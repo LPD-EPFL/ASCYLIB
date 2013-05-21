@@ -27,11 +27,30 @@
  */
 
 #include "optimistic.h"
+#include "ssalloc.h"
+
 
 unsigned int levelmax;
 
 inline int ok_to_delete(sl_node_t *node, int found) {
   return (node->fullylinked && ((node->toplevel-1) == found) && !node->marked);
+}
+
+inline void*
+xmalloc2(size_t size)
+{
+  void *p = ssalloc(size);
+  if (p == NULL) {
+    perror("malloc");
+    exit(1);
+  }
+  return p;
+}
+
+inline void
+xfree(void* mem)
+{
+  ssfree(mem);
 }
 
 /*
@@ -72,12 +91,12 @@ int optimistic_find(sl_intset_t *set, val_t val) {
   sl_node_t **succs, **preds;
   int result, found;
 	
-  preds = (sl_node_t **)xmalloc(levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t **)xmalloc(levelmax * sizeof(sl_node_t *));
+  preds = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
+  succs = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
   found = optimistic_search(set, val, preds, succs, 1);
   result = (found != -1 && succs[found]->fullylinked && !succs[found]->marked);
-  free(preds);
-  free(succs);
+  xfree(preds);
+  xfree(succs);
   return result;
 }
 
@@ -110,8 +129,9 @@ int optimistic_insert(sl_intset_t *set, val_t val) {
   unsigned int backoff;
   struct timespec timeout;
 
-  preds = (sl_node_t **)xmalloc(levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t **)xmalloc(levelmax * sizeof(sl_node_t *));
+  preds = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
+  succs = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
+
   toplevel = get_rand_level();
   backoff = 1;
 	
@@ -121,8 +141,8 @@ int optimistic_insert(sl_intset_t *set, val_t val) {
       node_found = succs[found];
       if (!node_found->marked) {
 	while (!node_found->fullylinked) {}
-	free(preds);
-	free(succs);
+	xfree(preds);
+	xfree(succs);
 	return 0;
       }
       continue;
@@ -165,8 +185,8 @@ int optimistic_insert(sl_intset_t *set, val_t val) {
     new_node->fullylinked = 1;
     unlock_levels(preds, highest_locked, 12);
     /* Freeing the previously allocated memory */
-    free(preds);
-    free(succs);
+    xfree(preds);
+    xfree(succs);
     return 1;
   }
 }
@@ -185,8 +205,8 @@ int optimistic_delete(sl_intset_t *set, val_t val) {
   unsigned int backoff;
   struct timespec timeout;
 
-  preds = (sl_node_t **)xmalloc(levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t **)xmalloc(levelmax * sizeof(sl_node_t *));
+  preds = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
+  succs = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
   node_todel = NULL;
   is_marked = 0;
   toplevel = -1;
@@ -208,8 +228,8 @@ int optimistic_delete(sl_intset_t *set, val_t val) {
 	  if (UNLOCK(&node_todel->lock) != 0)
 	    fprintf(stderr, "Error cannot unlock node_todel->val:%ld\n", 
 		    (long)node_todel->val);
-	  free(preds);
-	  free(succs);
+	  xfree(preds);
+	  xfree(succs);
 	  return 0;
 	}
 	node_todel->marked = 1;
@@ -246,13 +266,13 @@ int optimistic_delete(sl_intset_t *set, val_t val) {
       UNLOCK(&node_todel->lock);	
       unlock_levels(preds, highest_locked, 22);
       /* Freeing the previously allocated memory */
-      free(preds);
-      free(succs);
+      xfree(preds);
+      xfree(succs);
       return 1;
     } else {
       /* Freeing the previously allocated memory */
-      free(preds);
-      free(succs);
+      xfree(preds);
+      xfree(succs);
       return 0;
     }
   }

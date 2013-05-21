@@ -22,6 +22,7 @@
  */
 
 #include "skiplist-lock.h"
+#include "random.h"
 
 unsigned int levelmax;
 
@@ -35,24 +36,6 @@ inline void *xmalloc(size_t size)
 	return p;
 }
 
-
-/* 
- * Returns a pseudo-random value in [1;range).
- * Depending on the symbolic constant RAND_MAX>=32767 defined in stdlib.h,
- * the granularity of rand() could be lower-bounded by the 32767^th which might 
- * be too high for given values of range and initial.
- */
-inline long rand_range(long r) {
-	int m = RAND_MAX;
-	long d, v = 0;
-	
-	do {
-		d = (m > r ? r : m);		
-		v += 1 + (long)(d * ((double)rand()/((double)(m)+1.0)));
-		r -= m;
-	} while (r > 0);
-	return v;
-}
 
 
 int get_rand_level() {
