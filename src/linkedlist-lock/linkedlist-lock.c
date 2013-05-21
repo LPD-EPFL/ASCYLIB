@@ -22,12 +22,14 @@
  */
 
 #include "intset.h"
+#include "ssalloc.h"
 
 node_l_t *new_node_l(val_t val, node_l_t *next, int transactional)
 {
   node_l_t *node_l;
   
-  node_l = (node_l_t *)malloc(sizeof(node_l_t));
+  node_l = (node_l_t *) ssalloc(sizeof(node_l_t));
+  /* node_l = (node_l_t *)malloc(sizeof(node_l_t)); */
   if (node_l == NULL) {
     perror("malloc");
     exit(1);
@@ -56,7 +58,8 @@ intset_l_t *set_new_l()
 
 void node_delete_l(node_l_t *node) {
    DESTROY_LOCK(&node->lock);
-   free(node);
+   /* free(node); */
+   ssfree(node);
 }
 
 void set_delete_l(intset_l_t *set)
@@ -67,7 +70,8 @@ void set_delete_l(intset_l_t *set)
   while (node != NULL) {
     next = node->next;
     DESTROY_LOCK(&node->lock);
-    free(node);
+    /* free(node); */
+    ssfree(node);
     node = next;
   }
   free(set);

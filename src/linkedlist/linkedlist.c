@@ -16,8 +16,10 @@ node_t *new_node(val_t val, node_t *next, int transactional)
 
   if (transactional) {
 	node = (node_t *)MALLOC(sizeof(node_t));
+	/* node = (node_t *) ssalloc(sizeof(node_t)); */
   } else {
-	node = (node_t *)malloc(sizeof(node_t));
+	/* node = (node_t *)malloc(sizeof(node_t)); */
+	node = (node_t *) ssalloc(sizeof(node_t));
   }
   if (node == NULL) {
 	perror("malloc");
