@@ -4,13 +4,20 @@ include $(ROOT)/common/Makefile.common
 
 BINS = $(BINDIR)/lf-ht
 LLREP = $(ROOT)/src/linkedlist
+PROF = $(ROOT)/src
 
 .PHONY:	all clean
 
 all:	main
 
+measurements.o:
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
+
+ssalloc.o:
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/ssalloc.o $(PROF)/ssalloc.c
+
 linkedlist.o:
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist.o $(LLREP)/linkedlist.c
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist.o $(LLREP)/linkedlist.c $(BUILDIR)/measurements.o
 
 harris.o: $(LLREP)/linkedlist.h linkedlist.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/harris.o $(LLREP)/harris.c
@@ -27,8 +34,8 @@ intset.o: $(LLREP)/linkedlist.h harris.o hashtable.o
 test.o: linkedlist.o harris.o intset.o hashtable.o intset.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o test.c
 
-main: linkedlist.o harris.o intset.o hashtable.o intset.o test.o 
-	$(CC) $(CFLAGS) $(BUILDIR)/linkedlist.o $(BUILDIR)/harris.o $(BUILDIR)/ll-intset.o $(BUILDIR)/hashtable.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
+main: measurements.o ssalloc.o linkedlist.o harris.o intset.o hashtable.o intset.o test.o 
+	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/linkedlist.o $(BUILDIR)/harris.o $(BUILDIR)/ll-intset.o $(BUILDIR)/hashtable.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
 	-rm -f $(BINS)
