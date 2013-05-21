@@ -1,6 +1,8 @@
+*~
 /.gitignore~
 /bin
 /build
+/cscope.files
+/cscope.out
 /gp
 /plots
-*~

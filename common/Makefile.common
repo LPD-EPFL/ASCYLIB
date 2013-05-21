@@ -12,13 +12,16 @@ XBDIR 		?= SET_XBOOST_PATH
 
 # Compiler
 SOLARIS_CC 	?= SET_PATH_TO_SOLARIS_CC
+CC ?= gcc
 
 # Profile
 ifeq ($(VERSION),DEBUG)
      CFLAGS	+= -g -DDEBUG -O0
 else
-     CFLAGS	+= -O3 -DNDEBUG
+     CFLAGS	+= -O3 -DNDEBUG 
 endif
+
+CFLAGS += -D_GNU_SOURCE
 
 ROOT 		?= ../..
 BINDIR		?= $(ROOT)/bin
@@ -190,7 +193,7 @@ endif
 ifeq ($(ARCH_NAME), x86_64)
     ARCH = x86_64
     CFLAGS += -m64
-    LDFLAGS += -m64
+    LDFLAGS += -m64 
 endif
 
 ifeq ($(ARCH_NAME), sun4v)
@@ -209,13 +212,13 @@ CFLAGS += -fno-strict-aliasing
 CFLAGS += -I$(LIBAO_INC) -I$(ROOT)/include
 
 #LDFLAGS += -L$(LIBAO)/lib -latomic_ops 
-LDFLAGS += -lpthread
+LDFLAGS += -lpthread -lrt -lm -lnuma
 
 ifdef STM
   ifneq ($(STM), SEQUENTIAL)
-  	ifneq ($(STM), LOCKFREE) 
-  	  CFLAGS += -I$(INCDIR)
-   	  LDFLAGS += -L$(LIBDIR) -l$(TM)
+	ifneq ($(STM), LOCKFREE) 
+	  CFLAGS += -I$(INCDIR)
+	  LDFLAGS += -L$(LIBDIR) -l$(TM)
 	endif
   endif
 endif
