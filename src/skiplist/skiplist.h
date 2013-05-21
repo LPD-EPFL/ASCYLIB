@@ -35,6 +35,7 @@
 #include <atomic_ops.h>
 
 #include "tm.h"
+#include "ssalloc.h"
 
 #define DEFAULT_DURATION                10000
 #define DEFAULT_INITIAL                 256

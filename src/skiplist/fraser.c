@@ -75,14 +75,18 @@ retry:
   }
 }
 
-int fraser_find(sl_intset_t *set, val_t val) {
+int 
+fraser_find(sl_intset_t *set, val_t val) 
+{
   sl_node_t **succs;
   int result;
 
-  succs = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *));
+  /* succs = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *)); */
+  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
   fraser_search(set, val, NULL, succs);
   result = (succs[0]->val == val && !succs[0]->deleted);
-  free(succs);
+  /* free(succs); */
+  ssfree(succs);
   return result;
 }
 
@@ -103,7 +107,8 @@ int fraser_remove(sl_intset_t *set, val_t val) {
   sl_node_t **succs;
   int result;
 
-  succs = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *));
+  /* succs = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *)); */
+  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
   fraser_search(set, val, NULL, succs);
   result = (succs[0]->val == val);
   if (result == 0)
@@ -118,60 +123,71 @@ int fraser_remove(sl_intset_t *set, val_t val) {
   mark_node_ptrs(succs[0]);
   fraser_search(set, val, NULL, NULL);    
 end:
-  free(succs);
+  /* free(succs); */
+  ssfree(succs);
 
   return result;
 }
 
-int fraser_insert(sl_intset_t *set, val_t v) {
+int
+fraser_insert(sl_intset_t *set, val_t v) 
+{
   sl_node_t *new, *new_next, *pred, *succ, **succs, **preds;
   int i;
   int result;
 
   new = sl_new_simple_node(v, get_rand_level(), 6);
-  preds = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *));
-retry: 	
+  /* preds = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *)); */
+  /* succs = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *)); */
+  preds = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
+  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
+
+ retry: 	
   fraser_search(set, v, preds, succs);
   /* Update the value field of an existing node */
-  if (succs[0]->val == v) {
-    /* Value already in list */
-    if (succs[0]->deleted) {
-      /* Value is deleted: remove it and retry */
-      mark_node_ptrs(succs[0]);
-      goto retry;
+  if (succs[0]->val == v) 
+    {				/* Value already in list */
+      if (succs[0]->deleted) 
+	{		   /* Value is deleted: remove it and retry */
+	  mark_node_ptrs(succs[0]);
+	  goto retry;
+	}
+      result = 0;
+      sl_delete_node(new);
+      goto end;
     }
-    result = 0;
-    sl_delete_node(new);
-    goto end;
-  }
   for (i = 0; i < new->toplevel; i++)
     new->next[i] = succs[i];
   /* Node is visible once inserted at lowest level */
   if (!ATOMIC_CAS_MB(&preds[0]->next[0], succs[0], new)) 
     goto retry;
-  for (i = 1; i < new->toplevel; i++) {
-    while (1) {
-      pred = preds[i];
-      succ = succs[i];
-      /* Update the forward pointer if it is stale */
-      new_next = new->next[i];
-      if ((new_next != succ) && 
-          (!ATOMIC_CAS_MB(&new->next[i], unset_mark((uintptr_t)new_next), succ)))
-        break; /* Give up if pointer is marked */
-      /* Check for old reference to a k node */
-      if (succ->val == v)
-        succ = (sl_node_t *)unset_mark((uintptr_t)succ->next);
-      /* We retry the search if the CAS fails */
-      if (ATOMIC_CAS_MB(&pred->next[i], succ, new))
-        break;
-      fraser_search(set, v, preds, succs);
+  for (i = 1; i < new->toplevel; i++) 
+    {
+      while (1) 
+	{
+	  pred = preds[i];
+	  succ = succs[i];
+	  /* Update the forward pointer if it is stale */
+	  new_next = new->next[i];
+	  if ((new_next != succ) && 
+	      (!ATOMIC_CAS_MB(&new->next[i], unset_mark((uintptr_t)new_next), succ)))
+	    break; /* Give up if pointer is marked */
+	  /* Check for old reference to a k node */
+	  if (succ->val == v)
+	    succ = (sl_node_t *)unset_mark((uintptr_t)succ->next);
+	  /* We retry the search if the CAS fails */
+	  if (ATOMIC_CAS_MB(&pred->next[i], succ, new))
+	    break;
+	  fraser_search(set, v, preds, succs);
+	}
     }
-  }
   result = 1;
-end:
-  free(preds);
-  free(succs);
+ end:
+  /* free(preds); */
+  /* free(succs); */
+  ssfree(preds);
+  ssfree(succs);
+
 
   return result;
 }

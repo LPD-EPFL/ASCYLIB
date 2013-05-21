@@ -57,11 +57,14 @@ sl_node_t *sl_new_simple_node(val_t val, int toplevel, int transactional)
   if (transactional)
     node = (sl_node_t *)MALLOC(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *));
   else 
-    node = (sl_node_t *)malloc(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *));
+    {
+      node = (sl_node_t *)malloc(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *));
+      /* node = (sl_node_t *)ssalloc(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *)); */
+    }
   if (node == NULL) {
     perror("malloc");
     exit(1);
-    }
+  }
 
   node->val = val;
   node->toplevel = toplevel;
@@ -90,6 +93,7 @@ sl_node_t *sl_new_node(val_t val, sl_node_t *next, int toplevel, int transaction
 void sl_delete_node(sl_node_t *n)
 {
   free(n);
+  /* ssfree(n); */
 }
 
 sl_intset_t *sl_set_new()
