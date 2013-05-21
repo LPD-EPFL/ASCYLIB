@@ -65,3 +65,4 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional);
  */
 int ht_snapshot(ht_intset_t *set, int transactional);
 
+#define IO_FLUSH fflush(stdout)

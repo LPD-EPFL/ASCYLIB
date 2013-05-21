@@ -22,6 +22,9 @@
  */
 
 #include "intset.h"
+#include "utils.h"
+
+__thread unsigned long* seeds;
 
 typedef struct barrier {
   pthread_cond_t complete;
@@ -54,37 +57,6 @@ void barrier_cross(barrier_t *b)
   pthread_mutex_unlock(&b->mutex);
 }
 
-/* 
- * Returns a pseudo-random value in [1; range].
- * Depending on the symbolic constant RAND_MAX>=32767 defined in stdlib.h,
- * the granularity of rand() could be lower-bounded by the 32767^th which might 
- * be too high for given program options [r]ange and [i]nitial.
- */
-inline long rand_range(long r) {
-  int m = RAND_MAX;
-  int d, v = 0;
- 
-  do {
-    d = (m > r ? r : m);
-    v += 1 + (int)(d * ((double)rand()/((double)(m)+1.0)));
-    r -= m;
-  } while (r > 0);
-  return v;
-}
-
-/* Re-entrant version of rand_range(r) */
-inline long rand_range_re(unsigned int *seed, long r) {
-  int m = RAND_MAX;
-  int d, v = 0;
- 
-  do {
-    d = (m > r ? r : m);		
-    v += 1 + (int)(d * ((double)rand_r(seed)/((double)(m)+1.0)));
-    r -= m;
-  } while (r > 0);
-  return v;
-}
-
 typedef struct thread_data {
   val_t first;
   long range;
@@ -109,15 +81,26 @@ typedef struct thread_data {
   unsigned int seed;
   intset_l_t *set;
   barrier_t *barrier;
+  int id;
 } thread_data_t;
 
 
-void *test(void *data) {
+void*
+test(void *data) 
+{
   int unext, last = -1; 
   val_t val = 0;
 	
   thread_data_t *d = (thread_data_t *)data;
 	
+  set_cpu(the_cores[d->id]);
+
+  ssalloc_init();
+  PF_CORRECTION;
+
+  seeds = seed_rand();
+
+
   /* Wait on barrier */
   barrier_cross(d->barrier);
 	
@@ -198,6 +181,10 @@ void *test(void *data) {
 
 int main(int argc, char **argv)
 {
+  set_cpu(0);
+  ssalloc_init();
+  seeds = seed_rand();
+
   struct option long_options[] = {
     // These options don't set a flag
     {"help",                      no_argument,       NULL, 'h'},
@@ -406,6 +393,7 @@ int main(int argc, char **argv)
     data[i].seed = rand();
     data[i].set = set;
     data[i].barrier = &barrier;
+    data[i].id = i;
     if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
       fprintf(stderr, "Error creating thread\n");
       exit(1);

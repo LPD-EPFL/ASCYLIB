@@ -22,6 +22,9 @@
  */
 
 #include "intset.h"
+#include "utils.h"
+
+__thread unsigned long* seeds;
 
 volatile AO_t stop;
 unsigned int global_seed;
@@ -63,19 +66,6 @@ void barrier_cross(barrier_t *b)
   pthread_mutex_unlock(&b->mutex);
 }
 
-/* Re-entrant version of rand_range(r) */
-inline long rand_range_re(unsigned int *seed, long r) {
-  int m = RAND_MAX;
-  long d, v = 0;
-	
-  do {
-    d = (m > r ? r : m);		
-    v += 1 + (long)(d * ((double)rand_r(seed)/((double)(m)+1.0)));
-    r -= m;
-  } while (r > 0);
-  return v;
-}
-
 typedef struct thread_data {
   val_t first;
   long range;
@@ -100,6 +90,7 @@ typedef struct thread_data {
   unsigned int seed;
   sl_intset_t *set;
   barrier_t *barrier;
+  int id;
 } thread_data_t;
 
 void print_skiplist(sl_intset_t *set) {
@@ -136,13 +127,22 @@ void *test3(void *data) {
 }
 
 
-void *test(void *data) {
+void* 
+test(void *data) 
+{
   val_t last = -1;
   val_t val = 0;
   int unext; 
-	
+
   thread_data_t *d = (thread_data_t *)data;
 	
+  set_cpu(the_cores[d->id]);
+
+  ssalloc_init();
+  PF_CORRECTION;
+
+  seeds = seed_rand();
+
   /* Wait on barrier */
   barrier_cross(d->barrier);
 	
@@ -307,6 +307,10 @@ void *test2(void *data)
 	
   int main(int argc, char **argv)
   {
+    set_cpu(0);
+    ssalloc_init();
+    seeds = seed_rand();
+
     struct option long_options[] = {
       // These options don't set a flag
       {"help",                      no_argument,       NULL, 'h'},
@@ -525,6 +529,7 @@ void *test2(void *data)
       data[i].seed = rand();
       data[i].set = set;
       data[i].barrier = &barrier;
+      data[i].id = i;
       if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
 	fprintf(stderr, "Error creating thread\n");
 	exit(1);

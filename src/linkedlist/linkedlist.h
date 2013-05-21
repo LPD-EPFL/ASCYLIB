@@ -21,6 +21,9 @@
 #include <atomic_ops.h>
 
 #include "tm.h"
+#include "measurements.h"
+#include "ssalloc.h"
+
 
 #ifdef DEBUG
 #define IO_FLUSH                        fflush(NULL)

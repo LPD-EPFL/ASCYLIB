@@ -28,20 +28,25 @@
 
 unsigned int maxhtlength;
 
-void ht_delete(ht_intset_t *set) {
-	node_l_t *node, *next;
-	int i;
+void
+ht_delete(ht_intset_t *set) 
+{
+  node_l_t *node, *next;
+  int i;
 	
-	for (i=0; i < maxhtlength; i++) {
-		node = set->buckets[i]->head;
-		while (node != NULL) {
-			next = node->next;
-      free(node);
-			node = next;
-		}
-		free(set->buckets[i]);
+  for (i=0; i < maxhtlength; i++) 
+    {
+      node = set->buckets[i]->head;
+      while (node != NULL) 
+	{
+	  next = node->next;
+	  /* free(node); */
+	  ssfree(node);
+	  node = next;
 	}
-	free(set);
+      free(set->buckets[i]);
+    }
+  free(set);
 }
 
 int ht_size(ht_intset_t *set) {
