@@ -13,29 +13,33 @@
 #include "ssalloc.h"
 #include "measurements.h"
 
-static __thread void* ssalloc_app_mem;
-static __thread size_t alloc_next = 0;
-static __thread void* ssalloc_free_list[256] = {0};
-static __thread uint8_t ssalloc_free_cur = 0;
-static __thread uint8_t ssalloc_free_num = 0;
+static __thread void* ssalloc_app_mem[SSALLOC_NUM_ALLOCATORS];
+static __thread size_t alloc_next[SSALLOC_NUM_ALLOCATORS] = {0};
+static __thread void* ssalloc_free_list[SSALLOC_NUM_ALLOCATORS][256] = {{0}};
+static __thread uint8_t ssalloc_free_cur[SSALLOC_NUM_ALLOCATORS] = {0};
+static __thread uint8_t ssalloc_free_num[SSALLOC_NUM_ALLOCATORS] = {0};
 
 void
 ssalloc_set(void* mem)
 {
-  ssalloc_app_mem = mem;
+  ssalloc_app_mem[0] = mem;
 }
 
 void
 ssalloc_init()
 {
-  ssalloc_app_mem = (void*) malloc(SSALLOC_SIZE);
-  assert(ssalloc_app_mem != NULL);
+  int i;
+  for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
+    {
+      ssalloc_app_mem[i] = (void*) malloc(SSALLOC_SIZE);
+      assert(ssalloc_app_mem[i] != NULL);
+    }
 }
 
 void
 ssalloc_offset(size_t size)
 {
-  ssalloc_app_mem += size;
+  ssalloc_app_mem[0] += size;
 }
 
 //--------------------------------------------------------------------------------------
@@ -50,22 +54,21 @@ ssalloc_offset(size_t size)
 //--------------------------------------------------------------------------------------
  // requested space
 void*
-ssalloc(size_t size)
+ssalloc_alloc(unsigned int allocator, size_t size)
 {
   PF_START(1);
-
   void* ret = NULL;
-  if (ssalloc_free_num > 2)
+  if (ssalloc_free_num[allocator] > 2)
     {
-      uint8_t spot = ssalloc_free_cur - ssalloc_free_num;
-      ret = ssalloc_free_list[spot];
-      ssalloc_free_num--;
+      uint8_t spot = ssalloc_free_cur[allocator] - ssalloc_free_num[allocator];
+      ret = ssalloc_free_list[allocator][spot];
+      ssalloc_free_num[allocator]--;
     }
   else
     {
-      ret = ssalloc_app_mem + alloc_next;
-      alloc_next += size;
-      if (alloc_next > SSALLOC_SIZE)
+      ret = ssalloc_app_mem[allocator] + alloc_next[allocator];
+      alloc_next[allocator] += size;
+      if (alloc_next[allocator] > SSALLOC_SIZE)
 	{
 	  printf("*** warning: out of bounds alloc");
 	}
@@ -77,16 +80,29 @@ ssalloc(size_t size)
   return ret;
 }
 
+void*
+ssalloc(size_t size)
+{
+  return ssalloc_alloc(0, size);
+}
+
 //--------------------------------------------------------------------------------------
 // FUNCTION: ssfree
 //--------------------------------------------------------------------------------------
-// Deallocate memory in off-chip shared memory. Also collective, see ssmalloc
+// Deallocate memory in shared memory. Also collective, see ssmalloc
 //--------------------------------------------------------------------------------------
 // pointer to data to be freed
 void
+ssfree_alloc(unsigned int allocator, void* ptr)
+{
+  ssalloc_free_num[allocator]++;
+  /* PRINT("free %3d (num_free after: %3d)", ssalloc_free_cur, ssalloc_free_num); */
+  ssalloc_free_list[allocator][ssalloc_free_cur[allocator]++] = ptr;
+}
+
+
+void
 ssfree(void* ptr)
 {
-  ssalloc_free_num++;
-  /* PRINT("free %3d (num_free after: %3d)", ssalloc_free_cur, ssalloc_free_num); */
-  ssalloc_free_list[ssalloc_free_cur++] = ptr;
+  ssfree_alloc(0, ptr);
 }

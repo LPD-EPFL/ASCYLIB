@@ -23,6 +23,7 @@
 
 #include "skiplist-lock.h"
 #include "random.h"
+#include "ssalloc.h"
 
 unsigned int levelmax;
 
@@ -67,8 +68,10 @@ sl_node_t *sl_new_simple_node(val_t val, int toplevel, int transactional)
 {
 	sl_node_t *node;
 	
-	node = (sl_node_t *)xmalloc(sizeof(sl_node_t));
-	node->next = (sl_node_t **)xmalloc(toplevel * sizeof(sl_node_t *));
+	/* node = (sl_node_t *)xmalloc(sizeof(sl_node_t)); */
+	/* node->next = (sl_node_t **)xmalloc(toplevel * sizeof(sl_node_t *)); */
+	node = (sl_node_t *)ssalloc_alloc(1, (sizeof(sl_node_t)));
+	node->next = (sl_node_t **)ssalloc_alloc(2, toplevel * sizeof(sl_node_t *));
 	node->val = val;
 	node->toplevel = toplevel;
 	node->marked = 0;
@@ -97,8 +100,10 @@ sl_node_t *sl_new_node(val_t val, sl_node_t *next, int toplevel, int transaction
 void sl_delete_node(sl_node_t *n)
 {
 	DESTROY_LOCK(&n->lock);
-	free(n->next);
-	free(n);
+	/* free(n->next); */
+	/* free(n); */
+	ssfree_alloc(2, n->next);
+	ssfree_alloc(1, n);
 }
 
 sl_intset_t *sl_set_new()

@@ -28,7 +28,7 @@
 
 #include "optimistic.h"
 #include "ssalloc.h"
-
+#include "measurements.h"
 
 unsigned int levelmax;
 
@@ -164,17 +164,18 @@ int optimistic_insert(sl_intset_t *set, val_t val) {
 	       ((volatile sl_node_t*) pred->next[i] == 
 		(volatile sl_node_t*) succ));
     }	
-    if (!valid) {
-      /* Unlock the predecessors before leaving */ 
-      unlock_levels(preds, highest_locked, 11);
-      if (backoff > 5000) {
-	timeout.tv_sec = backoff / 5000;
-	timeout.tv_nsec = (backoff % 5000) * 1000000;
-	nanosleep(&timeout, NULL);
+    if (!valid) 
+      {			 /* Unlock the predecessors before leaving */ 
+	unlock_levels(preds, highest_locked, 11);
+	if (backoff > 5000) 
+	  {
+	    timeout.tv_sec = 0; //backoff / 5000;
+	    timeout.tv_nsec = (backoff % 5000) * 1000000;
+	    nanosleep(&timeout, NULL);
+	  }
+	backoff *= 2;
+	continue;
       }
-      backoff *= 2;
-      continue;
-    }
 		
     new_node = sl_new_simple_node(val, toplevel, 2);
     for (i = 0; i < toplevel; i++) {

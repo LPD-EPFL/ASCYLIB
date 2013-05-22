@@ -237,6 +237,8 @@ test(void *data)
   //	}
   //#endif /* ICC */
 	
+  PF_PRINT;
+
   return NULL;
 }
 
