@@ -34,6 +34,7 @@
 #include <stdint.h>
 
 #include <atomic_ops.h>
+#include "atomic_ops_if.h"
 
 //#ifndef RBTREE_H
 //#define RBTREE_H 1
@@ -204,8 +205,6 @@ typedef struct rbtree rbtree_t;
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
 
-#define ATOMIC_CAS_MB(a, e, v)          (AO_compare_and_swap_full((volatile AO_t *)(a), (AO_t)(e), (AO_t)(v)))
-#define ATOMIC_FETCH_AND_INC_FULL(a)    (AO_fetch_and_add1_full((volatile AO_t *)(a)))
 
 extern volatile AO_t stop;
 extern unsigned int global_seed;

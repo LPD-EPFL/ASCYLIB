@@ -7,10 +7,17 @@
  *  Description: 
  *      Cross-platform atomic operations
  */
-#ifndef _ATOMIC_OPS_H_INCLUDED_
-#define _ATOMIC_OPS_H_INCLUDED_
+#ifndef _ATOMIC_OPS_IF_H_INCLUDED_
+#define _ATOMIC_OPS_IF_H_INCLUDED_
 
 #include <inttypes.h>
+
+/* start --generic code */
+#define ATOMIC_CAS_MB(a, e, v)          CAS_U64((volatile AO_t *) (a),(AO_t) (e), (AO_t) (v))
+#define ATOMIC_FETCH_AND_INC_FULL(a)    FAI_U64((volatile AO_t *)(a))
+/* end -- generic code */
+
+
 
 #ifdef __sparc__
 /*
@@ -65,6 +72,7 @@ uint8_t oldval;
 //Memory barrier
 #define MEM_BARRIER asm volatile("membar #LoadLoad | #LoadStore | #StoreLoad | #StoreStore"); 
 //end of sparc code
+
 #elif defined(__tile__)
 /*
  *  Tilera code
@@ -108,6 +116,14 @@ uint8_t oldval;
 #define TAS_U8(a) arch_atomic_val_compare_and_exchange(a,0,0xff)
 //Memory barrier
 #define MEM_BARRIER arch_atomic_full_barrier()
+
+static inline void
+AO_nop_full(void)
+{
+  MEM_BARRIER;
+}
+#  define AO_store_full(addr, val) arch_atomic_write(addr, val)
+#  define AO_load_full(addr)       arch_atomic_access_once((*addr))
 //Relax CPU
 //define PAUSE cycle_relax()
 

@@ -12,6 +12,7 @@ XBDIR 		?= SET_XBOOST_PATH
 
 # Compiler
 SOLARIS_CC 	?= /opt/csw/bin/gcc
+TILERA_CC	?= tile-gcc
 CC ?= gcc
 
 # Profile
@@ -168,6 +169,20 @@ ifndef STM
   ifeq ($(LOCK),MUTEX)
     CFLAGS += -DMUTEX
   endif
+endif
+
+#################################
+# Management PC specific settings
+#################################
+
+ifndef PC_NAME
+	PC_NAME = $(shell uname -n)
+endif
+
+ifeq ($(PC_NAME), parsasrv1.epfl.ch)
+    OS = Linux
+    CC = $(TILERA_CC)
+    LDFLAGS += -ltmc
 endif
 
 #################################

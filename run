@@ -1,0 +1,12 @@
+#!/bin/sh
+
+prog=$1;
+shift;
+
+pwd=$(pwd);
+
+tile-monitor --net 192.168.10.11 --resume \
+    --mkdir $pwd \
+    --cd $pwd \
+    --upload $pwd"/"$prog $pwd"/"$prog \
+    --run -+- $pwd"/"$prog $@ -+- --quit

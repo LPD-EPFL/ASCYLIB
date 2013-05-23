@@ -30,6 +30,7 @@ getticks()
   return ret;
 }
 #elif defined(__tile__)
+#  include <arch/cycle.h>
 static inline ticks
 getticks()
 {

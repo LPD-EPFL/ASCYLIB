@@ -20,21 +20,19 @@ extern "C" {
 #    define REF_SPEED_GHZ           0.533
 #  elif defined(__sparc__)
 #    define REF_SPEED_GHZ           1.2
-#  elif defined(PLATFORM_TILERA)
-#    if defined(__tilepro__)
-#        define REF_SPEED_GHZ           0.7
-#    else  /* __tilegx__ */
-#        define REF_SPEED_GHZ           1.2
-#    endif  /* __tilepro__ */
+#  elif defined(__tilepro__)
+#    define REF_SPEED_GHZ           0.7
+#  elif defined(__tilegx__)
+#    define REF_SPEED_GHZ           1.2
 #  else
 #    error "Need to set REF_SPEED_GHZ for the platform"
 #  endif
 #endif  /* REF_SPEED_GHZ */
 
   /* 
-     #DO_TIMINGS_TICKS
-     #DO_TIMINGS_TICKS_SIMPLE
-     #DO_TIMINGS_STD
+#DO_TIMINGS_TICKS
+#DO_TIMINGS_TICKS_SIMPLE
+#DO_TIMINGS_STD
  */
 #define DO_TIMINGS_TICKS_SIMPLE
 

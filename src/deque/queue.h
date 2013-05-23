@@ -33,6 +33,7 @@
 #include <stdint.h>
 
 #include <atomic_ops.h>
+#include "atomic_ops_if.h"
 
 #include "tm.h"
 
@@ -50,8 +51,6 @@
 
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
-
-#define ATOMIC_CAS_MB(a, e, v)          (AO_compare_and_swap_full((volatile AO_t *)(a), (AO_t)(e), (AO_t)(v)))
 
 static volatile AO_t stop;
 
