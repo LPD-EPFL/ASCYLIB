@@ -64,43 +64,60 @@ inline long get_marked_ref(long w) {
  * from the list, yet not garbage collected.
  */
 node_t *harris_search(intset_t *set, val_t val, node_t **left_node) {
-	node_t *left_node_next, *right_node;
-	left_node_next = set->head;
+  node_t *left_node_next, *right_node;
+  left_node_next = set->head;
 	
-search_again:
-	do {
-		node_t *t = set->head;
-		node_t *t_next = set->head->next;
+ search_again:
+  do
+    {
+      node_t *t = set->head;
+      node_t *t_next = set->head->next;
 		
-		/* Find left_node and right_node */
-		do {
-			if (!is_marked_ref((long) t_next)) {
-				(*left_node) = t;
-				left_node_next = t_next;
-			}
-			t = (node_t *) get_unmarked_ref((long) t_next);
-			if (!t->next) break;
-			t_next = t->next;
-		} while (is_marked_ref((long) t_next) || (t->val < val));
-		right_node = t;
+      /* Find left_node and right_node */
+      do 
+	{
+	  if (!is_marked_ref((long) t_next)) 
+	    {
+	      (*left_node) = t;
+	      left_node_next = t_next;
+	    }
+	  t = (node_t *) get_unmarked_ref((long) t_next);
+	  if (!t->next) 
+	    {
+	      break;
+	    }
+	  t_next = t->next;
+	} 
+      while (is_marked_ref((long) t_next) || (t->val < val));
+      right_node = t;
 		
-		/* Check that nodes are adjacent */
-		if (left_node_next == right_node) {
-			if (right_node->next && is_marked_ref((long) right_node->next))
-				goto search_again;
-			else return right_node;
-		}
+      /* Check that nodes are adjacent */
+      if (left_node_next == right_node) 
+	{
+	  if (right_node->next && is_marked_ref((long) right_node->next))
+	    {
+	      goto search_again;
+	    }
+	  else
+	    {
+	      return right_node;
+	    }
+	}
 		
-		/* Remove one or more marked nodes */
-		if (ATOMIC_CAS_MB(&(*left_node)->next, 
-						  left_node_next, 
-						  right_node)) {
-			if (right_node->next && is_marked_ref((long) right_node->next))
-				goto search_again;
-			else return right_node;
-		} 
-		
-	} while (1);
+      /* Remove one or more marked nodes */
+      if (ATOMIC_CAS_MB(&(*left_node)->next, left_node_next, right_node)) 
+	{
+	  if (right_node->next && is_marked_ref((long) right_node->next))
+	    {
+	      goto search_again;
+	    }
+	  else 
+	    {
+	      return right_node;
+	    }
+	} 
+    } 
+  while (1);
 }
 
 /*
