@@ -5,8 +5,7 @@
 extern "C" {
 #endif
 
-#define PLATFORM_MCORE
-/* #define DO_TIMINGS */
+#define DO_TIMINGS
 
 #ifdef SSMP
 #  include <ssmp.h>
@@ -19,6 +18,8 @@ extern "C" {
 #    define REF_SPEED_GHZ           2.1
 #  elif defined(SCC)
 #    define REF_SPEED_GHZ           0.533
+#  elif defined(__sparc__)
+#    define REF_SPEED_GHZ           1.2
 #  elif defined(PLATFORM_TILERA)
 #    if defined(__tilepro__)
 #        define REF_SPEED_GHZ           0.7
@@ -131,9 +132,12 @@ extern "C" {
 
 #  define ENTRY_TIMES_SIZE 16
 
-  enum timings_bool_t {
-    M_FALSE, M_TRUE
-  };
+  extern void prints_ticks_stats(int start, int end);
+
+  enum timings_bool_t 
+    {
+      M_FALSE, M_TRUE
+    };
 
   extern __thread ticks entry_time[ENTRY_TIMES_SIZE];
   extern __thread enum timings_bool_t entry_time_valid[ENTRY_TIMES_SIZE];
@@ -225,6 +229,8 @@ extern "C" {
 #  include <stdint.h>
 
 #  define ENTRY_TIMES_SIZE 16
+
+  extern void prints_ticks_stats(int start, int end);
 
   enum timings_bool_t 
     {

@@ -3,12 +3,24 @@
 cores=$1;
 shift;
 
+unm=$(uname -n);
+
 if [ "$cores" = "all" ];
 then
-    cores=$(seq 2 1 48);
+    if [ $unm = "maglite" ];
+    then
+	cores=$(seq 2 1 64);
+    else
+	cores=$(seq 2 1 48);
+    fi;
 elif [ "$cores" = "socket" ];
 then
-    cores=$(seq 6 6 48);
+    if [ $unm = "maglite" ];
+    then
+	cores=$(seq 8 8 64);
+    else
+	cores=$(seq 6 6 48);
+    fi;
 fi;
 
 prog=$1;
@@ -16,12 +28,12 @@ shift;
 params="$@";
 
 
-echo "#cores  throughput  linear  actual"
+echo "#cores  throughput  %linear scalability"
 
 printf "%-8d" 1;
 thr1=$(./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1;
-printf "%-8d" 1;
+printf "%-8.2f" 100.00;
 printf "%-8d\n" 1;
 
 for c in $cores
@@ -34,7 +46,9 @@ do
     printf "%-8d" $c;
     thr=$(./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
     printf "%-12d" $thr;
-    printf "%-8d" $c;
-    printf "%-8.2f\n" $(echo "$thr/$thr1" | bc -l);
+    scl=$(echo "$thr/$thr1" | bc -l);
+    linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
+    printf "%-8.2f" $linear_p;
+    printf "%-8.2f\n" $scl;
 
 done;

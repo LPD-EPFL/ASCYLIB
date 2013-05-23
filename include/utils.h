@@ -3,8 +3,8 @@
 //some utility functions
 //#define USE_MUTEX_LOCKS
 //#define ADD_PADDING
-#define OPTERON
-#define OPTERON_OPTIMIZE
+/* #define OPTERON */
+/* #define OPTERON_OPTIMIZE */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,12 +19,12 @@
 #  include <sys/processor.h>
 #  include <sys/procset.h>
 #elif defined(__tile__)
-#include <arch/atomic.h>
-#include <arch/cycle.h>
-#include <tmc/cpus.h>
-#include <tmc/task.h>
-#include <tmc/spin.h>
-#include <sched.h>
+#  include <arch/atomic.h>
+#  include <arch/cycle.h>
+#  include <tmc/cpus.h>
+#  include <tmc/task.h>
+#  include <tmc/spin.h>
+#  include <sched.h>
 #else
 #  include <emmintrin.h>
 #  include <xmmintrin.h>
@@ -33,6 +33,8 @@
 #include <pthread.h>
 #include "getticks.h"
 #include "random.h"
+#include "measurements.h"
+#include "ssalloc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,9 +47,9 @@ extern "C" {
 				::: "memory")
 
 #elif defined(__tile__)
-#define PAUSE cycle_relax()
+#  define PAUSE cycle_relax()
 #else
-#define PAUSE _mm_pause()
+#  define PAUSE _mm_pause()
 #endif
   static inline void
   pause_rep(uint32_t num_reps)
@@ -77,10 +79,10 @@ extern "C" {
 #  define NUMBER_OF_SOCKETS 8
 #  define CORES_PER_SOCKET 8
 #  define CACHE_LINE_SIZE 64
-# define NOP_DURATION 9
+#  define NOP_DURATION 9
   //mapping from threads to cores on the niagara
-#define ALTERNATE_SOCKETS
-#ifdef ALTERNATE_SOCKETS
+#  define ALTERNATE_SOCKETS
+#  ifdef ALTERNATE_SOCKETS
   static uint8_t __attribute__ ((unused)) the_cores[] = {
     0, 8, 16, 24, 32, 40, 48, 56, 
     1, 9, 17, 25, 33, 41, 49, 57, 
@@ -114,7 +116,7 @@ extern "C" {
   //    0, 1, 2, 3, 4, 5, 6, 7 
   //};
 
-#else
+#  else
   static uint8_t __attribute__ ((unused)) the_cores[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 
     8, 9, 10, 11, 12, 13, 14, 15, 
@@ -136,12 +138,14 @@ extern "C" {
     7, 7, 7, 7, 7, 7, 7, 7 
   };
 
-#endif
-#elif defined __tile__
-#define NUMBER_OF_SOCKETS 1
-#define CORES_PER_SOCKET 36
-#define CACHE_LINE_SIZE 64
-# define NOP_DURATION 4
+#  endif
+#endif	/* __sparc__ */
+
+#if defined __tile__
+#  define NUMBER_OF_SOCKETS 1
+#  define CORES_PER_SOCKET 36
+#  define CACHE_LINE_SIZE 64
+#  define NOP_DURATION 4
   static uint8_t __attribute__ ((unused)) the_cores[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 
     8, 9, 10, 11, 12, 13, 14, 15, 
@@ -149,12 +153,14 @@ extern "C" {
     24, 25, 26, 27, 28, 29, 30, 31, 
     32, 33, 34, 35 
   };
+#endif	/*  */
 
-#elif defined(OPTERON)
+
+#if defined(OPTERON)
 #  define NUMBER_OF_SOCKETS 8
 #  define CORES_PER_SOCKET 6
 #  define CACHE_LINE_SIZE 64
-# define NOP_DURATION 2
+#  define NOP_DURATION 2
   static uint8_t  the_cores[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 
     8, 9, 10, 11, 12, 13, 14, 15, 
@@ -163,12 +169,13 @@ extern "C" {
     32, 33, 34, 35, 36, 37, 38, 39, 
     40, 41, 42, 43, 44, 45, 46, 47  
   };
+#endif	/*  */
 
-#elif defined(XEON)
+#if defined(XEON)
 #  define NUMBER_OF_SOCKETS 8
 #  define CORES_PER_SOCKET 10
 #  define CACHE_LINE_SIZE 64
-# define NOP_DURATION 1
+#  define NOP_DURATION 1
   static uint8_t __attribute__ ((unused)) the_cores[] = {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     11, 12, 13, 14, 15, 16, 17, 18, 19, 20,

@@ -2,6 +2,7 @@
 /.gitignore~
 /bin
 /build
+/core
 /cscope.files
 /cscope.out
 /gp

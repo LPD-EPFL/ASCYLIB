@@ -11,7 +11,7 @@ TL2DIR		?= SET_TL2_PATH
 XBDIR 		?= SET_XBOOST_PATH
 
 # Compiler
-SOLARIS_CC 	?= SET_PATH_TO_SOLARIS_CC
+SOLARIS_CC 	?= /opt/csw/bin/gcc
 CC ?= gcc
 
 # Profile
@@ -193,12 +193,12 @@ endif
 ifeq ($(ARCH_NAME), x86_64)
     ARCH = x86_64
     CFLAGS += -m64
-    LDFLAGS += -m64 
+    LDFLAGS += -m64 -lnuma
 endif
 
 ifeq ($(ARCH_NAME), sun4v)
     ARCH = sparc64
-    CFLAGS += -DSPARC=1 -DINLINED=1 -mt -fast -m64
+    CFLAGS += -DSPARC=1 -DINLINED=1 -m64
     LDFLAGS += -lrt -m64
 endif
 
@@ -212,7 +212,7 @@ CFLAGS += -fno-strict-aliasing
 CFLAGS += -I$(LIBAO_INC) -I$(ROOT)/include
 
 #LDFLAGS += -L$(LIBAO)/lib -latomic_ops 
-LDFLAGS += -lpthread -lrt -lm -lnuma
+LDFLAGS += -lpthread -lrt -lm
 
 ifdef STM
   ifneq ($(STM), SEQUENTIAL)

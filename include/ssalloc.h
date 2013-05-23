@@ -15,7 +15,12 @@
 #include <inttypes.h>
 #include <string.h>
 
-#define SSALLOC_SIZE (1024 * 1024 * 1024)
+#if defined(__sparc__)
+#  define SSALLOC_SIZE (10 * 1024 * 1024)
+#else
+#  define SSALLOC_SIZE (1024 * 1024 * 1024)
+#endif
+
 #define SSALLOC_NUM_ALLOCATORS 3
 
 void ssalloc_set(void* mem);

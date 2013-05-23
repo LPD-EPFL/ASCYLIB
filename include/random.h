@@ -50,7 +50,7 @@ extern __thread unsigned long* seeds;
 static inline long
 rand_range(long r) 
 {
-  PF_START(0);
+  /* PF_START(0); */
 #if defined(LOCAL_RAND)
   long v = xorshf96(seeds, seeds + 1, seeds + 2) % r;
   v++;
@@ -64,7 +64,7 @@ rand_range(long r)
     r -= m;
   } while (r > 0);
 #endif
-  PF_STOP(0);
+  /* PF_STOP(0); */
   return v;
 }
 
@@ -72,7 +72,7 @@ rand_range(long r)
 static inline long
 rand_range_re(unsigned int *seed, long r) 
 {
-  PF_START(0);
+  /* PF_START(0); */
 #if defined(LOCAL_RAND)
   long v = xorshf96(seeds, seeds + 1, seeds + 2) % r;
   v++;
@@ -86,7 +86,7 @@ rand_range_re(unsigned int *seed, long r)
     r -= m;
   } while (r > 0);
 #endif
-  PF_STOP(0);
+  /* PF_STOP(0); */
   return v;
 }
 
