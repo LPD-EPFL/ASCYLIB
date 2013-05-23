@@ -22,11 +22,35 @@
  */
 
 #include "lazy.h"
+#include "utils.h"
+
+__thread unsigned int mid;
 
 int set_contains_l(intset_l_t *set, val_t val, int transactional)
 {
-	if (transactional == 2) return parse_find(set, val);
-	else return lockc_find(set, val);
+  int r = 0;
+  
+  /* if (mid == 0) */
+  /*   { */
+  /*     PF_START(3); */
+  /*   } */
+
+  if (transactional == 2) 
+    {
+      r = parse_find(set, val);
+    }
+  else 
+    {
+      r =  lockc_find(set, val);
+    }
+
+  /* if (mid == 0) */
+  /*   { */
+  /*     PF_STOP(3); */
+  /*   } */
+
+
+  return r;
 }
 
 int set_add_l(intset_l_t *set, val_t val, int transactional)

@@ -11,6 +11,8 @@
 
 #include "intset.h"
 
+__thread unsigned int mid;
+
 int set_contains(intset_t *set, val_t val, int transactional)
 {
 	int result;
@@ -70,7 +72,15 @@ int set_contains(intset_t *set, val_t val, int transactional)
 
 
 #elif defined LOCKFREE			
+	/* if (mid == 0) */
+	/*   { */
+	/*     PF_START(3); */
+	/*   } */
 	result = harris_find(set, val);
+	/* if (mid == 0) */
+	/*   { */
+	/*     PF_STOP(3); */
+	/*   } */
 #endif	
 	
 	return result;

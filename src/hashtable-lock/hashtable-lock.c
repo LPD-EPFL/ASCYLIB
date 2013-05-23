@@ -25,6 +25,7 @@
  */
 
 #include "hashtable-lock.h"
+#include "ssalloc.h"
 
 unsigned int maxhtlength;
 

@@ -56,7 +56,7 @@ ssalloc_offset(size_t size)
 void*
 ssalloc_alloc(unsigned int allocator, size_t size)
 {
-  PF_START(1);
+  /* PF_START(1); */
   void* ret = NULL;
   if (ssalloc_free_num[allocator] > 2)
     {
@@ -75,8 +75,7 @@ ssalloc_alloc(unsigned int allocator, size_t size)
     }
 
   /* PRINT("[lib] allocated %p [offs: %lu]", ret, ssalloc_app_addr_offs(ret)); */
-  PF_STOP(1);
-
+  /* PF_STOP(1); */
   return ret;
 }
 

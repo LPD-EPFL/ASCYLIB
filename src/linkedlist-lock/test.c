@@ -25,6 +25,7 @@
 #include "utils.h"
 
 __thread unsigned long* seeds;
+extern __thread unsigned int mid;
 
 typedef struct barrier {
   pthread_cond_t complete;
@@ -57,6 +58,7 @@ void barrier_cross(barrier_t *b)
   pthread_mutex_unlock(&b->mutex);
 }
 
+
 typedef struct thread_data {
   val_t first;
   long range;
@@ -88,11 +90,17 @@ typedef struct thread_data {
 void*
 test(void *data) 
 {
+  PF_MSG(0, "rand_range");
+  PF_MSG(1, "malloc");
+  PF_MSG(2, "free");
+
   int unext, last = -1; 
   val_t val = 0;
 	
   thread_data_t *d = (thread_data_t *)data;
 	
+  mid = d->id;
+
   set_cpu(the_cores[d->id]);
 
   ssalloc_init();
@@ -176,7 +184,10 @@ test(void *data)
     }
 			
   }	
-  return NULL;
+ 
+  PF_PRINT;
+
+ return NULL;
 }
 
 int main(int argc, char **argv)

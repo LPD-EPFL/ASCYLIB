@@ -1,59 +1,61 @@
 /*
- * File:
- *   test.c
- * Author(s):
- *   Vincent Gramoli <vincent.gramoli@epfl.ch>
- * Description:
- *   Concurrent accesses of the linked list
- *
- * Copyright (c) 2009-2010.
- *
- * test.c is part of Synchrobench
- * 
- * Synchrobench is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, version 2
- * of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */
+  * File:
+  *   test.c
+  * Author(s):
+  *   Vincent Gramoli <vincent.gramoli@epfl.ch>
+  * Description:
+  *   Concurrent accesses of the linked list
+  *
+  * Copyright (c) 2009-2010.
+  *
+  * test.c is part of Synchrobench
+  * 
+  * Synchrobench is free software: you can redistribute it and/or
+  * modify it under the terms of the GNU General Public License
+  * as published by the Free Software Foundation, version 2
+  * of the License.
+  *
+  * This program is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+  */
 
 #include "intset.h"
+#include "utils.h"
 
 __thread unsigned long* seeds;
+extern __thread unsigned int mid;
 
 typedef struct barrier {
-	pthread_cond_t complete;
-	pthread_mutex_t mutex;
-	int count;
-	int crossing;
+  pthread_cond_t complete;
+  pthread_mutex_t mutex;
+  int count;
+  int crossing;
 } barrier_t;
 
 void barrier_init(barrier_t *b, int n)
 {
-	pthread_cond_init(&b->complete, NULL);
-	pthread_mutex_init(&b->mutex, NULL);
-	b->count = n;
-	b->crossing = 0;
+  pthread_cond_init(&b->complete, NULL);
+  pthread_mutex_init(&b->mutex, NULL);
+  b->count = n;
+  b->crossing = 0;
 }
 
 void barrier_cross(barrier_t *b)
 {
-	pthread_mutex_lock(&b->mutex);
-	/* One more thread through */
-	b->crossing++;
-	/* If not all here, wait */
-	if (b->crossing < b->count) {
-		pthread_cond_wait(&b->complete, &b->mutex);
-	} else {
-		pthread_cond_broadcast(&b->complete);
-		/* Reset for next time */
-		b->crossing = 0;
-	}
-	pthread_mutex_unlock(&b->mutex);
+  pthread_mutex_lock(&b->mutex);
+  /* One more thread through */
+  b->crossing++;
+  /* If not all here, wait */
+  if (b->crossing < b->count) {
+    pthread_cond_wait(&b->complete, &b->mutex);
+  } else {
+    pthread_cond_broadcast(&b->complete);
+    /* Reset for next time */
+    b->crossing = 0;
+  }
+  pthread_mutex_unlock(&b->mutex);
 }
 
 
@@ -86,18 +88,22 @@ typedef struct thread_data {
   int id;
 } thread_data_t;
 
+
 void*
 test(void *data) 
 {
   PF_MSG(0, "rand_range");
   PF_MSG(1, "malloc");
   PF_MSG(2, "free");
+  /* PF_MSG(3, "search"); */
 
   int unext, last = -1; 
   val_t val = 0;
 	
   thread_data_t *d = (thread_data_t *)data;
 	
+  mid = d->id;
+
   /* Create transaction */
   TM_THREAD_ENTER(d->id);
   /* Wait on barrier */
@@ -114,7 +120,8 @@ test(void *data)
 #ifdef ICC
   while (stop == 0) {
 #else
-    while (AO_load_full(&stop) == 0) {
+    /* while (AO_load_full(&stop) == 0) { */
+    while (stop == 0) {
 #endif /* ICC */
 		
       if (unext) { // update
@@ -198,8 +205,8 @@ test(void *data)
 }
 
 /*void catcher(int sig) {
-	printf("CAUGHT SIGNAL %d\n", sig);
-}*/
+  printf("CAUGHT SIGNAL %d\n", sig);
+  }*/
 
 int
 main(int argc, char **argv) 
