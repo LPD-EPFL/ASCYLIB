@@ -1,5 +1,6 @@
 *~
 /.gitignore~
+/any.sh
 /bin
 /build
 /core
@@ -7,3 +8,4 @@
 /cscope.out
 /gp
 /plots
+/runcrash

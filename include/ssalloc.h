@@ -17,6 +17,8 @@
 
 #if defined(__sparc__)
 #  define SSALLOC_SIZE (10 * 1024 * 1024)
+#elif defined(__tilera__)
+#  define SSALLOC_SIZE (10 * 1024 * 1024)
 #else
 #  define SSALLOC_SIZE (1024 * 1024 * 1024)
 #endif

@@ -22,7 +22,7 @@
  */
 
 #include "intset.h"
-#include "ssalloc.h"
+#include "utils.h"
 
 node_l_t *new_node_l(val_t val, node_l_t *next, int transactional)
 {
@@ -37,6 +37,13 @@ node_l_t *new_node_l(val_t val, node_l_t *next, int transactional)
   node_l->val = val;
   node_l->next = next;
   INIT_LOCK(&node_l->lock);	
+
+#if defined(__tilera__)
+  /* on tilera you may have store reordering causing the pointer to a new node
+   to become visible, before the contents of the node are visible */
+  MEM_BARRIER;
+#endif	/* __tilera__ */
+
   return node_l;
 }
 

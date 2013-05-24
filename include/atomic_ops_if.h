@@ -122,6 +122,7 @@ AO_nop_full(void)
 {
   MEM_BARRIER;
 }
+
 #  define AO_store_full(addr, val) arch_atomic_write(addr, val)
 #  define AO_load_full(addr)       arch_atomic_access_once((*addr))
 //Relax CPU

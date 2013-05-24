@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#define DO_TIMINGS
+/* #define DO_TIMINGS */
 
 #ifdef SSMP
 #  include <ssmp.h>

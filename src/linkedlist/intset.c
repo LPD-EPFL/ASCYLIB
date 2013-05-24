@@ -72,15 +72,15 @@ int set_contains(intset_t *set, val_t val, int transactional)
 
 
 #elif defined LOCKFREE			
-	/* if (mid == 0) */
-	/*   { */
-	/*     PF_START(3); */
-	/*   } */
+	if (mid == 0)
+	  {
+	    PF_START(3);
+	  }
 	result = harris_find(set, val);
-	/* if (mid == 0) */
-	/*   { */
-	/*     PF_STOP(3); */
-	/*   } */
+	if (mid == 0)
+	  {
+	    PF_STOP(3);
+	  }
 #endif	
 	
 	return result;
@@ -107,73 +107,81 @@ inline int set_seq_add(intset_t *set, val_t val)
 
 int set_add(intset_t *set, val_t val, int transactional)
 {
-	int result;
+  int result;
 	
 #ifdef DEBUG
-	printf("++> set_add(%d)\n", (int)val);
-	IO_FLUSH;
+  printf("++> set_add(%d)\n", (int)val);
+  IO_FLUSH;
 #endif
 
-	if (!transactional) {
+  if (!transactional) {
 		
-		result = set_seq_add(set, val);
+    result = set_seq_add(set, val);
 		
-	} else { 
+  } else { 
 	
 #ifdef SEQUENTIAL /* Unprotected */
 		
-		result = set_seq_add(set, val);
+    result = set_seq_add(set, val);
 		
 #elif defined STM
 	
-		node_t *prev, *next;
-		val_t v;	
+    node_t *prev, *next;
+    val_t v;	
 	
-		if (transactional > 2) {
+    if (transactional > 2) {
 
-		  TX_START(EL);
-		  prev = set->head;
-		  next = (node_t *)TX_LOAD(&prev->next);
-		  while (1) {
-		    v = TX_LOAD((uintptr_t *) &next->val);
-		    if (v >= val)
-		      break;
-		    prev = next;
-		    next = (node_t *)TX_LOAD(&prev->next);
-		  }
-		  result = (v != val);
-		  if (result) {
-		    TX_STORE(&prev->next, new_node(val, next, transactional));
-		  }
-		  TX_END;
+      TX_START(EL);
+      prev = set->head;
+      next = (node_t *)TX_LOAD(&prev->next);
+      while (1) {
+	v = TX_LOAD((uintptr_t *) &next->val);
+	if (v >= val)
+	  break;
+	prev = next;
+	next = (node_t *)TX_LOAD(&prev->next);
+      }
+      result = (v != val);
+      if (result) {
+	TX_STORE(&prev->next, new_node(val, next, transactional));
+      }
+      TX_END;
 		  
-		} else {
+    } else {
 
-		  TX_START(NL);
-		  prev = set->head;
-		  next = (node_t *)TX_LOAD(&prev->next);
-		  while (1) {
-		    v = TX_LOAD((uintptr_t *) &next->val);
-		    if (v >= val)
-		      break;
-		    prev = next;
-		    next = (node_t *)TX_LOAD(&prev->next);
-		  }
-		  result = (v != val);
-		  if (result) {
-		    TX_STORE(&prev->next, new_node(val, next, transactional));
-		  }
-		  TX_END;
+      TX_START(NL);
+      prev = set->head;
+      next = (node_t *)TX_LOAD(&prev->next);
+      while (1) {
+	v = TX_LOAD((uintptr_t *) &next->val);
+	if (v >= val)
+	  break;
+	prev = next;
+	next = (node_t *)TX_LOAD(&prev->next);
+      }
+      result = (v != val);
+      if (result) {
+	TX_STORE(&prev->next, new_node(val, next, transactional));
+      }
+      TX_END;
 
-		}
+    }
 
 #elif defined LOCKFREE
-		result = harris_insert(set, val);
+    if (mid == 0)
+      {
+	PF_START(4);
+      }
+    result = harris_insert(set, val);
+    if (mid == 0)
+      {
+	PF_STOP(4);
+      }
 #endif
 		
-	}
+  }
 	
-	return result;
+  return result;
 }
 
 int set_remove(intset_t *set, val_t val, int transactional)
@@ -250,7 +258,15 @@ int set_remove(intset_t *set, val_t val, int transactional)
 	}
 	
 #elif defined LOCKFREE
+	if (mid == 0)
+	  {
+	    PF_START(5);
+	  }
 	result = harris_delete(set, val);
+	if (mid == 0)
+	  {
+	    PF_STOP(5);
+	  }
 #endif
 	
 	return result;

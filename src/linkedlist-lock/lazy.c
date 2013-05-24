@@ -27,7 +27,7 @@
 #include "lazy.h"
 
 inline int is_marked_ref(long i) {
-	return (int) (i &= LONG_MIN+1);
+  return (int) (i & (LONG_MIN+1));
 }
 
 inline long unset_mark(long i) {
@@ -57,34 +57,40 @@ inline int parse_validate(node_l_t *pred, node_l_t *curr) {
 	return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr));
 }
 
-int parse_find(intset_l_t *set, val_t val) {
-	node_l_t *curr;
-	curr = set->head;
-	while (curr->val < val)
-		curr = curr->next;
-	return ((curr->val == val) && !is_marked_ref((long) curr));
+int
+parse_find(intset_l_t *set, val_t val)
+{
+  node_l_t *curr;
+  curr = set->head;
+  while (curr->val < val)
+    {
+      curr = curr->next;
+    }
+  return ((curr->val == val) && !is_marked_ref((long) curr));
 }
 
-int parse_insert(intset_l_t *set, val_t val) {
-	node_l_t *curr, *pred, *newnode;
-	int result;
+int
+parse_insert(intset_l_t *set, val_t val)
+{
+  node_l_t *curr, *pred, *newnode;
+  int result;
 	
-	pred = set->head;
-	curr = pred->next;
-	while (curr->val < val) {
-		pred = curr;
-		curr = curr->next;
-	}
-	LOCK(&pred->lock);
-	LOCK(&curr->lock);
-	result = (parse_validate(pred, curr) && (curr->val != val));
-	if (result) {
-		newnode = new_node_l(val, curr, 0);
-		pred->next = newnode;
-	} 
-	UNLOCK(&curr->lock);
-	UNLOCK(&pred->lock);
-	return result;
+  pred = set->head;
+  curr = pred->next;
+  while (curr->val < val) {
+    pred = curr;
+    curr = curr->next;
+  }
+  LOCK(&pred->lock);
+  LOCK(&curr->lock);
+  result = (parse_validate(pred, curr) && (curr->val != val));
+  if (result) {
+    newnode = new_node_l(val, curr, 0);
+    pred->next = newnode;
+  } 
+  UNLOCK(&curr->lock);
+  UNLOCK(&pred->lock);
+  return result;
 }
 
 /*
@@ -96,24 +102,27 @@ int parse_insert(intset_l_t *set, val_t val) {
  * TODO: must implement a stop-the-world garbage collector to correctly 
  * free the memory.
  */
-int parse_delete(intset_l_t *set, val_t val) {
-	node_l_t *pred, *curr;
-	int result;
+int parse_delete(intset_l_t *set, val_t val)
+{
+  node_l_t *pred, *curr;
+  int result;
 	
-	pred = set->head;
-	curr = pred->next;
-	while (curr->val < val) {
-		pred = curr;
-		curr = curr->next;
-	}
-	LOCK(&pred->lock);
-	LOCK(&curr->lock);
-	result = (parse_validate(pred, curr) && (val == curr->val));
-	if (result) {
-		set_mark((long) curr);
-		pred->next = curr->next;
-	}
-	UNLOCK(&curr->lock);
-	UNLOCK(&pred->lock);
-	return result;
+  pred = set->head;
+  curr = pred->next;
+  while (curr->val < val)
+    {
+      pred = curr;
+      curr = curr->next;
+    }
+  LOCK(&pred->lock);
+  LOCK(&curr->lock);
+  result = (parse_validate(pred, curr) && (val == curr->val));
+  if (result)
+    {
+      set_mark((long) curr);
+      pred->next = curr->next;
+    }
+  UNLOCK(&curr->lock);
+  UNLOCK(&pred->lock);
+  return result;
 }
