@@ -33,6 +33,7 @@
 #include <stdint.h>
 
 #include <atomic_ops.h>
+#include "lock_if.h"
 
 #define DEFAULT_DURATION                10000
 #define DEFAULT_INITIAL                 256
@@ -62,20 +63,6 @@ extern unsigned int levelmax;
 typedef intptr_t val_t;
 #define VAL_MIN                         INT_MIN
 #define VAL_MAX                         INT_MAX
-
-#ifdef MUTEX
-typedef pthread_mutex_t ptlock_t;
-#  define INIT_LOCK(lock)		pthread_mutex_init(lock, NULL);
-#  define DESTROY_LOCK(lock)		pthread_mutex_destroy(lock)
-#  define LOCK(lock)			pthread_mutex_lock(lock)
-#  define UNLOCK(lock)			pthread_mutex_unlock(lock)
-#else
-typedef pthread_spinlock_t ptlock_t;
-#  define INIT_LOCK(lock)		pthread_spin_init(lock, PTHREAD_PROCESS_PRIVATE);
-#  define DESTROY_LOCK(lock)		pthread_spin_destroy(lock)
-#  define LOCK(lock)			pthread_spin_lock(lock)
-#  define UNLOCK(lock)			pthread_spin_unlock(lock)
-#endif
 
 typedef struct sl_node {
 	val_t val; 

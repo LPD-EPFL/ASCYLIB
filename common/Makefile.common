@@ -166,9 +166,7 @@ ifeq ($(OS_NAME), SunOS)
 endif
 
 ifndef STM
-  ifeq ($(LOCK),MUTEX)
-    CFLAGS += -DMUTEX
-  endif
+    CFLAGS += -D$(LOCK)
 endif
 
 #################################
@@ -183,6 +181,10 @@ ifeq ($(PC_NAME), parsasrv1.epfl.ch)
     OS = Linux
     CC = $(TILERA_CC)
     LDFLAGS += -ltmc
+endif
+
+ifeq ($(PC_NAME), lpd48core)
+    CFLAGS += -DOPTERON -DPLATFORM_MCORE
 endif
 
 #################################

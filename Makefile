@@ -15,6 +15,12 @@ lock:
 spinlock:
 	$(MAKE) "LOCK=SPIN" $(LBENCHS)
 
+tas:
+	$(MAKE) "LOCK=TAS" $(LBENCHS)
+
+ticket:
+	$(MAKE) "LOCK=TICKET" $(LBENCHS)
+
 sequential:
 	$(MAKE) "STM=SEQUENTIAL" $(BENCHS)
 
