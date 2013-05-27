@@ -13,33 +13,45 @@
 #include "ssalloc.h"
 #include "measurements.h"
 
+
+#define SSALLOC_USE_MALLOC
+
+
+#if !defined(SSALLOC_USE_MALLOC)
 static __thread void* ssalloc_app_mem[SSALLOC_NUM_ALLOCATORS];
 static __thread size_t alloc_next[SSALLOC_NUM_ALLOCATORS] = {0};
 static __thread void* ssalloc_free_list[SSALLOC_NUM_ALLOCATORS][256] = {{0}};
 static __thread uint8_t ssalloc_free_cur[SSALLOC_NUM_ALLOCATORS] = {0};
 static __thread uint8_t ssalloc_free_num[SSALLOC_NUM_ALLOCATORS] = {0};
+#endif 
 
 void
 ssalloc_set(void* mem)
 {
+#if !defined(SSALLOC_USE_MALLOC)
   ssalloc_app_mem[0] = mem;
+#endif
 }
 
 void
 ssalloc_init()
 {
+#if !defined(SSALLOC_USE_MALLOC)
   int i;
   for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
     {
       ssalloc_app_mem[i] = (void*) malloc(SSALLOC_SIZE);
       assert(ssalloc_app_mem[i] != NULL);
     }
+#endif
 }
 
 void
 ssalloc_offset(size_t size)
 {
+#if !defined(SSALLOC_USE_MALLOC)
   ssalloc_app_mem[0] += size;
+#endif
 }
 
 //--------------------------------------------------------------------------------------
@@ -58,6 +70,10 @@ ssalloc_alloc(unsigned int allocator, size_t size)
 {
   /* PF_START(1); */
   void* ret = NULL;
+
+#if defined(SSALLOC_USE_MALLOC)
+  ret = (void*) malloc(size);
+#else
   if (ssalloc_free_num[allocator] > 2)
     {
       uint8_t spot = ssalloc_free_cur[allocator] - ssalloc_free_num[allocator];
@@ -73,7 +89,7 @@ ssalloc_alloc(unsigned int allocator, size_t size)
 	  printf("*** warning: out of bounds alloc");
 	}
     }
-
+#endif
   /* PRINT("[lib] allocated %p [offs: %lu]", ret, ssalloc_app_addr_offs(ret)); */
   /* PF_STOP(1); */
   return ret;
@@ -94,9 +110,13 @@ ssalloc(size_t size)
 void
 ssfree_alloc(unsigned int allocator, void* ptr)
 {
+#if defined(SSALLOC_USE_MALLOC)
+  free(ptr);
+#else
   ssalloc_free_num[allocator]++;
   /* PRINT("free %3d (num_free after: %3d)", ssalloc_free_cur, ssalloc_free_num); */
   ssalloc_free_list[allocator][ssalloc_free_cur[allocator]++] = ptr;
+#endif
 }
 
 
