@@ -220,8 +220,6 @@ test(void *data)
 	
   PF_PRINT;
 
-  printf("[%02d] done\n", d->id);
-
   return NULL;
 }
 

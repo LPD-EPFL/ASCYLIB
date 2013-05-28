@@ -38,10 +38,10 @@
 #include "tm.h"
 #include "ssalloc.h"
 
-#define DEFAULT_DURATION                10000
-#define DEFAULT_INITIAL                 256
+#define DEFAULT_DURATION                1000
+#define DEFAULT_INITIAL                 1024
 #define DEFAULT_NB_THREADS              1
-#define DEFAULT_RANGE                   0x7FFFFFFF
+#define DEFAULT_RANGE                   (2 * DEFAULT_INITIAL)
 #define DEFAULT_SEED                    0
 #define DEFAULT_UPDATE                  20
 #define DEFAULT_ELASTICITY              4
@@ -67,14 +67,16 @@ typedef intptr_t level_t;
 #define VAL_MIN                         INT_MIN
 #define VAL_MAX                         INT_MAX
 
-typedef struct sl_node {
+typedef struct sl_node
+{
   val_t val;
   intptr_t deleted;
   int toplevel;
   struct sl_node *next[1];
 } sl_node_t;
 
-typedef struct sl_intset {
+typedef struct sl_intset
+{
   sl_node_t *head;
 } sl_intset_t;
 

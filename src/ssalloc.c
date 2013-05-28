@@ -14,7 +14,7 @@
 #include "measurements.h"
 
 
-#define SSALLOC_USE_MALLOC
+/* #define SSALLOC_USE_MALLOC */
 
 
 #if !defined(SSALLOC_USE_MALLOC)
