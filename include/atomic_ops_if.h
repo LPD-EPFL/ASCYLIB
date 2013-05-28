@@ -12,13 +12,6 @@
 
 #include <inttypes.h>
 
-/* start --generic code */
-#define ATOMIC_CAS_MB(a, e, v)          CAS_U64((volatile AO_t *) (a),(AO_t) (e), (AO_t) (v))
-#define ATOMIC_FETCH_AND_INC_FULL(a)    FAI_U64((volatile AO_t *)(a))
-/* end -- generic code */
-
-
-
 #ifdef __sparc__
 /*
  *  sparc code
@@ -246,6 +239,24 @@ uint8_t oldval;
 
 /*End of x86 code*/
 #endif
+
+
+
+/* start --generic code */
+
+static inline uint8_t
+CAS_U64_bool(volatile AO_t* addr, AO_t old, AO_t new)
+{
+  return (old == CAS_U64(addr, old, new));
+}
+
+
+#define ATOMIC_CAS_MB(a, e, v)          (AO_compare_and_swap_full((volatile AO_t *)(a), (AO_t)(e), (AO_t)(v)))
+/* #define ATOMIC_CAS_MB(a, e, v)          CAS_U64_bool((volatile AO_t *) (a),(AO_t) (e), (AO_t) (v)) */
+/* #define ATOMIC_FETCH_AND_INC_FULL(a)    FAI_U64((volatile AO_t *) (a)) */
+#define ATOMIC_FETCH_AND_INC_FULL(a)    (AO_fetch_and_add1_full((volatile AO_t *)(a)))
+/* end -- generic code */
+
 
 
 #endif

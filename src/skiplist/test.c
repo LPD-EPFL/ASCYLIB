@@ -435,39 +435,42 @@ main(int argc, char **argv)
   barrier_init(&barrier, nb_threads + 1);
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-  for (i = 0; i < nb_threads; i++) {
-    printf("Creating thread %d\n", i);
-    data[i].first = last;
-    data[i].range = range;
-    data[i].update = update;
-    data[i].unit_tx = unit_tx;
-    data[i].alternate = alternate;
-    data[i].effective = effective;
-    data[i].nb_add = 0;
-    data[i].nb_added = 0;
-    data[i].nb_remove = 0;
-    data[i].nb_removed = 0;
-    data[i].nb_contains = 0;
-    data[i].nb_found = 0;
-    data[i].nb_aborts = 0;
-    data[i].nb_aborts_locked_read = 0;
-    data[i].nb_aborts_locked_write = 0;
-    data[i].nb_aborts_validate_read = 0;
-    data[i].nb_aborts_validate_write = 0;
-    data[i].nb_aborts_validate_commit = 0;
-    data[i].nb_aborts_invalid_memory = 0;
-    data[i].nb_aborts_double_write = 0;
-    data[i].max_retries = 0;
-    data[i].seed = rand();
-    data[i].set = set;
-    data[i].barrier = &barrier;
-    data[i].failures_because_contention = 0;
-    data[i].id = i;
-    if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
-      fprintf(stderr, "Error creating thread\n");
-      exit(1);
+  printf("Creating threads: ");
+  for (i = 0; i < nb_threads; i++) 
+    {
+      printf("%d, ", i);
+      data[i].first = last;
+      data[i].range = range;
+      data[i].update = update;
+      data[i].unit_tx = unit_tx;
+      data[i].alternate = alternate;
+      data[i].effective = effective;
+      data[i].nb_add = 0;
+      data[i].nb_added = 0;
+      data[i].nb_remove = 0;
+      data[i].nb_removed = 0;
+      data[i].nb_contains = 0;
+      data[i].nb_found = 0;
+      data[i].nb_aborts = 0;
+      data[i].nb_aborts_locked_read = 0;
+      data[i].nb_aborts_locked_write = 0;
+      data[i].nb_aborts_validate_read = 0;
+      data[i].nb_aborts_validate_write = 0;
+      data[i].nb_aborts_validate_commit = 0;
+      data[i].nb_aborts_invalid_memory = 0;
+      data[i].nb_aborts_double_write = 0;
+      data[i].max_retries = 0;
+      data[i].seed = rand();
+      data[i].set = set;
+      data[i].barrier = &barrier;
+      data[i].failures_because_contention = 0;
+      data[i].id = i;
+      if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
+	fprintf(stderr, "Error creating thread\n");
+	exit(1);
+      }
     }
-  }
+  printf("\n");
   pthread_attr_destroy(&attr);
 	
   // Catch some signals 
