@@ -60,20 +60,20 @@ struct ticket_st
 };
 
 typedef struct ticket_st ptlock_t;
-#  define INIT_LOCK(lock)				tas_init((volatile ptlock_t*) lock)
+#  define INIT_LOCK(lock)				ticket_init((volatile ptlock_t*) lock)
 #  define DESTROY_LOCK(lock)			
-#  define LOCK(lock)					tas_lock((volatile ptlock_t*) lock)
-#  define UNLOCK(lock)					tas_unlock((volatile ptlock_t*) lock)
+#  define LOCK(lock)					ticket_lock((volatile ptlock_t*) lock)
+#  define UNLOCK(lock)					ticket_unlock((volatile ptlock_t*) lock)
 
 static inline void
-tas_init(volatile ptlock_t* l)
+ticket_init(volatile ptlock_t* l)
 {
   l->ticket = l->curr = 0;
   MEM_BARRIER;
 }
 
 static inline uint32_t
-tas_lock(volatile ptlock_t* l)
+ticket_lock(volatile ptlock_t* l)
 {
   uint32_t ticket = FAI_U32(&l->ticket);
 
@@ -84,15 +84,18 @@ tas_lock(volatile ptlock_t* l)
       PAUSE;
     }
 
-
+  /* MEM_BARRIER; */
+  
   return 0;
 }
 
 static inline uint32_t
-tas_unlock(volatile ptlock_t* l)
+ticket_unlock(volatile ptlock_t* l)
 {
+  MEM_BARRIER;
   PREFETCHW(l);
   l->curr++;
+  /* FAI_U32(&l->curr); */
   return 0;
 }
 

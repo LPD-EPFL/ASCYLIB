@@ -22,8 +22,7 @@
  */
 
 #include "skiplist-lock.h"
-#include "random.h"
-#include "ssalloc.h"
+#include "utils.h"
 
 unsigned int levelmax;
 
@@ -39,16 +38,17 @@ inline void *xmalloc(size_t size)
 
 
 
-int get_rand_level() {
-	int i, level = 1;
-	for (i = 0; i < levelmax - 1; i++) {
-		if ((rand_range(100)-1) < 50)
-			level++;
-		else
-			break;
-	}
-	/* 1 <= level <= levelmax */
-	return level;
+int get_rand_level()
+{
+  int i, level = 1;
+  for (i = 0; i < levelmax - 1; i++) {
+    if ((rand_range(100)-1) < 50)
+      level++;
+    else
+      break;
+  }
+  /* 1 <= level <= levelmax */
+  return level;
 }
 
 int floor_log_2(unsigned int n) {
@@ -77,6 +77,9 @@ sl_node_t *sl_new_simple_node(val_t val, int toplevel, int transactional)
 	node->marked = 0;
 	node->fullylinked = 0;
 	INIT_LOCK(&node->lock);
+
+	MEM_BARRIER;
+
 	return node;
 }
 
@@ -94,6 +97,8 @@ sl_node_t *sl_new_node(val_t val, sl_node_t *next, int toplevel, int transaction
 	for (i = 0; i < toplevel; i++)
 		node->next[i] = next;
 	
+	MEM_BARRIER;
+
 	return node;
 }
 
