@@ -396,8 +396,7 @@ main(int argc, char **argv)
   else
     srand(seed);
 	
-  /* levelmax = floor_log_2((unsigned int) initial); */
-  levelmax = 1;
+  levelmax = floor_log_2((unsigned int) initial);
   set = sl_set_new();
   stop = 0;
 
