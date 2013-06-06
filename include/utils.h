@@ -41,7 +41,14 @@
 extern "C" {
 #endif
 
-#define ALIGNED(N) __attribute__ ((aligned (N)))
+
+/* #define DO_ALIGN */
+
+#if defined(DO_ALIGN)
+#  define ALIGNED(N) __attribute__ ((aligned (N)))
+#else
+#  define ALIGNED(N)
+#endif
 
 #ifdef __sparc__
 #  define PAUSE    asm volatile("rd    %%ccr, %%g0\n\t" \

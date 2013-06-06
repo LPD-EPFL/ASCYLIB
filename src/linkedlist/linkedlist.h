@@ -53,13 +53,15 @@ typedef intptr_t val_t;
 #define VAL_MIN                         INT_MIN
 #define VAL_MAX                         INT_MAX
 
-typedef struct node {
-	val_t val;
-	struct node *next;
+typedef struct node 
+{
+  val_t val;
+  struct node *next;
 } node_t;
 
-typedef struct intset {
-	node_t *head;
+typedef struct intset 
+{
+  node_t *head;
 } intset_t;
 
 node_t *new_node(val_t val, node_t *next, int transactional);

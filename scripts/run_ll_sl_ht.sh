@@ -29,17 +29,17 @@ do
     do
 	echo "** -u$update";
 
-	# out="$out_folder/ll.i$initial.u$update.dat";
-	# ./scripts/scalability3.sh "$cores" ./bin/lb-ll "./bin/lb-ll -x2" ./bin/lf-ll -d$duration -i$initial -r$range -u$update | tee $out;
-	out="$out_folder/sl.i$initial.u$update.dat";
-	./scripts/scalability2.sh "$cores" $sls -d$duration -i$initial -r$range -u$update | tee $out;
+	out="$out_folder/ll.i$initial.u$update.dat";
+	./scripts/scalability3.sh "$cores" ./bin/lb-ll "./bin/lb-ll -x2" ./bin/lf-ll -d$duration -i$initial -r$range -u$update | tee $out;
+	# out="$out_folder/sl.i$initial.u$update.dat";
+	# ./scripts/scalability2.sh "$cores" $sls -d$duration -i$initial -r$range -u$update | tee $out;
 
-	# for load_factor in $load_factors; 
-	# do
-	#     echo "*** -l$load_factor";
-	#     out="$out_folder/ht.i$initial.l$load_factor.u$update.dat";
-	#     ./scripts/scalability3.sh "$cores" ./bin/lb-ht "./bin/lb-ht -x2" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
-	# done
+	for load_factor in $load_factors; 
+	do
+	    echo "*** -l$load_factor";
+	    out="$out_folder/ht.i$initial.l$load_factor.u$update.dat";
+	    ./scripts/scalability3.sh "$cores" ./bin/lb-ht "./bin/lb-ht -x2" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+	done
     done
 done
 
