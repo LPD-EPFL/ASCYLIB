@@ -59,7 +59,7 @@ typedef struct node
   struct node *next;
 } node_t;
 
-typedef struct intset 
+typedef ALIGNED(64) struct intset 
 {
   node_t *head;
 } intset_t;
