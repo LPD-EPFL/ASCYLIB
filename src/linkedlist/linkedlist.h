@@ -53,7 +53,7 @@ typedef intptr_t val_t;
 #define VAL_MIN                         INT_MIN
 #define VAL_MAX                         INT_MAX
 
-typedef struct node 
+typedef ALIGNED(64) struct node 
 {
   val_t val;
   struct node *next;
