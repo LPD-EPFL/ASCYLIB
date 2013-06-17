@@ -57,6 +57,9 @@ typedef ALIGNED(64) struct node
 {
   val_t val;
   struct node *next;
+#if defined(DO_PAD)
+  uint8_t padding[64 - 16];
+#endif
 } node_t;
 
 typedef ALIGNED(64) struct intset 

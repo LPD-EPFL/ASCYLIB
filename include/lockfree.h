@@ -18,6 +18,5 @@
 #  define TM_STARTUP()                   /* nothing */
 #  define TM_SHUTDOWN()                  /* nothing */
 #include "utils.h"
-#  define TM_THREAD_ENTER(id)			\
-  set_cpu(the_cores[id]);
+#  define TM_THREAD_ENTER(id) 	/* nothing */
 #  define TM_THREAD_EXIT()               /* nothing */

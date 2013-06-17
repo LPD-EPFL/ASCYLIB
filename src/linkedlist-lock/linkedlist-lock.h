@@ -68,7 +68,8 @@ typedef ALIGNED(64) struct node_l
   /* char padding[40]; */
 } node_l_t;
 
-typedef struct intset_l {
+typedef ALIGNED(64) struct intset_l 
+{
   node_l_t *head;
 } intset_l_t;
 

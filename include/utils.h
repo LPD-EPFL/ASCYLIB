@@ -42,7 +42,8 @@ extern "C" {
 #endif
 
 
-/* #define DO_ALIGN */
+#define DO_ALIGN
+/* #define DO_PAD */
 
 #if defined(DO_ALIGN)
 #  define ALIGNED(N) __attribute__ ((aligned (N)))
