@@ -42,7 +42,8 @@ extern __thread unsigned int *rng_seed;
 extern pthread_key_t rng_seed_key;
 #endif /* ! TLS */
 
-typedef struct ht_intset {
+typedef struct ht_intset 
+{
   intset_t **buckets;
 } ht_intset_t;
 

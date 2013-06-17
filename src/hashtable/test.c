@@ -127,12 +127,13 @@ void
 	
   /* Create transaction */
   TM_THREAD_ENTER(d->id);
-  /* Wait on barrier */
+  set_cpu(the_cores[d->id]);
   ssalloc_init();
   PF_CORRECTION;
 
   seeds = seed_rand();
 
+  /* Wait on barrier */
   barrier_cross(d->barrier);
 	
   /* Is the first op an update, a move? */
@@ -260,6 +261,7 @@ void *test2(void *data)
 	
 	/* Create transaction */
 	TM_THREAD_ENTER(d->id);
+	set_cpu(the_cores[d->id]);
 	/* Wait on barrier */
 	barrier_cross(d->barrier);
 	

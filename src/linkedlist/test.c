@@ -102,10 +102,9 @@ test(void *data)
 	
   thread_data_t *d = (thread_data_t *)data;
 	
-  mid = d->id;
-
   /* Create transaction */
   TM_THREAD_ENTER(d->id);
+  set_cpu(the_cores[d->id]);
   /* Wait on barrier */
   ssalloc_init();
   PF_CORRECTION;
@@ -215,18 +214,19 @@ main(int argc, char **argv)
   ssalloc_init();
   seeds = seed_rand();
 
-  struct option long_options[] = {
-    // These options don't set a flag
-    {"help",                      no_argument,       NULL, 'h'},
-    {"duration",                  required_argument, NULL, 'd'},
-    {"initial-size",              required_argument, NULL, 'i'},
-    {"num-threads",               required_argument, NULL, 'n'},
-    {"range",                     required_argument, NULL, 'r'},
-    {"seed",                      required_argument, NULL, 's'},
-    {"update-rate",               required_argument, NULL, 'u'},
-    {"elasticity",                required_argument, NULL, 'x'},
-    {NULL, 0, NULL, 0}
-  };
+  struct option long_options[] = 
+    {
+      // These options don't set a flag
+      {"help",                      no_argument,       NULL, 'h'},
+      {"duration",                  required_argument, NULL, 'd'},
+      {"initial-size",              required_argument, NULL, 'i'},
+      {"num-threads",               required_argument, NULL, 'n'},
+      {"range",                     required_argument, NULL, 'r'},
+      {"seed",                      required_argument, NULL, 's'},
+      {"update-rate",               required_argument, NULL, 'u'},
+      {"elasticity",                required_argument, NULL, 'x'},
+      {NULL, 0, NULL, 0}
+    };
 	
   intset_t *set;
   int i, c, size;
@@ -342,7 +342,11 @@ main(int argc, char **argv)
   assert(duration >= 0);
   assert(initial >= 0);
   assert(nb_threads > 0);
-  assert(range > 0 && range >= initial);
+  assert(range > 0);
+  if (range < initial)
+    {
+      range = 2 * initial;
+    }
   assert(update >= 0 && update <= 100);
 	
   printf("Bench type   : linked list\n");
@@ -386,16 +390,40 @@ main(int argc, char **argv)
 	
   TM_STARTUP();
 	
+
+  size_t ten_perc = initial / 10, tens = 1;
+  size_t ten_perc_nxt = ten_perc;
+
   /* Populate set */
   printf("Adding %d entries to set\n", initial);
-  i = 0;
-  while (i < initial) {
-    val = rand_range(range);
-    if (set_add(set, val, 0)) {
-      last = val;
-      i++;
+
+  if (initial < 10000)
+    {
+      i = 0;
+      while (i < initial) 
+	{
+	  val = rand_range(range);
+	  if (set_add(set, val, 0)) 
+	    {
+	      last = val;
+	      if (i == ten_perc_nxt)
+		{
+		  printf("%02d%%  ", tens * 10); fflush(stdout);
+		  tens++;
+		  ten_perc_nxt = tens * ten_perc;
+		}
+	      i++;
+	    }
+	}
     }
-  }
+  else
+    {
+      for (i = initial; i > 0; i--)
+	{
+	  set_add(set, i, 0);
+	}
+    }
+  printf("\n");
   size = set_size(set);
   printf("Set size     : %d\n", size);
 	

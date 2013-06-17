@@ -126,6 +126,7 @@ test(void *data)
 	
   /* Create transaction */
   TM_THREAD_ENTER(d->id);
+  set_cpu(the_cores[d->id]);
   /* Wait on barrier */
   ssalloc_init();
   PF_CORRECTION;
