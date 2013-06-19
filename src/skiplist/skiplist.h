@@ -67,15 +67,18 @@ typedef intptr_t level_t;
 #define VAL_MIN                         INT_MIN
 #define VAL_MAX                         INT_MAX
 
-typedef struct sl_node
+typedef ALIGNED(64) struct sl_node
 {
   val_t val;
   intptr_t deleted;
   int toplevel;
   struct sl_node *next[1];
+#if defined(DO_PAD)
+  uint8_t padding[64 - 32];
+#endif
 } sl_node_t;
 
-typedef struct sl_intset
+typedef ALIGNED(64) struct sl_intset
 {
   sl_node_t *head;
 } sl_intset_t;

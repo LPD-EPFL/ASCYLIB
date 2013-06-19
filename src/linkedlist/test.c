@@ -188,7 +188,7 @@ test(void *data)
       } else { // remove/add (even failed) is considered as an update
 	unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
       }
-		
+
 #ifdef ICC
     }
 #else
