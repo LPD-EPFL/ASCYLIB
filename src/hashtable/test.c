@@ -508,7 +508,11 @@ main(int argc, char **argv)
   assert(duration >= 0);
   assert(initial >= 0);
   assert(nb_threads > 0);
-  assert(range > 0 && range >= initial);
+  assert(range > 0);
+  if (range < initial)
+    {
+      range = 2 * initial;
+    }
   assert(update >= 0 && update <= 100);
   assert(move >= 0 && move <= update);
   assert(snapshot >= 0 && snapshot <= (100-update));

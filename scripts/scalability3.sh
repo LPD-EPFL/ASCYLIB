@@ -46,7 +46,7 @@ shift;
 params="$@";
 
 
-echo "#      $prog1                             $prog2                              $prog3"
+echo "#      $prog1                           $prog2                          $prog3"
 echo "#cores  throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability"
 
 prog=$prog1;
