@@ -25,7 +25,6 @@
 #include "utils.h"
 
 __thread unsigned long* seeds;
-extern __thread unsigned int mid;
 
 typedef struct barrier {
   pthread_cond_t complete;
@@ -66,6 +65,7 @@ typedef struct thread_data {
   int unit_tx;
   int alternate;
   int effective;
+  int nb_threads;
   unsigned long nb_add;
   unsigned long nb_added;
   unsigned long nb_remove;
@@ -84,6 +84,7 @@ typedef struct thread_data {
   unsigned int seed;
   intset_t *set;
   barrier_t *barrier;
+  barrier_t *barrier_workers;
   unsigned long failures_because_contention;
   int id;
 } thread_data_t;
@@ -95,7 +96,7 @@ test(void *data)
   PF_MSG(0, "rand_range");
   PF_MSG(1, "malloc");
   PF_MSG(2, "free");
-  /* PF_MSG(3, "search"); */
+  PF_MSG(3, "search");
 
   int unext, last = -1; 
   val_t val = 0;
@@ -198,7 +199,16 @@ test(void *data)
   /* Free transaction */
   TM_THREAD_EXIT();
 	
-  PF_PRINT;
+ 
+  uint8_t t;
+  for (t = 0; t < d->nb_threads; t++)
+    {
+      if (t == d->id)
+	{
+	  PF_PRINT;
+	}
+      barrier_cross(d->barrier_workers);
+    }
 
   return NULL;
 }
@@ -239,7 +249,7 @@ main(int argc, char **argv)
   thread_data_t *data;
   pthread_t *threads;
   pthread_attr_t attr;
-  barrier_t barrier;
+  barrier_t barrier, barrier_workers;
   struct timeval start, end;
   struct timespec timeout;
   int duration = DEFAULT_DURATION;
@@ -429,6 +439,7 @@ main(int argc, char **argv)
 	
   /* Access set from all threads */
   barrier_init(&barrier, nb_threads + 1);
+  barrier_init(&barrier_workers, nb_threads);
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
@@ -442,6 +453,7 @@ main(int argc, char **argv)
       data[i].unit_tx = unit_tx;
       data[i].alternate = alternate;
       data[i].effective = effective;
+      data[i].nb_threads = nb_threads;
       data[i].nb_add = 0;
       data[i].nb_added = 0;
       data[i].nb_remove = 0;
@@ -460,6 +472,7 @@ main(int argc, char **argv)
       data[i].seed = rand();
       data[i].set = set;
       data[i].barrier = &barrier;
+      data[i].barrier_workers = &barrier_workers;
       data[i].failures_because_contention = 0;
       data[i].id = i;
       if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
@@ -492,7 +505,8 @@ main(int argc, char **argv)
   printf("STOPPING...\n");
 	
   /* Wait for thread completion */
-  for (i = 0; i < nb_threads; i++) {
+  for (i = 0; i < nb_threads; i++) 
+    {
     if (pthread_join(threads[i], NULL) != 0) {
       fprintf(stderr, "Error waiting for thread completion\n");
       exit(1);
