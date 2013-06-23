@@ -246,6 +246,7 @@ main(int argc, char **argv)
     {"seed",                      required_argument, NULL, 's'},
     {"update-rate",               required_argument, NULL, 'u'},
     {"elasticity",                required_argument, NULL, 'x'},
+    {"nothing",                   required_argument, NULL, 'l'},
     {NULL, 0, NULL, 0}
   };
 	
@@ -275,8 +276,7 @@ main(int argc, char **argv)
 	
   while(1) {
     i = 0;
-    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:x:"
-		    , long_options, &i);
+    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:x:l:", long_options, &i);
 		
     if(c == -1)
       break;
@@ -349,6 +349,8 @@ main(int argc, char **argv)
       break;
     case 'x':
       unit_tx = atoi(optarg);
+      break;
+    case 'l':
       break;
     case '?':
       printf("Use -h or --help for help\n");
