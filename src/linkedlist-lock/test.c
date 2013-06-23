@@ -108,6 +108,16 @@ test(void *data)
 
   seeds = seed_rand();
 
+#if defined(HTICKET)
+  if (mid == 1)
+    {
+      printf("~~~~~~~ hticket\n");
+    }
+
+  init_thread_htlocks(the_cores[d->id]);
+#endif
+
+
 
   /* Wait on barrier */
   barrier_cross(d->barrier);
@@ -192,6 +202,13 @@ test(void *data)
 
 int main(int argc, char **argv)
 {
+
+#if defined(HTICKET)
+    {
+      printf("~~~~~~~ hticket\n");
+    }
+#endif
+
   set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();

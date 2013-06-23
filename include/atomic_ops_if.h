@@ -244,11 +244,14 @@ uint8_t oldval;
 
 /* start --generic code */
 
-static inline uint8_t
-CAS_U64_bool(volatile AO_t* addr, AO_t old, AO_t new)
-{
-  return (old == CAS_U64(addr, old, new));
-}
+#define CAS_U64_bool(addr, old, new) (old == CAS_U64(addr, old, new))
+
+/* static inline uint8_t */
+/* CAS_U64_bool(volatile AO_t* addr, AO_t old, AO_t new) */
+/* { */
+/*   return (old == CAS_U64(addr, old, new)); */
+/* } */
+
 
 
 /* #define ATOMIC_CAS_MB(a, e, v)          (AO_compare_and_swap_full((volatile AO_t *)(a), (AO_t)(e), (AO_t)(v))) */
