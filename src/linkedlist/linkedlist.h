@@ -53,13 +53,18 @@ typedef intptr_t val_t;
 #define VAL_MIN                         INT_MIN
 #define VAL_MAX                         INT_MAX
 
-typedef struct node {
-	val_t val;
-	struct node *next;
+typedef ALIGNED(64) struct node 
+{
+  val_t val;
+  struct node *next;
+#if defined(DO_PAD)
+  uint8_t padding[64 - 16];
+#endif
 } node_t;
 
-typedef struct intset {
-	node_t *head;
+typedef ALIGNED(64) struct intset 
+{
+  node_t *head;
 } intset_t;
 
 node_t *new_node(val_t val, node_t *next, int transactional);

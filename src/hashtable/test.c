@@ -127,12 +127,13 @@ void
 	
   /* Create transaction */
   TM_THREAD_ENTER(d->id);
-  /* Wait on barrier */
+  set_cpu(the_cores[d->id]);
   ssalloc_init();
   PF_CORRECTION;
 
   seeds = seed_rand();
 
+  /* Wait on barrier */
   barrier_cross(d->barrier);
 	
   /* Is the first op an update, a move? */
@@ -260,6 +261,7 @@ void *test2(void *data)
 	
 	/* Create transaction */
 	TM_THREAD_ENTER(d->id);
+	set_cpu(the_cores[d->id]);
 	/* Wait on barrier */
 	barrier_cross(d->barrier);
 	
@@ -506,12 +508,17 @@ main(int argc, char **argv)
   assert(duration >= 0);
   assert(initial >= 0);
   assert(nb_threads > 0);
-  assert(range > 0 && range >= initial);
+  assert(range > 0);
   assert(update >= 0 && update <= 100);
   assert(move >= 0 && move <= update);
   assert(snapshot >= 0 && snapshot <= (100-update));
   assert(initial < MAXHTLENGTH);
   assert(initial >= load_factor);
+
+  if (range < initial)
+    {
+      range = 2 * initial;
+    }
 	
   if (test_verbose)
     {
@@ -571,6 +578,7 @@ main(int argc, char **argv)
     }
   i = 0;
   maxhtlength = (int) (initial / load_factor);
+
   while (i < initial) {
     val = rand_range(range);
     if (ht_add(set, val, 0)) {

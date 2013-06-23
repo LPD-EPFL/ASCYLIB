@@ -126,6 +126,7 @@ test(void *data)
 	
   /* Create transaction */
   TM_THREAD_ENTER(d->id);
+  set_cpu(the_cores[d->id]);
   /* Wait on barrier */
   ssalloc_init();
   PF_CORRECTION;
@@ -360,8 +361,13 @@ main(int argc, char **argv)
   assert(duration >= 0);
   assert(initial >= 0);
   assert(nb_threads > 0);
-  assert(range > 0 && range >= initial);
+  assert(range > 0);
   assert(update >= 0 && update <= 100);
+
+  if (range < initial)
+    {
+      range = 2 * initial;
+    }
 	
   printf("Set type     : skip list\n");
   printf("Duration     : %d\n", duration);
@@ -396,8 +402,7 @@ main(int argc, char **argv)
   else
     srand(seed);
 	
-  /* levelmax = floor_log_2((unsigned int) initial); */
-  levelmax = 1;
+  levelmax = floor_log_2((unsigned int) initial);
   set = sl_set_new();
   stop = 0;
 

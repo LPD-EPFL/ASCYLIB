@@ -11,8 +11,6 @@
 
 #include "intset.h"
 
-__thread unsigned int mid;
-
 int set_contains(intset_t *set, val_t val, int transactional)
 {
 	int result;
@@ -72,15 +70,9 @@ int set_contains(intset_t *set, val_t val, int transactional)
 
 
 #elif defined LOCKFREE			
-	if (mid == 0)
-	  {
-	    PF_START(3);
-	  }
+	PF_START(3);
 	result = harris_find(set, val);
-	if (mid == 0)
-	  {
-	    PF_STOP(3);
-	  }
+	PF_STOP(3);
 #endif	
 	
 	return result;
@@ -168,15 +160,9 @@ int set_add(intset_t *set, val_t val, int transactional)
     }
 
 #elif defined LOCKFREE
-    if (mid == 0)
-      {
-	PF_START(4);
-      }
+    PF_START(4);
     result = harris_insert(set, val);
-    if (mid == 0)
-      {
-	PF_STOP(4);
-      }
+    PF_STOP(4);
 #endif
 		
   }
@@ -258,15 +244,9 @@ int set_remove(intset_t *set, val_t val, int transactional)
 	}
 	
 #elif defined LOCKFREE
-	if (mid == 0)
-	  {
-	    PF_START(5);
-	  }
+	PF_START(5);
 	result = harris_delete(set, val);
-	if (mid == 0)
-	  {
-	    PF_STOP(5);
-	  }
+	PF_STOP(5);
 #endif
 	
 	return result;

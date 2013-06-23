@@ -15,6 +15,8 @@
 #include <inttypes.h>
 #include <string.h>
 
+/* #define SSALLOC_USE_MALLOC */
+
 #if defined(__sparc__)
 #  define SSALLOC_SIZE (10 * 1024 * 1024)
 #elif defined(__tilera__)

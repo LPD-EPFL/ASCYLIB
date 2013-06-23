@@ -13,10 +13,6 @@
 #include "ssalloc.h"
 #include "measurements.h"
 
-
-/* #define SSALLOC_USE_MALLOC */
-
-
 #if !defined(SSALLOC_USE_MALLOC)
 static __thread void* ssalloc_app_mem[SSALLOC_NUM_ALLOCATORS];
 static __thread size_t alloc_next[SSALLOC_NUM_ALLOCATORS] = {0};
