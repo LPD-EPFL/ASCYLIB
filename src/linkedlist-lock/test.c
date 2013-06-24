@@ -25,7 +25,6 @@
 #include "utils.h"
 
 __thread unsigned long* seeds;
-extern __thread unsigned int mid;
 
 typedef struct barrier {
   pthread_cond_t complete;
@@ -99,8 +98,6 @@ test(void *data)
 	
   thread_data_t *d = (thread_data_t *)data;
 	
-  mid = d->id;
-
   set_cpu(the_cores[d->id]);
 
   ssalloc_init();
@@ -200,7 +197,8 @@ test(void *data)
  return NULL;
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
 
 #if defined(HTICKET)
