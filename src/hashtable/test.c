@@ -24,8 +24,10 @@
 #include "intset.h"
 
 /* Hashtable length (# of buckets) */
-unsigned int maxhtlength;
+unsigned int* maxhtlength;
 __thread unsigned long* seeds;
+
+ALIGNED(64) uint8_t running[64];
 
 /* Hashtable seed */
 #ifdef TLS
@@ -73,7 +75,8 @@ void barrier_cross(barrier_t *b)
  * be too high for given values of range and initial.
  */
 
-typedef struct thread_data {
+typedef ALIGNED(64) struct thread_data 
+{
   val_t first;
   long range;
   int update;
@@ -87,13 +90,11 @@ typedef struct thread_data {
   unsigned long nb_remove;
   unsigned long nb_removed;
   unsigned long nb_contains;
-  /* added for HashTables */
-  unsigned long load_factor;
+  unsigned long load_factor;	/* added for HashTables */
   unsigned long nb_move;
   unsigned long nb_moved;
   unsigned long nb_snapshot;
-  unsigned long nb_snapshoted;
-  /* end: added for HashTables */
+  unsigned long nb_snapshoted;	/* end: added for HashTables */
   unsigned long nb_found;
   unsigned long nb_aborts;
   unsigned long nb_aborts_locked_read;
@@ -109,6 +110,7 @@ typedef struct thread_data {
   barrier_t *barrier;
   unsigned long failures_because_contention;
   int id;
+  uint8_t padding[16];
 } thread_data_t;
 
 
@@ -142,12 +144,9 @@ void
   mnext = (r < d->move);
   cnext = (r >= d->update + d->snapshot);
 	
-#ifdef ICC
-  while (stop == 0) {
-#else
-    while (AO_load_full(&stop) == 0) {
-#endif /* ICC */
-		
+  /* while (stop == 0) */
+  while (*running)
+    {
       if (unext) { // update
 	    
 	if (mnext) { // move
@@ -213,10 +212,9 @@ void
 	    }
 	  }	else val = rand_range_re(&d->seed, d->range);
 				
-	  if (ht_contains(d->set, val, TRANSACTIONAL)) 
+	  if (ht_contains(d->set, val, TRANSACTIONAL))
 	    d->nb_found++;
 	  d->nb_contains++;
-	      
 	} else { // snapshot
 	      
 	  if (ht_snapshot(d->set, TRANSACTIONAL))
@@ -238,13 +236,9 @@ void
 	mnext = (r < d->move);
 	cnext = (r >= d->update + d->snapshot);
       }
-	  
-#ifdef ICC
     }
-#else
-  }
-#endif /* ICC */
-	
+
+  printf("done\n");
   /* Free transaction */
   TM_THREAD_EXIT();
 
@@ -256,75 +250,75 @@ void
 
 void *test2(void *data)
 {
-	int val, newval, last, flag = 1;
-	thread_data_t *d = (thread_data_t *)data;
+  int val, newval, last, flag = 1;
+  thread_data_t *d = (thread_data_t *)data;
 	
-	/* Create transaction */
-	TM_THREAD_ENTER(d->id);
-	set_cpu(the_cores[d->id]);
-	/* Wait on barrier */
-	barrier_cross(d->barrier);
+  /* Create transaction */
+  TM_THREAD_ENTER(d->id);
+  set_cpu(the_cores[d->id]);
+  /* Wait on barrier */
+  barrier_cross(d->barrier);
 	
-	last = 0; // to avoid warning
-	while (stop == 0) {
+  last = 0; // to avoid warning
+  while (stop == 0) {
 		
-	  val = rand_range_re(&d->seed, 100) - 1;
-	  /* added for HashTables */
-	  if (val < d->update) {
-	    if (val >= d->move) { /* update without move */
-	      if (flag) {
-					/* Add random value */
-					val = (rand_r(&d->seed) % d->range) + 1;
-					if (ht_add(d->set, val, TRANSACTIONAL)) {
-						d->nb_added++;
-						last = val;
-						flag = 0;
-					}
-					d->nb_add++;
-	      } else {
-					if (d->alternate) {
-						/* Remove last value */
-						if (ht_remove(d->set, last, TRANSACTIONAL))  
-							d->nb_removed++;
-						d->nb_remove++;
-						flag = 1;
-					} else {
-						/* Random computation only in non-alternated cases */
-						newval = rand_range_re(&d->seed, d->range);
-						if (ht_remove(d->set, newval, TRANSACTIONAL)) {  
-							d->nb_removed++;
-							/* Repeat until successful, to avoid size variations */
-							flag = 1;
-						}
-						d->nb_remove++;
-					}
-	      } 
-	    } else { /* move */
-	      val = rand_range_re(&d->seed, d->range);
-	      if (ht_move(d->set, last, val, TRANSACTIONAL)) {
-					d->nb_moved++;
-					last = val;
-	      }
-	      d->nb_move++;
-	    }
-	  } else {
-	    if (val >= d->update + d->snapshot) { /* read-only without snapshot */
-	      /* Look for random value */
-	      val = rand_range_re(&d->seed, d->range);
-	      if (ht_contains(d->set, val, TRANSACTIONAL))
-					d->nb_found++;
-				d->nb_contains++;
-	    } else { /* snapshot */
-	      if (ht_snapshot(d->set, TRANSACTIONAL))
-					d->nb_snapshoted++;
-	      d->nb_snapshot++;
-	    }
+    val = rand_range_re(&d->seed, 100) - 1;
+    /* added for HashTables */
+    if (val < d->update) {
+      if (val >= d->move) { /* update without move */
+	if (flag) {
+	  /* Add random value */
+	  val = (rand_r(&d->seed) % d->range) + 1;
+	  if (ht_add(d->set, val, TRANSACTIONAL)) {
+	    d->nb_added++;
+	    last = val;
+	    flag = 0;
 	  }
+	  d->nb_add++;
+	} else {
+	  if (d->alternate) {
+	    /* Remove last value */
+	    if (ht_remove(d->set, last, TRANSACTIONAL))  
+	      d->nb_removed++;
+	    d->nb_remove++;
+	    flag = 1;
+	  } else {
+	    /* Random computation only in non-alternated cases */
+	    newval = rand_range_re(&d->seed, d->range);
+	    if (ht_remove(d->set, newval, TRANSACTIONAL)) {  
+	      d->nb_removed++;
+	      /* Repeat until successful, to avoid size variations */
+	      flag = 1;
+	    }
+	    d->nb_remove++;
+	  }
+	} 
+      } else { /* move */
+	val = rand_range_re(&d->seed, d->range);
+	if (ht_move(d->set, last, val, TRANSACTIONAL)) {
+	  d->nb_moved++;
+	  last = val;
 	}
+	d->nb_move++;
+      }
+    } else {
+      if (val >= d->update + d->snapshot) { /* read-only without snapshot */
+	/* Look for random value */
+	val = rand_range_re(&d->seed, d->range);
+	if (ht_contains(d->set, val, TRANSACTIONAL))
+	  d->nb_found++;
+	d->nb_contains++;
+      } else { /* snapshot */
+	if (ht_snapshot(d->set, TRANSACTIONAL))
+	  d->nb_snapshoted++;
+	d->nb_snapshot++;
+      }
+    }
+  }
 	
-	/* Free transaction */
-	TM_THREAD_EXIT();
-	return NULL;
+  /* Free transaction */
+  TM_THREAD_EXIT();
+  return NULL;
 }
 
 void print_set(intset_t *set) {
@@ -342,10 +336,11 @@ void print_set(intset_t *set) {
 }
 
 void print_ht(ht_intset_t *set) {
-	int i;
-	for (i=0; i < maxhtlength; i++) {
-		print_set(set->buckets[i]);
-	}
+  int i;
+  for (i=0; i < *maxhtlength; i++) 
+    {
+      print_set(set->buckets[i]);
+    }
 }
 
 int test_verbose = 0;
@@ -353,7 +348,7 @@ int test_verbose = 0;
 int
 main(int argc, char **argv)
 {
-  set_cpu(0);
+  set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
 
@@ -402,108 +397,110 @@ main(int argc, char **argv)
   int effective = DEFAULT_EFFECTIVE;
   sigset_t block_set;
 	
-  while(1) {
-    i = 0;
-    c = getopt_long(argc, argv, "hvAf:d:i:n:r:s:u:m:a:l:x:", long_options, &i);
+  while(1) 
+    {
+      i = 0;
+      c = getopt_long(argc, argv, "hvAf:d:i:n:r:s:u:m:a:l:x:", long_options, &i);
 		
-    if(c == -1)
-      break;
+      if(c == -1)
+	break;
 		
-    if(c == 0 && long_options[i].flag == 0)
-      c = long_options[i].val;
+      if(c == 0 && long_options[i].flag == 0)
+	c = long_options[i].val;
 		
-    switch(c) {
-    case 0:
-      // Flag is automatically set 
-      break;
-    case 'h':
-      printf("intset -- STM stress test "
-	     "(hash table)\n"
-	     "\n"
-	     "Usage:\n"
-	     "  intset [options...]\n"
-	     "\n"
-	     "Options:\n"
-	     "  -h, --help\n"
-	     "        Print this message\n"
-	     "  -A, --Alternate\n"
-	     "        Consecutive insert/remove target the same value\n"
-	     "  -f, --effective <int>\n"
-	     "        update txs must effectively write (0=trial, 1=effective, default=" XSTR(DEFAULT_EFFECTIVE) ")\n"
-	     "  -d, --duration <int>\n"
-	     "        Test duration in milliseconds (0=infinite, default=" XSTR(DEFAULT_DURATION) ")\n"
-	     "  -i, --initial-size <int>\n"
-	     "        Number of elements to insert before test (default=" XSTR(DEFAULT_INITIAL) ")\n"
-	     "  -n, --num-threads <int>\n"
-	     "        Number of threads (default=" XSTR(DEFAULT_NB_THREADS) ")\n"
-	     "  -r, --range <int>\n"
-	     "        Range of integer values inserted in set (default=" XSTR(DEFAULT_RANGE) ")\n"
-	     "  -s, --seed <int>\n"
-	     "        RNG seed (0=time-based, default=" XSTR(DEFAULT_SEED) ")\n"
-	     "  -u, --update-rate <int>\n"
-	     "        Percentage of update transactions (default=" XSTR(DEFAULT_UPDATE) ")\n"
-	     "  -m , --move-rate <int>\n"
-	     "        Percentage of move transactions (default=" XSTR(DEFAULT_MOVE) ")\n"
-	     "  -a , --snapshot-rate <int>\n"
-	     "        Percentage of snapshot transactions (default=" XSTR(DEFAULT_SNAPSHOT) ")\n"
-	     "  -l , --load-factor <int>\n"
-	     "        Ratio of keys over buckets (default=" XSTR(DEFAULT_LOAD) ")\n"
-	     "  -x, --elasticity (default=4)\n"
-	     "        Use elastic transactions\n"
-	     "        0 = non-protected,\n"
-	     "        1 = normal transaction,\n"
-	     "        2 = read elastic-tx,\n"
-	     "        3 = read/add elastic-tx,\n"
-	     "        4 = read/add/rem elastic-tx,\n"
-	     "        5 = elastic-tx w/ optimized move.\n"
-	     );
-      exit(0);
-    case 'v':
-      test_verbose = 1;
-      break;
-    case 'A':
-      alternate = 1;
-      break;
-    case 'f':
-      effective = atoi(optarg);
-      break;
-    case 'd':
-      duration = atoi(optarg);
-      break;
-    case 'i':
-      initial = atoi(optarg);
-      break;
-    case 'n':
-      nb_threads = atoi(optarg);
-      break;
-    case 'r':
-      range = atol(optarg);
-      break;
-    case 's':
-      seed = atoi(optarg);
-      break;
-    case 'u':
-      update = atoi(optarg);
-      break;
-    case 'm':
-      move = atoi(optarg);
-      break;
-    case 'a':
-      snapshot = atoi(optarg);
-      break;
-    case 'l':
-      load_factor = atoi(optarg);
-      break;
-    case 'x':
-      unit_tx = atoi(optarg);
-      break;
-    case '?':
-      printf("Use -h or --help for help\n");
-      exit(0);
-    default:
-      exit(1);
+      switch(c) 
+	{
+	case 0:
+	  // Flag is automatically set 
+	  break;
+	case 'h':
+	  printf("intset -- STM stress test "
+		 "(hash table)\n"
+		 "\n"
+		 "Usage:\n"
+		 "  intset [options...]\n"
+		 "\n"
+		 "Options:\n"
+		 "  -h, --help\n"
+		 "        Print this message\n"
+		 "  -A, --Alternate\n"
+		 "        Consecutive insert/remove target the same value\n"
+		 "  -f, --effective <int>\n"
+		 "        update txs must effectively write (0=trial, 1=effective, default=" XSTR(DEFAULT_EFFECTIVE) ")\n"
+		 "  -d, --duration <int>\n"
+		 "        Test duration in milliseconds (0=infinite, default=" XSTR(DEFAULT_DURATION) ")\n"
+		 "  -i, --initial-size <int>\n"
+		 "        Number of elements to insert before test (default=" XSTR(DEFAULT_INITIAL) ")\n"
+		 "  -n, --num-threads <int>\n"
+		 "        Number of threads (default=" XSTR(DEFAULT_NB_THREADS) ")\n"
+		 "  -r, --range <int>\n"
+		 "        Range of integer values inserted in set (default=" XSTR(DEFAULT_RANGE) ")\n"
+		 "  -s, --seed <int>\n"
+		 "        RNG seed (0=time-based, default=" XSTR(DEFAULT_SEED) ")\n"
+		 "  -u, --update-rate <int>\n"
+		 "        Percentage of update transactions (default=" XSTR(DEFAULT_UPDATE) ")\n"
+		 "  -m , --move-rate <int>\n"
+		 "        Percentage of move transactions (default=" XSTR(DEFAULT_MOVE) ")\n"
+		 "  -a , --snapshot-rate <int>\n"
+		 "        Percentage of snapshot transactions (default=" XSTR(DEFAULT_SNAPSHOT) ")\n"
+		 "  -l , --load-factor <int>\n"
+		 "        Ratio of keys over buckets (default=" XSTR(DEFAULT_LOAD) ")\n"
+		 "  -x, --elasticity (default=4)\n"
+		 "        Use elastic transactions\n"
+		 "        0 = non-protected,\n"
+		 "        1 = normal transaction,\n"
+		 "        2 = read elastic-tx,\n"
+		 "        3 = read/add elastic-tx,\n"
+		 "        4 = read/add/rem elastic-tx,\n"
+		 "        5 = elastic-tx w/ optimized move.\n"
+		 );
+	  exit(0);
+	case 'v':
+	  test_verbose = 1;
+	  break;
+	case 'A':
+	  alternate = 1;
+	  break;
+	case 'f':
+	  effective = atoi(optarg);
+	  break;
+	case 'd':
+	  duration = atoi(optarg);
+	  break;
+	case 'i':
+	  initial = atoi(optarg);
+	  break;
+	case 'n':
+	  nb_threads = atoi(optarg);
+	  break;
+	case 'r':
+	  range = atol(optarg);
+	  break;
+	case 's':
+	  seed = atoi(optarg);
+	  break;
+	case 'u':
+	  update = atoi(optarg);
+	  break;
+	case 'm':
+	  move = atoi(optarg);
+	  break;
+	case 'a':
+	  snapshot = atoi(optarg);
+	  break;
+	case 'l':
+	  load_factor = atoi(optarg);
+	  break;
+	case 'x':
+	  unit_tx = atoi(optarg);
+	  break;
+	case '?':
+	  printf("Use -h or --help for help\n");
+	  exit(0);
+	default:
+	  exit(1);
+	}
     }
-  }
 	
   assert(duration >= 0);
   assert(initial >= 0);
@@ -545,10 +542,11 @@ main(int argc, char **argv)
   timeout.tv_sec = duration / 1000;
   timeout.tv_nsec = (duration % 1000) * 1000000;
 	
-  if ((data = (thread_data_t *)malloc(nb_threads * sizeof(thread_data_t))) == NULL) {
-    perror("malloc");
-    exit(1);
-  }
+  if ((data = (thread_data_t *)memalign(64, nb_threads * sizeof(thread_data_t))) == NULL) 
+    {
+      perror("malloc");
+      exit(1);
+    }
   if ((threads = (pthread_t *)malloc(nb_threads * sizeof(pthread_t))) == NULL) {
     perror("malloc");
     exit(1);
@@ -559,10 +557,14 @@ main(int argc, char **argv)
   else
     srand(seed);
 	
-  maxhtlength = (unsigned int) initial / load_factor;
+  maxhtlength = (unsigned int*) ssalloc(64);//memalign(64, 64);
+  assert(maxhtlength != NULL);
+
+  *maxhtlength = (unsigned int) initial / load_factor;
   set = ht_new();
 	
-  stop = 0;
+  /* stop = 0; */
+  *running = 1;
 	
   // Init STM 
   if (test_verbose)
@@ -576,23 +578,24 @@ main(int argc, char **argv)
     {
       printf("Adding %d entries to set\n", initial);
     }
-  i = 0;
-  maxhtlength = (int) (initial / load_factor);
 
-  while (i < initial) {
-    val = rand_range(range);
-    if (ht_add(set, val, 0)) {
-      last = val;
-      i++;			
+  i = 0;
+  while (i < initial) 
+    {
+      val = rand_range(range);
+      if (ht_add(set, val, 0)) {
+	last = val;
+	i++;			
+      }
     }
-  }
   size = ht_size(set);
   if (test_verbose)
     {
       printf("Set size     : %d\n", size);
-      printf("Bucket amount: %d\n", maxhtlength);
+      printf("Bucket amount: %d\n", *maxhtlength);
       printf("Load         : %d\n", load_factor);
     }	
+
   // Access set from all threads 
   barrier_init(&barrier, nb_threads + 1);
   pthread_attr_init(&attr);
@@ -635,10 +638,12 @@ main(int argc, char **argv)
       data[i].barrier = &barrier;
       data[i].failures_because_contention = 0;
       data[i].id = i;
-      if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
-	fprintf(stderr, "Error creating thread\n");
-	exit(1);
-      }
+
+      if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) 
+	{
+	  fprintf(stderr, "Error creating thread\n");
+	  exit(1);
+	}
     }
   printf("\n");
   pthread_attr_destroy(&attr);
@@ -654,10 +659,12 @@ main(int argc, char **argv)
     sigemptyset(&block_set);
     sigsuspend(&block_set);
   }
-  AO_store_full(&stop, 1);
+
+  /* AO_store_full(&stop, 1); */
+  *running = 0;
+
   gettimeofday(&end, NULL);
   printf("STOPPING...\n");
-
   //print_ht(set);
 	
   // Wait for thread completion 
@@ -667,6 +674,7 @@ main(int argc, char **argv)
       exit(1);
     }
   }
+
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
   aborts = 0;
   aborts_locked_read = 0;
