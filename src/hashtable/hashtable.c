@@ -30,7 +30,7 @@ void ht_delete(ht_intset_t *set) {
   node_t *node, *next;
   int i;
   
-  for (i=0; i < maxhtlength; i++) {
+  for (i=0; i < *maxhtlength; i++) {
     node = set->buckets[i]->head;
     while (node != NULL) {
       next = node->next;
@@ -48,7 +48,7 @@ int ht_size(ht_intset_t *set) {
 	node_t *node;
 	int i;
 	
-	for (i=0; i < maxhtlength; i++) {
+	for (i=0; i < *maxhtlength; i++) {
 		node = set->buckets[i]->head->next;
 		while (node->next) {
 			size++;
@@ -71,21 +71,31 @@ int floor_log_2(unsigned int n) {
 	return ((n == 0) ? (-1) : pos);
 }
 
-ht_intset_t *ht_new() {
-	ht_intset_t *set;
-	int i;
+ht_intset_t* 
+ht_new() 
+{
+  ht_intset_t *set;
+  int i;
 	
-	if ((set = (ht_intset_t *)malloc(sizeof(ht_intset_t))) == NULL) {
-		perror("malloc");
-		exit(1);
-	}  
-        if ((set->buckets = (void *)malloc((maxhtlength + 1)* sizeof(intset_t *))) == NULL) {
-	perror("malloc");
-	exit(1);
-	}  
+  /* if ((set = (ht_intset_t *)malloc(sizeof(ht_intset_t))) == NULL) */
+  /* if ((set = (ht_intset_t *)memalign(64, 64)) == NULL)  */
+  if ((set = (ht_intset_t *)ssalloc(sizeof(ht_intset_t))) == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }  
 
-	for (i=0; i < maxhtlength; i++) {
-		set->buckets[i] = set_new();
-	}
-	return set;
+  size_t bs = (*maxhtlength + 1) * sizeof(intset_t *);
+  /* if ((set->buckets = (void *)memalign(64, bs)) == NULL)  */
+  if ((set->buckets = (void *)ssalloc(bs)) == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }  
+
+  for (i=0; i < *maxhtlength; i++) 
+    {
+      set->buckets[i] = set_new();
+    }
+  return set;
 }
