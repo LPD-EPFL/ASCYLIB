@@ -260,7 +260,9 @@ extern "C" {
     return (double)t.tv_sec + ((double)t.tv_usec)/1000000.0;
   }
 
-  static inline void set_cpu(int cpu) {
+  static inline 
+  void set_cpu(int cpu) 
+  {
 #ifdef __sparc__
     processor_bind(P_LWPID,P_MYID, cpu, NULL);
 #elif defined(__tile__)
@@ -277,9 +279,10 @@ extern "C" {
     CPU_SET(cpu, &mask);
     numa_set_preferred(get_cluster(cpu));
     pthread_t thread = pthread_self();
-    if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &mask) != 0) {
-      fprintf(stderr, "Error setting thread affinity\n");
-    }
+    if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &mask) != 0) 
+      {
+	fprintf(stderr, "Error setting thread affinity\n");
+      }
 #endif
   }
 
