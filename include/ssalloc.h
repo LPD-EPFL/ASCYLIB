@@ -25,7 +25,7 @@
 #  define SSALLOC_SIZE (128 * 1024 * 1024)
 #endif
 
-#define SSALLOC_NUM_ALLOCATORS 3
+#define SSALLOC_NUM_ALLOCATORS 2
 
 void ssalloc_set(void* mem);
 void ssalloc_init();
