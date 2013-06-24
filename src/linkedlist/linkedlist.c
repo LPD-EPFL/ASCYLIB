@@ -37,10 +37,14 @@ intset_t *set_new()
   intset_t *set;
   node_t *min, *max;
 	
-  if ((set = (intset_t *)malloc(sizeof(intset_t))) == NULL) {
-    perror("malloc");
-    exit(1);
-  }
+  /* if ((set = (intset_t *)malloc(sizeof(intset_t))) == NULL) */
+  if ((set = (intset_t *)ssalloc(sizeof(intset_t))) == NULL) 
+  /* if ((set = (intset_t *)ssalloc(64)) == NULL) */
+  /* if ((set = (intset_t *)memalign(64, 64)) == NULL)  */
+    {
+      perror("malloc");
+      exit(1);
+    }
   max = new_node(VAL_MAX, NULL, 0);
   min = new_node(VAL_MIN, max, 0);
   set->head = min;
