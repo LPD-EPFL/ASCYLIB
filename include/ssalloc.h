@@ -22,7 +22,7 @@
 #elif defined(__tilera__)
 #  define SSALLOC_SIZE (100 * 1024 * 1024)
 #else
-#  define SSALLOC_SIZE (1024 * 1024 * 1024)
+#  define SSALLOC_SIZE (128 * 1024 * 1024)
 #endif
 
 #define SSALLOC_NUM_ALLOCATORS 3
