@@ -220,7 +220,7 @@ test(void *data)
 int
 main(int argc, char **argv) 
 {
-  set_cpu(0);
+  set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
 
