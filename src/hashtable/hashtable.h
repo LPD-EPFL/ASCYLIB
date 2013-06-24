@@ -33,7 +33,7 @@
 #define MAXHTLENGTH                     65536
 
 /* Hashtable length (# of buckets) */
-extern unsigned int maxhtlength;
+extern unsigned int* maxhtlength;
 
 /* Hashtable seed */
 #ifdef TLS

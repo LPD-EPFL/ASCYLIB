@@ -18,6 +18,9 @@ then
     elif [ $unm = "parsasrv1.epfl.ch" ];
     then
 	cores=$(seq 2 1 36);
+    elif [ $unm = "diassrv8" ];
+    then
+	cores=$(seq 2 1 80);
     else
 	cores=$(seq 2 1 48);
     fi;
@@ -29,6 +32,9 @@ then
     elif [ $unm = "parsasrv1.epfl.ch" ];
     then
 	cores=$(seq 6 6 36);
+    elif [ $unm = "diassrv8" ];
+    then
+	cores=$(seq 10 10 80);
     else
 	cores=$(seq 6 6 48);
     fi;

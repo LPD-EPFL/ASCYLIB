@@ -99,6 +99,17 @@ ticket_unlock(volatile ptlock_t* l)
   return 0;
 }
 
+#elif defined(HTICKET)		/* Hierarchical ticket lock */
+
+#  include "htlock.h"
+
+#  define INIT_LOCK(lock)				init_alloc_htlock((htlock_t*) lock)
+#  define DESTROY_LOCK(lock)			
+#  define LOCK(lock)					htlock_lock((htlock_t*) lock)
+#  define UNLOCK(lock)					htlock_release((htlock_t*) lock)
+
+
 #endif
+
 
 #endif	/* _LOCK_IF_H_ */
