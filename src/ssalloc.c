@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <assert.h>
+#include <malloc.h>
 
 #include "ssalloc.h"
 #include "measurements.h"
@@ -36,7 +37,7 @@ ssalloc_init()
   int i;
   for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
     {
-      ssalloc_app_mem[i] = (void*) malloc(SSALLOC_SIZE);
+      ssalloc_app_mem[i] = (void*) memalign(64, SSALLOC_SIZE);
       assert(ssalloc_app_mem[i] != NULL);
     }
 #endif
