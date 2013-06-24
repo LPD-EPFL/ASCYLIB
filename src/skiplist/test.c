@@ -23,15 +23,10 @@
 
 #include "intset.h"
 
-volatile AO_t stop;
-unsigned int global_seed;
-#ifdef TLS
-__thread unsigned int *rng_seed;
-#else /* ! TLS */
-pthread_key_t rng_seed_key;
-#endif /* ! TLS */
-unsigned int levelmax;
+extern ALIGNED(64) uint8_t levelmax[64];
 __thread unsigned long* seeds;
+
+ALIGNED(64) uint8_t running[64];
 
 typedef struct barrier {
 	pthread_cond_t complete;
@@ -64,7 +59,8 @@ void barrier_cross(barrier_t *b)
 	pthread_mutex_unlock(&b->mutex);
 }
 
-typedef struct thread_data {
+typedef ALIGNED(64) struct thread_data 
+{
   val_t first;
   long range;
   int update;
@@ -94,25 +90,26 @@ typedef struct thread_data {
 } thread_data_t;
 
 
-void print_skiplist(sl_intset_t *set) {
-	sl_node_t *curr;
-	int i, j;
-	int arr[levelmax];
+void print_skiplist(sl_intset_t *set) 
+{
+  sl_node_t *curr;
+  int i, j;
+  int arr[*levelmax];
 	
-	for (i=0; i< sizeof arr/sizeof arr[0]; i++) arr[i] = 0;
+  for (i=0; i< sizeof arr/sizeof arr[0]; i++) arr[i] = 0;
 	
-	curr = set->head;
-	do {
-		printf("%d", (int) curr->val);
-		for (i=0; i<curr->toplevel; i++) {
-			printf("-*");
-		}
-		arr[curr->toplevel-1]++;
-		printf("\n");
-		curr = curr->next[0];
-	} while (curr); 
-	for (j=0; j<levelmax; j++)
-		printf("%d nodes of level %d\n", arr[j], j);
+  curr = set->head;
+  do {
+    printf("%d", (int) curr->val);
+    for (i=0; i<curr->toplevel; i++) {
+      printf("-*");
+    }
+    arr[curr->toplevel-1]++;
+    printf("\n");
+    curr = curr->next[0];
+  } while (curr); 
+  for (j=0; j<*levelmax; j++)
+    printf("%d nodes of level %d\n", arr[j], j);
 }
 
 
@@ -134,16 +131,13 @@ test(void *data)
   seeds = seed_rand();
 
   barrier_cross(d->barrier);
-	
+
   /* Is the first op an update? */
   unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
 	
-#ifdef ICC
-  while (stop == 0) {
-#else
-    while (AO_load_full(&stop) == 0) {
-#endif /* ICC */
-		
+  /* while (stop == 0) { */
+  while (*running)
+    {		
       if (unext) { // update
 			
 	if (last < 0) { // add
@@ -196,10 +190,11 @@ test(void *data)
 	  }
 	}	else val = rand_range_re(&d->seed, d->range);
 			
+	PF_START(2);
 	if (sl_contains(d->set, val, TRANSACTIONAL)) 
 	  d->nb_found++;
+	PF_STOP(2);	
 	d->nb_contains++;
-			
       }
 		
       /* Is the next op an update? */
@@ -209,12 +204,7 @@ test(void *data)
       } else { // remove/add (even failed) is considered as an update
 	unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
       }
-		
-#ifdef ICC
     }
-#else
-  }
-#endif /* ICC */
 	
   /* Free transaction */
   TM_THREAD_EXIT();
@@ -232,7 +222,9 @@ void catcher(int sig)
 int 
 main(int argc, char **argv)
 {
-  set_cpu(0);
+  printf("sizeof(thread_data_t) = %lu\n", sizeof(thread_data_t));
+
+  set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
 
@@ -404,21 +396,12 @@ main(int argc, char **argv)
   else
     srand(seed);
 	
-  levelmax = floor_log_2((unsigned int) initial);
+  *levelmax = floor_log_2((unsigned int) initial);
   set = sl_set_new();
-  stop = 0;
 
-  global_seed = rand();
-#ifdef TLS
-  rng_seed = &global_seed;
-#else /* ! TLS */
-  if (pthread_key_create(&rng_seed_key, NULL) != 0) {
-    fprintf(stderr, "Error creating thread local\n");
-    exit(1);
-  }
-  pthread_setspecific(rng_seed_key, &global_seed);
-#endif /* ! TLS */
-	
+  /* stop = 0; */
+  *running = 1;
+
   // Init STM 
   printf("Initializing STM\n");
 	
@@ -428,16 +411,18 @@ main(int argc, char **argv)
   printf("Adding %d entries to set\n", initial);
   i = 0;
 	
-  while (i < initial) {
-    val = rand_range_re(&global_seed, range);
-    if (sl_add(set, val, 0)) {
-      last = val;
-      i++;
+  while (i < initial) 
+    {
+      val = rand_range_re(NULL, range);
+      if (sl_add(set, val, 0)) 
+	{
+	  last = val;
+	  i++;
+	}
     }
-  }
   size = sl_set_size(set);
   printf("Set size     : %d\n", size);
-  printf("Level max    : %d\n", levelmax);
+  printf("Level max    : %d\n", *levelmax);
 	
   // Access set from all threads 
   barrier_init(&barrier, nb_threads + 1);
@@ -501,12 +486,9 @@ main(int argc, char **argv)
     sigsuspend(&block_set);
   }
 	
-#ifdef ICC
-  stop = 1;
-#else	
-  AO_store_full(&stop, 1);
-#endif /* ICC */
-	
+  /* AO_store_full(&stop, 1); */
+  *running = 0;
+
   gettimeofday(&end, NULL);
   printf("STOPPING...\n");
 	
@@ -607,10 +589,6 @@ main(int argc, char **argv)
 	
   // Cleanup STM 
   TM_SHUTDOWN();
-	
-#ifndef TLS
-  pthread_key_delete(rng_seed_key);
-#endif /* ! TLS */
 	
   free(threads);
   free(data);

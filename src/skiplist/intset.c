@@ -86,7 +86,6 @@ int sl_contains(sl_intset_t *set, val_t val, int transactional)
 #elif defined LOCKFREE /* fraser lock-free */
 	
 	result = fraser_find(set, val);
-	
 #endif
 	
 	return result;

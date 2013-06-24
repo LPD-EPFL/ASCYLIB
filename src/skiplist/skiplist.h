@@ -51,14 +51,7 @@
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
 
-extern volatile AO_t stop;
-extern unsigned int global_seed;
-#ifdef TLS
-extern __thread unsigned int *rng_seed;
-#else /* ! TLS */
-extern pthread_key_t rng_seed_key;
-#endif /* ! TLS */
-extern unsigned int levelmax;
+extern uint8_t levelmax[64];
 
 #define TRANSACTIONAL                   d->unit_tx
 

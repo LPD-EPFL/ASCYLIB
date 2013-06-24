@@ -238,7 +238,6 @@ void
       }
     }
 
-  printf("done\n");
   /* Free transaction */
   TM_THREAD_EXIT();
 

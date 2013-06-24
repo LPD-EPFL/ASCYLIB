@@ -26,6 +26,8 @@
 
 __thread unsigned long* seeds;
 
+ALIGNED(64) uint8_t running[64];
+
 typedef struct barrier {
   pthread_cond_t complete;
   pthread_mutex_t mutex;
@@ -58,7 +60,8 @@ void barrier_cross(barrier_t *b)
 }
 
 
-typedef struct thread_data {
+typedef ALIGNED(64) struct thread_data 
+{
   val_t first;
   long range;
   int update;
@@ -87,6 +90,7 @@ typedef struct thread_data {
   barrier_t *barrier_workers;
   unsigned long failures_because_contention;
   int id;
+  uint8_t padding[48];
 } thread_data_t;
 
 
@@ -117,13 +121,9 @@ test(void *data)
   /* Is the first op an update? */
   unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
 	
-#ifdef ICC
-  while (stop == 0) {
-#else
-    /* while (AO_load_full(&stop) == 0) { */
-    while (stop == 0) {
-#endif /* ICC */
-		
+  /* while (stop == 0)  */
+  while (*running)
+    {
       if (unext) { // update
 			
 	if (last < 0) { // add
@@ -189,13 +189,7 @@ test(void *data)
       } else { // remove/add (even failed) is considered as an update
 	unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
       }
-
-#ifdef ICC
     }
-#else
-  }
-#endif /* ICC */
-	
   /* Free transaction */
   TM_THREAD_EXIT();
 	
@@ -220,6 +214,8 @@ test(void *data)
 int
 main(int argc, char **argv) 
 {
+  printf("sizeof(thread_data_t) = %lu\n", sizeof(thread_data_t));
+
   set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
@@ -396,7 +392,8 @@ main(int argc, char **argv)
     srand(seed);
 	
   set = set_new();
-  stop = 0;
+  /* stop = 0; */
+  *running = 1;
 	
   /* Init STM */
   printf("Initializing STM\n");
@@ -498,12 +495,9 @@ main(int argc, char **argv)
     sigsuspend(&block_set);
   }
 	
-#ifdef ICC
-  stop = 1;
-#else	
   AO_store_full(&stop, 1);
-#endif /* ICC */
-	
+  *running = 0;
+
   gettimeofday(&end, NULL);
   printf("STOPPING...\n");
 	
