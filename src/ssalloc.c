@@ -109,7 +109,7 @@ ssalloc_alloc(unsigned int allocator, size_t size)
       alloc_next[allocator] += size;
       if (alloc_next[allocator] > SSALLOC_SIZE)
 	{
-	  printf("*** warning: out of bounds alloc");
+	  fprintf(stderr, "*** warning: allocator %2d : out of bounds alloc\n", allocator);
 	}
     }
 #endif
