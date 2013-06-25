@@ -1,6 +1,6 @@
 #!/bin/bash
 
-out_file="data/lf_socket_"$(date | awk '// {print $2"_"$3}')".dat";
+out_file="data/lf_socket_"$(date | gawk '// {print $2"_"$3}')".dat";
 echo "Output file: $out_file";
 
 initials="8 16 32 64 128 256 512 1024 2048 4096 8192";
