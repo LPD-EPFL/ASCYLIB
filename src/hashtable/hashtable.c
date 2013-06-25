@@ -30,7 +30,7 @@ void ht_delete(ht_intset_t *set) {
   node_t *node, *next;
   int i;
   
-  for (i=0; i < maxhtlength; i++) {
+  for (i=0; i < *maxhtlength; i++) {
     node = set->buckets[i]->head;
     while (node != NULL) {
       next = node->next;
@@ -44,48 +44,67 @@ void ht_delete(ht_intset_t *set) {
 }
 
 int ht_size(ht_intset_t *set) {
-	int size = 0;
-	node_t *node;
-	int i;
+  int size = 0;
+  node_t *node;
+  int i;
 	
-	for (i=0; i < maxhtlength; i++) {
-		node = set->buckets[i]->head->next;
-		while (node->next) {
-			size++;
-			node = node->next;
-		}
+  for (i=0; i < *maxhtlength; i++) {
+    node = set->buckets[i]->head->next;
+    while (node->next) {
+      size++;
+      node = node->next;
+    }
 		
-	}
-	return size;
+  }
+  return size;
 }
 
 int floor_log_2(unsigned int n) {
-	int pos = 0;
-	printf("n result = %d\n", n);
-	if (n >= 1<<16) { n >>= 16; pos += 16; }
-	if (n >= 1<< 8) { n >>=  8; pos +=  8; }
-	if (n >= 1<< 4) { n >>=  4; pos +=  4; }
-	if (n >= 1<< 2) { n >>=  2; pos +=  2; }
-	if (n >= 1<< 1) {           pos +=  1; }
-	printf("floor result = %d\n", pos);
-	return ((n == 0) ? (-1) : pos);
+  int pos = 0;
+  printf("n result = %d\n", n);
+  if (n >= 1<<16) { n >>= 16; pos += 16; }
+  if (n >= 1<< 8) { n >>=  8; pos +=  8; }
+  if (n >= 1<< 4) { n >>=  4; pos +=  4; }
+  if (n >= 1<< 2) { n >>=  2; pos +=  2; }
+  if (n >= 1<< 1) {           pos +=  1; }
+  printf("floor result = %d\n", pos);
+  return ((n == 0) ? (-1) : pos);
 }
 
-ht_intset_t *ht_new() {
-	ht_intset_t *set;
-	int i;
-	
-	if ((set = (ht_intset_t *)malloc(sizeof(ht_intset_t))) == NULL) {
-		perror("malloc");
-		exit(1);
-	}  
-        if ((set->buckets = (void *)malloc((maxhtlength + 1)* sizeof(intset_t *))) == NULL) {
-	perror("malloc");
-	exit(1);
-	}  
+ht_intset_t* 
+ht_new() 
+{
+  ssalloc_align();
 
-	for (i=0; i < maxhtlength; i++) {
-		set->buckets[i] = set_new();
-	}
-	return set;
+  ht_intset_t *set;
+  int i;
+	
+  /* if ((set = (ht_intset_t *)malloc(sizeof(ht_intset_t))) == NULL) */
+  /* if ((set = (ht_intset_t *)memalign(64, 64)) == NULL) */
+  /* if ((set = (ht_intset_t *)ssalloc(sizeof(ht_intset_t))) == NULL) */
+  if ((set = (ht_intset_t *)ssalloc_alloc(1, sizeof(ht_intset_t))) == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }  
+
+  size_t bs = (*maxhtlength + 1) * sizeof(intset_t *);
+  printf("bs = %lu\n", bs);
+
+  /* if ((set->buckets = (void *)memalign(64, bs)) == NULL) */
+  /* if ((set->buckets = (void *)ssalloc(bs)) == NULL) */
+  /* if ((set->buckets = (void *)malloc(bs)) == NULL) */
+  if ((set->buckets = (void *)ssalloc_alloc(1, bs)) == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }  
+
+  ssalloc_align_alloc(0);
+
+  for (i=0; i < *maxhtlength; i++) 
+    {
+      set->buckets[i] = set_new();
+    }
+  return set;
 }

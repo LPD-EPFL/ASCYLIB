@@ -3,39 +3,7 @@
 cores=$1;
 shift;
 
-unm=$(uname -n);
-
-if [ $unm = "parsasrv1.epfl.ch" ];
-then
-    run_script="./run"
-fi;
-
-if [ "$cores" = "all" ];
-then
-    if [ $unm = "maglite" ];
-    then
-	cores=$(seq 2 1 64);
-    elif [ $unm = "parsasrv1.epfl.ch" ];
-    then
-	cores=$(seq 2 1 36);
-    else
-	cores=$(seq 2 1 48);
-    fi;
-elif [ "$cores" = "socket" ];
-then
-    if [ $unm = "maglite" ];
-    then
-	cores=$(seq 8 8 64);
-    elif [ $unm = "parsasrv1.epfl.ch" ];
-    then
-	cores=$(seq 6 6 36);
-    else
-	cores=$(seq 6 6 48);
-    fi;
-elif [ "$cores" = "twelve" ];
-then
-    cores=$(seq 2 1 12);
-fi;
+source scripts/config;
 
 prog1="$1";
 shift;

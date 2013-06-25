@@ -1,0 +1,53 @@
+unm=$(uname -n);
+
+if [ $unm = "parsasrv1.epfl.ch" ];
+then
+    run_script="./run"
+fi;
+
+if [ "$cores" = "all" ];
+then
+    if [ $unm = "maglite" ];
+    then
+	cores=$(seq 2 1 64);
+    elif [ $unm = "parsasrv1.epfl.ch" ];
+    then
+	cores=$(seq 2 1 36);
+    elif [ $unm = "diassrv8" ];
+    then
+	cores=$(seq 2 1 80);
+    else
+	cores=$(seq 2 1 48);
+    fi;
+elif [ "$cores" = "socket" ];
+then
+    if [ $unm = "maglite" ];
+    then
+	cores=$(seq 8 8 64);
+    elif [ $unm = "parsasrv1.epfl.ch" ];
+    then
+	cores=$(seq 6 6 36);
+    elif [ $unm = "diassrv8" ];
+    then
+	cores=$(seq 10 10 80);
+    else
+	cores=$(seq 6 6 48);
+    fi;
+elif [ "$cores" = "step" ];
+then
+    if [ $unm = "maglite" ];
+    then
+	cores=$(seq 7 1 10);
+    elif [ $unm = "parsasrv1.epfl.ch" ];
+    then
+	cores=$(seq 5 1 8);
+    elif [ $unm = "diassrv8" ];
+    then
+	cores=$(seq 9 1 11);
+    else
+	cores=$(seq 5 1 8);
+    fi;
+elif [ "$cores" = "twelve" ];
+then
+    cores=$(seq 2 1 12);
+fi;

@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <assert.h>
+#include <malloc.h>
 
 #include "ssalloc.h"
 #include "measurements.h"
@@ -36,8 +37,34 @@ ssalloc_init()
   int i;
   for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
     {
-      ssalloc_app_mem[i] = (void*) malloc(SSALLOC_SIZE);
+      ssalloc_app_mem[i] = (void*) memalign(64, SSALLOC_SIZE);
       assert(ssalloc_app_mem[i] != NULL);
+    }
+#endif
+}
+
+void
+ssalloc_align()
+{
+#if !defined(SSALLOC_USE_MALLOC)
+  int i;
+  for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
+    {
+      while (alloc_next[i] % 64)
+	{
+	  alloc_next[i]++;
+	}
+    }
+#endif
+}
+
+void
+ssalloc_align_alloc(unsigned int allocator)
+{
+#if !defined(SSALLOC_USE_MALLOC)
+  while (alloc_next[allocator] % 64)
+    {
+      alloc_next[allocator]++;
     }
 #endif
 }
@@ -82,7 +109,7 @@ ssalloc_alloc(unsigned int allocator, size_t size)
       alloc_next[allocator] += size;
       if (alloc_next[allocator] > SSALLOC_SIZE)
 	{
-	  printf("*** warning: out of bounds alloc");
+	  fprintf(stderr, "*** warning: allocator %2d : out of bounds alloc\n", allocator);
 	}
     }
 #endif

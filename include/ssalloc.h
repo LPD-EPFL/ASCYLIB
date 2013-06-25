@@ -17,6 +17,8 @@
 
 /* #define SSALLOC_USE_MALLOC */
 
+#define SSALLOC_NUM_ALLOCATORS 2
+
 #if defined(__sparc__)
 #  define SSALLOC_SIZE (10 * 1024 * 1024)
 #elif defined(__tilera__)
@@ -25,12 +27,13 @@
 #  define SSALLOC_SIZE (1024 * 1024 * 1024)
 #endif
 
-#define SSALLOC_NUM_ALLOCATORS 3
 
 void ssalloc_set(void* mem);
 void ssalloc_init();
+void ssalloc_align();
+void ssalloc_align_alloc(unsigned int allocator);
 void ssalloc_offset(size_t size);
-void* ssalloc_alloc(unsigned int alloctor, size_t size);
+void* ssalloc_alloc(unsigned int allocator, size_t size);
 void ssfree_alloc(unsigned int allocator, void* ptr);
 void* ssalloc(size_t size);
 void ssfree(void* ptr);

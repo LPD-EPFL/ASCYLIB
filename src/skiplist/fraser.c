@@ -26,7 +26,7 @@
 
 #include "fraser.h"
 
-unsigned int levelmax;
+extern ALIGNED(64) uint8_t levelmax[64];
 
 inline int
 is_marked(uintptr_t i)
@@ -54,7 +54,7 @@ fraser_search(sl_intset_t *set, val_t val, sl_node_t **left_list, sl_node_t **ri
 
  retry:
   left = set->head;
-  for (i = levelmax - 1; i >= 0; i--)
+  for (i = *levelmax - 1; i >= 0; i--)
     {
       left_next = left->next[i];
       if (is_marked((uintptr_t)left_next))
@@ -92,8 +92,8 @@ fraser_find(sl_intset_t *set, val_t val)
   sl_node_t **succs;
   int result;
 
-  /* succs = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *)); */
-  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
+  /* succs = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
+  succs = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
   fraser_search(set, val, NULL, succs);
   result = (succs[0]->val == val && !succs[0]->deleted);
   /* free(succs); */
@@ -128,8 +128,8 @@ fraser_remove(sl_intset_t *set, val_t val)
   sl_node_t **succs;
   int result;
 
-  /* succs = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *)); */
-  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
+  /* succs = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
+  succs = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
   fraser_search(set, val, NULL, succs);
   result = (succs[0]->val == val);
   if (result == 0)
@@ -166,11 +166,11 @@ fraser_insert(sl_intset_t *set, val_t v)
   int i;
   int result;
 
-  new = sl_new_simple_node(v, get_rand_level(), 6);
-  /* preds = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *)); */
-  /* succs = (sl_node_t **)malloc(levelmax * sizeof(sl_node_t *)); */
-  preds = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
+  new = sl_new_simple_node(v, get_rand_level(), 0);
+  /* preds = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
+  /* succs = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
+  preds = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
+  succs = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
 
  retry: 	
   fraser_search(set, v, preds, succs);
