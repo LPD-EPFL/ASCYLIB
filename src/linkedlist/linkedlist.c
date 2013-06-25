@@ -37,17 +37,26 @@ intset_t *set_new()
   intset_t *set;
   node_t *min, *max;
 	
-  /* if ((set = (intset_t *)malloc(sizeof(intset_t))) == NULL) */
-  if ((set = (intset_t *)ssalloc(sizeof(intset_t))) == NULL) 
+  /* if ((set = (intset_t *)malloc(sizeof(intset_t))) == NULL)*/
+  if ((set = (intset_t *)ssalloc(sizeof(intset_t))) == NULL)
   /* if ((set = (intset_t *)ssalloc(64)) == NULL) */
+    /* if ((set = (intset_t *)ssalloc_alloc(1, 64)) == NULL) */
+  /* if ((set = (intset_t *)ssalloc_alloc(1, sizeof(intset_t))) == NULL) */
   /* if ((set = (intset_t *)memalign(64, 64)) == NULL)  */
     {
       perror("malloc");
       exit(1);
     }
+
+#define CL_NUM(x) ((uintptr_t) (x) / 64)
+#define CL_OFF(x)((uintptr_t) (x) % 64)
+  /* printf("* set @ %p (%lu / %lu )\n", set, CL_NUM(set), CL_OFF(set)); */
+
   max = new_node(VAL_MAX, NULL, 0);
   min = new_node(VAL_MIN, max, 0);
   set->head = min;
+
+  ssalloc_align_alloc(0);
 
   return set;
 }
