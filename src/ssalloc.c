@@ -44,6 +44,32 @@ ssalloc_init()
 }
 
 void
+ssalloc_align()
+{
+#if !defined(SSALLOC_USE_MALLOC)
+  int i;
+  for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
+    {
+      while (alloc_next[i] % 64)
+	{
+	  alloc_next[i]++;
+	}
+    }
+#endif
+}
+
+void
+ssalloc_align_alloc(unsigned int allocator)
+{
+#if !defined(SSALLOC_USE_MALLOC)
+  while (alloc_next[allocator] % 64)
+    {
+      alloc_next[allocator]++;
+    }
+#endif
+}
+
+void
 ssalloc_offset(size_t size)
 {
 #if !defined(SSALLOC_USE_MALLOC)

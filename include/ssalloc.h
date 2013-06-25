@@ -29,8 +29,10 @@
 
 void ssalloc_set(void* mem);
 void ssalloc_init();
+void ssalloc_align();
+void ssalloc_align_alloc(unsigned int allocator);
 void ssalloc_offset(size_t size);
-void* ssalloc_alloc(unsigned int alloctor, size_t size);
+void* ssalloc_alloc(unsigned int allocator, size_t size);
 void ssfree_alloc(unsigned int allocator, void* ptr);
 void* ssalloc(size_t size);
 void ssfree(void* ptr);
