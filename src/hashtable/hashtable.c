@@ -87,7 +87,8 @@ ht_new()
       perror("malloc");
       exit(1);
     }  
-  printf("bs = %lu\n", bs);
+
+  size_t bs = (*maxhtlength + 1) * sizeof(intset_t *);
 
   /* if ((set->buckets = (void *)memalign(64, bs)) == NULL) */
   /* if ((set->buckets = (void *)ssalloc(bs)) == NULL) */

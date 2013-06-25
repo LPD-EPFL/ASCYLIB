@@ -10,26 +10,32 @@
 
 #include "linkedlist.h"
 
-node_t *new_node(val_t val, node_t *next, int transactional)
+node_t*
+new_node(val_t val, node_t *next, int transactional)
 {
-  node_t *node;
+  volatile node_t *node;
 
-  if (transactional) {
-	node = (node_t *)MALLOC(sizeof(node_t));
-	/* node = (node_t *) ssalloc(sizeof(node_t)); */
-  } else {
-	/* node = (node_t *)malloc(sizeof(node_t)); */
-	node = (node_t *) ssalloc(sizeof(node_t));
-  }
+  /* if (transactional)  */
+  /*   { */
+  /*     node = (volatile node_t *)MALLOC(sizeof(node_t)); */
+  /*     perror("transactional call?\n"); */
+  /*     /\* node = (node_t *) ssalloc(sizeof(node_t)); *\/ */
+  /*   }  */
+  /* else  */
+  /*   { */
+  /* node = (node_t *)malloc(sizeof(node_t)); */
+  node = (volatile node_t *) ssalloc(sizeof(node_t));
+  /* } */
+
   if (node == NULL) {
-	perror("malloc");
-	exit(1);
+    perror("malloc");
+    exit(1);
   }
 
   node->val = val;
   node->next = next;
 
-  return node;
+  return (node_t*) node;
 }
 
 intset_t *set_new()
@@ -38,11 +44,11 @@ intset_t *set_new()
   node_t *min, *max;
 	
   /* if ((set = (intset_t *)malloc(sizeof(intset_t))) == NULL)*/
-  if ((set = (intset_t *)ssalloc(sizeof(intset_t))) == NULL)
   /* if ((set = (intset_t *)ssalloc(64)) == NULL) */
     /* if ((set = (intset_t *)ssalloc_alloc(1, 64)) == NULL) */
   /* if ((set = (intset_t *)ssalloc_alloc(1, sizeof(intset_t))) == NULL) */
-  /* if ((set = (intset_t *)memalign(64, 64)) == NULL)  */
+  /* if ((set = (intset_t *)memalign(64, 64)) == NULL) */
+  if ((set = (intset_t *)ssalloc(sizeof(intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);

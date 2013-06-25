@@ -214,8 +214,6 @@ test(void *data)
 int
 main(int argc, char **argv) 
 {
-  printf("sizeof(thread_data_t) = %lu\n", sizeof(thread_data_t));
-
   set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
@@ -391,6 +389,8 @@ main(int argc, char **argv)
   else
     srand(seed);
 	
+
+  ssalloc_align();
   set = set_new();
   /* stop = 0; */
   *running = 1;
