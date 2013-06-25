@@ -166,7 +166,7 @@ fraser_insert(sl_intset_t *set, val_t v)
   int i;
   int result;
 
-  new = sl_new_simple_node(v, get_rand_level(), 6);
+  new = sl_new_simple_node(v, get_rand_level(), 0);
   /* preds = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
   /* succs = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
   preds = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));

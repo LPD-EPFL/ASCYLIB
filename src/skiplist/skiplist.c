@@ -61,12 +61,24 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
   sl_node_t *node;
 
   if (transactional)
-    node = (sl_node_t *)MALLOC(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *));
+    {
+      node = (sl_node_t *)MALLOC(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *));
+    }
   else 
     {
       /* node = (sl_node_t *)malloc(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *)); */
-      node = (sl_node_t *)ssalloc_alloc(1, sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *));
+      /* node = (sl_node_t *)ssalloc_alloc(1, sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *)); */
+
+      /* use *levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
+      size_t ns = sizeof(sl_node_t) + *levelmax * sizeof(sl_node_t *);
+      size_t ns_rm = ns % 64;
+      if (ns_rm)
+	{
+	  ns += 64 - ns_rm;
+	}
+      node = (sl_node_t *)ssalloc_alloc(1, ns);
     }
+
   if (node == NULL)
     {
       perror("malloc");
@@ -134,10 +146,14 @@ sl_set_new()
 	
   /* if ((set = (sl_intset_t *)malloc(sizeof(sl_intset_t))) == NULL) */
   if ((set = (sl_intset_t *)ssalloc_alloc(1, sizeof(sl_intset_t))) == NULL)
+  /* if ((set = (sl_intset_t *)ssalloc_alloc(0, sizeof(sl_intset_t))) == NULL) */
     {
       perror("malloc");
       exit(1);
     }
+
+  ssalloc_align_alloc(1);
+
   max = sl_new_node(VAL_MAX, NULL, *levelmax, 0);
   min = sl_new_node(VAL_MIN, max, *levelmax, 0);
   set->head = min;
