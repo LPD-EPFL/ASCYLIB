@@ -36,23 +36,23 @@ ht_contains(ht_intset_t *set, int val, int transactional)
 }
 
 int ht_add(ht_intset_t *set, int val, int transactional) {
-	int addr;
+  int addr;
 	
-	addr = val % *maxhtlength;
-	if (transactional == 5)
-		return set_add(set->buckets[addr], val, 4);
-	else 
-		return set_add(set->buckets[addr], val, transactional);
+  addr = val % *maxhtlength;
+  if (transactional == 5)
+    return set_add(set->buckets[addr], val, 4);
+  else 
+    return set_add(set->buckets[addr], val, transactional);
 }
 
 int ht_remove(ht_intset_t *set, int val, int transactional) {
-	int addr;
+  int addr;
     
-	addr = val % *maxhtlength;
-	if (transactional == 5)
-		return set_remove(set->buckets[addr], val, 4);
-	else
-		return set_remove(set->buckets[addr], val, transactional);
+  addr = val % *maxhtlength;
+  if (transactional == 5)
+    return set_remove(set->buckets[addr], val, 4);
+  else
+    return set_remove(set->buckets[addr], val, transactional);
 }
 
 /* 
@@ -405,42 +405,42 @@ int ht_snapshot(ht_intset_t *set, int transactional) {
 	
 #ifdef SEQUENTIAL
 
-	int i, sum = 0;
-	node_t *next;
+  int i, sum = 0;
+  node_t *next;
 	
-	for (i=0; i < *maxhtlength; i++) {
-		next = set->buckets[i]->head->next;
-		while(next->next) {
-			sum += next->val;
-			next = next->next;
-		}
-	}
-	result = 1;
+  for (i=0; i < *maxhtlength; i++) {
+    next = set->buckets[i]->head->next;
+    while(next->next) {
+      sum += next->val;
+      next = next->next;
+    }
+  }
+  result = 1;
 		
 #elif defined STM
 	
-	int i, sum = 0;
-	node_t *next;
+  int i, sum = 0;
+  node_t *next;
 
-	// always a normal transaction
-	TX_START(NL);
-	result = 0;
-	for (i=0; i < *maxhtlength; i++) {
-		next = (node_t *)TX_LOAD(&set->buckets[i]->head->next);
-		while(next->next) {
-			sum += TX_LOAD(&next->val);
-			next = (node_t *)TX_LOAD(&next->next);
-		}
-	}
-	TX_END;
-	result = 1;
+  // always a normal transaction
+  TX_START(NL);
+  result = 0;
+  for (i=0; i < *maxhtlength; i++) {
+    next = (node_t *)TX_LOAD(&set->buckets[i]->head->next);
+    while(next->next) {
+      sum += TX_LOAD(&next->val);
+      next = (node_t *)TX_LOAD(&next->next);
+    }
+  }
+  TX_END;
+  result = 1;
 
 #elif defined LOCKFREE /* No CAS-based implementation is provided */
 
-	printf("ht_snapshot: No other implementation of atomic snapshot is available\n");
-	exit(1);
+  printf("ht_snapshot: No other implementation of atomic snapshot is available\n");
+  exit(1);
 			
 #endif
 	
-	return result;
+  return result;
 }
