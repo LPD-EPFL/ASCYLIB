@@ -1,6 +1,6 @@
 #!/bin/bash
 
-out_file="data/lf_socket_"$(date | awk '// {print $2"_"$3}')".dat";
+out_file="data/lf_step_"$(date | awk '// {print $2"_"$3}')".dat";
 echo "Output file: $out_file";
 printf "" > $out_file;
 
@@ -14,6 +14,6 @@ do
 	r=$((2*$i));	
 	settings="-i$i -r$r -u$u";
 	echo "## $settings";
-	./scripts/scalability3.sh socket ./bin/lf-ll ./bin/lf-sl ./bin/lf-ht ./ $settings -l4 | tee -a $out_file;
+	./scripts/scalability3.sh "9 10 11 12" ./bin/lf-ll ./bin/lf-sl ./bin/lf-ht ./ $settings -l4 | tee -a $out_file;
     done;
 done;
