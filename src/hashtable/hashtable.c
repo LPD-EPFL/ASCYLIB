@@ -89,7 +89,6 @@ ht_new()
     }  
 
   size_t bs = (*maxhtlength + 1) * sizeof(intset_t *);
-  printf("bs = %lu\n", bs);
 
   /* if ((set->buckets = (void *)memalign(64, bs)) == NULL) */
   /* if ((set->buckets = (void *)ssalloc(bs)) == NULL) */

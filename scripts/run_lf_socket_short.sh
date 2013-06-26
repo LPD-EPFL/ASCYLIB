@@ -1,11 +1,11 @@
 #!/bin/bash
 
-out_file="data/lf_socket_"$(date | gawk '// {print $2"_"$3}')".dat";
+out_file="data/lf_socket_short_"$(date | awk '// {print $2"_"$3}')".dat";
 echo "Output file: $out_file";
 printf "" > $out_file;
 
-initials="8 16 32 64 128 256 512 1024 2048 4096 8192";
-updates="0 1 10 20 50 100";
+initials="8 64 512 1024 2048 8192";
+updates="0 1 10 100";
 
 for i in $initials
 do
