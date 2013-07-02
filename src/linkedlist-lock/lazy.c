@@ -26,8 +26,6 @@
 
 #include "lazy.h"
 
-/* #define GLOBAL_LOCK */
-
 inline int is_marked_ref(long i) {
   return (int) (i & (LONG_MIN+1));
 }
@@ -87,24 +85,19 @@ parse_insert(intset_l_t *set, val_t val)
       pred = curr;
       curr = curr->next;
     }
-#if defined(GLOBAL_LOCK)
-  LOCK(&set->head->lock);
-#else
-  LOCK(&pred->lock);
-  LOCK(&curr->lock);
-#endif
+
+  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  LOCK(ND_GET_LOCK(pred));
+  LOCK(ND_GET_LOCK(curr));
   result = (parse_validate(pred, curr) && (curr->val != val));
   if (result) 
     {
       newnode = new_node_l(val, curr, 0);
       pred->next = newnode;
     } 
-#if defined(GLOBAL_LOCK)
-  UNLOCK(&set->head->lock);
-#else
-  UNLOCK(&curr->lock);
-  UNLOCK(&pred->lock);
-#endif
+  GL_UNLOCK(set->lock);
+  UNLOCK(ND_GET_LOCK(curr));
+  UNLOCK(ND_GET_LOCK(pred));
   return result;
 }
 
@@ -130,23 +123,17 @@ parse_delete(intset_l_t *set, val_t val)
       pred = curr;
       curr = curr->next;
     }
-#if defined(GLOBAL_LOCK)
-  LOCK(&set->head->lock);
-#else
-  LOCK(&pred->lock);
-  LOCK(&curr->lock);
-#endif
+  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  LOCK(ND_GET_LOCK(pred));
+  LOCK(ND_GET_LOCK(curr));
   result = (parse_validate(pred, curr) && (val == curr->val));
   if (result)
     {
       set_mark((long) curr);
       pred->next = curr->next;
     }
-#if defined(GLOBAL_LOCK)
-  UNLOCK(&set->head->lock);
-#else
-  UNLOCK(&curr->lock);
-  UNLOCK(&pred->lock);
-#endif
+  GL_UNLOCK(set->lock);
+  UNLOCK(ND_GET_LOCK(curr));
+  UNLOCK(ND_GET_LOCK(pred));
   return result;
 }

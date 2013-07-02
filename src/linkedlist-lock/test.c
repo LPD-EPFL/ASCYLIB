@@ -199,6 +199,8 @@ test(void *data)
 			
     }	
  
+  printf("%d / done --\n", d->id);
+
   PF_PRINT;
 
   return NULL;
@@ -226,6 +228,7 @@ main(int argc, char **argv)
     {"range",                     required_argument, NULL, 'r'},
     {"seed",                      required_argument, NULL, 's'},
     {"update-rate",               required_argument, NULL, 'u'},
+    {"load-factor",               required_argument, NULL, 'l'},
     {"unit-tx",                   required_argument, NULL, 'x'},
     {NULL, 0, NULL, 0}
   };
@@ -256,7 +259,7 @@ main(int argc, char **argv)
 	
   while(1) {
     i = 0;
-    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:x:"
+    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:l:x:"
 		    , long_options, &i);
 		
     if(c == -1)
@@ -324,6 +327,8 @@ main(int argc, char **argv)
       break;
     case 'u':
       update = atoi(optarg);
+      break;
+    case 'l':
       break;
     case 'x':
       unit_tx = atoi(optarg);
