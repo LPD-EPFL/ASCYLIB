@@ -68,7 +68,8 @@ void barrier_cross(barrier_t *b)
  * be too high for given values of range and initial.
  */
 
-typedef struct thread_data {
+typedef ALIGNED(64) struct thread_data 
+{
   val_t first;
   long range;
   int update;
@@ -102,6 +103,7 @@ typedef struct thread_data {
   ht_intset_t *set;
   barrier_t *barrier;
   int id;
+  uint8_t padding[32];
 } thread_data_t;
 
 
@@ -249,7 +251,7 @@ int
 main(int argc, char **argv)
 {
   /* Create transaction */
-  set_cpu(0);
+  set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
 
