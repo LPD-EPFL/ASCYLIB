@@ -384,16 +384,39 @@ main(int argc, char **argv)
   /* Init STM */
   printf("Initializing STM\n");
 	
+  size_t ten_perc = initial / 10, tens = 1;
+  size_t ten_perc_nxt = ten_perc;
+
+
   /* Populate set */
   printf("Adding %d entries to set\n", initial);
-  i = 0;
-  while (i < initial) {
-    val = (rand() % range) + 1;
-    if (set_add_l(set, val, 0)) {
-      last = val;
-      i++;
+  if (initial < 10000)
+    {
+      i = 0;
+      while (i < initial) 
+	{
+	  val = rand_range(range);
+	  if (set_add_l(set, val, 0)) 
+	    {
+	      last = val;
+	      if (i == ten_perc_nxt)
+		{
+		  printf("%02lu%%  ", tens * 10); fflush(stdout);
+		  tens++;
+		  ten_perc_nxt = tens * ten_perc;
+		}
+	      i++;
+	    }
+	}
     }
-  }
+  else
+    {
+      for (i = initial; i > 0; i--)
+	{
+	  set_add_l(set, i, 0);
+	}
+    }
+  printf("\n");
   size = set_size_l(set);
   printf("Set size     : %d\n", size);
 	
