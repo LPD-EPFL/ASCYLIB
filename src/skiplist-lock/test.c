@@ -26,7 +26,8 @@
 
 __thread unsigned long* seeds;
 
-volatile AO_t stop;
+ALIGNED(64) uint8_t running[64];
+
 unsigned int global_seed;
 #ifdef TLS
 __thread unsigned int *rng_seed;
@@ -115,18 +116,6 @@ void print_skiplist(sl_intset_t *set) {
 }
 
 
-void *test3(void *data) {
-	
-  thread_data_t *d = (thread_data_t *)data;
-	
-  /* Wait on barrier */
-  barrier_cross(d->barrier);
-	
-  while (stop == 0) {;}
-  return NULL;
-}
-
-
 void* 
 test(void *data) 
 {
@@ -150,93 +139,86 @@ test(void *data)
   unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
 
   //#ifdef ICC
-  while (stop == 0) {
-    //#else
-    //while (AO_load_full(&stop) == 0) {
-    //#endif /* ICC */
-		
-    if (unext) { // update
+  /* while (stop == 0)  */
+  while (*running)
+    {		
+      if (unext) { // update
 			
-      if (last < 0) { // add
+	if (last < 0) { // add
 				
-	val = rand_range_re(&d->seed, d->range);
-	if (sl_add(d->set, val, TRANSACTIONAL)) {
-	  d->nb_added++;
-	  last = val;
-	} 				
-	d->nb_add++;
-				
-      } else { // remove
-				
-	if (d->alternate) { // alternate mode (default)
-					
-	  if (sl_remove(d->set, last, TRANSACTIONAL)) {
-	    d->nb_removed++;
-	  }
-	  last = -1;
-					
-	} else {
-					
-	  // Random computation only in non-alternated cases 
 	  val = rand_range_re(&d->seed, d->range);
-	  // Remove one random value 
-	  if (sl_remove(d->set, val, TRANSACTIONAL)) {
-	    d->nb_removed++;
-	    // Repeat until successful, to avoid size variations 
-	    last = -1;
-	  } 
-					
-	}
-	d->nb_remove++;
-      }
-			
-    } else { // read
-			
-			
-      if (d->alternate) {
-	if (d->update == 0) {
-	  if (last < 0) {
-	    val = d->first;
+	  if (sl_add(d->set, val, TRANSACTIONAL)) {
+	    d->nb_added++;
 	    last = val;
-	  } else { // last >= 0
-	    val = rand_range_re(&d->seed, d->range);
+	  } 				
+	  d->nb_add++;
+				
+	} else { // remove
+				
+	  if (d->alternate) { // alternate mode (default)
+					
+	    if (sl_remove(d->set, last, TRANSACTIONAL)) {
+	      d->nb_removed++;
+	    }
 	    last = -1;
-	  }
-	} else { // update != 0
-	  if (last < 0) {
-	    val = rand_range_re(&d->seed, d->range);
-	    //last = val;
+					
 	  } else {
-	    val = last;
+					
+	    // Random computation only in non-alternated cases 
+	    val = rand_range_re(&d->seed, d->range);
+	    // Remove one random value 
+	    if (sl_remove(d->set, val, TRANSACTIONAL)) {
+	      d->nb_removed++;
+	      // Repeat until successful, to avoid size variations 
+	      last = -1;
+	    } 
+					
 	  }
+	  d->nb_remove++;
 	}
-      }	else val = rand_range_re(&d->seed, d->range);
 			
-      /*if (d->effective && last)
-	val = last;
-	else 
-	val = rand_range_re(&d->seed, d->range);*/
+      } else { // read
 			
-      if (sl_contains(d->set, val, TRANSACTIONAL)) 
-	d->nb_found++;
-      d->nb_contains++;
 			
-    }
+	if (d->alternate) {
+	  if (d->update == 0) {
+	    if (last < 0) {
+	      val = d->first;
+	      last = val;
+	    } else { // last >= 0
+	      val = rand_range_re(&d->seed, d->range);
+	      last = -1;
+	    }
+	  } else { // update != 0
+	    if (last < 0) {
+	      val = rand_range_re(&d->seed, d->range);
+	      //last = val;
+	    } else {
+	      val = last;
+	    }
+	  }
+	}	else val = rand_range_re(&d->seed, d->range);
+			
+	/*if (d->effective && last)
+	  val = last;
+	  else 
+	  val = rand_range_re(&d->seed, d->range);*/
+			
+	if (sl_contains(d->set, val, TRANSACTIONAL)) 
+	  d->nb_found++;
+	d->nb_contains++;
+			
+      }
 		
-    /* Is the next op an update? */
-    if (d->effective) { // a failed remove/add is a read-only tx
-      unext = ((100 * (d->nb_added + d->nb_removed))
-	       < (d->update * (d->nb_add + d->nb_remove + d->nb_contains)));
-    } else { // remove/add (even failed) is considered as an update
-      unext = ((rand_range_re(&d->seed, 100) - 1) < d->update);
+      /* Is the next op an update? */
+      if (d->effective) { // a failed remove/add is a read-only tx
+	unext = ((100 * (d->nb_added + d->nb_removed))
+		 < (d->update * (d->nb_add + d->nb_remove + d->nb_contains)));
+      } else { // remove/add (even failed) is considered as an update
+	unext = ((rand_range_re(&d->seed, 100) - 1) < d->update);
+      }
     }
-		
-    //#ifdef ICC
-  }
-  //#else
-  //	}
-  //#endif /* ICC */
-	
+
   PF_PRINT;
 
   return NULL;
@@ -258,12 +240,8 @@ void *test2(void *data)
 	
   last = -1;
 	
-#ifdef ICC
-  while (stop == 0) {
-#else
-    while (AO_load_full(&stop) == 0) {
-#endif /* ICC */
-			
+  while (*running)
+    {			
       val = rand_range_re(&d->seed, 100) - 1;
       if (val < d->update) {
 	if (last < 0) {
@@ -304,8 +282,8 @@ void *test2(void *data)
 			
     }
 		
-    return NULL;
-  }
+  return NULL;
+}
 	
   int main(int argc, char **argv)
   {
@@ -472,7 +450,9 @@ void *test2(void *data)
 		
     levelmax = floor_log_2((unsigned int) initial);
     set = sl_set_new();
-    stop = 0;
+    /* stop = 0; */
+    *running = 1;
+
 		
     global_seed = rand();
 #ifdef TLS
@@ -568,11 +548,7 @@ void *test2(void *data)
       printf("\n\n\n");
       }*/
 		
-#ifdef ICC
-    stop = 1;
-#else	
-    AO_store_full(&stop, 1);
-#endif /* ICC */
+    *running = 0;
 		
     gettimeofday(&end, NULL);
     printf("STOPPING...\n");

@@ -64,23 +64,32 @@ int floor_log_2(unsigned int n) {
 /* 
  * Create a new node without setting its next fields. 
  */
-sl_node_t *sl_new_simple_node(val_t val, int toplevel, int transactional)
+sl_node_t*
+sl_new_simple_node(val_t val, int toplevel, int transactional)
 {
-	sl_node_t *node;
+  sl_node_t *node;
 	
-	/* node = (sl_node_t *)xmalloc(sizeof(sl_node_t)); */
-	/* node->next = (sl_node_t **)xmalloc(toplevel * sizeof(sl_node_t *)); */
-	node = (sl_node_t *)ssalloc_alloc(1, (sizeof(sl_node_t)));
-	node->next = (sl_node_t **)ssalloc_alloc(2, toplevel * sizeof(sl_node_t *));
-	node->val = val;
-	node->toplevel = toplevel;
-	node->marked = 0;
-	node->fullylinked = 0;
-	INIT_LOCK(&node->lock);
+  /* node = (sl_node_t *)xmalloc(sizeof(sl_node_t)); */
+  /* node->next = (sl_node_t **)xmalloc(toplevel * sizeof(sl_node_t *)); */
+  size_t ns = sizeof(sl_node_t) + levelmax * sizeof(sl_node_t *);
+  size_t ns_rm = ns % 64;
+  if (ns_rm)
+    {
+      ns += 64 - ns_rm;
+    }
+  node = (sl_node_t *)ssalloc_alloc(1, ns);
 
-	MEM_BARRIER;
+  /* node = (sl_node_t *)ssalloc_alloc(1, (sizeof(sl_node_t))); */
+  /* node->next = (sl_node_t **)ssalloc_alloc(2, toplevel * sizeof(sl_node_t *)); */
+  node->val = val;
+  node->toplevel = toplevel;
+  node->marked = 0;
+  node->fullylinked = 0;
+  INIT_LOCK(&node->lock);
 
-	return node;
+  MEM_BARRIER;
+
+  return node;
 }
 
 /* 
@@ -107,22 +116,29 @@ void sl_delete_node(sl_node_t *n)
 	DESTROY_LOCK(&n->lock);
 	/* free(n->next); */
 	/* free(n); */
-	ssfree_alloc(2, n->next);
+	/* ssfree_alloc(2, n->next); */
 	ssfree_alloc(1, n);
 }
 
 sl_intset_t *sl_set_new()
 {
-	sl_intset_t *set;
-	sl_node_t *min, *max;
+  sl_intset_t *set;
+  sl_node_t *min, *max;
 	
-	set = (sl_intset_t *)xmalloc(sizeof(sl_intset_t));
-	max = sl_new_node(VAL_MAX, NULL, levelmax, 0);
-	min = sl_new_node(VAL_MIN, max, levelmax, 0);
-	max->fullylinked = 1;
-	min->fullylinked = 1;
-	set->head = min;
-	return set;
+  if ((set = (sl_intset_t *)ssalloc_alloc(1, sizeof(sl_intset_t))) == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }
+
+  ssalloc_align_alloc(1);
+  /* set = (sl_intset_t *)xmalloc(sizeof(sl_intset_t)); */
+  max = sl_new_node(VAL_MAX, NULL, levelmax, 0);
+  min = sl_new_node(VAL_MIN, max, levelmax, 0);
+  max->fullylinked = 1;
+  min->fullylinked = 1;
+  set->head = min;
+  return set;
 }
 
 void sl_set_delete(sl_intset_t *set)
