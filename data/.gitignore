@@ -1,10 +1,12 @@
 /ht.*
-/sl.*
+/lf_socket.dat
 /ll.*
 /old
+/sl.*
 /sl.i1024.u0.dat
 /sl.i1024.u20.dat
 /sl.i1024.u50.dat
 /sl.i16384.u0.dat
 /sl.i16384.u20.dat
 /sl.i16384.u50.dat
+/*
