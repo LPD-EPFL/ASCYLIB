@@ -72,11 +72,56 @@ ticket_init(volatile ptlock_t* l)
   MEM_BARRIER;
 }
 
+#define OPTERON_OPTIMIZE
+/* #undef PREFETCHW */
+/* #define PREFETCHW(l)  */
+
+#define TICKET_BASE_WAIT 512
+#define TICKET_MAX_WAIT  4095
+#define TICKET_WAIT_NEXT 128
+
 static inline uint32_t
 ticket_lock(volatile ptlock_t* l)
 {
   uint32_t ticket = FAI_U32(&l->ticket);
 
+#if defined(OPTERON_OPTIMIZE)
+  uint32_t wait = TICKET_BASE_WAIT;
+  uint32_t distance_prev = 1;
+  while (1)
+    {
+      PREFETCHW(l);
+      uint32_t cur = l->curr;
+      if (cur == ticket)
+	{
+	  break;
+	}
+      uint32_t distance = (ticket > cur) ? (ticket - cur) : (cur - ticket);
+
+      if (distance > 1)
+      	{
+	  if (distance != distance_prev)
+	    {
+	      distance_prev = distance;
+	      wait = TICKET_BASE_WAIT;
+	    }
+
+	  nop_rep(distance * wait);
+	  wait = (wait + TICKET_BASE_WAIT) & TICKET_MAX_WAIT;
+      	}
+      else
+	{
+	  nop_rep(TICKET_WAIT_NEXT);
+	}
+
+      if (distance > 20)
+      	{
+      	  sched_yield();
+      	  /* pthread_yield(); */
+      	}
+    }
+
+#else  /* !OPTERON_OPTIMIZE */
   PREFETCHW(l);
   while (ticket != l->curr)
     {
@@ -84,8 +129,8 @@ ticket_lock(volatile ptlock_t* l)
       PAUSE;
     }
 
+#endif
   /* MEM_BARRIER; */
-  
   return 0;
 }
 
