@@ -45,7 +45,7 @@ ht_delete(ht_intset_t *set)
 	  ssfree(node);
 	  node = next;
 	}
-      free(set->buckets[i]);
+      ssfree(set->buckets[i]);
     }
   free(set);
 }
@@ -77,18 +77,35 @@ int floor_log_2(unsigned int n) {
 	return ((n == 0) ? (-1) : pos);
 }
 
-ht_intset_t *ht_new() {
-	ht_intset_t *set;
-	int i;
+ht_intset_t*
+ht_new() 
+{
+  ssalloc_align();
+
+  ht_intset_t *set;
+  int i;
 	
-	if ((set = (ht_intset_t *)malloc(sizeof(ht_intset_t))) == NULL) {
-		perror("malloc");
-		exit(1);
-	}   
-	for (i=0; i < maxhtlength; i++) {
-		set->buckets[i] = set_new_l();
-	}
-	return set;
+  /* if ((set = (ht_intset_t *)malloc(sizeof(ht_intset_t))) == NULL)  */
+  if ((set = (ht_intset_t *)ssalloc_alloc(1, sizeof(ht_intset_t))) == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }   
+
+  size_t bs = (maxhtlength + 1) * sizeof(intset_l_t *);
+  if ((set->buckets = (void *)ssalloc_alloc(1, bs)) == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }  
+
+  ssalloc_align_alloc(0);
+
+  for (i=0; i < maxhtlength; i++) 
+    {
+      set->buckets[i] = set_new_l();
+    }
+  return set;
 }
 
 int ht_contains(ht_intset_t *set, int val, int transactional) {

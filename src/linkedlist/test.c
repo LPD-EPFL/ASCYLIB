@@ -495,7 +495,7 @@ main(int argc, char **argv)
     sigsuspend(&block_set);
   }
 	
-  AO_store_full(&stop, 1);
+  /* AO_store_full(&stop, 1); */
   *running = 0;
 
   gettimeofday(&end, NULL);

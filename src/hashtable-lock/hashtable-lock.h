@@ -42,8 +42,10 @@ extern unsigned int maxhtlength;
  * HASH TABLE
  * ################################################################### */
 
-typedef struct ht_intset {
-	intset_l_t *buckets[MAXHTLENGTH];
+typedef struct ht_intset 
+{
+  /* intset_l_t *buckets[MAXHTLENGTH]; */
+  intset_l_t **buckets;
 } ht_intset_t;
 
 void ht_delete(ht_intset_t *set);

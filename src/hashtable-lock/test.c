@@ -27,6 +27,8 @@
 unsigned int maxhtlength;
 __thread unsigned long* seeds;
 
+ALIGNED(64) uint8_t running[64];
+
 typedef struct barrier {
 	pthread_cond_t complete;
 	pthread_mutex_t mutex;
@@ -66,7 +68,8 @@ void barrier_cross(barrier_t *b)
  * be too high for given values of range and initial.
  */
 
-typedef struct thread_data {
+typedef ALIGNED(64) struct thread_data 
+{
   val_t first;
   long range;
   int update;
@@ -100,6 +103,7 @@ typedef struct thread_data {
   ht_intset_t *set;
   barrier_t *barrier;
   int id;
+  uint8_t padding[32];
 } thread_data_t;
 
 
@@ -144,12 +148,9 @@ test(void *data)
   mnext = (r < d->move);
   cnext = (r >= d->update + d->snapshot);
 	
-#ifdef ICC
-  while (stop == 0) {
-#else
-    while (AO_load_full(&stop) == 0) {
-#endif /* ICC */
-		
+  /* while (stop == 0) */
+  while (*running)
+    {		
       if (unext) { // update
 			
 	if (mnext) { // move
@@ -239,12 +240,7 @@ test(void *data)
 	mnext = (r < d->move);
 	cnext = (r >= d->update + d->snapshot);
       }
-	  
-#ifdef ICC
     }
-#else
-  }
-#endif /* ICC */
 	
   PF_PRINT;
 	
@@ -255,7 +251,7 @@ int
 main(int argc, char **argv)
 {
   /* Create transaction */
-  set_cpu(0);
+  set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
 
@@ -453,7 +449,8 @@ main(int argc, char **argv)
   maxhtlength = (unsigned int) initial / load_factor;
   set = ht_new();
 	
-  stop = 0;
+  /* stop = 0; */
+  *running = 1;
 	
   /* Populate set */
   printf("Adding %d entries to set\n", initial);
@@ -526,7 +523,10 @@ main(int argc, char **argv)
     sigemptyset(&block_set);
     sigsuspend(&block_set);
   }
-  AO_store_full(&stop, 1);
+
+  /* AO_store_full(&stop, 1); */
+  *running = 0;
+
   gettimeofday(&end, NULL);
   printf("STOPPING...\n");
 	

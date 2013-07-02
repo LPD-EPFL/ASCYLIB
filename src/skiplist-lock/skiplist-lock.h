@@ -64,17 +64,19 @@ typedef intptr_t val_t;
 #define VAL_MIN                         INT_MIN
 #define VAL_MAX                         INT_MAX
 
-typedef struct sl_node {
-	val_t val; 
-	int toplevel;
-	struct sl_node** next;
-	volatile int marked;
-	volatile int fullylinked;
-	ptlock_t lock;	
+typedef ALIGNED(64) struct sl_node
+{
+  val_t val; 
+  int toplevel;
+  volatile int marked;
+  volatile int fullylinked;
+  ptlock_t lock;	
+  struct sl_node* next[1];
 } sl_node_t;
 
-typedef struct sl_intset {
-	sl_node_t *head;
+typedef ALIGNED(64) struct sl_intset 
+{
+  sl_node_t *head;
 } sl_intset_t;
 
 inline void *xmalloc(size_t size);

@@ -104,23 +104,6 @@ sl_new_node(val_t val, sl_node_t *next, int toplevel, int transactional)
   volatile sl_node_t *node;
   int i;
 
-  /* if (transactional) */
-  /*   node = (sl_node_t *)MALLOC(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *)); */
-  /* else  */
-  /*   { */
-  /*     /\* node = (sl_node_t *)malloc(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *)); *\/ */
-  /*     node = (sl_node_t *)ssalloc(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *)); */
-  /*     /\* node = (sl_node_t *)ssalloc_alloc(1, sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *)); *\/ */
-  /*   } */
-  /* if (node == NULL) */
-  /*   { */
-  /*     perror("malloc"); */
-  /*     exit(1); */
-  /*   } */
-
-  /* node->val = val; */
-  /* node->toplevel = toplevel; */
-  /* node->deleted = 0; */
   node = sl_new_simple_node(val, toplevel, transactional);
 
   for (i = 0; i < *levelmax; i++)

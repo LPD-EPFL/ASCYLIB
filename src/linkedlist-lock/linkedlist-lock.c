@@ -52,21 +52,27 @@ intset_l_t *set_new_l()
   intset_l_t *set;
   node_l_t *min, *max;
 
-  if ((set = (intset_l_t *)malloc(sizeof(intset_l_t))) == NULL) {
-    perror("malloc");
-    exit(1);
-  }
+  /* if ((set = (intset_l_t *)malloc(sizeof(intset_l_t))) == NULL)  */
+  if ((set = (intset_l_t *)ssalloc(sizeof(intset_l_t))) == NULL) 
+    {
+      perror("malloc");
+      exit(1);
+    }
   max = new_node_l(VAL_MAX, NULL, 0);
   min = new_node_l(VAL_MIN, max, 0);
   set->head = min;
 
+  ssalloc_align_alloc(0);
+
   return set;
 }
 
-void node_delete_l(node_l_t *node) {
-   DESTROY_LOCK(&node->lock);
-   /* free(node); */
-   ssfree(node);
+void
+node_delete_l(node_l_t *node) 
+{
+  DESTROY_LOCK(&node->lock);
+  /* free(node); */
+  ssfree(node);
 }
 
 void set_delete_l(intset_l_t *set)
@@ -81,7 +87,7 @@ void set_delete_l(intset_l_t *set)
     ssfree(node);
     node = next;
   }
-  free(set);
+  ssfree(set);
 }
 
 int set_size_l(intset_l_t *set)
