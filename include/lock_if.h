@@ -6,21 +6,36 @@
 #if defined(MUTEX)
 typedef pthread_mutex_t ptlock_t;
 #  define INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL);
-#  define DESTROY_LOCK(lock)			pthread_mutex_destroy((pthread_mutex_t *) lock)
+#  define DESTROY_LOCK(lock)			        pthread_mutex_destroy((pthread_mutex_t *) lock)
 #  define LOCK(lock)					pthread_mutex_lock((pthread_mutex_t *) lock)
 #  define UNLOCK(lock)					pthread_mutex_unlock((pthread_mutex_t *) lock)
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL);
+#  define GL_DESTROY_LOCK(lock)			        pthread_mutex_destroy((pthread_mutex_t *) lock)
+#  define GL_LOCK(lock)					pthread_mutex_lock((pthread_mutex_t *) lock)
+#  define GL_UNLOCK(lock)					pthread_mutex_unlock((pthread_mutex_t *) lock)
 #elif defined(SPIN)		/* pthread spinlock */
 typedef pthread_spinlock_t ptlock_t;
 #  define INIT_LOCK(lock)				pthread_spin_init((pthread_spinlock_t *) lock, PTHREAD_PROCESS_PRIVATE);
-#  define DESTROY_LOCK(lock)			pthread_spin_destroy((pthread_spinlock_t *) lock)
+#  define DESTROY_LOCK(lock)			        pthread_spin_destroy((pthread_spinlock_t *) lock)
 #  define LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
 #  define UNLOCK(lock)					pthread_spin_unlock((pthread_spinlock_t *) lock)
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				pthread_spin_init((pthread_spinlock_t *) lock, PTHREAD_PROCESS_PRIVATE);
+#  define GL_DESTROY_LOCK(lock)			        pthread_spin_destroy((pthread_spinlock_t *) lock)
+#  define GL_LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
+#  define GL_UNLOCK(lock)					pthread_spin_unlock((pthread_spinlock_t *) lock)
 #elif defined(TAS)			/* TAS */
 typedef uint32_t ptlock_t;
 #  define INIT_LOCK(lock)				tas_init((volatile uint32_t*) lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					tas_lock((volatile uint32_t*) lock)
 #  define UNLOCK(lock)					tas_unlock((volatile uint32_t*) lock)
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				tas_init((volatile uint32_t*) lock)
+#  define GL_DESTROY_LOCK(lock)			
+#  define GL_LOCK(lock)					tas_lock((volatile uint32_t*) lock)
+#  define GL_UNLOCK(lock)              			tas_unlock((volatile uint32_t*) lock)
 
 #  define TAS_FREE 0
 #  define TAS_LCKD 1
@@ -73,7 +88,6 @@ typedef struct ticket_st ptlock_t;
 static inline void
 ticket_init(volatile ptlock_t* l)
 {
-  printf("initing ------------------------------------------->>>>\n");
   l->ticket = l->curr = 0;
   MEM_BARRIER;
 }
