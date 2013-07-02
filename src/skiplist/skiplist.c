@@ -101,7 +101,7 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
 sl_node_t*
 sl_new_node(val_t val, sl_node_t *next, int toplevel, int transactional)
 {
-  sl_node_t *node;
+  volatile sl_node_t *node;
   int i;
 
   node = sl_new_simple_node(val, toplevel, transactional);
