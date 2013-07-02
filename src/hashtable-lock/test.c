@@ -27,6 +27,8 @@
 unsigned int maxhtlength;
 __thread unsigned long* seeds;
 
+ALIGNED(64) uint8_t running[64];
+
 typedef struct barrier {
 	pthread_cond_t complete;
 	pthread_mutex_t mutex;
@@ -144,12 +146,9 @@ test(void *data)
   mnext = (r < d->move);
   cnext = (r >= d->update + d->snapshot);
 	
-#ifdef ICC
-  while (stop == 0) {
-#else
-    while (AO_load_full(&stop) == 0) {
-#endif /* ICC */
-		
+  /* while (stop == 0) */
+  while (*running)
+    {		
       if (unext) { // update
 			
 	if (mnext) { // move
@@ -239,12 +238,7 @@ test(void *data)
 	mnext = (r < d->move);
 	cnext = (r >= d->update + d->snapshot);
       }
-	  
-#ifdef ICC
     }
-#else
-  }
-#endif /* ICC */
 	
   PF_PRINT;
 	
@@ -453,7 +447,8 @@ main(int argc, char **argv)
   maxhtlength = (unsigned int) initial / load_factor;
   set = ht_new();
 	
-  stop = 0;
+  /* stop = 0; */
+  *running = 1;
 	
   /* Populate set */
   printf("Adding %d entries to set\n", initial);
@@ -526,7 +521,10 @@ main(int argc, char **argv)
     sigemptyset(&block_set);
     sigsuspend(&block_set);
   }
-  AO_store_full(&stop, 1);
+
+  /* AO_store_full(&stop, 1); */
+  *running = 0;
+
   gettimeofday(&end, NULL);
   printf("STOPPING...\n");
 	
