@@ -64,17 +64,23 @@ typedef struct ticket_st ptlock_t;
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					ticket_lock((volatile ptlock_t*) lock)
 #  define UNLOCK(lock)					ticket_unlock((volatile ptlock_t*) lock)
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				ticket_init((volatile ptlock_t*) lock)
+#  define GL_DESTROY_LOCK(lock)			
+#  define GL_LOCK(lock)					ticket_lock((volatile ptlock_t*) lock)
+#  define GL_UNLOCK(lock)					ticket_unlock((volatile ptlock_t*) lock)
 
 static inline void
 ticket_init(volatile ptlock_t* l)
 {
+  printf("initing ------------------------------------------->>>>\n");
   l->ticket = l->curr = 0;
   MEM_BARRIER;
 }
 
 #define OPTERON_OPTIMIZE
 /* #undef PREFETCHW */
-/* #define PREFETCHW(l)  */
+/* #define PREFETCHW(l) */
 
 #define TICKET_BASE_WAIT 512
 #define TICKET_MAX_WAIT  4095
@@ -156,5 +162,36 @@ ticket_unlock(volatile ptlock_t* l)
 
 #endif
 
+
+
+/* --------------------------------------------------------------------------------------------------- */
+/* GLOBAL LOCK --------------------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------------------------------- */
+
+/* #define LL_GLOBAL_LOCK */
+
+#if defined(LL_GLOBAL_LOCK)
+#  undef INIT_LOCK
+#  undef DESTROY_LOCK
+#  undef LOCK
+#  undef UNLOCK
+
+#  define INIT_LOCK(lock)
+#  define DESTROY_LOCK(lock)			
+#  define LOCK(lock)
+#  define UNLOCK(lock)
+
+#else  /* !LL_GLOBAL_LOCK */
+#  undef GL_INIT_LOCK
+#  undef GL_DESTROY_LOCK
+#  undef GL_LOCK
+#  undef GL_UNLOCK
+
+#  define GL_INIT_LOCK(lock)
+#  define GL_DESTROY_LOCK(lock)			
+#  define GL_LOCK(lock)
+#  define GL_UNLOCK(lock)
+
+#endif
 
 #endif	/* _LOCK_IF_H_ */
