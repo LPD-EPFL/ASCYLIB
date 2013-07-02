@@ -21,10 +21,12 @@
   * GNU General Public License for more details.
   */
 
+#include <signal.h>
 #include "intset.h"
 #include "utils.h"
 
 __thread unsigned long* seeds;
+__thread int8_t mid;
 
 ALIGNED(64) uint8_t running[64];
 
@@ -94,6 +96,17 @@ typedef ALIGNED(64) struct thread_data
 } thread_data_t;
 
 
+void
+usr_handler(int sig)
+{
+  printf("usr : id: %d\n", mid);
+  signal(SIGUSR1, usr_handler);
+
+  udelay(rand_range(500000));
+  /* udelay(500000); */
+}
+
+
 void*
 test(void *data) 
 {
@@ -106,6 +119,8 @@ test(void *data)
   val_t val = 0;
 	
   thread_data_t *d = (thread_data_t *)data;
+  mid = d->id;
+
 	
   /* Create transaction */
   TM_THREAD_ENTER(d->id);
@@ -115,6 +130,9 @@ test(void *data)
   PF_CORRECTION;
 
   seeds = seed_rand();
+
+  signal(SIGUSR1, usr_handler);
+
 
   barrier_cross(d->barrier);
 	
@@ -207,13 +225,10 @@ test(void *data)
   return NULL;
 }
 
-/*void catcher(int sig) {
-  printf("CAUGHT SIGNAL %d\n", sig);
-  }*/
-
 int
 main(int argc, char **argv) 
 {
+  mid = -1;
   set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
@@ -237,10 +252,13 @@ main(int argc, char **argv)
   int i, c, size;
   val_t last = 0; 
   val_t val = 0;
-  unsigned long reads, effreads, updates, effupds, aborts, aborts_locked_read, 
+  unsigned long reads, effreads, updates, effupds;
+#if defined(STM)
+  unsigned long  aborts, aborts_locked_read, 
     aborts_locked_write, aborts_validate_read, aborts_validate_write, 
     aborts_validate_commit, aborts_invalid_memory, aborts_double_write, 
     max_retries, failures_because_contention;
+#endif
   thread_data_t *data;
   pthread_t *threads;
   pthread_attr_t attr;
@@ -488,12 +506,26 @@ main(int argc, char **argv)
 	
   printf("STARTING...\n");
   gettimeofday(&start, NULL);
-  if (duration > 0) {
-    nanosleep(&timeout, NULL);
-  } else {
-    sigemptyset(&block_set);
-    sigsuspend(&block_set);
-  }
+
+  int sleep_portions = 10;
+  int duration_portion = duration / sleep_portions;
+  timeout.tv_sec = duration_portion / 1000;
+  timeout.tv_nsec = (duration_portion % 1000) * 1000000;
+
+  if (duration > 0) 
+    {
+      int s;
+      for (s = 0; s < sleep_portions; s++)
+	{
+	  nanosleep(&timeout, NULL);
+	  pthread_kill(threads[0],SIGUSR1);
+	}
+    } 
+  else 
+    {
+      sigemptyset(&block_set);
+      sigsuspend(&block_set);
+    }
 	
   /* AO_store_full(&stop, 1); */
   *running = 0;
@@ -504,13 +536,14 @@ main(int argc, char **argv)
   /* Wait for thread completion */
   for (i = 0; i < nb_threads; i++) 
     {
-    if (pthread_join(threads[i], NULL) != 0) {
-      fprintf(stderr, "Error waiting for thread completion\n");
-      exit(1);
+      if (pthread_join(threads[i], NULL) != 0) {
+	fprintf(stderr, "Error waiting for thread completion\n");
+	exit(1);
+      }
     }
-  }
 	
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
+#if defined(STM)
   aborts = 0;
   aborts_locked_read = 0;
   aborts_locked_write = 0;
@@ -520,48 +553,53 @@ main(int argc, char **argv)
   aborts_invalid_memory = 0;
   aborts_double_write = 0;
   failures_because_contention = 0;
+  max_retries = 0;
+#endif
   reads = 0;
   effreads = 0;
   updates = 0;
   effupds = 0;
-  max_retries = 0;
-  for (i = 0; i < nb_threads; i++) {
-    printf("Thread %d\n", i);
-    printf("  #add        : %lu\n", data[i].nb_add);
-    printf("    #added    : %lu\n", data[i].nb_added);
-    printf("  #remove     : %lu\n", data[i].nb_remove);
-    printf("    #removed  : %lu\n", data[i].nb_removed);
-    printf("  #contains   : %lu\n", data[i].nb_contains);
-    printf("    #found    : %lu\n", data[i].nb_found);
-    printf("  #aborts     : %lu\n", data[i].nb_aborts);
-    printf("    #lock-r   : %lu\n", data[i].nb_aborts_locked_read);
-    printf("    #lock-w   : %lu\n", data[i].nb_aborts_locked_write);
-    printf("    #val-r    : %lu\n", data[i].nb_aborts_validate_read);
-    printf("    #val-w    : %lu\n", data[i].nb_aborts_validate_write);
-    printf("    #val-c    : %lu\n", data[i].nb_aborts_validate_commit);
-    printf("    #inv-mem  : %lu\n", data[i].nb_aborts_invalid_memory);
-    printf("    #inv-mem  : %lu\n", data[i].nb_aborts_double_write);
-    printf("    #failures : %lu\n", data[i].failures_because_contention);
-    printf("  Max retries : %lu\n", data[i].max_retries);
-    aborts += data[i].nb_aborts;
-    aborts_locked_read += data[i].nb_aborts_locked_read;
-    aborts_locked_write += data[i].nb_aborts_locked_write;
-    aborts_validate_read += data[i].nb_aborts_validate_read;
-    aborts_validate_write += data[i].nb_aborts_validate_write;
-    aborts_validate_commit += data[i].nb_aborts_validate_commit;
-    aborts_invalid_memory += data[i].nb_aborts_invalid_memory;
-    aborts_double_write += data[i].nb_aborts_double_write;
-    failures_because_contention += data[i].failures_because_contention;
-    reads += data[i].nb_contains;
-    effreads += data[i].nb_contains + 
-      (data[i].nb_add - data[i].nb_added) + 
-      (data[i].nb_remove - data[i].nb_removed); 
-    updates += (data[i].nb_add + data[i].nb_remove);
-    effupds += data[i].nb_removed + data[i].nb_added; 
-    size += data[i].nb_added - data[i].nb_removed;
-    if (max_retries < data[i].max_retries)
-      max_retries = data[i].max_retries;
-  }
+  for (i = 0; i < nb_threads; i++) 
+    {
+      printf("Thread %d\n", i);
+      printf("  #add        : %lu\n", data[i].nb_add);
+      printf("    #added    : %lu\n", data[i].nb_added);
+      printf("  #remove     : %lu\n", data[i].nb_remove);
+      printf("    #removed  : %lu\n", data[i].nb_removed);
+      printf("  #contains   : %lu\n", data[i].nb_contains);
+      printf("    #found    : %lu\n", data[i].nb_found);
+#if defined(STM)
+      printf("  #aborts     : %lu\n", data[i].nb_aborts);
+      printf("    #lock-r   : %lu\n", data[i].nb_aborts_locked_read);
+      printf("    #lock-w   : %lu\n", data[i].nb_aborts_locked_write);
+      printf("    #val-r    : %lu\n", data[i].nb_aborts_validate_read);
+      printf("    #val-w    : %lu\n", data[i].nb_aborts_validate_write);
+      printf("    #val-c    : %lu\n", data[i].nb_aborts_validate_commit);
+      printf("    #inv-mem  : %lu\n", data[i].nb_aborts_invalid_memory);
+      printf("    #inv-mem  : %lu\n", data[i].nb_aborts_double_write);
+      printf("    #failures : %lu\n", data[i].failures_because_contention);
+      printf("  Max retries : %lu\n", data[i].max_retries);
+      aborts += data[i].nb_aborts;
+      aborts_locked_read += data[i].nb_aborts_locked_read;
+      aborts_locked_write += data[i].nb_aborts_locked_write;
+      aborts_validate_read += data[i].nb_aborts_validate_read;
+      aborts_validate_write += data[i].nb_aborts_validate_write;
+      aborts_validate_commit += data[i].nb_aborts_validate_commit;
+      aborts_invalid_memory += data[i].nb_aborts_invalid_memory;
+      aborts_double_write += data[i].nb_aborts_double_write;
+      failures_because_contention += data[i].failures_because_contention;
+      if (max_retries < data[i].max_retries)
+	max_retries = data[i].max_retries;
+#endif
+
+      reads += data[i].nb_contains;
+      effreads += data[i].nb_contains + 
+	(data[i].nb_add - data[i].nb_added) + 
+	(data[i].nb_remove - data[i].nb_removed); 
+      updates += (data[i].nb_add + data[i].nb_remove);
+      effupds += data[i].nb_removed + data[i].nb_added; 
+      size += data[i].nb_added - data[i].nb_removed;
+    }
   printf("Set size      : %d (expected: %d)\n", set_size(set), size);
   printf("Duration      : %d (ms)\n", duration);
   printf("#txs          : %lu (%f / s)\n", reads + updates, 
@@ -583,6 +621,7 @@ main(int argc, char **argv)
   } else printf("%lu (%f / s)\n", updates, updates * 1000.0 / duration);
 	
 	
+#if defined(STM)
   printf("#aborts       : %lu (%f / s)\n", aborts, 
 	 aborts * 1000.0 / duration);
   printf("  #lock-r     : %lu (%f / s)\n", aborts_locked_read, 
@@ -601,7 +640,8 @@ main(int argc, char **argv)
 	 aborts_double_write * 1000.0 / duration);
   printf("  #failures   : %lu\n",  failures_because_contention);
   printf("Max retries   : %lu\n", max_retries);
-	
+#endif
+
   /* Delete set */
   /* set_delete(set); */
 	
