@@ -26,6 +26,8 @@
 
 #include "lazy.h"
 
+/* #define GLOBAL_LOCK */
+
 inline int is_marked_ref(long i) {
   return (int) (i & (LONG_MIN+1));
 }
@@ -53,8 +55,11 @@ inline long get_marked_ref(long w) {
  * Checking that both curr and pred are both unmarked and that pred's next pointer
  * points to curr to verify that the entries are adjacent and present in the list.
  */
-inline int parse_validate(node_l_t *pred, node_l_t *curr) {
-	return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr));
+inline int
+parse_validate(node_l_t* pred, node_l_t* curr) 
+{
+  /* FIX: checking pred twice :: return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr)); */
+  return (!is_marked_ref((long) pred) && !is_marked_ref((long) curr) && (pred->next == curr));
 }
 
 int
@@ -77,19 +82,29 @@ parse_insert(intset_l_t *set, val_t val)
 	
   pred = set->head;
   curr = pred->next;
-  while (curr->val < val) {
-    pred = curr;
-    curr = curr->next;
-  }
+  while (curr->val < val) 
+    {
+      pred = curr;
+      curr = curr->next;
+    }
+#if defined(GLOBAL_LOCK)
+  LOCK(&set->head->lock);
+#else
   LOCK(&pred->lock);
   LOCK(&curr->lock);
+#endif
   result = (parse_validate(pred, curr) && (curr->val != val));
-  if (result) {
-    newnode = new_node_l(val, curr, 0);
-    pred->next = newnode;
-  } 
+  if (result) 
+    {
+      newnode = new_node_l(val, curr, 0);
+      pred->next = newnode;
+    } 
+#if defined(GLOBAL_LOCK)
+  UNLOCK(&set->head->lock);
+#else
   UNLOCK(&curr->lock);
   UNLOCK(&pred->lock);
+#endif
   return result;
 }
 
@@ -102,7 +117,8 @@ parse_insert(intset_l_t *set, val_t val)
  * TODO: must implement a stop-the-world garbage collector to correctly 
  * free the memory.
  */
-int parse_delete(intset_l_t *set, val_t val)
+int
+parse_delete(intset_l_t *set, val_t val)
 {
   node_l_t *pred, *curr;
   int result;
@@ -114,15 +130,23 @@ int parse_delete(intset_l_t *set, val_t val)
       pred = curr;
       curr = curr->next;
     }
+#if defined(GLOBAL_LOCK)
+  LOCK(&set->head->lock);
+#else
   LOCK(&pred->lock);
   LOCK(&curr->lock);
+#endif
   result = (parse_validate(pred, curr) && (val == curr->val));
   if (result)
     {
       set_mark((long) curr);
       pred->next = curr->next;
     }
+#if defined(GLOBAL_LOCK)
+  UNLOCK(&set->head->lock);
+#else
   UNLOCK(&curr->lock);
   UNLOCK(&pred->lock);
+#endif
   return result;
 }
