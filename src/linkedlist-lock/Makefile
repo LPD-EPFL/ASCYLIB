@@ -15,13 +15,13 @@ measurements.o:
 ssalloc.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/ssalloc.o $(PROF)/ssalloc.c
 
-# htlock.o:
-# 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/htlock.o $(PROF)/htlock.c
+htlock.o:
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/htlock.o $(PROF)/htlock.c
 
 linkedlist-lock.o: 
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist-lock.o linkedlist-lock.c
 
-lazy.o: linkedlist-lock.h linkedlist-lock.o # htlock.o
+lazy.o: linkedlist-lock.h linkedlist-lock.o htlock.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/lazy.o lazy.c	 
 
 coupling.o: linkedlist-lock.h linkedlist-lock.o
@@ -33,8 +33,8 @@ intset.o: linkedlist-lock.h coupling.h lazy.h
 test.o: linkedlist-lock.h coupling.h lazy.h intset.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o test.c
 
-main: measurements.o ssalloc.o linkedlist-lock.o coupling.o lazy.o intset.o test.o # htlock.o
-	$(CC) $(CFLAGS)l $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/lazy.o $(BUILDIR)/coupling.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS) #$(BUILDIR)/htlock.o
+main: measurements.o ssalloc.o linkedlist-lock.o coupling.o lazy.o intset.o test.o htlock.o
+	$(CC) $(CFLAGS)l $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/lazy.o $(BUILDIR)/coupling.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS) 
 
 clean:
 	rm -f $(BINS)

@@ -128,6 +128,10 @@ test(void *data)
 
   seeds = seed_rand();
 
+#if defined(HTICKET)
+  /* printf("~~~~~~~ hticket\n"); */
+  init_thread_htlocks(the_cores[d->id]);
+#endif
 
   /* Wait on barrier */
   barrier_cross(d->barrier);

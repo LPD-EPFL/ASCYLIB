@@ -172,10 +172,12 @@ ticket_unlock(volatile ptlock_t* l)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					htlock_lock((htlock_t*) lock)
 #  define UNLOCK(lock)					htlock_release((htlock_t*) lock)
-
-
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				init_alloc_htlock((htlock_t*) lock)
+#  define GL_DESTROY_LOCK(lock)			
+#  define GL_LOCK(lock)					htlock_lock((htlock_t*) lock)
+#  define GL_UNLOCK(lock)				htlock_release((htlock_t*) lock)
 #endif
-
 
 
 /* --------------------------------------------------------------------------------------------------- */

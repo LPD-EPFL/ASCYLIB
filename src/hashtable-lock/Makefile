@@ -16,13 +16,16 @@ measurements.o:
 ssalloc.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/ssalloc.o $(PROF)/ssalloc.c
 
+htlock.o:
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/htlock.o $(PROF)/htlock.c
+
 ll-intset.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/intset.o $(LLREP)/intset.c
 
 coupling.o: ll-intset.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/coupling.o $(LLREP)/coupling.c
 
-lazy.o: ll-intset.o
+lazy.o: ll-intset.o htlock.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/lazy.o $(LLREP)/lazy.c      
 
 linkedlist-lock.o: ll-intset.o coupling.o lazy.o
@@ -34,8 +37,8 @@ hashtable-lock.o: ll-intset.o coupling.o lazy.o linkedlist-lock.o
 test.o: ll-intset.o coupling.o lazy.o linkedlist-lock.o hashtable-lock.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o test.c
 
-main: measurements.o ssalloc.o ll-intset.o coupling.o lazy.o linkedlist-lock.o hashtable-lock.o test.o
-	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/intset.o $(BUILDIR)/coupling.o $(BUILDIR)/lazy.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/hashtable-lock.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
+main: measurements.o ssalloc.o ll-intset.o coupling.o lazy.o linkedlist-lock.o hashtable-lock.o test.o htlock.o
+	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/intset.o $(BUILDIR)/coupling.o $(BUILDIR)/lazy.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/hashtable-lock.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
 	rm -f $(BINS)

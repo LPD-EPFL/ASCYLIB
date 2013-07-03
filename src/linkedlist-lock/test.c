@@ -111,11 +111,7 @@ test(void *data)
   seeds = seed_rand();
 
 #if defined(HTICKET)
-  if (mid == 1)
-    {
-      printf("~~~~~~~ hticket\n");
-    }
-
+  /* printf("~~~~~~~ hticket\n"); */
   init_thread_htlocks(the_cores[d->id]);
 #endif
 
