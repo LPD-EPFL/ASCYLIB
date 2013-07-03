@@ -199,6 +199,8 @@ test(void *data)
 			
     }	
  
+  printf("%d / done --\n", d->id);
+
   PF_PRINT;
 
   return NULL;
@@ -226,6 +228,7 @@ main(int argc, char **argv)
     {"range",                     required_argument, NULL, 'r'},
     {"seed",                      required_argument, NULL, 's'},
     {"update-rate",               required_argument, NULL, 'u'},
+    {"load-factor",               required_argument, NULL, 'l'},
     {"unit-tx",                   required_argument, NULL, 'x'},
     {NULL, 0, NULL, 0}
   };
@@ -256,7 +259,7 @@ main(int argc, char **argv)
 	
   while(1) {
     i = 0;
-    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:x:"
+    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:l:x:"
 		    , long_options, &i);
 		
     if(c == -1)
@@ -325,6 +328,8 @@ main(int argc, char **argv)
     case 'u':
       update = atoi(optarg);
       break;
+    case 'l':
+      break;
     case 'x':
       unit_tx = atoi(optarg);
       break;
@@ -384,16 +389,39 @@ main(int argc, char **argv)
   /* Init STM */
   printf("Initializing STM\n");
 	
+  size_t ten_perc = initial / 10, tens = 1;
+  size_t ten_perc_nxt = ten_perc;
+
+
   /* Populate set */
   printf("Adding %d entries to set\n", initial);
-  i = 0;
-  while (i < initial) {
-    val = (rand() % range) + 1;
-    if (set_add_l(set, val, 0)) {
-      last = val;
-      i++;
+  if (initial < 10000)
+    {
+      i = 0;
+      while (i < initial) 
+	{
+	  val = rand_range(range);
+	  if (set_add_l(set, val, 0)) 
+	    {
+	      last = val;
+	      if (i == ten_perc_nxt)
+		{
+		  printf("%02lu%%  ", tens * 10); fflush(stdout);
+		  tens++;
+		  ten_perc_nxt = tens * ten_perc;
+		}
+	      i++;
+	    }
+	}
     }
-  }
+  else
+    {
+      for (i = initial; i > 0; i--)
+	{
+	  set_add_l(set, i, 0);
+	}
+    }
+  printf("\n");
   size = set_size_l(set);
   printf("Set size     : %d\n", size);
 	

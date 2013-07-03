@@ -53,8 +53,11 @@ inline long get_marked_ref(long w) {
  * Checking that both curr and pred are both unmarked and that pred's next pointer
  * points to curr to verify that the entries are adjacent and present in the list.
  */
-inline int parse_validate(node_l_t *pred, node_l_t *curr) {
-	return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr));
+inline int
+parse_validate(node_l_t* pred, node_l_t* curr) 
+{
+  /* FIX: checking pred twice :: return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr)); */
+  return (!is_marked_ref((long) pred) && !is_marked_ref((long) curr) && (pred->next == curr));
 }
 
 int
@@ -77,19 +80,24 @@ parse_insert(intset_l_t *set, val_t val)
 	
   pred = set->head;
   curr = pred->next;
-  while (curr->val < val) {
-    pred = curr;
-    curr = curr->next;
-  }
-  LOCK(&pred->lock);
-  LOCK(&curr->lock);
+  while (curr->val < val) 
+    {
+      pred = curr;
+      curr = curr->next;
+    }
+
+  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  LOCK(ND_GET_LOCK(pred));
+  LOCK(ND_GET_LOCK(curr));
   result = (parse_validate(pred, curr) && (curr->val != val));
-  if (result) {
-    newnode = new_node_l(val, curr, 0);
-    pred->next = newnode;
-  } 
-  UNLOCK(&curr->lock);
-  UNLOCK(&pred->lock);
+  if (result) 
+    {
+      newnode = new_node_l(val, curr, 0);
+      pred->next = newnode;
+    } 
+  GL_UNLOCK(set->lock);
+  UNLOCK(ND_GET_LOCK(curr));
+  UNLOCK(ND_GET_LOCK(pred));
   return result;
 }
 
@@ -102,7 +110,8 @@ parse_insert(intset_l_t *set, val_t val)
  * TODO: must implement a stop-the-world garbage collector to correctly 
  * free the memory.
  */
-int parse_delete(intset_l_t *set, val_t val)
+int
+parse_delete(intset_l_t *set, val_t val)
 {
   node_l_t *pred, *curr;
   int result;
@@ -114,15 +123,17 @@ int parse_delete(intset_l_t *set, val_t val)
       pred = curr;
       curr = curr->next;
     }
-  LOCK(&pred->lock);
-  LOCK(&curr->lock);
+  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  LOCK(ND_GET_LOCK(pred));
+  LOCK(ND_GET_LOCK(curr));
   result = (parse_validate(pred, curr) && (val == curr->val));
   if (result)
     {
       set_mark((long) curr);
       pred->next = curr->next;
     }
-  UNLOCK(&curr->lock);
-  UNLOCK(&pred->lock);
+  GL_UNLOCK(set->lock);
+  UNLOCK(ND_GET_LOCK(curr));
+  UNLOCK(ND_GET_LOCK(pred));
   return result;
 }

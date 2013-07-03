@@ -36,7 +36,7 @@ node_l_t *new_node_l(val_t val, node_l_t *next, int transactional)
   }
   node_l->val = val;
   node_l->next = next;
-  INIT_LOCK(&node_l->lock);	
+  INIT_LOCK(ND_GET_LOCK(node_l));
 
 #if defined(__tilera__)
   /* on tilera you may have store reordering causing the pointer to a new node
@@ -58,11 +58,22 @@ intset_l_t *set_new_l()
       perror("malloc");
       exit(1);
     }
+
   max = new_node_l(VAL_MAX, NULL, 0);
   min = new_node_l(VAL_MIN, max, 0);
   set->head = min;
 
   ssalloc_align_alloc(0);
+#if defined(LL_GLOBAL_LOCK)
+  set->lock = (volatile ptlock_t*) ssalloc(sizeof(ptlock_t));
+  if (set->lock == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }
+  GL_INIT_LOCK(set->lock);
+  ssalloc_align_alloc(0);
+#endif
 
   return set;
 }

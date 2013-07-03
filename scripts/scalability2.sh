@@ -3,6 +3,7 @@
 cores=$1;
 shift;
 
+source scripts/lock_exec;
 source scripts/config;
 
 prog1=$1;
@@ -61,3 +62,5 @@ do
 
 
 done;
+
+source scripts/unlock_exec;

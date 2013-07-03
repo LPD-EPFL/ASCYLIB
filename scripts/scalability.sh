@@ -3,6 +3,7 @@
 cores=$1;
 shift;
 
+source scripts/lock_exec;
 source scripts/config;
 
 prog=$1;
@@ -34,3 +35,5 @@ do
     printf "%-8.2f\n" $scl;
 
 done;
+
+source scripts/unlock_exec;

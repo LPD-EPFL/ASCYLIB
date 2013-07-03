@@ -172,15 +172,15 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional) {
 		return 0;
 	// acquire locks in order
 	if (addr1 < addr2 || (addr1 == addr2 && val1 < val2)) {
-		LOCK(&pred1->lock);
-		LOCK(&curr1->lock);
-		LOCK(&pred2->lock);
-		LOCK(&curr2->lock);
+		LOCK(ND_GET_LOCK(pred1));
+		LOCK(ND_GET_LOCK(curr1));
+		LOCK(ND_GET_LOCK(pred2));
+		LOCK(ND_GET_LOCK(curr2));
 	} else {
-		LOCK(&pred2->lock);
-		LOCK(&curr2->lock);
-		LOCK(&pred1->lock);
-		LOCK(&curr1->lock);
+		LOCK(ND_GET_LOCK(pred2));
+		LOCK(ND_GET_LOCK(curr2));
+		LOCK(ND_GET_LOCK(pred1));
+		LOCK(ND_GET_LOCK(curr1));
 	}
 	// remove val1 and insert val2 
 	result = (parse_validate(pred1, curr1) && (val1 == curr1->val) &&
@@ -192,10 +192,10 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional) {
 		pred2->next = newnode;
 	}
 	// release locks in order
-	UNLOCK(&pred2->lock);
-	UNLOCK(&pred1->lock);
-	UNLOCK(&curr2->lock);
-	UNLOCK(&curr1->lock);
+	UNLOCK(ND_GET_LOCK(pred2));
+	UNLOCK(ND_GET_LOCK(pred1));
+	UNLOCK(ND_GET_LOCK(curr2));
+	UNLOCK(ND_GET_LOCK(curr1));
 		
 	return result;
 }
@@ -213,17 +213,17 @@ int ht_snapshot_unmovable(ht_intset_t *set, int transactional) {
 		curr = set->buckets[i]->head;
 		next = set->buckets[i]->head->next;
 		
-  		//pthread_mutex_lock((pthread_mutex_t *) &next->lock);
-		LOCK(&next->lock);
+  		//pthread_mutex_lock((pthread_mutex_t *) &next));
+		LOCK(ND_GET_LOCK(next));
 	    
 		while (next->next) {
-			UNLOCK(&next->lock);
+			UNLOCK(ND_GET_LOCK(next));
 			curr = next;
 			if (!is_marked_ref((long) next)) sum += next->val;
 			next = curr->next;
-			LOCK(&next->lock);
+			LOCK(ND_GET_LOCK(next));
 		}
-		UNLOCK(&next->lock);
+		UNLOCK(ND_GET_LOCK(next));
 	}
 	
 	return sum;
@@ -242,15 +242,15 @@ int ht_snapshot(ht_intset_t *set, int transactional) {
 	
 	for (i=0; i < m; i++) {
 	  do {
-	    LOCK(&set->buckets[i]->head->lock);
-	    LOCK(&set->buckets[i]->head->next->lock);
+	    LOCK(ND_GET_LOCK(set->buckets[i]->head));
+	    LOCK(ND_GET_LOCK(set->buckets[i]->head->next));
 	    curr = set->buckets[i]->head;
 	    next = set->buckets[i]->head->next;
 	  } while (!parse_validate(curr, next));
 
 	  while (next->next) {
 	    while(1) {
-	      LOCK(&next->next->lock);
+	      LOCK(ND_GET_LOCK(next->next));
 	      curr = next;
 	      next = curr->next;
 	      if (parse_validate(curr, next)) {
@@ -267,12 +267,12 @@ int ht_snapshot(ht_intset_t *set, int transactional) {
 	  curr = set->buckets[i]->head;
 	  next = set->buckets[i]->head->next;
 	  
-	  UNLOCK(&curr->lock);
-	  UNLOCK(&next->lock);
+	  UNLOCK(ND_GET_LOCK(curr));
+	  UNLOCK(ND_GET_LOCK(next));
 	  while (next->next) {
 	    curr = next;
 	    next = curr->next;
-	    UNLOCK(&next->lock);
+	    UNLOCK(ND_GET_LOCK(next));
 	  }
 	}
 	
