@@ -26,17 +26,6 @@
 
 unsigned int levelmax;
 
-inline void *xmalloc(size_t size)
-{
-	void *p = malloc(size);
-	if (p == NULL) {
-		perror("malloc");
-		exit(1);
-	}
-	return p;
-}
-
-
 
 int get_rand_level()
 {
@@ -69,8 +58,6 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
 {
   sl_node_t *node;
 	
-  /* node = (sl_node_t *)xmalloc(sizeof(sl_node_t)); */
-  /* node->next = (sl_node_t **)xmalloc(toplevel * sizeof(sl_node_t *)); */
   size_t ns = sizeof(sl_node_t) + levelmax * sizeof(sl_node_t *);
   size_t ns_rm = ns % 64;
   if (ns_rm)
@@ -79,13 +66,11 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
     }
   node = (sl_node_t *)ssalloc_alloc(1, ns);
 
-  /* node = (sl_node_t *)ssalloc_alloc(1, (sizeof(sl_node_t))); */
-  /* node->next = (sl_node_t **)ssalloc_alloc(2, toplevel * sizeof(sl_node_t *)); */
   node->val = val;
   node->toplevel = toplevel;
   node->marked = 0;
   node->fullylinked = 0;
-  INIT_LOCK(&node->lock);
+  INIT_LOCK(ND_GET_LOCK(node));
 
   MEM_BARRIER;
 
@@ -113,7 +98,7 @@ sl_node_t *sl_new_node(val_t val, sl_node_t *next, int toplevel, int transaction
 
 void sl_delete_node(sl_node_t *n)
 {
-	DESTROY_LOCK(&n->lock);
+	DESTROY_LOCK(ND_GET_LOCK(n));
 	/* free(n->next); */
 	/* free(n); */
 	/* ssfree_alloc(2, n->next); */
@@ -138,20 +123,38 @@ sl_intset_t *sl_set_new()
   max->fullylinked = 1;
   min->fullylinked = 1;
   set->head = min;
+
+#if defined(LL_GLOBAL_LOCK)
+  ssalloc_align_alloc(1);
+  set->lock = (volatile ptlock_t*) ssalloc_alloc(1, sizeof(ptlock_t));
+  if (set->lock == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }
+  GL_INIT_LOCK(set->lock);
+  ssalloc_align_alloc(1);
+#endif
+
   return set;
 }
 
-void sl_set_delete(sl_intset_t *set)
+void
+sl_set_delete(sl_intset_t *set)
 {
-	sl_node_t *node, *next;
+  sl_node_t *node, *next;
 	
-	node = set->head;
-	while (node != NULL) {
-		next = node->next[0];
-		sl_delete_node(node);
-		node = next;
-	}
-	free(set);
+  node = set->head;
+  while (node != NULL)
+    {
+      next = node->next[0];
+      sl_delete_node(node);
+      node = next;
+    }
+#if defined(LL_GLOBAL_LOCK)
+  ssfree_alloc(1, (ptlock_t*) set->lock);
+#endif
+  ssfree_alloc(1, set);
 }
 
 int sl_set_size(sl_intset_t *set)

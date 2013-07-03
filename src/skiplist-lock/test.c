@@ -287,6 +287,19 @@ void *test2(void *data)
   return NULL;
 }
 	
+void
+*xmalloc(size_t size)
+{
+  void *p = malloc(size);
+  if (p == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }
+  return p;
+}
+
+
 int
 main(int argc, char **argv)
 {

@@ -112,19 +112,23 @@ optimistic_find(sl_intset_t *set, val_t val)
  * functions.
  */ 
 inline void
-unlock_levels(sl_node_t **nodes, int highestlevel, int j)
+unlock_levels(sl_intset_t* set, sl_node_t **nodes, int highestlevel, int j)
 {
-  int i, r;
-  sl_node_t *old = NULL;
 
+#if defined(LL_GLOBAL_LOCK)
+  GL_UNLOCK(set->lock);
+#else 
+  int i;
+  sl_node_t *old = NULL;
   for (i = 0; i <= highestlevel; i++)
     {
       if (old != nodes[i])
-    	if ((r=UNLOCK(&nodes[i]->lock)) != 0)
-	  fprintf(stderr, "Error %d from %d cannot unlock node[%d]:%ld\n", 
-		  r, j, i, (long)nodes[i]->val);
+	{
+	  UNLOCK(ND_GET_LOCK(nodes[i]));
+	}
       old = nodes[i];
     }
+#endif
 }
 
 /*
@@ -165,6 +169,8 @@ optimistic_insert(sl_intset_t *set, val_t val)
 	continue;
       }
 
+
+    GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
     highest_locked = -1;
     prev_pred = NULL;
     valid = 1;
@@ -174,10 +180,7 @@ optimistic_insert(sl_intset_t *set, val_t val)
 	succ = succs[i];
 	if (pred != prev_pred)
 	  {
-	    if (LOCK(&pred->lock) != 0)
-	      {
-		fprintf(stderr, "Error cannot lock pred->val:%ld\n", (long)pred->val);
-	      }
+	    LOCK(ND_GET_LOCK(pred));
 	    highest_locked = i;
 	    prev_pred = pred;
 	  }	
@@ -185,10 +188,11 @@ optimistic_insert(sl_intset_t *set, val_t val)
 	valid = (!pred->marked && !succ->marked && 
 		 ((volatile sl_node_t*) pred->next[i] == 
 		  (volatile sl_node_t*) succ));
-      }	
+      }
+	
     if (!valid) 
       {			 /* Unlock the predecessors before leaving */ 
-	unlock_levels(preds, highest_locked, 11);
+	unlock_levels(set, preds, highest_locked, 11); /* unlocks the global-lock in the GL case */
 	if (backoff > 5000) 
 	  {
 	    timeout.tv_sec = 0; //backoff / 5000;
@@ -215,7 +219,7 @@ optimistic_insert(sl_intset_t *set, val_t val)
 		
     new_node->fullylinked = 1;
 
-    unlock_levels(preds, highest_locked, 12);
+    unlock_levels(set, preds, highest_locked, 12);
     /* Freeing the previously allocated memory */
     xfree(preds);
     xfree(succs);
@@ -252,25 +256,19 @@ optimistic_delete(sl_intset_t *set, val_t val)
       /* If not marked and ok to delete, then mark it */
       if (is_marked || (found != -1 && ok_to_delete(succs[found], found)))
 	{	
+	  GL_LOCK(set->lock); /* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
 	  if (!is_marked)
 	    {
 	      node_todel = succs[found];
 				
-	      if (LOCK(&node_todel->lock) != 0) 
-		{
-		  fprintf(stderr, "Error cannot lock node_todel->val:%ld\n", 
-			  (long)node_todel->val);
-		}
+	      LOCK(ND_GET_LOCK(node_todel));
 	      toplevel = node_todel->toplevel;
 	      /* Unless it has been marked meanwhile */
 
 	      if (node_todel->marked)
 		{
-		  if (UNLOCK(&node_todel->lock) != 0)
-		    {
-		      fprintf(stderr, "Error cannot unlock node_todel->val:%ld\n", 
-			      (long)node_todel->val);
-		    }
+		  GL_UNLOCK(set->lock);
+		  UNLOCK(ND_GET_LOCK(node_todel));
 		  xfree(preds);
 		  xfree(succs);
 		  return 0;
@@ -290,7 +288,7 @@ optimistic_delete(sl_intset_t *set, val_t val)
 	      succ = succs[i];
 	      if (pred != prev_pred)
 		{
-		  LOCK(&pred->lock);
+		  LOCK(ND_GET_LOCK(pred));
 		  highest_locked = i;
 		  prev_pred = pred;
 		}
@@ -301,7 +299,7 @@ optimistic_delete(sl_intset_t *set, val_t val)
 
 	  if (!valid)
 	    {	
-	      unlock_levels(preds, highest_locked, 21);
+	      unlock_levels(set, preds, highest_locked, 21);
 	      if (backoff > 5000) {
 		timeout.tv_sec = backoff / 5000;
 		timeout.tv_nsec = (backoff % 5000) / 1000000;
@@ -316,8 +314,8 @@ optimistic_delete(sl_intset_t *set, val_t val)
 	      preds[i]->next[i] = node_todel->next[i];
 	    }
 
-	  UNLOCK(&node_todel->lock);	
-	  unlock_levels(preds, highest_locked, 22);
+	  UNLOCK(ND_GET_LOCK(node_todel));
+	  unlock_levels(set, preds, highest_locked, 22);
 	  /* Freeing the previously allocated memory */
 	  xfree(preds);
 	  xfree(succs);
