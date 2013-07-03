@@ -3,6 +3,7 @@
 
 BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque
 LBENCHS = src/linkedlist-lock src/hashtable-lock src/skiplist-lock
+LBENCHS = src/skiplist-lock
 LFBENCHS = src/linkedlist src/hashtable src/skiplist 
 
 .PHONY:	clean all $(BENCHS) $(LBENCHS)
