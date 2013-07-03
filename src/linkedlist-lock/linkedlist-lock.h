@@ -60,13 +60,6 @@ typedef intptr_t val_t;
 #define VAL_MIN                         INT_MIN
 #define VAL_MAX                         INT_MAX
 
-
-#if defined(LL_GLOBAL_LOCK)
-#  define ND_GET_LOCK(nd)                 nd /* LOCK / UNLOCK are not defined in any case ;-) */
-#else
-#  define ND_GET_LOCK(nd)                 &nd->lock
-#endif
-
 typedef ALIGNED(64) struct node_l
 {
   val_t val;
@@ -83,7 +76,6 @@ typedef ALIGNED(64) struct intset_l
 #if defined(LL_GLOBAL_LOCK)
   volatile ptlock_t* lock;
 #endif
-
 } intset_l_t;
 
 node_l_t *new_node_l(val_t val, node_l_t *next, int transactional);

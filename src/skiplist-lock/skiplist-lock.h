@@ -70,13 +70,18 @@ typedef ALIGNED(64) struct sl_node
   int toplevel;
   volatile int marked;
   volatile int fullylinked;
-  ptlock_t lock;	
+#if !defined(LL_GLOBAL_LOCK)
+  ptlock_t lock;
+#endif
   struct sl_node* next[1];
 } sl_node_t;
 
 typedef ALIGNED(64) struct sl_intset 
 {
   sl_node_t *head;
+#if defined(LL_GLOBAL_LOCK)
+  volatile ptlock_t* lock;
+#endif
 } sl_intset_t;
 
 inline void *xmalloc(size_t size);
@@ -93,8 +98,7 @@ sl_node_t *sl_new_simple_node(val_t val, int toplevel, int transactional);
  * Create a new node with its next field. 
  * If next=NULL, then this create a tail node. 
  */
-sl_node_t *sl_new_node(val_t val, sl_node_t *next, int toplevel, int 
-transactional);
+sl_node_t *sl_new_node(val_t val, sl_node_t *next, int toplevel, int transactional);
 void sl_delete_node(sl_node_t *n);
 sl_intset_t *sl_set_new();
 void sl_set_delete(sl_intset_t *set);
