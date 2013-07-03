@@ -22,6 +22,15 @@ else
      CFLAGS	+= -O3 -DNDEBUG 
 endif
 
+# Compile with global lock
+ifeq ($(GRANULARITY),GLOBAL_LOCK)
+     CFLAGS	+= -DLL_GLOBAL_LOCK
+endif
+ifeq ($(G),GL)
+     CFLAGS	+= -DLL_GLOBAL_LOCK
+endif
+
+
 CFLAGS += -D_GNU_SOURCE
 
 ROOT 		?= ../..
