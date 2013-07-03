@@ -182,7 +182,7 @@ ticket_unlock(volatile ptlock_t* l)
 /* GLOBAL LOCK --------------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------------- */
 
-#define LL_GLOBAL_LOCK
+/* #define LL_GLOBAL_LOCK */
 
 #if defined(LL_GLOBAL_LOCK)
 #  define ND_GET_LOCK(nd)                 nd /* LOCK / UNLOCK are not defined in any case ;-) */
