@@ -36,7 +36,7 @@ node_l_t *new_node_l(val_t val, node_l_t *next, int transactional)
   }
   node_l->val = val;
   node_l->next = next;
-  INIT_LOCK(&node_l->lock);	
+  INIT_LOCK(ND_GET_LOCK(node_l));
 
 #if defined(__tilera__)
   /* on tilera you may have store reordering causing the pointer to a new node
@@ -52,21 +52,38 @@ intset_l_t *set_new_l()
   intset_l_t *set;
   node_l_t *min, *max;
 
-  if ((set = (intset_l_t *)malloc(sizeof(intset_l_t))) == NULL) {
-    perror("malloc");
-    exit(1);
-  }
+  /* if ((set = (intset_l_t *)malloc(sizeof(intset_l_t))) == NULL)  */
+  if ((set = (intset_l_t *)ssalloc(sizeof(intset_l_t))) == NULL) 
+    {
+      perror("malloc");
+      exit(1);
+    }
+
   max = new_node_l(VAL_MAX, NULL, 0);
   min = new_node_l(VAL_MIN, max, 0);
   set->head = min;
 
+  ssalloc_align_alloc(0);
+#if defined(LL_GLOBAL_LOCK)
+  set->lock = (volatile ptlock_t*) ssalloc(sizeof(ptlock_t));
+  if (set->lock == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }
+  GL_INIT_LOCK(set->lock);
+  ssalloc_align_alloc(0);
+#endif
+
   return set;
 }
 
-void node_delete_l(node_l_t *node) {
-   DESTROY_LOCK(&node->lock);
-   /* free(node); */
-   ssfree(node);
+void
+node_delete_l(node_l_t *node) 
+{
+  DESTROY_LOCK(&node->lock);
+  /* free(node); */
+  ssfree(node);
 }
 
 void set_delete_l(intset_l_t *set)
@@ -81,7 +98,7 @@ void set_delete_l(intset_l_t *set)
     ssfree(node);
     node = next;
   }
-  free(set);
+  ssfree(set);
 }
 
 int set_size_l(intset_l_t *set)

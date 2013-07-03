@@ -29,7 +29,7 @@
 #define DEFAULT_MOVE                    0
 #define DEFAULT_SNAPSHOT                0
 #define DEFAULT_LOAD                    1
-#define DEFAULT_ELASTICITY              2
+#define DEFAULT_ELASTICITY              1
 #define DEFAULT_ALTERNATE               0
 #define DEFAULT_EFFECTIVE               1
 
@@ -42,8 +42,10 @@ extern unsigned int maxhtlength;
  * HASH TABLE
  * ################################################################### */
 
-typedef struct ht_intset {
-	intset_l_t *buckets[MAXHTLENGTH];
+typedef struct ht_intset 
+{
+  /* intset_l_t *buckets[MAXHTLENGTH]; */
+  intset_l_t **buckets;
 } ht_intset_t;
 
 void ht_delete(ht_intset_t *set);

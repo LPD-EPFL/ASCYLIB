@@ -32,27 +32,30 @@ int lockc_delete(intset_l_t *set, val_t val) {
 	node_l_t *curr, *next;
 	int found;
 	
-	LOCK(&set->head->lock);
+	GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+	LOCK(ND_GET_LOCK(set->head));
 	curr = set->head;
-	LOCK(&curr->next->lock);
+	LOCK(ND_GET_LOCK(curr->next));
 	next = curr->next;
 	
 	while (next->val < val) {
-		UNLOCK(&curr->lock);
+	  UNLOCK(ND_GET_LOCK(curr));
 		curr = next;
-		LOCK(&next->next->lock);
+		LOCK(ND_GET_LOCK(next->next));
 		next = next->next;
 	}
 	found = (val == next->val);
 	if (found) {
 	  curr->next = next->next;
-	  UNLOCK(&next->lock);
+	  UNLOCK(ND_GET_LOCK(next));
 	  node_delete_l(next);
-	  UNLOCK(&curr->lock);
+	  UNLOCK(ND_GET_LOCK(curr));
 	} else {
-	  UNLOCK(&curr->lock);
-	  UNLOCK(&next->lock);
-	}
+	  UNLOCK(ND_GET_LOCK(curr));
+	  UNLOCK(ND_GET_LOCK(next));
+	}  
+	GL_UNLOCK(set->lock);
+
 	return found;
 }
 
@@ -60,20 +63,22 @@ int lockc_find(intset_l_t *set, val_t val) {
 	node_l_t *curr, *next; 
 	int found;
 	
-	LOCK(&set->head->lock);
+	GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+	LOCK(ND_GET_LOCK(set->head));
 	curr = set->head;
-	LOCK(&curr->next->lock);
+	LOCK(ND_GET_LOCK(curr->next));
 	next = curr->next;
 	
 	while (next->val < val) {
-		UNLOCK(&curr->lock);
+		UNLOCK(ND_GET_LOCK(curr));
 		curr = next;
-		LOCK(&next->next->lock);
+		LOCK(ND_GET_LOCK(next->next));
 		next = curr->next;
 	}	
 	found = (val == next->val);
-	UNLOCK(&curr->lock);
-	UNLOCK(&next->lock);
+	GL_UNLOCK(set->lock);
+	UNLOCK(ND_GET_LOCK(curr));
+	UNLOCK(ND_GET_LOCK(next));
 	return found;
 }
 
@@ -81,16 +86,17 @@ int lockc_insert(intset_l_t *set, val_t val) {
 	node_l_t *curr, *next, *newnode;
 	int found;
 	
-	LOCK(&set->head->lock);
+	GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+	LOCK(ND_GET_LOCK(set->head));
 	curr = set->head;
-	LOCK(&curr->next->lock);
+	LOCK(ND_GET_LOCK(curr->next));
 	next = curr->next;
 	
 	while (next->val < val) {
 		
-		UNLOCK(&curr->lock);
+		UNLOCK(ND_GET_LOCK(curr));
 		curr = next;
-		LOCK(&next->next->lock);
+		LOCK(ND_GET_LOCK(next->next));
 		next = curr->next;
 		
 	}
@@ -99,7 +105,8 @@ int lockc_insert(intset_l_t *set, val_t val) {
 		newnode =  new_node_l(val, next, 0);
 		curr->next = newnode;
 	}
-	UNLOCK(&curr->lock);
-	UNLOCK(&next->lock);
+	GL_UNLOCK(set->lock);
+	UNLOCK(ND_GET_LOCK(curr));
+	UNLOCK(ND_GET_LOCK(next));
 	return !found;
 }

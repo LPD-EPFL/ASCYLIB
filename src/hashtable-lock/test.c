@@ -27,6 +27,8 @@
 unsigned int maxhtlength;
 __thread unsigned long* seeds;
 
+ALIGNED(64) uint8_t running[64];
+
 typedef struct barrier {
 	pthread_cond_t complete;
 	pthread_mutex_t mutex;
@@ -66,7 +68,8 @@ void barrier_cross(barrier_t *b)
  * be too high for given values of range and initial.
  */
 
-typedef struct thread_data {
+typedef ALIGNED(64) struct thread_data 
+{
   val_t first;
   long range;
   int update;
@@ -100,6 +103,7 @@ typedef struct thread_data {
   ht_intset_t *set;
   barrier_t *barrier;
   int id;
+  uint8_t padding[32];
 } thread_data_t;
 
 
@@ -144,12 +148,9 @@ test(void *data)
   mnext = (r < d->move);
   cnext = (r >= d->update + d->snapshot);
 	
-#ifdef ICC
-  while (stop == 0) {
-#else
-    while (AO_load_full(&stop) == 0) {
-#endif /* ICC */
-		
+  /* while (stop == 0) */
+  while (*running)
+    {		
       if (unext) { // update
 			
 	if (mnext) { // move
@@ -239,12 +240,7 @@ test(void *data)
 	mnext = (r < d->move);
 	cnext = (r >= d->update + d->snapshot);
       }
-	  
-#ifdef ICC
     }
-#else
-  }
-#endif /* ICC */
 	
   PF_PRINT;
 	
@@ -255,7 +251,7 @@ int
 main(int argc, char **argv)
 {
   /* Create transaction */
-  set_cpu(0);
+  set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
 
@@ -304,106 +300,107 @@ main(int argc, char **argv)
   int effective = DEFAULT_EFFECTIVE;
   sigset_t block_set;
 	
-  while(1) {
-    i = 0;
-    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:x:", long_options, &i);
+  while(1) 
+    {
+      i = 0;
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:x:", long_options, &i);
 		
-    if(c == -1)
-      break;
+      if(c == -1)
+	break;
 		
-    if(c == 0 && long_options[i].flag == 0)
-      c = long_options[i].val;
+      if(c == 0 && long_options[i].flag == 0)
+	c = long_options[i].val;
 		
-    switch(c) {
-    case 0:
-      /* Flag is automatically set */
-      break;
-    case 'h':
-      printf("intset -- STM stress test "
-	     "(linked list)\n"
-	     "\n"
-	     "Usage:\n"
-	     "  intset [options...]\n"
-	     "\n"
-	     "Options:\n"
-	     "  -h, --help\n"
-	     "        Print this message\n"
-	     "  -A, --Alternate\n"
-	     "        Consecutive insert/remove target the same value\n"
-	     "  -f, --effective <int>\n"
-	     "        update txs must effectively write (0=trial, 1=effective, default=" XSTR(DEFAULT_EFFECTIVE) ")\n"
-	     "  -d, --duration <int>\n"
-	     "        Test duration in milliseconds (0=infinite, default=" XSTR(DEFAULT_DURATION) ")\n"
-	     "  -i, --initial-size <int>\n"
-	     "        Number of elements to insert before test (default=" XSTR(DEFAULT_INITIAL) ")\n"
-	     "  -n, --num-threads <int>\n"
-	     "        Number of threads (default=" XSTR(DEFAULT_NB_THREADS) ")\n"
-	     "  -r, --range <int>\n"
-	     "        Range of integer values inserted in set (default=" XSTR(DEFAULT_RANGE) ")\n"
-	     "  -s, --seed <int>\n"
-	     "        RNG seed (0=time-based, default=" XSTR(DEFAULT_SEED) ")\n"
-	     "  -u, --update-rate <int>\n"
-	     "        Percentage of update transactions (default=" XSTR(DEFAULT_UPDATE) ")\n"
-	     "  -m , --move-rate <int>\n"
-	     "        Percentage of move transactions (default=" XSTR(DEFAULT_MOVE) ")\n"
-	     "  -a , --snapshot-rate <int>\n"
-	     "        Percentage of snapshot transactions (default=" XSTR(DEFAULT_SNAPSHOT) ")\n"
-	     "  -l , --load-factor <int>\n"
-	     "        Ratio of keys over buckets (default=" XSTR(DEFAULT_LOAD) ")\n"
-	     "  -x, --unit-tx (default=1)\n"
-	     "        Use unit transactions\n"
-	     "        0 = non-protected,\n"
-	     "        1 = normal transaction,\n"
-	     "        2 = read unit-tx,\n"
-	     "        3 = read/add unit-tx,\n"
-	     "        4 = read/add/rem unit-tx,\n"
-	     "        5 = all recursive unit-tx,\n"
-	     "        6 = harris lock-free\n"
-	     );
-      exit(0);
-    case 'A':
-      alternate = 1;
-      break;
-    case 'f':
-      effective = atoi(optarg);
-      break;
-    case 'd':
-      duration = atoi(optarg);
-      break;
-    case 'i':
-      initial = atoi(optarg);
-      break;
-    case 'n':
-      nb_threads = atoi(optarg);
-      break;
-    case 'r':
-      range = atol(optarg);
-      break;
-    case 's':
-      seed = atoi(optarg);
-      break;
-    case 'u':
-      update = atoi(optarg);
-      break;
-    case 'm':
-      move = atoi(optarg);
-      break;
-    case 'a':
-      snapshot = atoi(optarg);
-      break;
-    case 'l':
-      load_factor = atoi(optarg);
-      break;
-    case 'x':
-      unit_tx = atoi(optarg);
-      break;
-    case '?':
-      printf("Use -h or --help for help\n");
-      exit(0);
-    default:
-      exit(1);
+      switch(c) {
+      case 0:
+	/* Flag is automatically set */
+	break;
+      case 'h':
+	printf("intset -- STM stress test "
+	       "(linked list)\n"
+	       "\n"
+	       "Usage:\n"
+	       "  intset [options...]\n"
+	       "\n"
+	       "Options:\n"
+	       "  -h, --help\n"
+	       "        Print this message\n"
+	       "  -A, --Alternate\n"
+	       "        Consecutive insert/remove target the same value\n"
+	       "  -f, --effective <int>\n"
+	       "        update txs must effectively write (0=trial, 1=effective, default=" XSTR(DEFAULT_EFFECTIVE) ")\n"
+	       "  -d, --duration <int>\n"
+	       "        Test duration in milliseconds (0=infinite, default=" XSTR(DEFAULT_DURATION) ")\n"
+	       "  -i, --initial-size <int>\n"
+	       "        Number of elements to insert before test (default=" XSTR(DEFAULT_INITIAL) ")\n"
+	       "  -n, --num-threads <int>\n"
+	       "        Number of threads (default=" XSTR(DEFAULT_NB_THREADS) ")\n"
+	       "  -r, --range <int>\n"
+	       "        Range of integer values inserted in set (default=" XSTR(DEFAULT_RANGE) ")\n"
+	       "  -s, --seed <int>\n"
+	       "        RNG seed (0=time-based, default=" XSTR(DEFAULT_SEED) ")\n"
+	       "  -u, --update-rate <int>\n"
+	       "        Percentage of update transactions (default=" XSTR(DEFAULT_UPDATE) ")\n"
+	       "  -m , --move-rate <int>\n"
+	       "        Percentage of move transactions (default=" XSTR(DEFAULT_MOVE) ")\n"
+	       "  -a , --snapshot-rate <int>\n"
+	       "        Percentage of snapshot transactions (default=" XSTR(DEFAULT_SNAPSHOT) ")\n"
+	       "  -l , --load-factor <int>\n"
+	       "        Ratio of keys over buckets (default=" XSTR(DEFAULT_LOAD) ")\n"
+	       "  -x, --unit-tx (default=1)\n"
+	       "        Use unit transactions\n"
+	       "        0 = non-protected,\n"
+	       "        1 = normal transaction,\n"
+	       "        2 = read unit-tx,\n"
+	       "        3 = read/add unit-tx,\n"
+	       "        4 = read/add/rem unit-tx,\n"
+	       "        5 = all recursive unit-tx,\n"
+	       "        6 = harris lock-free\n"
+	       );
+	exit(0);
+      case 'A':
+	alternate = 1;
+	break;
+      case 'f':
+	effective = atoi(optarg);
+	break;
+      case 'd':
+	duration = atoi(optarg);
+	break;
+      case 'i':
+	initial = atoi(optarg);
+	break;
+      case 'n':
+	nb_threads = atoi(optarg);
+	break;
+      case 'r':
+	range = atol(optarg);
+	break;
+      case 's':
+	seed = atoi(optarg);
+	break;
+      case 'u':
+	update = atoi(optarg);
+	break;
+      case 'm':
+	move = atoi(optarg);
+	break;
+      case 'a':
+	snapshot = atoi(optarg);
+	break;
+      case 'l':
+	load_factor = atoi(optarg);
+	break;
+      case 'x':
+	unit_tx = atoi(optarg);
+	break;
+      case '?':
+	printf("Use -h or --help for help\n");
+	exit(0);
+      default:
+	exit(1);
+      }
     }
-  }
 	
   assert(duration >= 0);
   assert(initial >= 0);
@@ -453,7 +450,8 @@ main(int argc, char **argv)
   maxhtlength = (unsigned int) initial / load_factor;
   set = ht_new();
 	
-  stop = 0;
+  /* stop = 0; */
+  *running = 1;
 	
   /* Populate set */
   printf("Adding %d entries to set\n", initial);
@@ -526,7 +524,10 @@ main(int argc, char **argv)
     sigemptyset(&block_set);
     sigsuspend(&block_set);
   }
-  AO_store_full(&stop, 1);
+
+  /* AO_store_full(&stop, 1); */
+  *running = 0;
+
   gettimeofday(&end, NULL);
   printf("STOPPING...\n");
 	
