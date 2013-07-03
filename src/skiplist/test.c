@@ -222,8 +222,6 @@ void catcher(int sig)
 int 
 main(int argc, char **argv)
 {
-  printf("sizeof(thread_data_t) = %lu\n", sizeof(thread_data_t));
-
   set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
@@ -551,17 +549,6 @@ main(int argc, char **argv)
     size += data[i].nb_added - data[i].nb_removed;
     if (max_retries < data[i].max_retries)
       max_retries = data[i].max_retries;
-
-    /* size_t ns = sizeof(sl_node_t) + *levelmax * sizeof(sl_node_t *); */
-    /* size_t ns_np = ns; */
-    /* size_t ns_rm = ns & 63; */
-    /* if (ns_rm) */
-    /*   { */
-    /* 	ns += 64 - ns_rm; */
-    /*   } */
-    /* printf("size per element: not padded: %lu / padded:%lu\n", ns_np, ns); */
-    /* printf("added data size: %lu bytes / %lu Kib / %lu Mib\n", data[i].nb_added * ns,  */
-    /* 	   (data[i].nb_added / 1024) * ns, (data[i].nb_added / 1024 / 1024) * ns); */
   }
 
   size_t size_after = sl_set_size(set);

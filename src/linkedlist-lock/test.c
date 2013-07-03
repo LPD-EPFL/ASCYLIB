@@ -199,8 +199,6 @@ test(void *data)
 			
     }	
  
-  printf("%d / done --\n", d->id);
-
   PF_PRINT;
 
   return NULL;

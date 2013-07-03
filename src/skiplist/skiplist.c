@@ -111,7 +111,7 @@ sl_new_node(val_t val, sl_node_t *next, int toplevel, int transactional)
 	
   MEM_BARRIER;
 
-  return node;
+  return (sl_node_t*) node;
 }
 
 void

@@ -287,6 +287,19 @@ void *test2(void *data)
   return NULL;
 }
 	
+void
+*xmalloc(size_t size)
+{
+  void *p = malloc(size);
+  if (p == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }
+  return p;
+}
+
+
 int
 main(int argc, char **argv)
 {
@@ -304,6 +317,7 @@ main(int argc, char **argv)
     {"seed",                      required_argument, NULL, 's'},
     {"update-rate",               required_argument, NULL, 'u'},
     {"unit-tx",                   required_argument, NULL, 'x'},
+    {"nothing",                   required_argument, NULL, 'l'},
     {NULL, 0, NULL, 0}
   };
 		
@@ -333,7 +347,7 @@ main(int argc, char **argv)
 		
   while(1) {
     i = 0;
-    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:x:"
+    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:x:l:"
 		    , long_options, &i);
 			
     if(c == -1)
@@ -409,6 +423,8 @@ main(int argc, char **argv)
       break;
     case 'x':
       unit_tx = atoi(optarg);
+      break;
+    case 'l':
       break;
     case '?':
       printf("Use -h or --help for help\n");
