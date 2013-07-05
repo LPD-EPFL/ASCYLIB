@@ -31,6 +31,9 @@
 
 unsigned int levelmax;
 
+#define MAX_BACKOFF 131071
+
+
 inline int ok_to_delete(sl_node_t *node, int found)
 {
   return (node->fullylinked && ((node->toplevel-1) == found) && !node->marked);
@@ -143,7 +146,6 @@ optimistic_insert(sl_intset_t *set, val_t val)
   sl_node_t *pred, *succ;
   int toplevel, highest_locked, i, valid, found;
   unsigned int backoff;
-  struct timespec timeout;
 
   preds = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
   succs = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
@@ -195,11 +197,13 @@ optimistic_insert(sl_intset_t *set, val_t val)
 	unlock_levels(set, preds, highest_locked, 11); /* unlocks the global-lock in the GL case */
 	if (backoff > 5000) 
 	  {
-	    timeout.tv_sec = 0; //backoff / 5000;
-	    timeout.tv_nsec = (backoff % 5000) * 1000000;
-	    nanosleep(&timeout, NULL);
+	    /* timeout.tv_sec = 0; //backoff / 5000; */
+	    /* timeout.tv_nsec = (backoff % 5000) * 1000000; */
+	    nop_rep(backoff & MAX_BACKOFF);
+	    /* nop_rep(backoff); */
+	    /* nanosleep(&timeout, NULL); */
 	  }
-	backoff *= 2;
+	backoff <<= 1;
 	continue;
       }
 		
@@ -241,7 +245,6 @@ optimistic_delete(sl_intset_t *set, val_t val)
   sl_node_t *pred, *succ;
   int is_marked, toplevel, highest_locked, i, valid, found;	
   unsigned int backoff;
-  struct timespec timeout;
 
   preds = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
   succs = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
@@ -302,11 +305,13 @@ optimistic_delete(sl_intset_t *set, val_t val)
 	      unlock_levels(set, preds, highest_locked, 21);
 	      if (backoff > 5000) 
 		{
-		  timeout.tv_sec = 0; /* backoff / 5000; */
-		  timeout.tv_nsec = (backoff % 5000) / 1000000;
-		  nanosleep(&timeout, NULL);
+		  /* timeout.tv_sec = 0; //backoff / 5000; */
+		  /* timeout.tv_nsec = (backoff % 5000) * 1000000; */
+		  nop_rep(backoff & MAX_BACKOFF);
+		  /* nop_rep(backoff); */
+		  /* nanosleep(&timeout, NULL); */
 		}
-	      backoff *= 2;
+	      backoff <<= 1;
 	      continue;
 	    }
 			
