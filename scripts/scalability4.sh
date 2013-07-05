@@ -17,7 +17,7 @@ shift;
 params="$@";
 
 
-echo "#      $prog1                           $prog2                          $prog3                          $prog4"
+printf "#       %-32s%-32s%-32s%-32s\n" "$prog1" "$prog2" "$prog3" "$prog4";
 echo "#cores  throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability";
 
 prog=$prog1;
