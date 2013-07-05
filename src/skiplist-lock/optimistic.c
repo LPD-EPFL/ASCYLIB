@@ -300,11 +300,12 @@ optimistic_delete(sl_intset_t *set, val_t val)
 	  if (!valid)
 	    {	
 	      unlock_levels(set, preds, highest_locked, 21);
-	      if (backoff > 5000) {
-		timeout.tv_sec = backoff / 5000;
-		timeout.tv_nsec = (backoff % 5000) / 1000000;
-		nanosleep(&timeout, NULL);
-	      }
+	      if (backoff > 5000) 
+		{
+		  timeout.tv_sec = 0; /* backoff / 5000; */
+		  timeout.tv_nsec = (backoff % 5000) / 1000000;
+		  nanosleep(&timeout, NULL);
+		}
 	      backoff *= 2;
 	      continue;
 	    }
