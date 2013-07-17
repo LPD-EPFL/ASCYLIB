@@ -113,6 +113,8 @@ test(void *data)
 #if defined(HTICKET)
   /* printf("~~~~~~~ hticket\n"); */
   init_thread_htlocks(the_cores[d->id]);
+#elif defined(CLH)
+  init_clh_thread(&clh_local_p);
 #endif
 
 
@@ -203,10 +205,8 @@ test(void *data)
 int
 main(int argc, char **argv)
 {
-#if defined(HTICKET)
-  {
-    printf("~~~~~~~ hticket\n");
-  }
+#if defined(CLH)
+  init_clh_thread(&clh_local_p);
 #endif
 
   set_cpu(the_cores[0]);
