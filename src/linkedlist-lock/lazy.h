@@ -27,11 +27,11 @@
 #include "coupling.h"
 
 /* handling logical deletion flag */ 
-inline int is_marked_ref(long i);
-inline long unset_mark(long i);
-inline long set_mark(long i);
-inline long get_unmarked_ref(long w);
-inline long get_marked_ref(long w);
+inline int is_marked_ref(uintptr_t i);
+inline uintptr_t unset_mark(uintptr_t* i);
+inline uintptr_t set_mark(uintptr_t* i);
+inline uintptr_t get_unmarked_ref(uintptr_t w);
+inline uintptr_t get_marked_ref(uintptr_t w);
 
 /* linked list accesses */
 int parse_validate(node_l_t *pred, node_l_t *curr);
