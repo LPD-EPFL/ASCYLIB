@@ -1,7 +1,8 @@
 .PHONY:	all
 
 BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque
-LBENCHS = src/linkedlist-lock src/hashtable-lock src/skiplist-lock
+# LBENCHS = src/linkedlist-lock src/hashtable-lock src/skiplist-lock
+LBENCHS = src/linkedlist-lock
 LFBENCHS = src/linkedlist src/hashtable src/skiplist 
 
 .PHONY:	clean all $(BENCHS) $(LBENCHS)
@@ -22,6 +23,9 @@ ticket:
 
 hticket:
 	$(MAKE) "LOCK=HTICKET" $(LBENCHS)
+
+clh:
+	$(MAKE) "LOCK=CLH" $(LBENCHS)
 
 sequential:
 	$(MAKE) "STM=SEQUENTIAL" $(BENCHS)
