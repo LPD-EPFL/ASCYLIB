@@ -44,6 +44,8 @@ node_l_t *new_node_l(val_t val, node_l_t *next, int transactional)
   MEM_BARRIER;
 #endif	/* __tilera__ */
 
+  /* _mm_mfence(); */
+
   return node_l;
 }
 
@@ -92,7 +94,7 @@ void set_delete_l(intset_l_t *set)
 
   node = set->head;
   while (node != NULL) {
-    next = node->next;
+    next = (node_l_t*) get_unmarked_ref((uintptr_t) node->next);
     DESTROY_LOCK(&node->lock);
     /* free(node); */
     ssfree(node);
@@ -107,11 +109,12 @@ int set_size_l(intset_l_t *set)
   node_l_t *node;
 
   /* We have at least 2 elements */
-  node = set->head->next;
-  while (node->next != NULL) {
-    size++;
-    node = node->next;
-  }
+  node = (node_l_t*) get_unmarked_ref((uintptr_t) set->head->next);
+  while (node->next != NULL) 
+    {
+      size++;
+      node = (node_l_t*) get_unmarked_ref((uintptr_t) node->next);
+    }
 
   return size;
 }
