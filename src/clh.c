@@ -2,7 +2,7 @@
 
 __thread clh_local_params clh_local_p;
 
-volatile clh_qnode* 
+clh_qnode* 
 clh_acquire(clh_lock *L, clh_qnode* I) 
 {
   I->locked=1;
@@ -26,7 +26,7 @@ clh_acquire(clh_lock *L, clh_qnode* I)
 #endif	/* OPTERON_OPTIMIZE */
     }
 
-  return pred;
+  return (clh_qnode*) pred;
 }
 
 clh_qnode* 
@@ -56,7 +56,7 @@ init_alloc_clh(clh_lock_t* lock)
 {
   clh_qnode* a_node = (clh_qnode *) memalign(CACHE_LINE_SIZE, sizeof(clh_qnode));
   a_node->locked=0;
-  lock->the_lock = a_node;
+  lock->the_lock = (clh_lock*) a_node;
 }
 
 void
