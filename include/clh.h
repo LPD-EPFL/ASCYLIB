@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
-#ifndef __sparc__
+#if defined(PLATFORM_NUMA)
 #include <numa.h>
 #endif
 #include <pthread.h>
@@ -49,7 +49,7 @@ typedef clh_lock_t ptlock_t;
 extern __thread clh_local_params clh_local_p;
 
 //lock
-volatile clh_qnode* clh_acquire(clh_lock* the_lock, clh_qnode* my_qnode);
+clh_qnode* clh_acquire(clh_lock* the_lock, clh_qnode* my_qnode);
 
 //unlock
 clh_qnode* clh_release(clh_qnode* my_qnode, clh_qnode* my_pred);
