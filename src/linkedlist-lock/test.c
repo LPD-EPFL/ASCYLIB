@@ -91,7 +91,7 @@ typedef ALIGNED(64) struct thread_data
 } thread_data_t;
 
 
-extern __thread size_t num_pause, num_total, num_xtest;
+/* extern __thread size_t num_pause, num_total, num_xtest; */
 
 void*
 test(void *data) 
@@ -198,8 +198,8 @@ test(void *data)
     }	
  
   PF_PRINT;
-  printf("[%d] tot: %10lu / pause: %10lu / ratio: %5.2f / xtests: %lu\n",
-  	 d->id, num_total, num_pause, 1.0*num_pause/num_total, num_xtest);
+  /* printf("[%d] tot: %10lu / pause: %10lu / ratio: %5.2f / xtests: %lu\n", */
+  /* 	 d->id, num_total, num_pause, 1.0*num_pause/num_total, num_xtest); */
 
   return NULL;
 }

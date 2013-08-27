@@ -355,7 +355,7 @@ htlock_lock(htlock_t* l)
   /*   { */
   /*     s = getticks(); */
   /*   } */
-  local_ticket = DAF_U32(&localp->nxt);
+  local_ticket = DAF_U32((volatile uint32_t*) &localp->nxt);
   /* if (my_id == 32) */
   /*   { */
   /*     e = getticks(); */
@@ -400,7 +400,7 @@ htlock_release(htlock_t* l)
   PREFETCHW(localp);
 #endif
   int32_t local_cur = localp->cur;
-  int32_t local_nxt = CAS_U32(&localp->nxt, local_cur, 0);
+  int32_t local_nxt = CAS_U32((volatile uint32_t*) &localp->nxt, local_cur, 0);
   if (local_cur == 0 || local_cur == local_nxt) /* global */
     {
 #if defined(OPTERON_OPTIMIZE)

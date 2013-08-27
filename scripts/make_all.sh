@@ -1,6 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
-make lockfree
-make ticket GRANULARITY=GLOBAL_LOCK
-./scripts/bins_add_suffix.sh gl lb
-make ticket
+if [ $(uname -n) = "maglite" ];
+then
+    MAKE="/home/trigonak/sw/make/make";
+else
+    MAKE=make
+fi;
+
+$MAKE lockfree;
+$MAKE ticket GRANULARITY=GLOBAL_LOCK;
+./scripts/bins_add_suffix.sh gl_ticket lb
+$MAKE ticket
+./scripts/bins_add_suffix.sh ticket lb
+$MAKE hticket GRANULARITY=GLOBAL_LOCK;
+./scripts/bins_add_suffix.sh gl_hticket lb
+

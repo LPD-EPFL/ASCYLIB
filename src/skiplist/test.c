@@ -553,6 +553,7 @@ main(int argc, char **argv)
 
   size_t size_after = sl_set_size(set);
   printf("Set size      : %lu (expected: %d)\n", size_after, size);
+  assert(size_after == size);
   printf("Duration      : %d (ms)\n", duration);
   printf("#txs          : %lu (%f / s)\n", reads + updates, (reads + updates) * 1000.0 / duration);
 	
