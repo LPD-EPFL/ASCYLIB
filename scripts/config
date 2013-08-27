@@ -60,3 +60,19 @@ elif [ "$cores" = "twelve" ];
 then
     cores=$(seq 2 1 12);
 fi;
+
+if [ $unm = "maglite" ];
+then
+	max_cores=64;
+elif [ $unm = "parsasrv1.epfl.ch" ];
+then
+	max_cores=36;
+elif [ $unm = "diassrv8" ];
+then
+	max_cores=80;
+elif [ $unm = "lpdpc34" ];
+then
+	max_cores=8;
+else
+	max_cores=48;
+fi;
