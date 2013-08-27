@@ -57,37 +57,6 @@ void barrier_cross(barrier_t *b)
 	pthread_mutex_unlock(&b->mutex);
 }
 
-/* 
- * Returns a pseudo-random value in [1; range].
- * Depending on the symbolic constant RAND_MAX>=32767 defined in stdlib.h,
- * the granularity of rand() could be lower-bounded by the 32767^th which might 
- * be too high for given program options [r]ange and [i]nitial.
- */
-inline int rand_range(int r) {
-	int m = RAND_MAX;
-	int d, v = 0;
-	
-	do {
-		d = (m > r ? r : m);
-		v += 1 + (int)(d * ((double)rand()/((double)(m)+1.0)));
-		r -= m;
-	} while (r > 0);
-	return v;
-}
-
-/* Re-entrant version of rand_range(r) */
-inline int rand_range_re(unsigned int *seed, int r) {
-	int m = RAND_MAX;
-	int d, v = 0;
-	
-	do {
-		d = (m > r ? r : m);		
-		v += 1 + (int)(d * ((double)rand_r(seed)/((double)(m)+1.0)));
-		r -= m;
-	} while (r > 0);
-	return v;
-}
-
 typedef struct thread_data {
 	int range;
 	int push_rate;
