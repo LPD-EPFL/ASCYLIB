@@ -259,6 +259,10 @@ test(void *data)
 int 
 main(int argc, char **argv)
 {
+#if defined(CLH)
+  init_clh_thread(&clh_local_p);
+#endif
+
   /* Create transaction */
   set_cpu(the_cores[0]);
   ssalloc_init();
