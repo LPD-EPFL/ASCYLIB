@@ -1,6 +1,6 @@
 #!/bin/bash
 
-out_file="data/lf_vs_lb_socket_short_"$(date | awk '// {print $2"_"$3}')".dat";
+out_file="data/lf_vs_lb_socket_short_"$(date | gawk '// {print $2"_"$3}')".dat";
 echo "Output file: $out_file";
 printf "" > $out_file;
 
