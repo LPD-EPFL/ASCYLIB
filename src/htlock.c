@@ -38,7 +38,7 @@ create_htlock()
   uint32_t s;
   for (s = 0; s < NUMBER_OF_SOCKETS; s++)
     {
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(PLATFORM_NUMA)
       numa_set_preferred(s);
       htl->local[s] = (htlock_local_t*) numa_alloc_onnode(sizeof(htlock_local_t), s);
 #else
@@ -47,7 +47,7 @@ create_htlock()
       assert(htl->local != NULL);
     }
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(PLATFORM_NUMA)
   numa_set_preferred(my_node);
 #endif
 
@@ -101,7 +101,7 @@ init_alloc_htlock(htlock_t* htl)
   uint32_t s;
   for (s = 0; s < NUMBER_OF_SOCKETS; s++)
     {
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(PLATFORM_NUMA)
       numa_set_preferred(s);
       htl->local[s] = (htlock_local_t*) numa_alloc_onnode(sizeof(htlock_local_t), s);
 #else
@@ -110,7 +110,7 @@ init_alloc_htlock(htlock_t* htl)
       assert(htl->local != NULL);
     }
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(PLATFORM_NUMA)
   numa_set_preferred(my_node);
 #endif
 
@@ -228,7 +228,7 @@ init_htlocks(uint32_t num_locks)
   uint32_t n;
   for (n = 0; n < NUMBER_OF_SOCKETS; n++)
     {
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(PLATFORM_NUMA)
       numa_set_preferred(n);
       _mm_mfence();
 #endif
@@ -237,7 +237,7 @@ init_htlocks(uint32_t num_locks)
       assert(locals[n] != NULL);
     }
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(PLATFORM_NUMA)
   numa_set_preferred(my_node);
 #endif
 
