@@ -11,6 +11,9 @@ lb_ll_gl="./bin/lb-ll_gl_ticket -x2";
 if [ $(uname -n) = "diassrv8" ];
 then
     lb_ll_gl="./bin/lb-ll_gl_hticket -x2";
+elif [ $(uname -n) = "lpd48core" ];
+then
+    lb_ll_gl="./bin/lb-ll_gl_clh -x2";
 fi;
 
 for i in $initials
