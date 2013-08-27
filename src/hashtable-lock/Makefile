@@ -25,7 +25,7 @@ clh.o:
 ll-intset.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/intset.o $(LLREP)/intset.c
 
-coupling.o: ll-intset.o
+coupling.o: ll-intset.o 
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/coupling.o $(LLREP)/coupling.c
 
 lazy.o: ll-intset.o htlock.o
@@ -34,20 +34,14 @@ lazy.o: ll-intset.o htlock.o
 linkedlist-lock.o: ll-intset.o coupling.o lazy.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist-lock.o $(LLREP)/linkedlist-lock.c
 
-lazy_rtm.o: linkedlist-lock.o htlock.o clh.o
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/lazy_rtm.o $(LLREP)/lazy_rtm.c	 
-
-lazy_rtm2.o: linkedlist-lock.o htlock.o clh.o
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/lazy_rtm2.o $(LLREP)/lazy_rtm2.c	 
-
 hashtable-lock.o: ll-intset.o coupling.o lazy.o linkedlist-lock.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/hashtable-lock.o hashtable-lock.c
 
 test.o: ll-intset.o coupling.o lazy.o linkedlist-lock.o hashtable-lock.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o test.c
 
-main: measurements.o ssalloc.o ll-intset.o coupling.o lazy.o lazy_rtm.o lazy_rtm2.o linkedlist-lock.o hashtable-lock.o test.o htlock.o
-	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/intset.o $(BUILDIR)/coupling.o $(BUILDIR)/lazy.o $(BUILDIR)/lazy_rtm.o $(BUILDIR)/lazy_rtm2.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/hashtable-lock.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
+main: measurements.o ssalloc.o ll-intset.o coupling.o lazy.o linkedlist-lock.o hashtable-lock.o test.o htlock.o
+	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/intset.o $(BUILDIR)/coupling.o $(BUILDIR)/lazy.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/hashtable-lock.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
 	rm -f $(BINS)

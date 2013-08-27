@@ -131,8 +131,9 @@ test(void *data)
   seeds = seed_rand();
 
 #if defined(HTICKET)
-  /* printf("~~~~~~~ hticket\n"); */
   init_thread_htlocks(the_cores[d->id]);
+#elif defined(CLH)
+  init_clh_thread(&clh_local_p);
 #endif
 
   /* Wait on barrier */

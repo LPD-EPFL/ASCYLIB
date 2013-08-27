@@ -27,10 +27,10 @@ linkedlist-lock.o:
 lazy.o: linkedlist-lock.h linkedlist-lock.o htlock.o clh.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/lazy.o lazy.c	 
 
-coupling.o: linkedlist-lock.h linkedlist-lock.o
+coupling.o: linkedlist-lock.h linkedlist-lock.o clh.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/coupling.o coupling.c
 
-intset.o: linkedlist-lock.h coupling.h lazy.h
+intset.o: linkedlist-lock.h coupling.h lazy.h clh.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/intset.o intset.c
 
 test.o: linkedlist-lock.h coupling.h lazy.h intset.h
