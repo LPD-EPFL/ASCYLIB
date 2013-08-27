@@ -76,49 +76,6 @@ void barrier_cross(barrier_t *b)
  * be too high for given values of range and initial.
  */
 
-inline long rand_range(long r) {
-	int m = RAND_MAX;
-	int d, v = 0;
-
-/* #ifdef BIAS_RANGE */
-/* 	if(rand() < RAND_MAX / 10000) { */
-/* 	  if(last < r || last > r * 10) { */
-/* 	    last = r; */
-/* 	  } */
-/* 	  return last++; */
-/* 	} */
-/* #endif */
-	
-	do {
-		d = (m > r ? r : m);		
-		v += 1 + (int)(d * ((double)rand()/((double)(m)+1.0)));
-		r -= m;
-	} while (r > 0);
-	return v;
-}
-
-/* Re-entrant version of rand_range(r) */
-inline long rand_range_re(unsigned int *seed, long r) {
-	int m = RAND_MAX;
-	int d, v = 0;
-
-/* #ifdef BIAS_RANGE */
-/* 	if(rand_r(seed) < RAND_MAX / 10000) { */
-/* 	  if(last < r || last > r * 10) { */
-/* 	    last = r; */
-/* 	  } */
-/* 	  return last++; */
-/* 	} */
-/* #endif	 */
-	do {
-		d = (m > r ? r : m);		
-		v += 1 + (int)(d * ((double)rand_r(seed)/((double)(m)+1.0)));
-		r -= m;
-	} while (r > 0);
-	return v;
-}
-
-
 typedef struct thread_data {
         int id;
 	val_t first;
