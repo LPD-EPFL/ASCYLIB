@@ -16,6 +16,9 @@ then
     elif [ $unm = "diassrv8" ];
     then
 	cores=$(seq 2 1 80);
+    elif [ $unm = "lpdpc34" ];
+    then
+	cores=$(seq 2 1 8);
     else
 	cores=$(seq 2 1 48);
     fi;
@@ -30,6 +33,9 @@ then
     elif [ $unm = "diassrv8" ];
     then
 	cores=$(seq 10 10 80);
+    elif [ $unm = "lpdpc34" ];
+    then
+	cores=$(seq 2 1 8);
     else
 	cores=$(seq 6 6 48);
     fi;
@@ -44,6 +50,9 @@ then
     elif [ $unm = "diassrv8" ];
     then
 	cores=$(seq 9 1 11);
+    elif [ $unm = "lpdpc34" ];
+    then
+	cores=$(seq 2 1 8);
     else
 	cores=$(seq 5 1 8);
     fi;

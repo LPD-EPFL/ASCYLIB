@@ -186,7 +186,7 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional) {
 	result = (parse_validate(pred1, curr1) && (val1 == curr1->val) &&
 			  parse_validate(pred2, curr2) && (curr2->val != val2));
 	if (result) {
-		set_mark((long) curr1);
+		set_mark((uintptr_t*) &curr1->next);
 		pred1->next = curr1->next;
 		newnode = new_node_l(val2, curr2, 0);
 		pred2->next = newnode;

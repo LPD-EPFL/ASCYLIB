@@ -26,27 +26,38 @@
 
 #include "lazy.h"
 
-inline int is_marked_ref(long i) {
-  return (int) (i & (LONG_MIN+1));
+inline int
+is_marked_ref(uintptr_t i) 
+{
+  int r = (int) (i & 0x1);
+  /* if (r) { printf("is_marked_ref(%p) = %d\n", i, r); } */
+  return r;
 }
 
-inline long unset_mark(long i) {
-	i &= LONG_MAX-1;
-	return i;
+inline uintptr_t
+unset_mark(uintptr_t* i) 
+{
+  *i &= ~(0x1);
+  return *i;
 }
 
-inline long set_mark(long i) {
-	i = unset_mark(i);
-	i += 1;
-	return i;
+inline uintptr_t
+set_mark(uintptr_t* i)
+{
+  *i |= 0x1;
+  return *i;
 }
 
-inline long get_unmarked_ref(long w) {
-	return unset_mark(w);
+inline uintptr_t
+get_unmarked_ref(uintptr_t w) 
+{
+  return (w & ~(0x1));
 }
 
-inline long get_marked_ref(long w) {
-	return set_mark(w);
+inline uintptr_t
+get_marked_ref(uintptr_t w) 
+{
+  return (w | 0x1);
 }
 
 /*
@@ -57,7 +68,7 @@ inline int
 parse_validate(node_l_t* pred, node_l_t* curr) 
 {
   /* FIX: checking pred twice :: return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr)); */
-  return (!is_marked_ref((long) pred) && !is_marked_ref((long) curr) && (pred->next == curr));
+  return (!is_marked_ref((uintptr_t) pred->next) && !is_marked_ref((uintptr_t) curr->next) && (pred->next == curr));
 }
 
 int
@@ -67,9 +78,9 @@ parse_find(intset_l_t *set, val_t val)
   curr = set->head;
   while (curr->val < val)
     {
-      curr = curr->next;
+      curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
     }
-  return ((curr->val == val) && !is_marked_ref((long) curr));
+  return ((curr->val == val) && !is_marked_ref((uintptr_t) curr->next));
 }
 
 int
@@ -79,11 +90,11 @@ parse_insert(intset_l_t *set, val_t val)
   int result;
 	
   pred = set->head;
-  curr = pred->next;
+  curr = (node_l_t*) get_unmarked_ref((uintptr_t) pred->next);
   while (curr->val < val) 
     {
       pred = curr;
-      curr = curr->next;
+      curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
     }
 
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
@@ -117,11 +128,11 @@ parse_delete(intset_l_t *set, val_t val)
   int result;
 	
   pred = set->head;
-  curr = pred->next;
+  curr = (node_l_t*) get_unmarked_ref((uintptr_t) pred->next);
   while (curr->val < val)
     {
       pred = curr;
-      curr = curr->next;
+      curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
     }
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(pred));
@@ -129,8 +140,9 @@ parse_delete(intset_l_t *set, val_t val)
   result = (parse_validate(pred, curr) && (val == curr->val));
   if (result)
     {
-      set_mark((long) curr);
-      pred->next = curr->next;
+      node_l_t* c_nxt = curr->next;
+      set_mark((uintptr_t*) &curr->next);
+      pred->next = c_nxt;
     }
   GL_UNLOCK(set->lock);
   UNLOCK(ND_GET_LOCK(curr));

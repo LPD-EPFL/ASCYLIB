@@ -21,6 +21,9 @@
  * GNU General Public License for more details.
  */
 
+#ifndef _H_LINKEDLIST_LOCK_
+#define _H_LINKEDLIST_LOCK_
+
 #include <assert.h>
 #include <getopt.h>
 #include <limits.h>
@@ -84,4 +87,4 @@ void set_delete_l(intset_l_t *set);
 int set_size_l(intset_l_t *set);
 void node_delete_l(node_l_t *node);
 
-
+#endif	/* _H_LINKEDLIST_LOCK_ */

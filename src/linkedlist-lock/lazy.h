@@ -24,17 +24,22 @@
  * GNU General Public License for more details.
  */
 
+#ifndef _H_LAZY_
+#define _H_LAZY_
+
 #include "coupling.h"
 
 /* handling logical deletion flag */ 
-inline int is_marked_ref(long i);
-inline long unset_mark(long i);
-inline long set_mark(long i);
-inline long get_unmarked_ref(long w);
-inline long get_marked_ref(long w);
+extern inline int is_marked_ref(uintptr_t i);
+extern inline uintptr_t unset_mark(uintptr_t* i);
+extern inline uintptr_t set_mark(uintptr_t* i);
+extern inline uintptr_t get_unmarked_ref(uintptr_t w);
+extern inline uintptr_t get_marked_ref(uintptr_t w);
 
 /* linked list accesses */
-int parse_validate(node_l_t *pred, node_l_t *curr);
+extern int parse_validate(node_l_t *pred, node_l_t *curr);
 int parse_find(intset_l_t *set, val_t val);
 int parse_insert(intset_l_t *set, val_t val);
 int parse_delete(intset_l_t *set, val_t val);
+
+#endif	/* _H_LAZY_ */

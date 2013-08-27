@@ -91,6 +91,8 @@ typedef ALIGNED(64) struct thread_data
 } thread_data_t;
 
 
+/* extern __thread size_t num_pause, num_total, num_xtest; */
+
 void*
 test(void *data) 
 {
@@ -111,8 +113,9 @@ test(void *data)
   seeds = seed_rand();
 
 #if defined(HTICKET)
-  /* printf("~~~~~~~ hticket\n"); */
   init_thread_htlocks(the_cores[d->id]);
+#elif defined(CLH)
+  init_clh_thread(&clh_local_p);
 #endif
 
 
@@ -126,7 +129,6 @@ test(void *data)
   /* while (stop == 0) */
   while (*running)
     {
-			
       if (unext) { // update
 				
 	if (last < 0) { // add
@@ -196,6 +198,8 @@ test(void *data)
     }	
  
   PF_PRINT;
+  /* printf("[%d] tot: %10lu / pause: %10lu / ratio: %5.2f / xtests: %lu\n", */
+  /* 	 d->id, num_total, num_pause, 1.0*num_pause/num_total, num_xtest); */
 
   return NULL;
 }
@@ -203,10 +207,8 @@ test(void *data)
 int
 main(int argc, char **argv)
 {
-#if defined(HTICKET)
-  {
-    printf("~~~~~~~ hticket\n");
-  }
+#if defined(CLH)
+  init_clh_thread(&clh_local_p);
 #endif
 
   set_cpu(the_cores[0]);
@@ -231,9 +233,12 @@ main(int argc, char **argv)
   int i, c, size;
   val_t last = 0; 
   val_t val = 0;
-  unsigned long reads, effreads, updates, effupds, aborts, aborts_locked_read, aborts_locked_write,
+  unsigned long reads, effreads, updates, effupds;
+#if defined(STM)
+  unsigned long aborts, aborts_locked_read, aborts_locked_write,
     aborts_validate_read, aborts_validate_write, aborts_validate_commit,
     aborts_invalid_memory, max_retries;
+#endif 
   thread_data_t *data;
   pthread_t *threads;
   pthread_attr_t attr;
@@ -397,7 +402,6 @@ main(int argc, char **argv)
 	  val = rand_range(range);
 	  if (set_add_l(set, val, 0)) 
 	    {
-	      last = val;
 	      if (i == ten_perc_nxt)
 		{
 		  printf("%02lu%%  ", tens * 10); fflush(stdout);
@@ -487,6 +491,7 @@ main(int argc, char **argv)
   }
 	
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
+#if defined(STM)
   aborts = 0;
   aborts_locked_read = 0;
   aborts_locked_write = 0;
@@ -494,11 +499,12 @@ main(int argc, char **argv)
   aborts_validate_write = 0;
   aborts_validate_commit = 0;
   aborts_invalid_memory = 0;
+  max_retries = 0;
+#endif
   reads = 0;
   effreads = 0;
   updates = 0;
   effupds = 0;
-  max_retries = 0;
   for (i = 0; i < nb_threads; i++) {
     printf("Thread %d\n", i);
     printf("  #add        : %lu\n", data[i].nb_add);
@@ -507,6 +513,7 @@ main(int argc, char **argv)
     printf("    #removed  : %lu\n", data[i].nb_removed);
     printf("  #contains   : %lu\n", data[i].nb_contains);
     printf("  #found      : %lu\n", data[i].nb_found);
+#if defined(STM)
     printf("  #aborts     : %lu\n", data[i].nb_aborts);
     printf("    #lock-r   : %lu\n", data[i].nb_aborts_locked_read);
     printf("    #lock-w   : %lu\n", data[i].nb_aborts_locked_write);
@@ -522,6 +529,9 @@ main(int argc, char **argv)
     aborts_validate_write += data[i].nb_aborts_validate_write;
     aborts_validate_commit += data[i].nb_aborts_validate_commit;
     aborts_invalid_memory += data[i].nb_aborts_invalid_memory;
+    if (max_retries < data[i].max_retries)
+      max_retries = data[i].max_retries;
+#endif
     reads += data[i].nb_contains;
     effreads += data[i].nb_contains + 
       (data[i].nb_add - data[i].nb_added) + 
@@ -531,10 +541,10 @@ main(int argc, char **argv)
 		
     //size += data[i].diff;
     size += data[i].nb_added - data[i].nb_removed;
-    if (max_retries < data[i].max_retries)
-      max_retries = data[i].max_retries;
   }
-  printf("Set size      : %d (expected: %d)\n", set_size_l(set), size);
+  int size_after = set_size_l(set);
+  printf("Set size      : %d (expected: %d)\n", size_after, size);
+  assert(size_after == size);
   printf("Duration      : %d (ms)\n", duration);
   printf("#txs          : %lu (%f / s)\n", reads + updates, (reads + updates) * 1000.0 / duration);
 	
@@ -553,6 +563,7 @@ main(int argc, char **argv)
 	   duration);
   } else printf("%lu (%f / s)\n", updates, updates * 1000.0 / duration);
 	
+#if defined(STM)
   printf("#aborts       : %lu (%f / s)\n", aborts, aborts * 1000.0 / duration);
   printf("  #lock-r     : %lu (%f / s)\n", aborts_locked_read, aborts_locked_read * 1000.0 / duration);
   printf("  #lock-w     : %lu (%f / s)\n", aborts_locked_write, aborts_locked_write * 1000.0 / duration);
@@ -561,7 +572,8 @@ main(int argc, char **argv)
   printf("  #val-c      : %lu (%f / s)\n", aborts_validate_commit, aborts_validate_commit * 1000.0 / duration);
   printf("  #inv-mem    : %lu (%f / s)\n", aborts_invalid_memory, aborts_invalid_memory * 1000.0 / duration);
   printf("Max retries   : %lu\n", max_retries);
-	
+#endif 
+
   /* Delete set */
   set_delete_l(set);
 	

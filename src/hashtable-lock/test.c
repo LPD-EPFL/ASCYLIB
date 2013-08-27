@@ -107,6 +107,8 @@ typedef ALIGNED(64) struct thread_data
 } thread_data_t;
 
 
+/* extern __thread size_t num_pause, num_total, num_xtest; */
+
 void*
 test(void *data) 
 {
@@ -247,6 +249,8 @@ test(void *data)
     }
 	
   PF_PRINT;
+ /* printf("[%d] tot: %10lu / pause: %10lu / ratio: %5.2f / xtests: %lu / ratio: %5.2f\n", */
+ /* 	d->id, num_total, num_pause, 1.0*num_pause/num_total, num_xtest, 1.0*num_xtest/num_total); */
 	
   return NULL;
 }
@@ -477,44 +481,47 @@ main(int argc, char **argv)
   barrier_init(&barrier, nb_threads + 1);
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-  for (i = 0; i < nb_threads; i++) {
-    printf("Creating thread %d\n", i);
-    data[i].first = last;
-    data[i].range = range;
-    data[i].update = update;
-    data[i].load_factor = load_factor;
-    data[i].move = move;
-    data[i].snapshot = snapshot;
-    data[i].unit_tx = unit_tx;
-    data[i].alternate = alternate;
-    data[i].effective = effective;
-    data[i].nb_add = 0;
-    data[i].nb_added = 0;
-    data[i].nb_remove = 0;
-    data[i].nb_removed = 0;
-    data[i].nb_move = 0;
-    data[i].nb_moved = 0;
-    data[i].nb_snapshot = 0;
-    data[i].nb_snapshoted = 0;
-    data[i].nb_contains = 0;
-    data[i].nb_found = 0;
-    data[i].nb_aborts = 0;
-    data[i].nb_aborts_locked_read = 0;
-    data[i].nb_aborts_locked_write = 0;
-    data[i].nb_aborts_validate_read = 0;
-    data[i].nb_aborts_validate_write = 0;
-    data[i].nb_aborts_validate_commit = 0;
-    data[i].nb_aborts_invalid_memory = 0;
-    data[i].max_retries = 0;
-    data[i].seed = rand();
-    data[i].set = set;
-    data[i].barrier = &barrier;
-    data[i].id = i;
-    if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
-      fprintf(stderr, "Error creating thread\n");
-      exit(1);
+  printf("Creating threads:");
+  for (i = 0; i < nb_threads; i++) 
+    {
+      printf(" %d", i);
+      data[i].first = last;
+      data[i].range = range;
+      data[i].update = update;
+      data[i].load_factor = load_factor;
+      data[i].move = move;
+      data[i].snapshot = snapshot;
+      data[i].unit_tx = unit_tx;
+      data[i].alternate = alternate;
+      data[i].effective = effective;
+      data[i].nb_add = 0;
+      data[i].nb_added = 0;
+      data[i].nb_remove = 0;
+      data[i].nb_removed = 0;
+      data[i].nb_move = 0;
+      data[i].nb_moved = 0;
+      data[i].nb_snapshot = 0;
+      data[i].nb_snapshoted = 0;
+      data[i].nb_contains = 0;
+      data[i].nb_found = 0;
+      data[i].nb_aborts = 0;
+      data[i].nb_aborts_locked_read = 0;
+      data[i].nb_aborts_locked_write = 0;
+      data[i].nb_aborts_validate_read = 0;
+      data[i].nb_aborts_validate_write = 0;
+      data[i].nb_aborts_validate_commit = 0;
+      data[i].nb_aborts_invalid_memory = 0;
+      data[i].max_retries = 0;
+      data[i].seed = rand();
+      data[i].set = set;
+      data[i].barrier = &barrier;
+      data[i].id = i;
+      if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
+	fprintf(stderr, "Error creating thread\n");
+	exit(1);
+      }
     }
-  }
+  printf("\n");
   pthread_attr_destroy(&attr);
 	
   /* Start threads */
@@ -568,6 +575,7 @@ main(int argc, char **argv)
     printf("    #removed  : %lu\n", data[i].nb_removed);
     printf("  #contains   : %lu\n", data[i].nb_contains);
     printf("    #found    : %lu\n", data[i].nb_found);
+#if defined(STM)
     printf("  #move       : %lu\n", data[i].nb_move);
     printf("  #moved      : %lu\n", data[i].nb_moved);
     printf("  #snapshot   : %lu\n", data[i].nb_snapshot);
@@ -580,6 +588,7 @@ main(int argc, char **argv)
     printf("    #val-c    : %lu\n", data[i].nb_aborts_validate_commit);
     printf("    #inv-mem  : %lu\n", data[i].nb_aborts_invalid_memory);
     printf("  Max retries : %lu\n", data[i].max_retries);
+#endif
     aborts += data[i].nb_aborts;
     aborts_locked_read += data[i].nb_aborts_locked_read;
     aborts_locked_write += data[i].nb_aborts_locked_write;
@@ -622,6 +631,7 @@ main(int argc, char **argv)
 	   duration);
   } else printf("%lu (%f / s)\n", updates, updates * 1000.0 / duration);
 	
+#if defined(STM)
   printf("#move txs     : %lu (%f / s)\n", moves, moves * 1000.0 / duration);
   printf("  #moved      : %lu (%f / s)\n", moved, moved * 1000.0 / duration);
   printf("#snapshot txs : %lu (%f / s)\n", snapshots, snapshots * 1000.0 / duration);
@@ -634,7 +644,7 @@ main(int argc, char **argv)
   printf("  #val-c      : %lu (%f / s)\n", aborts_validate_commit, aborts_validate_commit * 1000.0 / duration);
   printf("  #inv-mem    : %lu (%f / s)\n", aborts_invalid_memory, aborts_invalid_memory * 1000.0 / duration);
   printf("Max retries   : %lu\n", max_retries);
-	
+#endif	
   /* Delete set */
   ht_delete(set);
 	

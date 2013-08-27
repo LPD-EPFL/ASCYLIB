@@ -110,16 +110,14 @@ mark_node_ptrs(sl_node_t *n)
   for (i=n->toplevel-1; i>=0; i--)
     {
       do
-	{
-	  n_next = n->next[i];
-	  if (is_marked((uintptr_t)n_next))
-	    {
-	      break;
-	    }
-	} while (!ATOMIC_CAS_MB(&n->next[i], n_next, set_mark((uintptr_t)n_next)));
+      	{
+      	  n_next = n->next[i];
+      	  if (is_marked((uintptr_t)n_next))
+      	    {
+      	      break;
+      	    }
+      	} while (!ATOMIC_CAS_MB(&n->next[i], n_next, set_mark((uintptr_t)n_next)));
     }
-
-  /* MEM_BARRIER; */
 }
 
 int
@@ -142,16 +140,19 @@ fraser_remove(sl_intset_t *set, val_t val)
     }
 
 
-  ATOMIC_FETCH_AND_INC_FULL(&succs[0]->deleted);
-  
-  /* MEM_BARRIER; */
+  if (ATOMIC_FETCH_AND_INC_FULL(&succs[0]->deleted) == 0)
+    {
+      /* 2. Mark forward pointers, then search will remove the node */
+      mark_node_ptrs(succs[0]);
 
-  /* 2. Mark forward pointers, then search will remove the node */
-  mark_node_ptrs(succs[0]);
+      /* MEM_BARRIER; */
 
-  /* MEM_BARRIER; */
-
-  fraser_search(set, val, NULL, NULL);
+      fraser_search(set, val, NULL, NULL);
+    }
+  else
+    {
+      result = 0;
+    }  
  end:
   /* free(succs); */
   ssfree(succs);
@@ -164,7 +165,7 @@ fraser_insert(sl_intset_t *set, val_t v)
 {
   sl_node_t *new, *new_next, *pred, *succ, **succs, **preds;
   int i;
-  int result;
+  int result = 0;
 
   new = sl_new_simple_node(v, get_rand_level(), 0);
   /* preds = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
@@ -177,10 +178,9 @@ fraser_insert(sl_intset_t *set, val_t v)
   /* Update the value field of an existing node */
   if (succs[0]->val == v) 
     {				/* Value already in list */
-      if (succs[0]->deleted) 
+      if (succs[0]->deleted)
 	{		   /* Value is deleted: remove it and retry */
 	  mark_node_ptrs(succs[0]);
-	  /* MEM_BARRIER; */
 	  goto retry;
 	}
       result = 0;
@@ -195,13 +195,14 @@ fraser_insert(sl_intset_t *set, val_t v)
 
   MEM_BARRIER;
 
+
   /* Node is visible once inserted at lowest level */
-  if (!ATOMIC_CAS_MB(&preds[0]->next[0], succs[0], new)) 
+  if (!ATOMIC_CAS_MB(&preds[0]->next[0], succs[0], new))
     {
       goto retry;
     }
 
-  for (i = 1; i < new->toplevel; i++) 
+ for (i = 1; i < new->toplevel; i++) 
     {
       while (1) 
 	{
@@ -209,6 +210,10 @@ fraser_insert(sl_intset_t *set, val_t v)
 	  succ = succs[i];
 	  /* Update the forward pointer if it is stale */
 	  new_next = new->next[i];
+	  if (is_marked((uintptr_t) new_next))
+	    {
+	      goto success;
+	    }
 	  if ((new_next != succ) && 
 	      (!ATOMIC_CAS_MB(&new->next[i], unset_mark((uintptr_t)new_next), succ)))
 	    break; /* Give up if pointer is marked */
@@ -223,6 +228,8 @@ fraser_insert(sl_intset_t *set, val_t v)
 	  fraser_search(set, v, preds, succs);
 	}
     }
+
+ success:
   result = 1;
  end:
   /* free(preds); */
