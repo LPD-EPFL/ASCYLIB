@@ -32,27 +32,42 @@
  *  - (un)set_marked changes the mark,
  *  - get_(un)marked_ref sets the mark before returning the node.
  */
-inline int is_marked_ref(long i) {
-    return (int) (i & (LONG_MIN+1));
+inline int
+is_marked_ref(long i) 
+{
+  /* return (int) (i & (LONG_MIN+1)); */
+  return (int) (i & 0x1L);
 }
 
-inline long unset_mark(long i) {
-	i &= LONG_MAX-1;
-	return i;
+inline long
+unset_mark(long i)
+{
+  /* i &= LONG_MAX-1; */
+  i &= ~0x1L;
+  return i;
 }
 
-inline long set_mark(long i) {
-	i = unset_mark(i);
-	i += 1;
-	return i;
+inline long
+set_mark(long i) 
+{
+  /* i = unset_mark(i); */
+  /* i += 1; */
+  i |= 0x1L;
+  return i;
 }
 
-inline long get_unmarked_ref(long w) {
-	return unset_mark(w);
+inline long
+get_unmarked_ref(long w) 
+{
+  /* return unset_mark(w); */
+  return w & ~0x1L;
 }
 
-inline long get_marked_ref(long w) {
-	return set_mark(w);
+inline long
+get_marked_ref(long w) 
+{
+  /* return set_mark(w); */
+  return w | 0x1L;
 }
 
 /*
@@ -63,11 +78,12 @@ inline long get_marked_ref(long w) {
  * Encountered nodes that are marked as logically deleted are physically removed
  * from the list, yet not garbage collected.
  */
-node_t *harris_search(intset_t *set, val_t val, node_t **left_node) {
+node_t*
+harris_search(intset_t *set, val_t val, node_t **left_node) 
+{
   node_t *left_node_next, *right_node;
   left_node_next = set->head;
 	
- search_again:
   do
     {
       node_t *t = set->head;
@@ -96,7 +112,7 @@ node_t *harris_search(intset_t *set, val_t val, node_t **left_node) {
 	{
 	  if (right_node->next && is_marked_ref((long) right_node->next))
 	    {
-	      goto search_again;
+	      continue;
 	    }
 	  else
 	    {
@@ -107,11 +123,7 @@ node_t *harris_search(intset_t *set, val_t val, node_t **left_node) {
       /* Remove one or more marked nodes */
       if (ATOMIC_CAS_MB(&(*left_node)->next, left_node_next, right_node)) 
 	{
-	  if (right_node->next && is_marked_ref((long) right_node->next))
-	    {
-	      goto search_again;
-	    }
-	  else 
+	  if (!(right_node->next && is_marked_ref((long) right_node->next)))
 	    {
 	      return right_node;
 	    }
@@ -123,35 +135,41 @@ node_t *harris_search(intset_t *set, val_t val, node_t **left_node) {
 /*
  * harris_find returns whether there is a node in the list owning value val.
  */
-int harris_find(intset_t *set, val_t val) {
-	node_t *right_node, *left_node;
-	left_node = set->head;
+int
+harris_find(intset_t *set, val_t val) 
+{
+  node_t *right_node, *left_node;
+  left_node = set->head;
 	
-	right_node = harris_search(set, val, &left_node);
-	if ((!right_node->next) || right_node->val != val)
-		return 0;
-	else 
-		return 1;
+  right_node = harris_search(set, val, &left_node);
+  if ((!right_node->next) || right_node->val != val)
+    return 0;
+  else 
+    return 1;
 }
 
 /*
  * harris_find inserts a new node with the given value val in the list
  * (if the value was absent) or does nothing (if the value is already present).
  */
-int harris_insert(intset_t *set, val_t val) {
-	node_t *newnode, *right_node, *left_node;
-	left_node = set->head;
+int
+harris_insert(intset_t *set, val_t val) 
+{
+  node_t *newnode, *right_node, *left_node;
+  left_node = set->head;
 	
-	do {
-		right_node = harris_search(set, val, &left_node);
-		if (right_node->val == val)
-			return 0;
-		newnode = new_node(val, right_node, 0);
-		/* mem-bar between node creation and insertion */
-		AO_nop_full(); 
-		if (ATOMIC_CAS_MB(&left_node->next, right_node, newnode))
-			return 1;
-	} while(1);
+  do 
+    {
+      right_node = harris_search(set, val, &left_node);
+      if (right_node->val == val)
+	return 0;
+      newnode = new_node(val, right_node, 0);
+      /* mem-bar between node creation and insertion */
+      AO_nop_full(); 
+      if (ATOMIC_CAS_MB(&left_node->next, right_node, newnode))
+	return 1;
+    } 
+  while(1);
 }
 
 /*
@@ -159,24 +177,33 @@ int harris_insert(intset_t *set, val_t val) {
  * or does nothing (if the value is already present).
  * The deletion is logical and consists of setting the node mark bit to 1.
  */
-int harris_delete(intset_t *set, val_t val) {
-	node_t *right_node, *right_node_next, *left_node;
-	left_node = set->head;
+int
+harris_delete(intset_t *set, val_t val) 
+{
+  node_t *right_node, *right_node_next, *left_node;
+  left_node = set->head;
 	
-	do {
-		right_node = harris_search(set, val, &left_node);
-		if (right_node->val != val)
-			return 0;
-		right_node_next = right_node->next;
-		if (!is_marked_ref((long) right_node_next))
-			if (ATOMIC_CAS_MB(&right_node->next, 
-							  right_node_next, 
-							  get_marked_ref((long) right_node_next)))
-				break;
-	} while(1);
-	if (!ATOMIC_CAS_MB(&left_node->next, right_node, right_node_next))
-		right_node = harris_search(set, right_node->val, &left_node);
-	return 1;
+  do 
+    {
+      right_node = harris_search(set, val, &left_node);
+      if (right_node->val != val)
+	return 0;
+      right_node_next = right_node->next;
+      if (!is_marked_ref((long) right_node_next))
+	{
+	  if (ATOMIC_CAS_MB(&right_node->next, right_node_next, get_marked_ref((long) right_node_next)))
+	    {
+	      break;
+	    }
+	}
+    } 
+  while(1);
+
+  if (!ATOMIC_CAS_MB(&left_node->next, right_node, right_node_next))
+    {
+      right_node = harris_search(set, right_node->val, &left_node);
+    }
+  return 1;
 }
 
 
