@@ -92,10 +92,6 @@ ticket_init(volatile ptlock_t* l)
   MEM_BARRIER;
 }
 
-#define OPTERON_OPTIMIZE
-/* #undef PREFETCHW */
-/* #define PREFETCHW(l) */
-
 #define TICKET_BASE_WAIT 512
 #define TICKET_MAX_WAIT  4095
 #define TICKET_WAIT_NEXT 128

@@ -193,7 +193,7 @@ ifeq ($(PC_NAME), parsasrv1.epfl.ch)
 endif
 
 ifeq ($(PC_NAME), lpd48core)
-    CFLAGS += -DOPTERON -DPLATFORM_MCORE
+    CFLAGS += -DOPTERON -DPLATFORM_MCORE -DOPTERON_OPTIMIZE
 endif
 
 ifeq ($(PC_NAME), diassrv8)
