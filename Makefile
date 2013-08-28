@@ -9,10 +9,10 @@ LFBENCHS = src/linkedlist src/hashtable src/skiplist
 
 all:	lock
 
-lock:
+mutex:
 	$(MAKE) "LOCK=MUTEX" $(LBENCHS)
 
-spinlock:
+spin:
 	$(MAKE) "LOCK=SPIN" $(LBENCHS)
 
 tas:
