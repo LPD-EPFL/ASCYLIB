@@ -29,35 +29,34 @@
 inline int
 is_marked_ref(uintptr_t i) 
 {
-  int r = (int) (i & 0x1);
   /* if (r) { printf("is_marked_ref(%p) = %d\n", i, r); } */
-  return r;
+  return (int) (i & 0x1L);
 }
 
 inline uintptr_t
 unset_mark(uintptr_t* i) 
 {
-  *i &= ~(0x1);
+  *i &= ~0x1L;
   return *i;
 }
 
 inline uintptr_t
 set_mark(uintptr_t* i)
 {
-  *i |= 0x1;
+  *i |= 0x1L;
   return *i;
 }
 
 inline uintptr_t
 get_unmarked_ref(uintptr_t w) 
 {
-  return (w & ~(0x1));
+  return w & ~0x1L;
 }
 
 inline uintptr_t
 get_marked_ref(uintptr_t w) 
 {
-  return (w | 0x1);
+  return w | 0x1L;
 }
 
 /*
@@ -68,7 +67,8 @@ inline int
 parse_validate(node_l_t* pred, node_l_t* curr) 
 {
   /* FIX: checking pred twice :: return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr)); */
-  return (!is_marked_ref((uintptr_t) pred->next) && !is_marked_ref((uintptr_t) curr->next) && (pred->next == curr));
+  int r = (!is_marked_ref((uintptr_t) pred->next) && !is_marked_ref((uintptr_t) curr->next) && (pred->next == curr));
+  return r;
 }
 
 int
@@ -100,15 +100,18 @@ parse_insert(intset_l_t *set, val_t val)
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(pred));
   LOCK(ND_GET_LOCK(curr));
+
+  MEM_BARRIER;
   result = (parse_validate(pred, curr) && (curr->val != val));
-  if (result) 
+  if (result)
     {
       newnode = new_node_l(val, curr, 0);
       pred->next = newnode;
     } 
-  GL_UNLOCK(set->lock);
   UNLOCK(ND_GET_LOCK(curr));
   UNLOCK(ND_GET_LOCK(pred));
+  GL_UNLOCK(set->lock);
+  
   return result;
 }
 
@@ -134,6 +137,7 @@ parse_delete(intset_l_t *set, val_t val)
       pred = curr;
       curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
     }
+
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(pred));
   LOCK(ND_GET_LOCK(curr));

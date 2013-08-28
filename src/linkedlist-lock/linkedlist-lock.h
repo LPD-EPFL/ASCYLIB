@@ -69,7 +69,7 @@ typedef ALIGNED(64) struct node_l
   struct node_l *next;
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;
-#endif
+  #endif
   /* char padding[40]; */
 } node_l_t;
 
@@ -77,6 +77,7 @@ typedef ALIGNED(64) struct intset_l
 {
   node_l_t* head;
 #if defined(LL_GLOBAL_LOCK)
+  /* char padding[56]; */
   volatile ptlock_t* lock;
 #endif
 } intset_l_t;

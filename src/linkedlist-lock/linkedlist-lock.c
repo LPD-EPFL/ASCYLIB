@@ -24,29 +24,31 @@
 #include "intset.h"
 #include "utils.h"
 
-node_l_t *new_node_l(val_t val, node_l_t *next, int transactional)
+node_l_t*
+new_node_l(val_t val, node_l_t *next, int transactional)
 {
-  node_l_t *node_l;
+  volatile node_l_t *node_l;
   
-  node_l = (node_l_t *) ssalloc(sizeof(node_l_t));
-  /* node_l = (node_l_t *)malloc(sizeof(node_l_t)); */
-  if (node_l == NULL) {
-    perror("malloc");
-    exit(1);
-  }
+  node_l = (volatile node_l_t *) ssalloc(sizeof(node_l_t));
+  if (node_l == NULL)
+    {
+      perror("malloc");
+      exit(1);
+    }
   node_l->val = val;
   node_l->next = next;
+  
   INIT_LOCK(ND_GET_LOCK(node_l));
 
-#if defined(__tilera__)
+#if defined(__tile__)
   /* on tilera you may have store reordering causing the pointer to a new node
-   to become visible, before the contents of the node are visible */
+     to become visible, before the contents of the node are visible */
   MEM_BARRIER;
-#endif	/* __tilera__ */
+#endif	/* __tile__ */
 
   /* _mm_mfence(); */
 
-  return node_l;
+  return (node_l_t*) node_l;
 }
 
 intset_l_t *set_new_l()
@@ -77,6 +79,7 @@ intset_l_t *set_new_l()
   ssalloc_align_alloc(0);
 #endif
 
+  MEM_BARRIER;
   return set;
 }
 
