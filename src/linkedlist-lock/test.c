@@ -25,6 +25,7 @@
 #include "utils.h"
 
 __thread unsigned long* seeds;
+int verbose = 0;
 
 ALIGNED(64) uint8_t running[64];
 
@@ -218,6 +219,7 @@ main(int argc, char **argv)
   struct option long_options[] = {
     // These options don't set a flag
     {"help",                      no_argument,       NULL, 'h'},
+    {"verbose",                   no_argument,       NULL, 'v'},
     {"duration",                  required_argument, NULL, 'd'},
     {"initial-size",              required_argument, NULL, 'i'},
     {"num-threads",               required_argument, NULL, 'n'},
@@ -258,8 +260,8 @@ main(int argc, char **argv)
 	
   while(1) {
     i = 0;
-    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:l:x:"
-		    , long_options, &i);
+    c = getopt_long(argc, argv, "hvAf:d:i:n:r:s:u:l:x:"
+		    ,long_options, &i);
 		
     if(c == -1)
       break;
@@ -281,6 +283,8 @@ main(int argc, char **argv)
 	     "Options:\n"
 	     "  -h, --help\n"
 	     "        Print this message\n"
+	     "  -v, --verbose\n"
+	     "        Print detailed (per core) results\n"
 	     "  -A, --alternate (default="XSTR(DEFAULT_ALTERNATE)")\n"
 	     "        Consecutive insert/remove target the same value\n"
 	     "  -f, --effective <int>\n"
@@ -305,6 +309,9 @@ main(int argc, char **argv)
       exit(0);
     case 'A':
       alternate = 1;
+      break;
+    case 'v':
+      verbose = 1;
       break;
     case 'f':
       effective = atoi(optarg);
@@ -385,13 +392,10 @@ main(int argc, char **argv)
   /* stop = 0; */
   *running = 1;
 	
-  /* Init STM */
-  printf("Initializing STM\n");
+  /* printf("Initializing STM\n"); */
 	
   size_t ten_perc = initial / 10, tens = 1;
   size_t ten_perc_nxt = ten_perc;
-
-
   /* Populate set */
   printf("Adding %d entries to set\n", initial);
   if (initial < 10000)
@@ -505,43 +509,50 @@ main(int argc, char **argv)
   effreads = 0;
   updates = 0;
   effupds = 0;
-  for (i = 0; i < nb_threads; i++) {
-    printf("Thread %d\n", i);
-    printf("  #add        : %lu\n", data[i].nb_add);
-    printf("    #added    : %lu\n", data[i].nb_added);
-    printf("  #remove     : %lu\n", data[i].nb_remove);
-    printf("    #removed  : %lu\n", data[i].nb_removed);
-    printf("  #contains   : %lu\n", data[i].nb_contains);
-    printf("  #found      : %lu\n", data[i].nb_found);
+  for (i = 0; i < nb_threads; i++)
+    {
+      if (verbose)
+	{
+	  printf("Thread %d\n", i);
+	  printf("  #add        : %lu\n", data[i].nb_add);
+	  printf("    #added    : %lu\n", data[i].nb_added);
+	  printf("  #remove     : %lu\n", data[i].nb_remove);
+	  printf("    #removed  : %lu\n", data[i].nb_removed);
+	  printf("  #contains   : %lu\n", data[i].nb_contains);
+	  printf("  #found      : %lu\n", data[i].nb_found);
+	}
 #if defined(STM)
-    printf("  #aborts     : %lu\n", data[i].nb_aborts);
-    printf("    #lock-r   : %lu\n", data[i].nb_aborts_locked_read);
-    printf("    #lock-w   : %lu\n", data[i].nb_aborts_locked_write);
-    printf("    #val-r    : %lu\n", data[i].nb_aborts_validate_read);
-    printf("    #val-w    : %lu\n", data[i].nb_aborts_validate_write);
-    printf("    #val-c    : %lu\n", data[i].nb_aborts_validate_commit);
-    printf("    #inv-mem  : %lu\n", data[i].nb_aborts_invalid_memory);
-    printf("  Max retries : %lu\n", data[i].max_retries);
-    aborts += data[i].nb_aborts;
-    aborts_locked_read += data[i].nb_aborts_locked_read;
-    aborts_locked_write += data[i].nb_aborts_locked_write;
-    aborts_validate_read += data[i].nb_aborts_validate_read;
-    aborts_validate_write += data[i].nb_aborts_validate_write;
-    aborts_validate_commit += data[i].nb_aborts_validate_commit;
-    aborts_invalid_memory += data[i].nb_aborts_invalid_memory;
-    if (max_retries < data[i].max_retries)
-      max_retries = data[i].max_retries;
+      if (verbose)
+	{
+	  printf("  #aborts     : %lu\n", data[i].nb_aborts);
+	  printf("    #lock-r   : %lu\n", data[i].nb_aborts_locked_read);
+	  printf("    #lock-w   : %lu\n", data[i].nb_aborts_locked_write);
+	  printf("    #val-r    : %lu\n", data[i].nb_aborts_validate_read);
+	  printf("    #val-w    : %lu\n", data[i].nb_aborts_validate_write);
+	  printf("    #val-c    : %lu\n", data[i].nb_aborts_validate_commit);
+	  printf("    #inv-mem  : %lu\n", data[i].nb_aborts_invalid_memory);
+	  printf("  Max retries : %lu\n", data[i].max_retries);
+	}
+      aborts += data[i].nb_aborts;
+      aborts_locked_read += data[i].nb_aborts_locked_read;
+      aborts_locked_write += data[i].nb_aborts_locked_write;
+      aborts_validate_read += data[i].nb_aborts_validate_read;
+      aborts_validate_write += data[i].nb_aborts_validate_write;
+      aborts_validate_commit += data[i].nb_aborts_validate_commit;
+      aborts_invalid_memory += data[i].nb_aborts_invalid_memory;
+      if (max_retries < data[i].max_retries)
+	max_retries = data[i].max_retries;
 #endif
-    reads += data[i].nb_contains;
-    effreads += data[i].nb_contains + 
-      (data[i].nb_add - data[i].nb_added) + 
-      (data[i].nb_remove - data[i].nb_removed); 
-    updates += (data[i].nb_add + data[i].nb_remove);
-    effupds += data[i].nb_removed + data[i].nb_added; 
+      reads += data[i].nb_contains;
+      effreads += data[i].nb_contains + 
+	(data[i].nb_add - data[i].nb_added) + 
+	(data[i].nb_remove - data[i].nb_removed); 
+      updates += (data[i].nb_add + data[i].nb_remove);
+      effupds += data[i].nb_removed + data[i].nb_added; 
 		
-    //size += data[i].diff;
-    size += data[i].nb_added - data[i].nb_removed;
-  }
+      //size += data[i].diff;
+      size += data[i].nb_added - data[i].nb_removed;
+    }
   int size_after = set_size_l(set);
   printf("Set size      : %d (expected: %d)\n", size_after, size);
   assert(size_after == size);
