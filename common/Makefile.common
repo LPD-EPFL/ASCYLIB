@@ -197,7 +197,7 @@ ifeq ($(PC_NAME), lpd48core)
 endif
 
 ifeq ($(PC_NAME), diassrv8)
-    CFLAGS += -DXEON -DPLATFORM_MCORE
+    CFLAGS += -DXEON -DPLATFORM_MCORE -DOPTERON_OPTIMIZE
 endif
 
 #################################
