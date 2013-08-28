@@ -60,7 +60,7 @@ tas_lock(volatile uint32_t* l)
 static inline uint32_t
 tas_unlock(volatile uint32_t* l)
 {
-  /* MEM_BARRIER; */
+  MEM_BARRIER;
   *l = TAS_FREE;
   return 0;
 }
@@ -83,7 +83,7 @@ typedef struct ticket_st ptlock_t;
 #  define GL_INIT_LOCK(lock)				ticket_init((volatile ptlock_t*) lock)
 #  define GL_DESTROY_LOCK(lock)			
 #  define GL_LOCK(lock)					ticket_lock((volatile ptlock_t*) lock)
-#  define GL_UNLOCK(lock)					ticket_unlock((volatile ptlock_t*) lock)
+#  define GL_UNLOCK(lock)				ticket_unlock((volatile ptlock_t*) lock)
 
 static inline void
 ticket_init(volatile ptlock_t* l)
@@ -103,6 +103,8 @@ ticket_init(volatile ptlock_t* l)
 static inline uint32_t
 ticket_lock(volatile ptlock_t* l)
 {
+  MEM_BARRIER;
+
   uint32_t ticket = FAI_U32(&l->ticket);
 
 #if defined(OPTERON_OPTIMIZE)
@@ -150,7 +152,7 @@ ticket_lock(volatile ptlock_t* l)
     }
 
 #endif
-  /* MEM_BARRIER; */
+  MEM_BARRIER;
   return 0;
 }
 
@@ -160,6 +162,7 @@ ticket_unlock(volatile ptlock_t* l)
   MEM_BARRIER;
   PREFETCHW(l);
   l->curr++;
+  MEM_BARRIER;
   /* FAI_U32(&l->curr); */
   return 0;
 }
