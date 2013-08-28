@@ -103,8 +103,6 @@ ticket_init(volatile ptlock_t* l)
 static inline uint32_t
 ticket_lock(volatile ptlock_t* l)
 {
-  MEM_BARRIER;
-
   uint32_t ticket = FAI_U32(&l->ticket);
 
 #if defined(OPTERON_OPTIMIZE)
@@ -139,7 +137,6 @@ ticket_lock(volatile ptlock_t* l)
       if (distance > 20)
       	{
       	  sched_yield();
-      	  /* pthread_yield(); */
       	}
     }
 
@@ -152,18 +149,17 @@ ticket_lock(volatile ptlock_t* l)
     }
 
 #endif
-  MEM_BARRIER;
   return 0;
 }
 
 static inline uint32_t
 ticket_unlock(volatile ptlock_t* l)
 {
+#if defined(__tile__)
   MEM_BARRIER;
+#endif
   PREFETCHW(l);
   l->curr++;
-  MEM_BARRIER;
-  /* FAI_U32(&l->curr); */
   return 0;
 }
 
