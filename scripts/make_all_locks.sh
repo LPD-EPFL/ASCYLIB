@@ -31,7 +31,14 @@ $MAKE $lock GRANULARITY=GLOBAL_LOCK;
 $MAKE $lock
 ./scripts/bins_add_suffix.sh $lock lb
 
-lock=clh
-$MAKE $lock GRANULARITY=GLOBAL_LOCK;
-./scripts/bins_add_suffix.sh gl_$lock lb
 
+if [ $(uname -n) = "lpd48core" ] || [ $(uname -n) = "xeon" ];
+then
+    lock=hticket
+    $MAKE $lock GRANULARITY=GLOBAL_LOCK;
+    ./scripts/bins_add_suffix.sh gl_$lock lb
+
+    lock=clh
+    $MAKE $lock GRANULARITY=GLOBAL_LOCK;
+    ./scripts/bins_add_suffix.sh gl_$lock lb
+fi;
