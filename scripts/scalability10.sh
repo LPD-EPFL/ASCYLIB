@@ -29,77 +29,77 @@ shift;
 params="$@";
 
 
-printf "#     %-23s%-23s%-23s%-23s%-23s%-23s%-23s%-23s%-23s%-23s\n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7" "$prog8" "$prog9" "$prog10";
-echo "#cor  throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb";
+printf "#     %-25s%-25s%-25s%-25s%-25s%-25s%-25s%-25s%-25s%-25s\n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7" "$prog8" "$prog9" "$prog10";
+echo "#cor  throughput %linea scalb  throughput %linea scalb  throughput %linea scalb  throughput %linea scalb  throughput %linea scalb  throughput %linea scalb  throughput %linea scalb  throughput %linea scalb  throughput %linea scalb  throughput %linea scalb";
 
 prog=$prog1;
 
 printf "%-6d" 1;
 thr1a=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1a;
+printf "%-11d" $thr1a;
 printf "%-7.2f" 100.00;
-printf "%-6d" 1;
+printf "%-7d" 1;
 
 prog=$prog2;
 
 thr1b=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1b;
+printf "%-11d" $thr1b;
 printf "%-7.2f" 100.00;
-printf "%-6d" 1;
+printf "%-7d" 1;
 
 prog=$prog3;
 
 thr1c=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1c;
+printf "%-11d" $thr1c;
 printf "%-7.2f" 100.00;
-printf "%-6d" 1;
+printf "%-7d" 1;
 
 prog=$prog4;
 
 thr1d=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1d;
+printf "%-11d" $thr1d;
 printf "%-7.2f" 100.00;
-printf "%-6d" 1;
+printf "%-7d" 1;
 
 prog=$prog5;
 
 thr1e=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1e;
+printf "%-11d" $thr1e;
 printf "%-7.2f" 100.00;
-printf "%-6d" 1;
+printf "%-7d" 1;
 
 prog=$prog6;
 
 thr1f=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1f;
+printf "%-11d" $thr1f;
 printf "%-7.2f" 100.00;
-printf "%-6d" 1;
+printf "%-7d" 1;
 
 prog=$prog7;
 
 thr1g=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1g;
+printf "%-11d" $thr1g;
 printf "%-7.2f" 100.00;
-printf "%-6d" 1;
+printf "%-7d" 1;
 
 prog=$prog8;
 
 thr1h=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1h;
+printf "%-11d" $thr1h;
 printf "%-7.2f" 100.00;
-printf "%-6d" 1;
+printf "%-7d" 1;
 
 prog=$prog9;
 
 thr1i=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1i;
+printf "%-11d" $thr1i;
 printf "%-7.2f" 100.00;
-printf "%-6d" 1;
+printf "%-7d" 1;
 
 prog=$prog10;
 
 thr1j=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-printf "%-12d" $thr1j;
+printf "%-11d" $thr1j;
 printf "%-7.2f" 100.00;
 printf "%-6d\n" 1;
 
@@ -117,97 +117,97 @@ do
     thr1=$thr1a;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;
-    printf "%-6.2f" $scl;
+    printf "%-7.2f" $scl;
 
     prog=$prog2;
     thr1=$thr1b;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;
-    printf "%-6.2f" $scl;
+    printf "%-7.2f" $scl;
 
     prog=$prog3;
     thr1=$thr1c;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;
-    printf "%-6.2f" $scl;
+    printf "%-7.2f" $scl;
 
     prog=$prog4;
     thr1=$thr1d;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;
-    printf "%-6.2f" $scl;
+    printf "%-7.2f" $scl;
 
     prog=$prog5;
     thr1=$thr1e;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;
-    printf "%-6.2f" $scl;
+    printf "%-7.2f" $scl;
 
     prog=$prog6;
     thr1=$thr1f;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;
-    printf "%-6.2f" $scl;
+    printf "%-7.2f" $scl;
 
     prog=$prog7;
     thr1=$thr1g;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;
-    printf "%-6.2f" $scl;
+    printf "%-7.2f" $scl;
 
     prog=$prog8;
     thr1=$thr1h;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;
-    printf "%-6.2f" $scl;
+    printf "%-7.2f" $scl;
 
     prog=$prog9;
     thr1=$thr1i;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;
-    printf "%-6.2f" $scl;
+    printf "%-7.2f" $scl;
 
     prog=$prog10;
     thr1=$thr1j;
 
     thr=$($run_script ./$prog $params -n$c | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
-    printf "%-12d" $thr;
+    printf "%-11d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
     printf "%-7.2f" $linear_p;

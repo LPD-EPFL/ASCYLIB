@@ -1,21 +1,38 @@
 #!/bin/bash
 
-p="lb-ll -x2 -u10";
+p="lb-ll -u10";
 echo "## settings: $p";
 ./scripts/run_compare.sh $p
-p="lb-ll -x2 -u10 -i128 -r256";
+p="lb-ll -u10 -i128 -r256";
 echo "## settings: $p";
 ./scripts/run_compare.sh $p
+
+p="lb-ll -u10 -x2";
+echo "## settings: $p";
+./scripts/run_compare.sh $p
+p="lb-ll -u10 -i128 -r256 -x2";
+echo "## settings: $p";
+./scripts/run_compare.sh $p
+
 p="lb-sl  -u10";
 echo "## settings: $p";
 ./scripts/run_compare.sh $p
-p="-u10 -i128 -r256";
+p="lb-sl -u10 -i128 -r256";
 echo "## settings: $p";
-./scripts/run_compare.sh lb-sl $p
-p="-u10 -l4";
+./scripts/run_compare.sh $p
+
+p="lb-ht -u10 -l4";
 echo "## settings: $p";
-./scripts/run_compare.sh lb-ht $p
-p="-u10 -l4 -x2"
+./scripts/run_compare.sh $p
+p="lb-ht -u10 -l4 -i128 -r256";
 echo "## settings: $p";
-./scripts/run_compare.sh lb-ht $p
+./scripts/run_compare.sh $p
+
+
+p="lb-ht -u10 -l4 -x2"
+echo "## settings: $p";
+./scripts/run_compare.sh $p
+p="lb-ht -u10 -l4 -i128 -r256 -x2";
+echo "## settings: $p";
+./scripts/run_compare.sh $p
 
