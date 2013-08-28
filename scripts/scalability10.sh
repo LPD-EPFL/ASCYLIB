@@ -29,79 +29,79 @@ shift;
 params="$@";
 
 
-printf "#       %-29s%-29s%-29s%-29s%-29s%-29s%-29s%-29s%-29s%-29s\n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7" "$prog8" "$prog9" "$prog10";
-echo "#cores  throughput  %linear scalabil throughput  %linear scalabil throughput  %linear scalabil throughput  %linear scalabil throughput  %linear scalabil throughput  %linear scalabil throughput  %linear scalabil throughput  %linear scalabil throughput  %linear scalabil throughput  %linear scalabil";
+printf "#     %-23s%-23s%-23s%-23s%-23s%-23s%-23s%-23s%-23s%-23s\n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7" "$prog8" "$prog9" "$prog10";
+echo "#cor  throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb throughput  %linea scalb";
 
 prog=$prog1;
 
-printf "%-8d" 1;
+printf "%-6d" 1;
 thr1a=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1a;
-printf "%-8.2f" 100.00;
-printf "%-9d" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d" 1;
 
 prog=$prog2;
 
 thr1b=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1b;
-printf "%-8.2f" 100.00;
-printf "%-9d" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d" 1;
 
 prog=$prog3;
 
 thr1c=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1c;
-printf "%-8.2f" 100.00;
-printf "%-9d" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d" 1;
 
 prog=$prog4;
 
 thr1d=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1d;
-printf "%-8.2f" 100.00;
-printf "%-9d" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d" 1;
 
 prog=$prog5;
 
 thr1e=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1e;
-printf "%-8.2f" 100.00;
-printf "%-9d" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d" 1;
 
 prog=$prog6;
 
 thr1f=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1f;
-printf "%-8.2f" 100.00;
-printf "%-9d" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d" 1;
 
 prog=$prog7;
 
 thr1g=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1g;
-printf "%-8.2f" 100.00;
-printf "%-9d" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d" 1;
 
 prog=$prog8;
 
 thr1h=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1h;
-printf "%-8.2f" 100.00;
-printf "%-9d" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d" 1;
 
 prog=$prog9;
 
 thr1i=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1i;
-printf "%-8.2f" 100.00;
-printf "%-9d" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d" 1;
 
 prog=$prog10;
 
 thr1j=$($run_script ./$prog $params -n1 | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 printf "%-12d" $thr1j;
-printf "%-8.2f" 100.00;
-printf "%-8d\n" 1;
+printf "%-7.2f" 100.00;
+printf "%-6d\n" 1;
 
 
 for c in $cores
@@ -111,7 +111,7 @@ do
 	continue;
     fi;
 
-    printf "%-8d" $c;
+    printf "%-6d" $c;
 
     prog=$prog1;
     thr1=$thr1a;
@@ -120,8 +120,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-9.2f" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f" $scl;
 
     prog=$prog2;
     thr1=$thr1b;
@@ -130,8 +130,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-9.2f" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f" $scl;
 
     prog=$prog3;
     thr1=$thr1c;
@@ -140,8 +140,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-9.2f" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f" $scl;
 
     prog=$prog4;
     thr1=$thr1d;
@@ -150,8 +150,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-9.2f" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f" $scl;
 
     prog=$prog5;
     thr1=$thr1e;
@@ -160,8 +160,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-9.2f" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f" $scl;
 
     prog=$prog6;
     thr1=$thr1f;
@@ -170,8 +170,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-9.2f" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f" $scl;
 
     prog=$prog7;
     thr1=$thr1g;
@@ -180,8 +180,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-9.2f" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f" $scl;
 
     prog=$prog8;
     thr1=$thr1h;
@@ -190,8 +190,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-9.2f" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f" $scl;
 
     prog=$prog9;
     thr1=$thr1i;
@@ -200,8 +200,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-9.2f" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f" $scl;
 
     prog=$prog10;
     thr1=$thr1j;
@@ -210,8 +210,8 @@ do
     printf "%-12d" $thr;
     scl=$(echo "$thr/$thr1" | bc -l);
     linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-8.2f\n" $scl;
+    printf "%-7.2f" $linear_p;
+    printf "%-6.2f\n" $scl;
 
 
 done;

@@ -32,7 +32,7 @@ $MAKE $lock
 ./scripts/bins_add_suffix.sh $lock lb
 
 
-if [ $(uname -n) = "lpd48core" ] || [ $(uname -n) = "xeon" ];
+if [ $(uname -n) = "lpd48core" ] || [ $(uname -n) = "diassrv8" ];
 then
     lock=hticket
     $MAKE $lock GRANULARITY=GLOBAL_LOCK;
