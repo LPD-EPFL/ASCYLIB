@@ -67,8 +67,7 @@ inline int
 parse_validate(node_l_t* pred, node_l_t* curr) 
 {
   /* FIX: checking pred twice :: return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr)); */
-  int r = (!is_marked_ref((uintptr_t) pred->next) && !is_marked_ref((uintptr_t) curr->next) && (pred->next == curr));
-  return r;
+  return (!is_marked_ref((uintptr_t) pred->next) && !is_marked_ref((uintptr_t) curr->next) && (pred->next == curr));
 }
 
 int
@@ -100,18 +99,15 @@ parse_insert(intset_l_t *set, val_t val)
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(pred));
   LOCK(ND_GET_LOCK(curr));
-
-  MEM_BARRIER;
   result = (parse_validate(pred, curr) && (curr->val != val));
-  if (result)
+  if (result) 
     {
       newnode = new_node_l(val, curr, 0);
       pred->next = newnode;
     } 
+  GL_UNLOCK(set->lock);
   UNLOCK(ND_GET_LOCK(curr));
   UNLOCK(ND_GET_LOCK(pred));
-  GL_UNLOCK(set->lock);
-  
   return result;
 }
 
