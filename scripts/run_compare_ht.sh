@@ -4,9 +4,9 @@ out_file="data/compare_ht_"$(date | gawk '// {print $2"_"$3}')".dat";
 echo "Output file: $out_file";
 printf "" > $out_file;
 
-initials="8 64 512 1024 2048 8192";
-updates="0 1 10 100";
-load_factors="2 4 8"
+initials="64 512 2048 8192";
+updates="0 10 100";
+load_factors="4 8"
 
 
 for i in $initials
