@@ -135,18 +135,61 @@ void
 
   seeds = seed_rand();
 
+  int succ = 1, putting = 1;
+
   /* Wait on barrier */
   barrier_cross(d->barrier);
 	
-  /* Is the first op an update, a move? */
-  r = rand_range_re(&d->seed, 100) - 1;
-  unext = (r < d->update);
-  mnext = (r < d->move);
-  cnext = (r >= d->update + d->snapshot);
-	
+#define TEST_SIMPLE
+
   /* while (stop == 0) */
   while (*running)
     {
+#if defined(TEST_SIMPLE)
+      val = rand_range_re(&d->seed, d->range);
+
+      if(succ)
+      	{
+	  r = rand_range_re(&d->seed, 100) - 1;
+	  unext = (r < d->update);
+
+      	  succ = 0;
+      	}
+
+      if(unext) 
+	{
+	  if(putting) 
+	    {
+	      if (ht_add(d->set, val, TRANSACTIONAL))
+		{
+		  d->nb_added++;
+		  succ = 1;
+		  putting = 0;
+		} 				
+	      d->nb_add++;
+	    } 
+	  else 
+	    {
+	      if (ht_remove(d->set, val, TRANSACTIONAL))
+		{
+		  d->nb_removed++;
+		  succ = 1;
+		  putting = 1;
+		}
+	      d->nb_remove++;
+	    }
+	} 
+      else
+	{ 
+	  if (ht_contains(d->set, val, TRANSACTIONAL))
+	    {
+	      d->nb_found++;
+	      succ = 1;
+	    }
+	  d->nb_contains++;
+	}
+
+#else  /* !TEST_SIMPLE */
       if (unext) { // update
 	    
 	if (mnext) { // move
@@ -166,7 +209,7 @@ void
 	  if (ht_add(d->set, val, TRANSACTIONAL)) {
 	    d->nb_added++;
 	    last = val;
-	  } 				
+	  }
 	  d->nb_add++;
 	      
 	} else { // remove
@@ -184,7 +227,7 @@ void
 	      d->nb_removed++;
 	      /* Repeat until successful, to avoid size variations */
 	      last = -1;
-	    } 
+	    }
 	  }
 	  d->nb_remove++;
 	}
@@ -229,14 +272,17 @@ void
 	numtx = d->nb_contains + d->nb_add + d->nb_remove + d->nb_move + d->nb_snapshot;
 	unext = ((100.0 * (d->nb_added + d->nb_removed + d->nb_moved)) < (d->update * numtx));
 	mnext = ((100.0 * d->nb_moved) < (d->move * numtx));
-	cnext = !((100.0 * d->nb_snapshoted) < (d->snapshot * numtx)); 
+	cnext = !((100.0 * d->nb_snapshoted) < (d->snapshot * numtx));
       } else { // remove/add (even failed) is considered as an update
 	r = rand_range_re(&d->seed, 100) - 1;
 	unext = (r < d->update);
 	mnext = (r < d->move);
 	cnext = (r >= d->update + d->snapshot);
       }
+
+#endif	/* TEST_SIMPLE */
     }
+
 
   /* Free transaction */
   TM_THREAD_EXIT();
