@@ -18,7 +18,7 @@ do
 	do
 	    settings="-i$i -r$r -u$u -l$l";
 	    echo "## $settings" | tee -a $out_file;
-	    ./scripts/scalability2.sh socket "./bin/lf-ht" "./bin/througput_ticket"  $settings | tee -a $out_file;
+	    ./scripts/scalability2.sh socket "./bin/lf-ht" "./bin/throughput_ticket"  $settings | tee -a $out_file;
 	done;
     done;
 done;
