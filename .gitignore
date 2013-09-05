@@ -8,5 +8,7 @@
 /cscope.out
 /events_all
 /gp
+/noise
+/noise.o
 /plots
 /runcrash

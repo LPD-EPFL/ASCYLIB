@@ -1,0 +1,81 @@
+PERF_CLFAGS += -O3 -fno-inline
+
+UNAME := $(shell uname -n)
+
+ifeq ($(UNAME), lpd48core)
+PLATFORM=OPTERON
+CC=gcc
+PLATFORM_NUMA=1
+endif
+
+ifeq ($(UNAME), diassrv8)
+PLATFORM=XEON
+CC=gcc
+PLATFORM_NUMA=1
+endif
+
+ifeq ($(UNAME), maglite)
+PLATFORM=NIAGARA
+CC=/opt/csw/bin/gcc -m64 -mcpu=v9 -mtune=v9
+endif
+
+ifeq ($(UNAME), parsasrv1.epfl.ch)
+PLATFORM=TILERA
+CC=tile-gcc
+LINK=-ltmc
+PERF_CLFAGS= -O0 -fno-inline
+PERF_CLFAGS+= -ltmc
+endif
+
+ifeq ($(UNAME), diascld19)
+PLATFORM=XEON2
+CC=gcc
+# PLATFORM_NUMA=1
+endif
+
+ifeq ($(UNAME), diascld9)
+PLATFORM=OPTERON2
+CC=gcc
+# PLATFORM_NUMA=1
+endif
+
+ifeq ($(UNAME), trigonak-laptop)
+PLATFORM=COREi7
+CC=gcc
+# PLATFORM_NUMA=1
+endif
+
+
+ifeq ($(P),0) #give P=0 to compile with debug info
+DEBUG_CFLAGS= -O0 -ggdb -Wall -g  -fno-inline #-pg
+PERF_CLFAGS= 
+else
+DEBUG_CFLAGS=
+# PERF_CLFAGS += -O0
+endif
+
+ifeq ($(PLATFORM_NUMA),1) #give PLATFORM_NUMA=1 for NUMA
+PERF_CLFAGS += -lnuma
+VER_FLAGS = -DPLATFORM_NUMA
+endif 
+
+ifeq ($(PERF_COUNTERS),1) #give PERF_COUNTERS=1 for compiling with the papi library included
+PERF_CLFAGS += -lpapi
+VER_FLAGS = -DPLATFORM_NUMA
+endif 
+
+VER_FLAGS+=-D$(PLATFORM)
+
+default: noise
+
+all: noise
+
+noise: 	 noise.o 
+	$(CC) $(VER_FLAGS) -o noise noise.o -lm -lrt -pthread $(DEBUG_CFLAGS) $(PERF_CLFAGS) 
+
+noise.o: noise.c
+	$(CC) $(VER_FLAGS) -D_GNU_SOURCE -I./include -c noise.c $(DEBUG_CFLAGS) $(PERF_CLFAGS) 
+
+
+clean:
+	rm -f *.o noise
