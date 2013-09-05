@@ -12,9 +12,8 @@ prog2=$1;
 shift;
 params="$@";
 
-
-echo "#      $prog1                             $prog2"
-echo "#cores  throughput  %linear scalability throughput  %linear scalability"
+printf "#       %-32s%-32s\n" "$prog1" "$prog2";
+echo "#cores  throughput  %linear scalability throughput  %linear scalability";
 
 prog=$prog1;
 
