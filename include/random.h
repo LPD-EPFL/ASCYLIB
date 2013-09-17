@@ -17,7 +17,7 @@ extern __thread unsigned long* seeds;
   static inline uint32_t
   fast_rand() 
   {
-    return ((getticks()&4294967295)>>4);
+    return ((getticks()&4294967295UL)>>4);
   }
 
 
