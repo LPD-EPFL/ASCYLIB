@@ -1,28 +1,18 @@
-REQUIREMENTS
+CONFIGURATION
 ------------
+	1. in common/Makefile.common, goto "# Management PC specific settings"
+	   and add an entry for your development laptop, e.g.,
+	   if "uname -n" trigonaklaptop, you can add something like:
+	   ifeq ($(PC_NAME), trigonaklaptop)
+	       CFLAGS += -DMYLAPTOP
+	   endif
+	2. in include/measurements.h, goto #ifndef REF_SPEED_GHZ and add
+	   the an entry using the "MYLAPTOP" entry with the freq of your PC
 
-   * STMs. Microbench aimed at testing an STM. Some are available online:
-     - TinySTM   http://tmware.org/tinystm
-     - SwissTM   http://lpd.epfl.ch/site/research/tmeval
-     - E-STM     http://lpd.epfl.ch/gramoli/php/estm
 
 
 INSTALL
 -------  
-
-   1. Download an STM (e.g., http://lpd.epfl.ch/gramoli/php/estm) 
-      Compile the STM
- 
-   2. Set ./common/Makefile.common
-      - libatomic_ops directory (LIBAO)
-      - STM directories (e.g., ESTMDIR)
-
-   3. Compile with E-STM using 
-        make estm
-
-   NB Alternatively, you can directly use the lock-based versions 
-      (without using any STM) by compiling the mutex or spinlock 
-      versions as follows:
         make lock 
         make spinlock
 

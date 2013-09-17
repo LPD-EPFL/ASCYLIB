@@ -26,9 +26,15 @@
 #  include <tmc/spin.h>
 #  include <sched.h>
 #else
-#  include <emmintrin.h>
-#  include <xmmintrin.h>
-#  include <numa.h>
+#  if defined(PLATFORM_MCORE)
+#    include <numa.h>
+#  endif
+#  if defined(__SSE__)
+#    include <xmmintrin.h>
+#  endif
+#  if defined(__SSE2__)
+#    include <emmintrin.h>
+#  endif
 #endif
 #include <pthread.h>
 #include "getticks.h"
