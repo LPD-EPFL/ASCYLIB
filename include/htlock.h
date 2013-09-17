@@ -10,11 +10,9 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
-#ifndef __sparc__
-#  ifndef __tile__
-#    include <numa.h>
-#    include <emmintrin.h>
-#  endif
+#if defined(PLATFORM_MCORE)
+#  include <numa.h>
+#  include <emmintrin.h>
 #endif
 #include <pthread.h>
 #include <assert.h>
