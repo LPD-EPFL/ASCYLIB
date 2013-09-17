@@ -200,6 +200,11 @@ ifeq ($(PC_NAME), diassrv8)
     CFLAGS += -DXEON -DPLATFORM_MCORE -DOPTERON_OPTIMIZE
 endif
 
+ifeq ($(PC_NAME), trigonak-laptop)
+    CFLAGS += -DLAPTOP
+endif
+
+
 #################################
 # Architecture dependent settings
 #################################
