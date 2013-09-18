@@ -1,8 +1,8 @@
 .PHONY:	all
 
-BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque
+BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque src/bst
 LBENCHS = src/linkedlist-lock src/hashtable-lock src/skiplist-lock
-LFBENCHS = src/linkedlist src/hashtable src/skiplist 
+LFBENCHS = src/linkedlist src/hashtable src/skiplist src/bst 
 
 .PHONY:	clean all $(BENCHS) $(LBENCHS)
 
@@ -41,6 +41,7 @@ clean:
 	$(MAKE) -C src/hashtable-lock clean
 	$(MAKE) -C src/skiplist-lock clean
 	$(MAKE) -C src/sftree clean
+	$(MAKE) -C src/bst clean
 	$(MAKE) -C src/deque clean
 	rm -rf build
 #	$(MAKE) -C rbtree-boosted clean
