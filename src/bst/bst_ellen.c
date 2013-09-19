@@ -205,3 +205,11 @@ void bst_print(node_t* node){
             fprintf(stderr, "leaf\n");
         }
 }
+
+unsigned long bst_size(node_t* node){
+        if (node->leaf==FALSE) {
+            return (bst_size(node->right) + bst_size(node->left));
+        } else {
+            return 1;
+        }
+}

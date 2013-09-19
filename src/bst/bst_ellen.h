@@ -44,12 +44,12 @@ typedef uint32_t bst_key_t;
 
 #define INF2 UINT32_MAX
 #define INF1 (UINT32_MAX-1)
-#define MAX_KEY 4294967295 //MAX_KEY should be of the form 2^n-1 for increased random key generation
+#define MAX_KEY 4294967295 //MAX_KEY should be of the form 2^n-1 for increased random key generation performance
 
-typedef struct node_t node_t;
+typedef ALIGNED(64) struct node_t node_t;
 typedef union info_t info_t;
 
-typedef info_t* update_t;//FIXME quite a few CASes done on this data structure; make it cache line?
+typedef info_t* update_t;//FIXME quite a few CASes done on this data structure; make it cache line aligned?
 
 typedef struct iinfo_t {
     node_t* p;
@@ -78,13 +78,15 @@ struct node_t {
     bool_t leaf;
 };
 
-typedef struct search_result_t {
+typedef ALIGNED(64) struct search_result_t {
     node_t* gp; 
     node_t* p;
     node_t* l;
     update_t pupdate;
     update_t gpupdate;
+#ifdef DO_PAD
     char padding[24];
+#endif
 } search_result_t;
 
 
@@ -122,7 +124,11 @@ static inline uint64_t UNFLAG(update_t ptr) {
     return (((uint64_t)ptr) & 0xfffffffffffffffc);
 }
 
+//for testing purposes
 void bst_print(node_t* node);
+
+//for testing purposes
+unsigned long bst_size(node_t* node);
 
 //#define SETFLAG(ptr,state) ptr= (ptr & ~(0x3)) |state
 //#define FLAG(ptr,state) ((ptr & ~(0x3)) | state)

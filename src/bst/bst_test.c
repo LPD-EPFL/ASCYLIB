@@ -37,7 +37,8 @@ uint32_t max_key;
 int seed;
 
 ticks correction;
-static volatile int stop;
+//static volatile int stop;
+ALIGNED(64) uint8_t running[64];
 __thread unsigned long * seeds;
 
 //the root of the binary search tree
@@ -74,14 +75,15 @@ void barrier_cross(barrier_t *b)
     pthread_mutex_unlock(&b->mutex);
 }
 
-typedef struct thread_data {
+typedef ALIGNED(64) struct thread_data {
     barrier_t *barrier;
     unsigned long num_operations;
-//unsigned long num_entries;
     ticks total_time;
-//    int* lock;
     unsigned int seed;
     uint64_t num_add;
+    unsigned long num_insert;
+    unsigned long num_remove;
+    unsigned long num_search;
     int id;
 } thread_data_t;
 
@@ -93,6 +95,7 @@ void *test(void *data)
     uint32_t write_thresh = 256 * (finds + inserts) / 100;
     set_cpu(the_cores[d->id]);
     ssalloc_init();
+    PF_CORRECTION;
     uint32_t rand_max;
     seeds = seed_rand();
     rand_max = max_key;
@@ -118,22 +121,28 @@ void *test(void *data)
     ticks t1,t2;
     /* Wait on barrier */
     barrier_cross(d->barrier);
-    while (stop == 0) {
+    while (*running) {
         key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
         op = my_random(&seeds[0],&seeds[1],&seeds[2]) & 0xff;
         //t1=getticks();
         DDPRINT("key is %lu\n",key);
         if (op < read_thresh) {
             DDPRINT("starting find\n",NULL);
+            PF_START(2);
             bst_find(key,root,d->id);
+            PF_STOP(2);
             DDPRINT("finished find\n",NULL);
         } else if (op < write_thresh) {
             DDPRINT("starting insert\n",NULL);
-            bst_insert(key,root, d->id);
+            if (bst_insert(key,root, d->id)) {
+                d->num_insert++;
+            }
             DDPRINT("finished insert\n",NULL);
         } else {
             DDPRINT("starting remove\n",NULL);
-            bst_delete(key,root, d->id);
+            if (bst_delete(key,root, d->id)) {
+                d->num_remove++;
+            }
             DDPRINT("finished remove\n",NULL);
         }
         //t2=getticks();
@@ -141,6 +150,7 @@ void *test(void *data)
         MEM_BARRIER;
         //d->total_time+=t2-t1-correction;
     }
+    PF_PRINT;
     return NULL;
 }
 
@@ -265,7 +275,7 @@ int main(int argc, char* const argv[]) {
     else
         srand(seed);
 
-    stop = 0;
+    *running = 1;
 
     barrier_init(&barrier, num_threads + 1);
     pthread_attr_init(&attr);
@@ -278,6 +288,9 @@ int main(int argc, char* const argv[]) {
         data[i].id = i;
         data[i].num_operations = 0;
         data[i].total_time=0;
+        data[i].num_insert=0;
+        data[i].num_remove=0;
+        data[i].num_search=0;
         data[i].num_add = max_key/(2 * num_threads); 
         data[i].seed = rand();
         data[i].barrier = &barrier;
@@ -305,7 +318,8 @@ int main(int argc, char* const argv[]) {
         sigemptyset(&block_set);
         sigsuspend(&block_set);
     }
-    stop = 1;
+
+    *running = 0;
     gettimeofday(&end, NULL);
     /* Wait for thread completion */
     for (i = 0; i < num_threads; i++) {
@@ -321,17 +335,19 @@ int main(int argc, char* const argv[]) {
 
     unsigned long operations = 0;
     ticks total_ticks = 0;
+    long reported_total = 2; //the tree contains two initial dummy nodes, INF1 and INF2
     for (i = 0; i < num_threads; i++) {
         printf("Thread %d\n", i);
         printf("  #operations   : %lu\n", data[i].num_operations);
         operations += data[i].num_operations;
         total_ticks += data[i].total_time;
+        reported_total = reported_total + data[i].num_add + data[i].num_insert - data[i].num_remove;
     }
 
     printf("Duration      : %d (ms)\n", duration);
     printf("#operations     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
-    printf("Operation latency %lu\n", total_ticks / operations);
-
+    //printf("Operation latency %lu\n", total_ticks / operations);
+    printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
 
     free(threads);
     free(data);
