@@ -15,7 +15,8 @@
 #include "utils.h"
 #include "ssalloc.h"
 
-#define XSTR(s) #s
+#define XSTR(s)                         STR(s)
+#define STR(s)                          #s
 
 #define DEFAULT_READS 90
 #define DEFAULT_INSERTS 5
@@ -198,7 +199,7 @@ int main(int argc, char* const argv[]) {
 
     while(1) {
         i = 0;
-        c = getopt_long(argc, argv, "h:d:n:f:r:s", long_options, &i);
+        c = getopt_long(argc, argv, "hd:n:f:r:s", long_options, &i);
 
         if(c == -1)
             break;
@@ -224,7 +225,7 @@ int main(int argc, char* const argv[]) {
                         "  -f, --finds <int>\n"
                         "        Percentage of find operations (default=" XSTR(DEFAULT_READS) ")\n"
                         "  -r, --range <int>\n"
-                        "        Key range (default=" XSTR(DEFAULT_RANGE) ")\n"
+                        "        Key range (default=" XSTR(DEFAULT_MAX_KEY) ")\n"
                         "  -n, --num-threads <int>\n"
                         "        Number of threads (default=" XSTR(DEFAULT_NUM_THREADS) ")\n"
                         "  -s, --seed <int>\n"
