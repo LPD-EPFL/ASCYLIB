@@ -17,7 +17,6 @@
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
 
-
 //not used any more; TODO remove this parameter
 #define DEFAULT_SEED 0
 
@@ -341,6 +340,7 @@ int main(int argc, char* const argv[]) {
 
     timeout.tv_sec = duration / 1000;
     timeout.tv_nsec = (duration % 1000) * 1000000;
+    
 
     //set the data for each thread and create the threads
     for (i = 0; i < num_threads; i++) {

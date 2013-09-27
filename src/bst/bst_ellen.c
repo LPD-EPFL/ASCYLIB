@@ -29,6 +29,7 @@ node_t* bst_initialize(int num_proc){
 search_result_t* bst_search(bst_key_t key, node_t* root, int id) {
 //    search_result_t * result = (search_result_t*) malloc(sizeof(search_result_t));
     search_result_t * result = &(my_search_result[id]);
+
     result->l = root;
     while (!(result->l->leaf)) {
         result->gp = result->p;
@@ -95,7 +96,7 @@ bool_t bst_insert(bst_key_t key, node_t* root, int id) {
             op->iinfo.p = search_result->p;
             op->iinfo.new_internal = new_internal;
             op->iinfo.l =  search_result->l;
-
+            MEM_BARRIER;
             result = CAS_PTR(&(search_result->p->update),search_result->pupdate,FLAG(op,STATE_IFLAG));
             if (result == search_result->pupdate) {
                 bst_help_insert(op);
@@ -134,6 +135,7 @@ bool_t bst_delete(bst_key_t key, node_t* root, int id) {
             op->dinfo.p = search_result->p;
             op->dinfo.l = search_result->l;
             op->dinfo.pupdate = search_result->pupdate;
+            MEM_BARRIER;
             result = CAS_PTR(&(search_result->gp->update),search_result->gpupdate,FLAG(op,STATE_DFLAG));
             if (result == search_result->gpupdate) {
                 if (bst_help_delete(op)==TRUE) {
@@ -148,7 +150,6 @@ bool_t bst_delete(bst_key_t key, node_t* root, int id) {
 
 bool_t bst_help_delete(info_t* op) {
    update_t result; 
-
     result = CAS_PTR(&(op->dinfo.p->update), op->dinfo.pupdate, FLAG(op,STATE_MARK));
     if ((result == op->dinfo.pupdate) || (result == ((info_t*)FLAG(op,STATE_MARK)))) {
         bst_help_marked(op);
