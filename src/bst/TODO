@@ -1,2 +1,3 @@
 test on tilera and niagara
 add value pointer to each node as well?
+possibly add some more parameters to the bechmark (not sure truly necessary)
