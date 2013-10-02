@@ -89,7 +89,6 @@ typedef ALIGNED(64) struct search_result_t {
 #endif
 } search_result_t;
 
-
 void bst_cas_child(node_t* parent, node_t* old, node_t* new);
 
 void bst_help(update_t u);
@@ -110,7 +109,9 @@ search_result_t* bst_search(bst_key_t key, node_t* root, int id);
 
 node_t* bst_initialize();
 
-search_result_t* my_search_result;
+void bst_init_local(int id);
+
+search_result_t** my_search_result;
 
 static inline uint64_t GETFLAG(update_t ptr) {
     return ((uint64_t)ptr) & 3;

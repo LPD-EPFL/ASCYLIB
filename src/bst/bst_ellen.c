@@ -21,14 +21,18 @@ node_t* bst_initialize(int num_proc){
     root->left = i1;
     root->right = i2;
     
-    my_search_result = (search_result_t*) ssalloc(num_proc * sizeof(search_result_t));
+    my_search_result = (search_result_t**) ssalloc(num_proc * sizeof(search_result_t*));
 
     return root;
 }
 
+void bst_init_local(int id){
+    my_search_result[id] = (search_result_t*) ssalloc(sizeof(search_result_t));
+}
+
 search_result_t* bst_search(bst_key_t key, node_t* root, int id) {
 //    search_result_t * result = (search_result_t*) malloc(sizeof(search_result_t));
-    search_result_t * result = &(my_search_result[id]);
+    search_result_t * result = my_search_result[id];
 
     result->l = root;
     while (!(result->l->leaf)) {

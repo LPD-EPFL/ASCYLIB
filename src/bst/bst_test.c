@@ -21,28 +21,24 @@
 #define DEFAULT_SEED 0
 
 //default percentage of reads
-#define DEFAULT_READS 90
-//default percentage of inserts
-#define DEFAULT_INSERTS 5
-//default percentage of remove operations
-#define DEFAULT_REMOVES 5
+#define DEFAULT_READS 80
+#define DEFAULT_UPDATES 20
 
 //default number of threads
-#define DEFAULT_NUM_THREADS 4
+#define DEFAULT_NUM_THREADS 1
 
 //default experiment duration in miliseconds
-#define DEFAULT_DURATION 10000
+#define DEFAULT_DURATION 1000
 
 //the maximum value the key stored in the bst can take; defines the key range
-#define DEFAULT_MAX_KEY 255
+#define DEFAULT_RANGE 2048
 
 //#define DEBUG 1
 
 int duration;
 int num_threads;
 uint32_t finds;
-uint32_t removes;
-uint32_t inserts;
+uint32_t updates;
 uint32_t max_key;
 int seed;
 
@@ -123,11 +119,12 @@ void *test(void *data)
     //e.g instead of random()%100 to determine the next operation we will do, we can simply do random()&256
     //this saves time on some platfroms
     uint32_t read_thresh = 256 * finds / 100;
-    uint32_t write_thresh = 256 * (finds + inserts) / 100;
+    //uint32_t write_thresh = 256 * (finds + inserts) / 100;
     //place the thread on the apropriate cpu
     set_cpu(the_cores[d->id]);
     //initialize the custom memeory allocator for this thread (we do not use malloc due to concurrency bottleneck issues)
     ssalloc_init();
+    bst_init_local(d->id);
     //for fine-grain latency measurements, we need to get the lenght of a getticks() function call, which is also counted
     //by default when we do getticks(); //code... getticks(); PF_START and PF_STOP use this when fine grain measurements are enabled
     PF_CORRECTION;
@@ -138,6 +135,7 @@ void *test(void *data)
     uint32_t op;
     key_t key;
     int i;
+    int last = -1;
 
     DDPRINT("staring initial insert\n",NULL);
     DDPRINT("number of inserts: %u up to %u\n",d->num_add,rand_max);
@@ -165,34 +163,29 @@ void *test(void *data)
         key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
         //generate the operation
         op = my_random(&seeds[0],&seeds[1],&seeds[2]) & 0xff;
-        DDPRINT("key is %lu\n",key);
         if (op < read_thresh) {
             //do a find operation
             //PF_START and PF_STOP can be used to do latency measurements of the operation
             //to enable them, DO_TIMINGS must be defined at compile time, otherwise they do nothing
-            DDPRINT("starting find\n",NULL);
-            PF_START(2);
+            //PF_START(2);
             bst_find(key,root,d->id);
-            PF_STOP(2);
-            DDPRINT("finished find\n",NULL);
-        } else if (op < write_thresh) {
+            //PF_STOP(2);
+        } else if (last == -1) {
             //do a write operation
-            DDPRINT("starting insert\n",NULL);
             if (bst_insert(key,root, d->id)) {
                 d->num_insert++;
+                last=1;
             }
-            DDPRINT("finished insert\n",NULL);
         } else {
-            DDPRINT("starting remove\n",NULL);
             //do a delete operation
             if (bst_delete(key,root, d->id)) {
                 d->num_remove++;
+                last=-1;
             }
-            DDPRINT("finished remove\n",NULL);
         }
         d->num_operations++;
         //memory barrier to ensure no unwanted reporderings are happening
-        MEM_BARRIER;
+        //MEM_BARRIER;
     }
     //summary of the fine grain measurements if enabled 
     PF_PRINT;
@@ -224,10 +217,11 @@ int main(int argc, char* const argv[]) {
     //initially, set parameters to their default values
     num_threads = DEFAULT_NUM_THREADS;
     seed=DEFAULT_SEED;
-    max_key=DEFAULT_MAX_KEY;
+    max_key=DEFAULT_RANGE;
+    updates=DEFAULT_UPDATES;
     finds=DEFAULT_READS;
-    inserts=DEFAULT_INSERTS;
-    removes=DEFAULT_REMOVES;
+    //inserts=DEFAULT_INSERTS;
+    //removes=DEFAULT_REMOVES;
     duration=DEFAULT_DURATION;
 
     //now read the parameters in case the user provided values for them 
@@ -238,8 +232,9 @@ int main(int argc, char* const argv[]) {
         {"help",                      no_argument,       NULL, 'h'},
         {"duration",                  required_argument, NULL, 'd'},
         {"range",                     required_argument, NULL, 'r'},
+        {"initial",                     required_argument, NULL, 'i'},
         {"num-threads",               required_argument, NULL, 'n'},
-        {"finds",             required_argument, NULL, 'f'},
+        {"updates",             required_argument, NULL, 'u'},
         {"seed",                      required_argument, NULL, 's'},
         {NULL, 0, NULL, 0}
     };
@@ -249,7 +244,7 @@ int main(int argc, char* const argv[]) {
     //actually get the parameters form the command-line
     while(1) {
         i = 0;
-        c = getopt_long(argc, argv, "hd:n:f:r:s", long_options, &i);
+        c = getopt_long(argc, argv, "hd:n:l:u:i:r:s", long_options, &i);
 
         if(c == -1)
             break;
@@ -272,10 +267,10 @@ int main(int argc, char* const argv[]) {
                         "        Print this message\n"
                         "  -d, --duration <int>\n"
                         "        Test duration in milliseconds (0=infinite, default=" XSTR(DEFAULT_DURATION) ")\n"
-                        "  -f, --finds <int>\n"
-                        "        Percentage of find operations (default=" XSTR(DEFAULT_READS) ")\n"
+                        "  -u, --updates <int>\n"
+                        "        Percentage of update operations (default=" XSTR(DEFAULT_UPDATES) ")\n"
                         "  -r, --range <int>\n"
-                        "        Key range (default=" XSTR(DEFAULT_MAX_KEY) ")\n"
+                        "        Key range (default=" XSTR(DEFAULT_RANGE) ")\n"
                         "  -n, --num-threads <int>\n"
                         "        Number of threads (default=" XSTR(DEFAULT_NUM_THREADS) ")\n"
                         "  -s, --seed <int>\n"
@@ -285,13 +280,16 @@ int main(int argc, char* const argv[]) {
             case 'd':
                 duration = atoi(optarg);
                 break;
-            case 'f':
-                finds = atoi(optarg);
-                inserts = (100 - finds)/2;
-                removes = (100 - finds)/2;
+            case 'u':
+                updates = atoi(optarg);
+                finds = 100 - updates;
                 break;
             case 'r':
                 max_key = atoi(optarg);
+                break;
+            case 'i':
+                break;
+            case 'l':
                 break;
             case 'n':
                 num_threads = atoi(optarg);
@@ -306,6 +304,8 @@ int main(int argc, char* const argv[]) {
                 exit(1);
         }
     }
+
+    max_key--;
     //aligmenent in the custom memory allocator to a 64 byte boundary 
     ssalloc_align();
     //we round the max key up to the nearest power of 2, which makes our random key generation more efficient
@@ -403,13 +403,15 @@ int main(int argc, char* const argv[]) {
     for (i = 0; i < num_threads; i++) {
         printf("Thread %d\n", i);
         printf("  #operations   : %lu\n", data[i].num_operations);
+        printf("  #inserts   : %lu\n", data[i].num_insert);
+        printf("  #removes   : %lu\n", data[i].num_remove);
         operations += data[i].num_operations;
         total_ticks += data[i].total_time;
         reported_total = reported_total + data[i].num_add + data[i].num_insert - data[i].num_remove;
     }
 
     printf("Duration      : %d (ms)\n", duration);
-    printf("#operations     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
+    printf("#txs     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
     printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
