@@ -24,7 +24,7 @@ extern "C" {
 #    define REF_SPEED_GHZ           0.7
 #  elif defined(__tilegx__)
 #    define REF_SPEED_GHZ           1.2
-#  elif defined(LAPTOP)
+#  elif defined(LAPTOP) | defined(IGORLAPTOPLINUX)
 #    define REF_SPEED_GHZ           2.4
 #  else
 #    error "Need to set REF_SPEED_GHZ for the platform"
