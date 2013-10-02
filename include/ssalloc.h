@@ -23,7 +23,7 @@
 #  define SSALLOC_SIZE (128 * 1024 * 1024)
 #elif defined(__tile__)
 #  define SSALLOC_SIZE (100 * 1024 * 1024)
-#elif defined(LAPTOP) | defined(IGORLAPTOPLINUX)
+#elif defined(LAPTOP) | defined(IGORLAPTOPLINUX) | defined(OANALAPTOPLINUX)
 #  define SSALLOC_SIZE (100 * 1024 * 1024)
 #else
 #  define SSALLOC_SIZE (1024 * 1024 * 1024)

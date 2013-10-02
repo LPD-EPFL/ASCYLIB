@@ -211,6 +211,9 @@ ifeq ($(PC_NAME), igor-M17xR4)
     CFLAGS += -DIGORLAPTOPLINUX
 endif
 
+ifeq ($(PC_NAME), oana-MacBookPro)
+    CFLAGS += -DOANALAPTOPLINUX
+endif
 
 #################################
 # Architecture dependent settings
