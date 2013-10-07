@@ -2,6 +2,7 @@
 
 //TODO memory allocation (for whom?)
 //define root?
+//TODO what does CAS_PTR return?
 
 bool_t bst_contains(bst_key_t k){
 	
@@ -11,6 +12,7 @@ bool_t bst_contains(bst_key_t k){
 	node_t* curr;
 	operation_t* pred_op;
 	operation_t* curr_op;
+
 	return bst_find(k, &pred, &pred_op, &curr, &curr_op, &root);
 }
 
@@ -103,7 +105,7 @@ bool_t bst_add(bst_key_t k){
 		}
 		// cas_op = new child_cas_op_t(is_left, old, new_node)
 		// TODO allocate memory
-		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS))) {
+		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
 			bst_help_child_cas((child_cas_op_t*)cas_op, curr);
 			return TRUE;
 		}
@@ -124,18 +126,108 @@ void bst_help_child_cas(child_cas_op_t* op, node_t* dest){
 
 bool_t bst_remove(bst_key_t k){
 	fprintf(stderr, "bst remove\n");
-	return 0;
+	node_t* pred;
+	node_t* curr;
+	node_t* replace;
+	operation_t* pred_op;
+	operation_t* curr_op;
+	operation_t* replace_op;
+	operation_t* reloc_op;
+
+	while(TRUE) {
+		if (bst_find(k, &pred, &pred_op, &curr, &curr_op, &root) != FOUND) {
+			return FALSE;
+		}
+
+		if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
+			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
+				bst_help_marked(pred, pred_op, curr);
+				return TRUE;
+			}
+		} else { // node has two children
+			if ((bst_find(k, &pred, &pred_op, &replace, &replace_op, curr) == ABORT) || (curr->op != curr_op)) {
+				continue;
+			} 
+
+			//TODO allocate memory
+			//reloc_op = new RelocateOP(curr, curr_op, k, replace->key);
+
+			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
+				if (bst_help_relocate((relocate_op_t *)reloc_op, pred, pred_op, replace)) {
+					return TRUE;
+				}
+			}
+		}
+	}
 }
+
 bool_t bst_help_relocate(relocate_op_t* op, node_t* pred, operation_t* pred_op, node_t* curr){
 	fprintf(stderr, "bst help relocate\n");
-	return 0;
+	int seen_state = op->state;
+	if (seen_state == STATE_OP_ONGOING) {
+		//VCAS in original implementation
+		operation_t* seen_op = CAS_PTR(&(op->dest->op), op->dest_op, FLAG((operation_t *)op, STATE_OP_RELOCATE));
+		if ((seen_op == op->dest_op) || (seen_op == (operation_t *)FLAG((operation_t *)op, STATE_OP_RELOCATE))){
+			CAS_PTR(&(op->state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
+			seen_state = STATE_OP_SUCCESSFUL;
+		} else {
+			// VCAS
+			seen_state = CAS_PTR(&(op->state), STATE_OP_ONGOING, STATE_OP_FAILED);
+		}
+	}
+
+	if (seen_state == STATE_OP_SUCCESSFUL) {
+		// TODO not clear in the paper code
+		CAS_PTR(&(op->dest->key), op->remove_key, op->replace_key);
+		CAS_PTR(&(op->dest->op), FLAG((operation_t *)op, STATE_OP_RELOCATE), FLAG((operation_t *)op, STATE_OP_NONE));
+	}
+
+	bool_t result = (seen_state == STATE_OP_SUCCESSFUL);
+	if (op->dest == curr) {
+		return result;
+	}
+
+	CAS_PTR(&(curr->op), FLAG((operation_t *)op, STATE_OP_RELOCATE), FLAG((operation_t *)op, result ? STATE_OP_MARK : STATE_OP_NONE));
+	if (result) {
+		if (op->dest == pred) {
+			pred_op = (operation_t *)FLAG((operation_t *)op, STATE_OP_NONE);
+		}
+		bst_help_marked(pred, pred_op, curr);
+	}
+	return result;
 }
 
 void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr){
 
 	fprintf(stderr, "bst help marked\n");
+	node_t* new_ref;
+	if (ISNULL(curr->left)) {
+		if (ISNULL(curr->right)) {
+			new_ref = (node_t*)SETNULL(curr);
+		} else {
+			new_ref = curr->right;
+		}
+	} else {
+		new_ref = curr->left;
+	}
 
+	// TODO allocate memory
+	// operation_t* cas_op = new child_cas_op(curr==pred->left, curr, new_ref);
+	operation_t* cas_op;
+
+	if (CAS_PTR(&(pred->op), pred_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == pred_op) {
+		bst_help_child_cas((child_cas_op_t*)cas_op, pred);
+	}
 }
+
 void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* curr_op ){
+	
 	fprintf(stderr, "bst help\n");
+	if (GETFLAG(curr_op) == STATE_OP_CHILDCAS) {
+		bst_help_child_cas(( child_cas_op_t *)UNFLAG(curr_op), curr);
+	} else if (GETFLAG(curr_op) == STATE_OP_RELOCATE) {
+		bst_help_relocate((relocate_op_t *)UNFLAG(curr_op), pred, pred_op, curr);
+	} else if (GETFLAG(curr_op) == STATE_OP_MARK) {
+		bst_help_marked(pred, pred_op, curr);
+	}
 }
