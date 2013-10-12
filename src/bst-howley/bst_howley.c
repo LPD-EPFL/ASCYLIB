@@ -4,6 +4,23 @@
 //define root?
 //TODO what does CAS_PTR return?
 
+node_t* root;
+
+node_t* bst_initialize() {
+	root = (node_t*) ssalloc(sizeof(node_t));
+
+	// assign minimum key to the root, actual tree will be 
+	// the right subtree of the root
+	root->key = 0;
+	root->left = NULL;
+	root->right = NULL;
+	root->op = NULL;
+	
+	// should we create an op pointer and flag it with NONE?
+	return root;
+}
+
+
 bool_t bst_contains(bst_key_t k){
 	
 	fprintf(stderr, "bst contains\n");
@@ -13,7 +30,8 @@ bool_t bst_contains(bst_key_t k){
 	operation_t* pred_op;
 	operation_t* curr_op;
 
-	return bst_find(k, &pred, &pred_op, &curr, &curr_op, &root);
+	//root is now a global pointer to a node, not a node
+	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root);
 }
 
 search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root){
@@ -31,13 +49,15 @@ retry:
 	*curr_op = (*curr)->op;
 
 	if(GETFLAG(*curr_op) != STATE_OP_NONE){
-		if (aux_root == &root){
+		//root is now a global pointer to a node, not a node
+		if (aux_root == root){
 			bst_help_child_cas(((child_cas_op_t*)UNFLAG(*curr_op)), *curr);
 			goto retry;
 		} else {
 			return ABORT;
 		}
 	}
+
 
 	next = (*curr)->right;
 	last_right = *curr;
@@ -49,6 +69,8 @@ retry:
 		*pred_op = *curr_op;
 		*curr = next;
 		*curr_op = (*curr)->op;
+
+
 		if(GETFLAG(*curr_op) != STATE_OP_NONE){
 			bst_help(*pred, *pred_op, *curr, *curr_op);
 			goto retry;
@@ -90,12 +112,15 @@ bool_t bst_add(bst_key_t k){
 	search_res_t result;
 
 	while(TRUE) {
-		result = bst_find(k, &pred, &pred_op, &curr, &curr_op, &root);
+		//root is now a global pointer to a node, not a node
+		result = bst_find(k, &pred, &pred_op, &curr, &curr_op, root);
 		if (result == FOUND) {
 			return FALSE;
 		}
-		// TODO allocate memory 
+		// allocate memory 
 		// new_node = new Node(k);
+		new_node = (node_t*) ssalloc(sizeof(node_t));
+		new_node->key = k;
 		bool_t is_left = (result == NOT_FOUND_L);
 		node_t* old;
 		if (is_left) {
@@ -103,9 +128,16 @@ bool_t bst_add(bst_key_t k){
 		} else {
 			old = curr->right;
 		}
-		// cas_op = new child_cas_op_t(is_left, old, new_node)
-		// TODO allocate memory
+
+		// allocate memory
+		//cas_op = new child_cas_op_t(is_left, old, new_node)
+		cas_op = (operation_t*) ssalloc(sizeof(operation_t));
+		cas_op->child_cas_op.is_left = is_left;
+		cas_op->child_cas_op.expected = old;
+		cas_op->child_cas_op.update = new_node;
+
 		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
+			// legit cast? YES!!
 			bst_help_child_cas((child_cas_op_t*)cas_op, curr);
 			return TRUE;
 		}
@@ -113,7 +145,7 @@ bool_t bst_add(bst_key_t k){
 }
 
 void bst_help_child_cas(child_cas_op_t* op, node_t* dest){
-	fprintf(stderr, "bst help child\n");
+	fprintf(stderr, "bst help child cas\n");
 	node_t** address = NULL;
 	if (op->is_left) {
 		address = &(dest->left);
@@ -135,7 +167,8 @@ bool_t bst_remove(bst_key_t k){
 	operation_t* reloc_op;
 
 	while(TRUE) {
-		if (bst_find(k, &pred, &pred_op, &curr, &curr_op, &root) != FOUND) {
+		//root is now a global pointer to a node, not a node
+		if (bst_find(k, &pred, &pred_op, &curr, &curr_op, root) != FOUND) {
 			return FALSE;
 		}
 
@@ -149,8 +182,14 @@ bool_t bst_remove(bst_key_t k){
 				continue;
 			} 
 
-			//TODO allocate memory
+			//allocate memory
 			//reloc_op = new RelocateOP(curr, curr_op, k, replace->key);
+			reloc_op = (operation_t*) ssalloc(sizeof(operation_t*));
+			reloc_op->relocate_op.state = STATE_OP_ONGOING;
+			reloc_op->relocate_op.dest = curr;
+			reloc_op->relocate_op.dest_op = curr_op;
+			reloc_op->relocate_op.remove_key = k;
+			reloc_op->relocate_op.replace_key = replace->key;
 
 			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
 				if (bst_help_relocate((relocate_op_t *)reloc_op, pred, pred_op, replace)) {
@@ -211,9 +250,12 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr){
 		new_ref = curr->left;
 	}
 
-	// TODO allocate memory
+	// allocate memory
 	// operation_t* cas_op = new child_cas_op(curr==pred->left, curr, new_ref);
-	operation_t* cas_op;
+	operation_t* cas_op = (operation_t*) ssalloc(sizeof(operation_t));
+	cas_op->child_cas_op.is_left = (curr == pred->left);
+	cas_op->child_cas_op.expected = curr;
+	cas_op->child_cas_op.update = new_ref;
 
 	if (CAS_PTR(&(pred->op), pred_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == pred_op) {
 		bst_help_child_cas((child_cas_op_t*)cas_op, pred);

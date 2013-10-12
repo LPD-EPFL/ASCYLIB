@@ -28,6 +28,7 @@
 #define NOT_FOUND_R 2
 #define ABORT 3
 
+#define INF UINT32_MAX
 //TODO min key; max key values
 
 typedef uint32_t bst_key_t;
@@ -74,6 +75,7 @@ search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t*
 //place pred points to is modified and we want the modif
 //to live outside the function call, we need **.  
 
+node_t* bst_initialize();
 bool_t bst_add(bst_key_t k);
 void bst_help_child_cas(child_cas_op_t* op, node_t* dest);
 bool_t bst_remove(bst_key_t k);
@@ -98,7 +100,7 @@ static inline uint64_t UNFLAG(operation_t* ptr) {
 
 //Last bit of the node pointer will be set to 1 if the pointer is null 
 static inline uint64_t ISNULL(node_t* node){
-	return (((uint64_t)node) & 1);
+	return (node == NULL) || (((uint64_t)node) & 1);
 }
 
 static inline uint64_t SETNULL(node_t* node){
