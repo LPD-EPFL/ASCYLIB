@@ -1,8 +1,8 @@
 #include "bst_howley.h"
 
-//TODO memory allocation (for whom?)
-//define root?
-//TODO what does CAS_PTR return?
+// TODO initialize structures similar to my_search_result from bst_ellen?
+
+
 
 node_t* root;
 
