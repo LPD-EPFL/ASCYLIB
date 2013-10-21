@@ -14,7 +14,7 @@
 
 // TODO maybe change value of RETRY to 1?
 // TODO maybe make retry a pointer to a dummy value (bst_value_t)
-#define RETRY 3
+#define RETRY (bst_value_t*)3
 
 #define TRUE 1
 #define FALSE 0
@@ -46,6 +46,7 @@ struct node_t {
 	volatile ptlock_t lock;	
 };
 
+node_t* bst_initialize();
 bst_value_t* bst_get(bst_key_t k);
 bst_value_t* bst_attempt_get(bst_key_t k, node_t* node, bool_t is_right, bst_version_t node_v);
 bst_value_t* bst_put(bst_key_t k, bst_value_t* v);
