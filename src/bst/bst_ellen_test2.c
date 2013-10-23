@@ -10,15 +10,12 @@
 
 
 // #include "bst_howley.h"
-#include "bst_howley.h"
+#include "bst_ellen.h"
 #include "measurements.h"
 #include "utils.h"
-#include "atomic_ops_if.h"
 #include "ssalloc.h"
 
 int num_threads;
-int op_count = 10000;
-uint8_t* v;
 
 // TODO how do we know that threads are correctly set up on separate cpus?
 // TODO seems to work correctly with num_threads = 10. WAT. wrap-around for set_cpu/the_cores?
@@ -95,6 +92,7 @@ void *test(void *data) {
     int op_count = 10000;
 
     ssalloc_init();
+    bst_init_local(d->id);
 
     /* Wait on barrier */
     barrier_cross(d->barrier);
@@ -104,11 +102,10 @@ void *test(void *data) {
 
 	for ( i = 1; i <= op_count; i++){
 
-		added = bst_add(i);
+		added = bst_insert(i, root, d->id);
 		// fprintf(stderr, "[%d] Added %d? %d\n", d->id, i, added==TRUE);
 		if (added == TRUE) {
 			d->num_insert++;
-            FAI_U8(&v[i]);
 		}
 	}
 
@@ -116,20 +113,19 @@ void *test(void *data) {
 	
 	for ( i = 1; i <= op_count; i++){
 
-		bool_t found = bst_contains(i);
+		node_t* found = bst_find(i, root, d->id);
 		// printf("Contains %d? %d\n", i, found==FOUND);
-		if (found == FOUND) {
+		if (found != NULL) {
 			d->num_search ++;
 		} 
 	}
 
 	for ( i = 1; i <= op_count; i++){
 
-		bool_t removed = bst_remove(i);
+		bool_t removed = bst_delete(i, root, d->id);
 		// printf("Removed %d? %d\n", i, removed==TRUE);
 		if (removed == TRUE) {
 			d->num_remove ++;
-            FAI_U8(&v[i]);
 		}
 	}
 
@@ -147,11 +143,6 @@ int main(int argc, char* const argv[]) {
 
 	num_threads = 5;
 	int i;
-
-    v = (uint8_t*) malloc((1+op_count) * sizeof(uint8_t));
-    for (i = 1; i <= op_count;  i++) {
-        v[i] = 0;
-    }
     
 	//place thread on the first cpu
     set_cpu(the_cores[7]);
@@ -165,7 +156,7 @@ int main(int argc, char* const argv[]) {
     thread_data_t *data;
     barrier_t barrier;
 
-	node_t* root = bst_initialize();
+	root = bst_initialize(num_threads);
 	printf("Initialized tree\n");
 
 	//initialize the data which will be passed to the threads
@@ -217,17 +208,6 @@ int main(int argc, char* const argv[]) {
         printf("  #searches   : %lu\n", data[i].num_search);
         printf("  #removes   : %lu\n", data[i].num_remove);
         
-    }
-
-    bool_t correct = TRUE;
-    for (i = 1; i <= op_count; i++) {
-        if (v[i] != 2) {
-            correct = FALSE;
-            fprintf(stderr, "Incorrect value %d\n", i);
-        }
-    }
-    if (correct == TRUE) {
-        fprintf(stderr, "Okey-dokey\n");
     }
 
 	free(threads);
