@@ -4,7 +4,7 @@
 node_t* root;
 
 node_t* bst_initialize() {
-	printf("bst_initialize\n");
+	// printf("bst_initialize\n");
 	root = (node_t*) ssalloc(sizeof(node_t));
 
 	// assign minimum key to the root, actual tree will be 
@@ -24,12 +24,12 @@ node_t* bst_initialize() {
 
 
 bst_value_t* bst_get(bst_key_t k){
-	printf("bst_get\n");
+	// printf("bst_get\n");
 	return bst_attempt_get(k, root, TRUE, 0);
 }
 
 bst_value_t* bst_attempt_get(bst_key_t k, node_t* node, bool_t is_right, bst_version_t node_v){
-	printf("bst_attempt_get\n");
+	// printf("bst_attempt_get\n");
 
 	while(TRUE){
 		node_t* child = CHILD(node, is_right);
@@ -66,13 +66,13 @@ bst_value_t* bst_attempt_get(bst_key_t k, node_t* node, bool_t is_right, bst_ver
 }
 
 bst_value_t* bst_put(bst_key_t k, bst_value_t* v){
-	printf("bst_put\n");
+	// printf("bst_put\n");
 
 	return bst_attempt_put(k, v, root, TRUE, 0);
 }
 
 bst_value_t* bst_attempt_put(bst_key_t k, bst_value_t* v, node_t* node, bool_t is_right, bst_version_t node_v){
-	printf("[%d] bst_attempt_put\n", pthread_self());
+	// printf("[%d] bst_attempt_put\n", pthread_self());
 
 	bst_value_t* p = RETRY;
 	do{
@@ -113,7 +113,7 @@ bst_value_t* bst_attempt_put(bst_key_t k, bst_value_t* v, node_t* node, bool_t i
 }
 
 bst_value_t* bst_attempt_insert(bst_key_t k, bst_value_t* v, node_t* node, bool_t is_right, bst_version_t node_v){
-	printf("[%d] bst_attempt_insert\n", pthread_self());
+	// printf("[%d] bst_attempt_insert\n", pthread_self());
 
 
 	LOCK(&(node->lock));
@@ -149,7 +149,7 @@ bst_value_t* bst_attempt_insert(bst_key_t k, bst_value_t* v, node_t* node, bool_
 }
 
 bst_value_t* bst_attempt_update(node_t* node, bst_value_t* v){
-	printf("[%d] bst_attempt_update\n", pthread_self());
+	// printf("[%d] bst_attempt_update\n", pthread_self());
 	
 	LOCK(&(node->lock));
 	if (node->version == UNLINKED) {
@@ -164,13 +164,13 @@ bst_value_t* bst_attempt_update(node_t* node, bst_value_t* v){
 }
 
 bst_value_t* bst_remove(bst_key_t k){
-	printf("bst_remove\n");
+	// printf("bst_remove\n");
 
 	return bst_attempt_remove(k, root, TRUE, 0);
 }
 
 bst_value_t* bst_attempt_remove(bst_key_t k, node_t* node, bool_t is_right, bst_version_t node_v){
-	printf("bst_attempt_remove\n");
+	// printf("bst_attempt_remove\n");
 
 	bst_value_t* p = RETRY;
 	do{
@@ -207,13 +207,13 @@ bst_value_t* bst_attempt_remove(bst_key_t k, node_t* node, bool_t is_right, bst_
 }
 
 bool_t can_unlink(node_t* node){
-	printf("can_unlink\n");
+	// printf("can_unlink\n");
 
 	return node->left == NULL || node->right == NULL;
 }
 
 bst_value_t* bst_attempt_remove_node(node_t* par, node_t* n){
-	printf("bst_attempt_remove_node\n");
+	// printf("bst_attempt_remove_node\n");
 
 	if (n->value == NULL) {
 		return NULL;
@@ -266,11 +266,11 @@ bst_value_t* bst_attempt_remove_node(node_t* par, node_t* n){
 }
 
 void bst_fix_height_and_rebalance(node_t* par){
-	printf("bst_fix_height_and_rebalance\n");
+	// printf("bst_fix_height_and_rebalance\n");
 }
 
 void bst_wait_until_not_changing(node_t* n){
-	printf("bst_wait_until_not_changing\n");
+	// printf("bst_wait_until_not_changing\n");
 
 	bst_version_t v = n->version;
 	if ((v & (GROWING | SHRINKING)) != 0) {

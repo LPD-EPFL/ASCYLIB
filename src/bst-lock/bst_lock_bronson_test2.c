@@ -98,7 +98,7 @@ void *test(void *data) {
 	bst_value_t* val;
 	bst_value_t* added;
 
-	for ( i = 1; i <= op_count; i++){
+	for ( i = d->id * op_count + 1; i <= (d->id+1) * op_count; i++){
 
 		val = (bst_value_t*)malloc(sizeof(bst_value_t));
 		*val = d->id*op_count+i;
@@ -115,7 +115,7 @@ void *test(void *data) {
 
 	// printf("Root right node: %d", root->right->key);
 	
-	for (i = 1; i <= op_count; i++){
+	for ( i = 1; i <= num_threads * op_count; i++){
 
 		bool_t found = (bst_get(i) != NULL);
 		// printf("Contains %d? %d\n", i, found==FOUND);
@@ -128,7 +128,7 @@ void *test(void *data) {
 
 	// d->num_search = 0;
 
-	for ( i = 1; i <= op_count; i++){
+	for ( i = d->id * op_count + 1; i <= (d->id+1) * op_count; i++){
 
 		bool_t removed = (bst_remove(i) != NULL);
 		// printf("Removed %d? %d\n", i, removed==TRUE);
@@ -158,7 +158,7 @@ int main(int argc, char* const argv[]) {
 	num_threads = 3;
 	int i;
     
-    v = (uint8_t*) malloc((1+op_count) * sizeof(uint8_t));
+    v = (uint8_t*) malloc((num_threads+1)*(1+op_count) * sizeof(uint8_t));
     for (i = 1; i <= op_count;  i++) {
         v[i] = 0;
     }

@@ -21,9 +21,14 @@ bst_lock_bronson.o:
 bst_lock_bronson_test.o: bst_lock_bronson.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_lock_bronson_test.o bst_lock_bronson_test.c
 
+bst_lock_bronson_test2.o: bst_lock_bronson.h
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_lock_bronson_test2.o bst_lock_bronson_test2.c
 
 main: measurements.o ssalloc.o  bst_lock_bronson.o bst_lock_bronson_test.o
 	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_lock_bronson.o $(BUILDIR)/bst_lock_bronson_test.o -o $(BINS) $(LDFLAGS)
+
+two: measurements.o ssalloc.o  bst_lock_bronson.o bst_lock_bronson_test2.o
+	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_lock_bronson.o $(BUILDIR)/bst_lock_bronson_test2.o -o $(BINS) $(LDFLAGS)
 
 clean:
 	rm -f $(BINS)
