@@ -47,19 +47,20 @@ struct node_t {
 };
 
 node_t* bst_initialize();
-bst_value_t* bst_get(bst_key_t k);
+bst_value_t* bst_get(bst_key_t k, node_t* root);
 bst_value_t* bst_attempt_get(bst_key_t k, node_t* node, bool_t is_right, bst_version_t node_v);
-bst_value_t* bst_put(bst_key_t k, bst_value_t* v);
+bst_value_t* bst_put(bst_key_t k, bst_value_t* v, node_t* root);
 bst_value_t* bst_attempt_put(bst_key_t k, bst_value_t* v, node_t* node, bool_t is_right, bst_version_t node_v);
 bst_value_t* bst_attempt_insert(bst_key_t k, bst_value_t* v, node_t* node, bool_t is_right, bst_version_t node_v);
 bst_value_t* bst_attempt_update(node_t* node, bst_value_t* v);
-bst_value_t* bst_remove(bst_key_t k);
+bst_value_t* bst_remove(bst_key_t k, node_t* root);
 // TODO what is the signature of bst_attempt_remove
 bst_value_t* bst_attempt_remove(bst_key_t k, node_t* rootHolder, bool_t is_right, bst_version_t node_v);
 bool_t can_unlink(node_t* node);
 bst_value_t* bst_attempt_remove_node(node_t* par, node_t* n);
 void bst_fix_height_and_rebalance(node_t* par);
 void bst_wait_until_not_changing(node_t* n);
+unsigned long bst_size(node_t* node);
 
 static inline node_t* CHILD(node_t* parent, bool_t is_right) {
 	return is_right ? parent->right : parent->left;

@@ -95,15 +95,15 @@ void *test(void *data) {
     barrier_cross(d->barrier);
 
 	int i;
-	bst_value_t* val;
+	bst_value_t* val = (bst_value_t*)malloc(sizeof(bst_value_t));
 	bst_value_t* added;
 
 	for ( i = 1; i <= op_count; i++){
 
-		val = (bst_value_t*)malloc(sizeof(bst_value_t));
 		*val = d->id*op_count+i;
+        // bst_value_t val = d->id*op_count+i;
 		// fprintf(stderr, "[%d] before add\n", pthread_self());
-		added = bst_put(i, val);
+		added = bst_put(i, val, root);
 		// fprintf(stderr, "[%d] Added %d\n", pthread_self(), i);
 
 		// fprintf(stderr, "[%d] Added %d? %d\n", d->id, i, added==TRUE);
@@ -117,7 +117,7 @@ void *test(void *data) {
 	
 	for (i = 1; i <= op_count; i++){
 
-		bool_t found = (bst_get(i) != NULL);
+		bool_t found = (bst_get(i, root) != NULL);
 		// printf("Contains %d? %d\n", i, found==FOUND);
 		if (found) {
 			d->num_search ++;
@@ -130,7 +130,7 @@ void *test(void *data) {
 
 	for ( i = 1; i <= op_count; i++){
 
-		bool_t removed = (bst_remove(i) != NULL);
+		bool_t removed = (bst_remove(i, root) != NULL);
 		// printf("Removed %d? %d\n", i, removed==TRUE);
 		if (removed == TRUE) {
 			d->num_remove ++;
@@ -176,7 +176,7 @@ int main(int argc, char* const argv[]) {
     thread_data_t *data;
     barrier_t barrier;
 
-	node_t* root = bst_initialize();
+	root = bst_initialize();
 	printf("Initialized tree\n");
 
 	//initialize the data which will be passed to the threads

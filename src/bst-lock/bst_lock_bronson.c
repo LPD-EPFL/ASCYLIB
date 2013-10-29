@@ -1,16 +1,16 @@
 #include "bst_lock_bronson.h"
 #include <pthread.h>
 
-node_t* root;
+// node_t* root;
 
 node_t* bst_initialize() {
 	// printf("bst_initialize\n");
-	root = (node_t*) ssalloc(sizeof(node_t));
+	node_t* root = (node_t*) ssalloc(sizeof(node_t));
 
 	// assign minimum key to the root, actual tree will be 
 	// the right subtree of the root
 	root->key = 0;
-	root->value = NULL;
+	root->value = &root; //wanted to avoid using ssalloc for the dummy value stored in the root placeholder node.
 	root->left = NULL;
 	root->right = NULL;
 	root->height = 0;
@@ -23,7 +23,7 @@ node_t* bst_initialize() {
 }
 
 
-bst_value_t* bst_get(bst_key_t k){
+bst_value_t* bst_get(bst_key_t k, node_t* root){
 	// printf("bst_get\n");
 	return bst_attempt_get(k, root, TRUE, 0);
 }
@@ -65,7 +65,7 @@ bst_value_t* bst_attempt_get(bst_key_t k, node_t* node, bool_t is_right, bst_ver
 	}
 }
 
-bst_value_t* bst_put(bst_key_t k, bst_value_t* v){
+bst_value_t* bst_put(bst_key_t k, bst_value_t* v, node_t* root){
 	// printf("bst_put\n");
 
 	return bst_attempt_put(k, v, root, TRUE, 0);
@@ -163,7 +163,7 @@ bst_value_t* bst_attempt_update(node_t* node, bst_value_t* v){
 	
 }
 
-bst_value_t* bst_remove(bst_key_t k){
+bst_value_t* bst_remove(bst_key_t k, node_t* root){
 	// printf("bst_remove\n");
 
 	return bst_attempt_remove(k, root, TRUE, 0);
@@ -282,5 +282,16 @@ void bst_wait_until_not_changing(node_t* n){
 			LOCK(&(n->lock));
 			UNLOCK(&(n->lock));
 		} 
+	}
+}
+
+unsigned long bst_size(node_t* node) {
+	if (node == NULL) {
+		return 0;
+	} else if (node->value != NULL){
+		// fprintf(stderr, "node %p ; left: %p; right: %p\n", node, node->left, node->right);
+		return 1 + bst_size(node->right) + bst_size(node->left);
+	} else {
+		return bst_size(node->right) + bst_size(node->left);
 	}
 }
