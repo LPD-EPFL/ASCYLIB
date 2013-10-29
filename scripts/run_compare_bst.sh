@@ -14,6 +14,6 @@ do
 	r=$((2*$i));	
 	settings="-i$i -r$r -u$u";
 	echo "## $settings" | tee -a $out_file;
-	./scripts/scalability3.sh ./bin/lf-bst ./bin/lf-bst-howley ./bin/lb-bst $settings | tee -a $out_file;
+	./scripts/scalability3.sh socket ./bin/lf-bst ./bin/lf-bst-howley ./bin/lb-bst $settings | tee -a $out_file;
     done;
 done;
