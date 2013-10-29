@@ -17,7 +17,7 @@
 #include "ssalloc.h"
 
 int num_threads;
-int op_count = 10000;
+int op_count = 100;
 uint8_t* v;
 
 // TODO how do we know that threads are correctly set up on separate cpus?
@@ -92,7 +92,6 @@ void *test(void *data) {
 
     //place the thread on the apropriate cpu
     set_cpu(the_cores[d->id]);
-    int op_count = 10000;
 
     ssalloc_init();
 
@@ -104,7 +103,7 @@ void *test(void *data) {
 
 	for ( i = 1; i <= op_count; i++){
 
-		added = bst_add(i);
+		added = bst_add(i, root);
 		// fprintf(stderr, "[%d] Added %d? %d\n", d->id, i, added==TRUE);
 		if (added == TRUE) {
 			d->num_insert++;
@@ -112,11 +111,13 @@ void *test(void *data) {
 		}
 	}
 
+    bst_print(root);
+
 	// printf("Root right node: %d", root->right->key);
 	
 	for ( i = 1; i <= op_count; i++){
 
-		bool_t found = bst_contains(i);
+		bool_t found = bst_contains(i, root);
 		// printf("Contains %d? %d\n", i, found==FOUND);
 		if (found == FOUND) {
 			d->num_search ++;
@@ -125,7 +126,7 @@ void *test(void *data) {
 
 	for ( i = 1; i <= op_count; i++){
 
-		bool_t removed = bst_remove(i);
+		bool_t removed = bst_remove(i, root);
 		// printf("Removed %d? %d\n", i, removed==TRUE);
 		if (removed == TRUE) {
 			d->num_remove ++;
@@ -145,7 +146,7 @@ void *test(void *data) {
 
 int main(int argc, char* const argv[]) {
 
-	num_threads = 5;
+	num_threads = 1;
 	int i;
 
     v = (uint8_t*) malloc((1+op_count) * sizeof(uint8_t));
@@ -154,7 +155,7 @@ int main(int argc, char* const argv[]) {
     }
     
 	//place thread on the first cpu
-    set_cpu(the_cores[7]);
+    set_cpu(the_cores[0]);
 
 	ssalloc_init();
 	//alignment in the custom memory allocator to a 64 byte boundary 
@@ -165,7 +166,7 @@ int main(int argc, char* const argv[]) {
     thread_data_t *data;
     barrier_t barrier;
 
-	node_t* root = bst_initialize();
+	root = bst_initialize();
 	printf("Initialized tree\n");
 
 	//initialize the data which will be passed to the threads
@@ -229,6 +230,8 @@ int main(int argc, char* const argv[]) {
     if (correct == TRUE) {
         fprintf(stderr, "Okey-dokey\n");
     }
+    fprintf(stderr, "%lu\n", bst_size(root));
+    bst_print(root);
 
 	free(threads);
     free(data);
