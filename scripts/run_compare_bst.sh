@@ -17,3 +17,7 @@ do
 	./scripts/scalability3.sh socket ./bin/lf-bst ./bin/lf-bst-howley ./bin/lb-bst $settings | tee -a $out_file;
     done;
 done;
+
+out_file=${out_file##*/};
+out_file=${out_file%.*}
+./scripts/plot_bst_compare.sh ${out_file};
