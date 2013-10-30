@@ -22,6 +22,11 @@
 // Spin time for bst_wait_until_not_changing
 #define SPIN_COUNT 100
 
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+   
 typedef uint32_t bst_height_t; 
 typedef uint64_t bst_version_t;
 typedef uint32_t bst_key_t;

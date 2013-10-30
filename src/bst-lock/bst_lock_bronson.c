@@ -265,9 +265,6 @@ bst_value_t* bst_attempt_remove_node(node_t* par, node_t* n){
 	return prev;
 }
 
-void bst_fix_height_and_rebalance(node_t* par){
-	// printf("bst_fix_height_and_rebalance\n");
-}
 
 void bst_wait_until_not_changing(node_t* n){
 	// printf("bst_wait_until_not_changing\n");
@@ -295,3 +292,277 @@ unsigned long bst_size(node_t* node) {
 		return bst_size(node->right) + bst_size(node->left);
 	}
 }
+
+// Functions for fixing the height
+
+
+void bst_fix_height_and_rebalance(node_t* node){
+	// printf("bst_fix_height_and_rebalance\n");
+	while(node != NULL && node->parent != NULL){
+		uint8_t condition = node_condition(node);
+		if (condition == NOTHING_REQUIRED || node->version == UNLINKED){
+
+			return;
+		}
+
+		if (condition == UNLINK_REQUIRED && condition != REBALANCE_REQUIRED) {
+
+			LOCK(&(node->lock));
+			node = fix_height_nl(node);
+			UNLOCK(&(node->lock));
+		} else {
+			node_t* n_parent = node->parent; 
+			LOCK(&(n_parent->lock));
+			if ( n_parent->version != UNLINKED && node->parent == n_parent){
+				LOCK(&(node->lock));
+				node = rebalance_nl(n_parent, node);
+				UNLOCK(&(node->lock));
+			}
+			UNLOCK(&(n_parent->lock));	
+		}
+	}
+}
+
+node_t* fix_height_nl(node_t* node){
+	uint8_t c = node_condition(node);
+	switch (c) {
+        case REBALANCE_REQUIRED:
+        case UNLINK_REQUIRED:
+            // can't repair
+            return node;
+        case NOTHING_REQUIRED:
+            // Any future damage to this node is not our responsibility.
+            return NULL;
+        default:
+            node->height = c;
+            // we've damaged our parent, but we can't fix it now
+            return node->parent;
+    }
+}
+
+node_t* rebalance_nl(node_t* n_parent, node_t* n){
+	node_t* nl = unshared_left(n);
+	node_t* nr = unshared_right(n);
+
+	if((nl == NULL || nr == NULL) && n->value == NULL){
+		if (attempt_unlink_nl(n_parent, n)){
+			return fix_height_nl(n_parent);
+		} else {
+			return n;
+		}
+	}
+
+	bst_height_t hn = n->height;
+	bst_height_t hl0 = height(nl);
+	bst_height_t hr0 = height(nr);
+	bst_height_t hNRepl = 1 + max(hl0, hr0);
+    bst_height_t bal = hl0 - hr0;
+
+    if(bal > 1){
+    	return rebalance_to_right_nl(n_parent, n, nl, hr0);
+    } else if (bal < 1){
+    	return rebalance_to_left_nl(n_parent, n, nr, hl0);
+    } else if (hNRepl != hn){
+    	n->height = hNRepl;
+    	return fix_height_nl(n_parent);
+    } else {
+    	return NULL;
+    }
+
+}
+
+node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, bst_height_t hr0){
+
+	LOCK(&(nl->lock));
+	bst_height_t hl = nl->height;
+	if (hl - hr0 <= 1){
+		UNLOCK(&(nl->lock));
+		return n;
+	} else {
+		node_t* nlr = unshared_right(nl);
+		bst_height_t hll0 = height(nl->left);
+		bst_height_t hlr0 = height(nlr);
+        if (hll0 >= hlr0) {
+            // rotate right based on our snapshot of hLR
+            node_t* res = rotate_right_nl(n_parent, n, nl, hr0, hll0, nlr, hlr0);
+            UNLOCK(&(nl->lock));
+            return res;
+        } else {
+        	LOCK(&(nlr->lock));
+
+        	bst_height_t hlr = nlr->height;
+            if (hll0 >= hlr) {
+            	node_t* res = rotate_right_nl(n_parent, n, nl, hr0, hll0, nlr, hlr);
+            	UNLOCK(&(nlr->lock));
+            	UNLOCK(&(nl->lock));
+                return res;
+            } else {
+	            bst_height_t hlrl = height(nLR.left);
+	            bst_height_t b = hll0 - hlrl;
+	            if (b >= -1 && b <= 1 && !((hll0 == 0 || hlrl == 0) && nl->value == NULL)) {
+	                // nParent.child.left won't be damaged after a double rotation
+	                node_t* res = rotateRightOverLeft_nl(n_parent, n, nl, hr0, hll0, nlr, hlrl);
+                	UNLOCK(&(nlr->lock));
+            		UNLOCK(&(nl->lock));
+	                return res; 
+				}
+        	}
+
+        	node_t* res = rebalance_to_left_nl(n, nl, nlr, nll0);
+        	UNLOCK(&(nl->lock));
+        	return res;
+		}
+	}
+	UNLOCK(&(nl->lock));
+}
+
+node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr,bst_height_t hl0) {
+
+	LOCK(&(nr->lock));
+	bst_height_t hr = nr->height;
+	if (hl0 - hr >= -1) {
+		UNLOCK(&(nr->lock));
+		return n;
+	} else {
+		node_t* nrl = unshared_left(nr);
+		bst_height_t hrl0 = height(nrl);
+		bst_height_t hrr0 = height(nr->right);
+		if (hrr0 >= hrl0) {
+			node_t* res = rotate_left_nl(n_parent, n, hl0, nr, nrl, hrl0, hrr0);
+			UNLOCK(&(nr->lock));
+			return res;
+		} else {
+			LOCK(&(nrl->lock));
+			bst_height_t hrl = nrl->height;
+			if (hrr0 >= hrl) {
+				node_t* res = rotate_left_nl(n_parent, n, hl0, nr, nrl, hrl, hrr0);
+				UNLOCK(&(nrl->lock));
+				UNLOCK(&(nr->lock));
+				return res;
+			} else {
+                bst_height_t hrlr = height(nrl->right);
+                bst_height_t b = hrr0 - hrlr;
+                if (b >= -1 && b <= 1 && !((hrr0 == 0 || hrlr == 0) && nr->value == NULL)) {
+                	node_t* res = rotate_left_over_right_nl(n_parent, n, hl0, nr, nrl, hrr0, hrlr);
+					UNLOCK(&(nrl->lock));
+					UNLOCK(&(nr->lock));
+                    return res;
+                }
+			}
+			UNLOCK(&(nrl->lock));
+			node_t* res = rebalance_to_right_nl(n, nr, nrl, hrr0);
+			UNLOCK(&(nr->lock));
+			return res;
+		}
+	}
+	UNLOCK(&(nr->lock));
+}
+
+node_t* rotate_right_nl(node_t* n_parent, node_t* n, node_t* nl, bst_height_t hr, bst_height_t hll, bst_height_t nlr, bst_height_t hlr) {
+
+	bst_version_t node_ovl = n->version;
+	node_t* npl = n_parent->left;
+	n->version = begin_change(node_ovl);
+	n->left = nlr;
+	if (nlr != NULL) {
+		nlr->parent = n;
+	}
+
+	nl->right = n;
+	n->parent = nl;
+
+	if (npl == n) {
+		n_parent->left = nl;
+	} else {
+		n_parent->right = nl;
+	}
+	nl->parent = n_parent;
+
+	bst_height_t hn_repl = 1 + max(hlr, hr);
+	n->height = hn_repl;
+	nl->height = 1 + max(hll, hn_repl);
+
+	n->version = end_change(node_ovl);
+
+	bst_height_t bal_n = hlr - hr;
+	if (bal_n < -1 || bal_n > 1) {
+		return n;
+	}
+
+	if ((nlr == NULL || hr == 0) && n->value == NULL) {
+		return n;
+	}
+
+	bst_height_t bal_l = hll - hn_repl;
+	if (bal_l < -1 || bal_l > 1) {
+		return nl;
+	}
+
+	if (hll == 0 && nl->value == NULL) {
+		return nl;
+	}
+
+	return fix_height_nl(n_parent);
+}
+
+node_t* rotate_left_nl(node_t* n_parent, node_t* n, bst_height_t hl, node_t* nr, node_t* nrl, bst_height_t hrl, bst_height_t hrr) {
+
+    bst_version_t node_ovl = n->version;
+
+    node_t* npl = n_parent->left;
+
+    n->version = begin_change(node_ovl);
+
+    // fix up n links, careful to be compatible with concurrent traversal for all but n
+    n->right = nrl;
+    if (nrl != NULL) {
+        nrl->parent = n;
+    }
+
+    nr->left = n;
+    n->parent = nr;
+
+    if (npl == n) {
+        n_parent->left = nr;
+    } else {
+        n_parent->right = nr;
+    }
+    nr->parent = n_parent;
+
+    // fix up heights
+    bst_height_t hn_repl = 1 + max(hl, hrl);
+    n->height = hn_repl;
+    n->height = 1 + max(hn_repl, hrr);
+
+    n->version = endChange(node_ovl);
+
+    bst_height_t bal_n = hrl - hl;
+    if (bal_n < -1 || bal_n > 1) {
+        return n;
+    }
+
+    if ((nrl == NULL || hl == 0) && n->value == NULL) {
+        return n;
+    }
+
+    bst_height_t bal_r = hrr - hn_repl;
+    if (bal_r < -1 || bal_r > 1) {
+        return nr;
+    }
+
+    if (hrr == 0 && nr->value == NULL) {
+        return nr;
+    }
+
+    return fix_height_nl(n_parent);
+}
+
+TODO:
+begin_change(node_ovl);
+end_change(node_ovl);
+node_condition(node_t*);
+unshared_left(n);
+unshared_right(n);
+attempt_unlink_nl(n_parent, n);
+
+(static inline) height(nl);
