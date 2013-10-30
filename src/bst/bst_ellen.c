@@ -21,13 +21,13 @@ node_t* bst_initialize(int num_proc){
     root->left = i1;
     root->right = i2;
     
-    my_search_result = (search_result_t**) ssalloc(num_proc * sizeof(search_result_t*));
+    my_search_result = (search_result_t**) malloc(num_proc * sizeof(search_result_t*));
 
     return root;
 }
 
 void bst_init_local(int id){
-    my_search_result[id] = (search_result_t*) ssalloc(sizeof(search_result_t));
+    my_search_result[id] = (search_result_t*) malloc(sizeof(search_result_t));
 }
 
 search_result_t* bst_search(bst_key_t key, node_t* root, int id) {
@@ -96,7 +96,7 @@ bool_t bst_insert(bst_key_t key, node_t* root, int id) {
                 new_internal->left = new_sibling;
                 new_internal->right = new_node;
             }
-            op = (info_t*) ssalloc(sizeof(info_t));
+            op = (info_t*) ssalloc_alloc(1,sizeof(info_t));
             op->iinfo.p = search_result->p;
             op->iinfo.new_internal = new_internal;
             op->iinfo.l =  search_result->l;
@@ -134,7 +134,7 @@ bool_t bst_delete(bst_key_t key, node_t* root, int id) {
         } else if (GETFLAG(search_result->pupdate)!=STATE_CLEAN){
             bst_help(search_result->pupdate);
         } else {
-            op = (info_t*) ssalloc(sizeof(info_t));
+            op = (info_t*) ssalloc_alloc(1,sizeof(info_t));
             op->dinfo.gp = search_result->gp;
             op->dinfo.p = search_result->p;
             op->dinfo.l = search_result->l;

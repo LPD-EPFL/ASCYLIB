@@ -351,6 +351,7 @@ int main(int argc, char* const argv[]) {
         data[i].num_remove=0;
         data[i].num_search=0;
         data[i].num_add = max_key/(2 * num_threads); 
+        if (i< ((max_key/2)%num_threads)) data[i].num_add++;
         data[i].seed = rand();
         data[i].barrier = &barrier;
         if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {

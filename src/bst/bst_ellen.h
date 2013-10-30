@@ -40,7 +40,7 @@
 typedef uint8_t leaf_t;
 typedef uint8_t bool_t;
 
-typedef uint32_t bst_key_t;
+typedef uint64_t bst_key_t;
 
 #define INF2 UINT32_MAX
 #define INF1 (UINT32_MAX-1)
