@@ -9,6 +9,8 @@
 #include <time.h>
 
 
+
+#include "lock_if.h"
 #include "bst_howley.h"
 #include "measurements.h"
 #include "utils.h"
@@ -52,7 +54,6 @@ __thread unsigned long * seeds;
 
 //the root of the binary search tree
 node_t * root;
-
 
 //a simple barrier implementation
 //used to make sure all threads start the experiment at the same time
@@ -141,15 +142,16 @@ void *test(void *data)
     //before starting the test, we insert a number of elements in the data structure
     //we do this at each thread to avoid the situation where the entire data structure 
     //resides in the same memory node
-    for (i=0;i<d->num_add;++i) {
-        key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
-        DDPRINT("key is %u\n",key);
-        //we make sure the insert was effective (as opposed to just updating an existing entry)
-        if (bst_add(key, root)!=TRUE) {
-            i--;
-        }
-    }
-    DDPRINT("added initial data\n",NULL);
+    // for (i=0;i<d->num_add;++i) {
+    //     key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
+    //     DDPRINT("key is %u\n",key);
+    //     //we make sure the insert was effective (as opposed to just updating an existing entry)
+    //     if (bst_add(key, root)!=TRUE) {
+    //         i--;
+    //     }
+    // }
+    //fprintf(stderr, "added initial data\n");
+
 
     bool_t res;
     /* Init of local data if necessary */
@@ -202,6 +204,7 @@ void catcher(int sig)
 int main(int argc, char* const argv[]) {
     //place thread on the first cpu
     set_cpu(the_cores[0]);
+
     //initialize the custom memory allocator
     ssalloc_init();
     pthread_t *threads;
@@ -367,6 +370,19 @@ int main(int argc, char* const argv[]) {
         exit(1);
     }
 
+    seeds = seed_rand();
+    bst_key_t key;
+    for (i=0;i<max_key/2;++i) {
+        key = my_random(&seeds[0],&seeds[1],&seeds[2]) & max_key;
+        //we make sure the insert was effective (as opposed to just updating an existing entry)
+        if (bst_add(key, root)!=TRUE) {
+            i--;
+        }
+    }
+
+    // bst_print(root);
+
+
     /* Start threads */
     barrier_cross(&barrier);
     gettimeofday(&start, NULL);
@@ -397,7 +413,7 @@ int main(int argc, char* const argv[]) {
 
     unsigned long operations = 0;
     ticks total_ticks = 0;
-    long reported_total = 2; //the tree contains two initial dummy nodes, INF1 and INF2
+    long reported_total = 1; //the tree contains two initial dummy nodes, INF1 and INF2
     //report some experiment statistics
     for (i = 0; i < num_threads; i++) {
         printf("Thread %d\n", i);

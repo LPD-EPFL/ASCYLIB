@@ -31,8 +31,9 @@ bool_t bst_contains(bst_key_t k, node_t* root){
 	operation_t* curr_op;
 
 
-	//root is now a global pointer to a node, not a node
-	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
+	// root is now a global pointer to a node, not a node
+	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root) == FOUND;
+	// return TRUE;
 }
 
 search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
@@ -50,6 +51,7 @@ retry:
 	*curr_op = (*curr)->op;
 
 	if(GETFLAG(*curr_op) != STATE_OP_NONE){
+		fprintf(stderr, "Shouldn't be here\n");
 		//root is now a global pointer to a node, not a node
 		if (aux_root == root){
 			bst_help_child_cas(((child_cas_op_t*)UNFLAG(*curr_op)), *curr, aux_root);
@@ -73,6 +75,7 @@ retry:
 
 
 		if(GETFLAG(*curr_op) != STATE_OP_NONE){
+			fprintf(stderr, "Shouldn't be here 2\n");
 			bst_help(*pred, *pred_op, *curr, *curr_op, aux_root);
 			goto retry;
 		}
@@ -92,10 +95,12 @@ retry:
 	}
 	
 	if ((result != FOUND) && (last_right_op != last_right->op)) {
+		fprintf(stderr, "Shouldn't be here 3\n");
 		goto retry;
 	}
 
 	if ((*curr)->op != *curr_op){
+		fprintf(stderr, "Shouldn't be here 4\n");
 		goto retry;
 	}
 
@@ -122,6 +127,10 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		// new_node = new Node(k);
 		new_node = (node_t*) ssalloc(sizeof(node_t));
 		new_node->key = k;
+		new_node->op = NULL;
+		new_node->left = NULL;
+		new_node->right = NULL;
+
 		bool_t is_left = (result == NOT_FOUND_L);
 		node_t* old;
 		if (is_left) {
