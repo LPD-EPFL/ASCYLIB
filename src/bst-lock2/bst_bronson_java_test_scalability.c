@@ -133,7 +133,6 @@ void *test(void *data)
     rand_max = max_key;
     uint32_t op;
     bst_key_t key;
-    bst_value_t val = 42;
     int i;
     int last = -1;
 
@@ -147,7 +146,7 @@ void *test(void *data)
 
         DDPRINT("key is %u\n",key);
         //we make sure the insert was effective (as opposed to just updating an existing entry)
-        if (bst_put(key, &val, root)!=NULL) {
+        if (bst_add(key, root)!=TRUE) {
             i--;
         }
     }
@@ -169,17 +168,17 @@ void *test(void *data)
             //PF_START and PF_STOP can be used to do latency measurements of the operation
             //to enable them, DO_TIMINGS must be defined at compile time, otherwise they do nothing
             //PF_START(2);
-            bst_get(key, root);
+            bst_contains(key, root);
             //PF_STOP(2);
         } else if (last == -1) {
             //do a write operation
-            if (bst_put(key, &val, root) == NULL) {
+            if (bst_add(key, root) == TRUE) {
                 d->num_insert++;
                 last=1;
             }
         } else {
             //do a delete operation
-            if (bst_remove(key, root) != NULL) {
+            if (bst_remove(key, root) == TRUE) {
                 d->num_remove++;
                 last=-1;
             }

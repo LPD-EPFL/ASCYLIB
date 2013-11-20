@@ -2,7 +2,7 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS  = $(BINDIR)/lb-bst 
+BINS  = $(BINDIR)/lb-bst2 
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
@@ -24,7 +24,7 @@ bst_bronson_java_test.o: bst_bronson_java.h
 bst_bronson_java_test2.o: bst_bronson_java.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_bronson_java_test2.o bst_bronson_java_test2.c
 
-bst_lock_bronson_test_scalability.o: bst_bronson_java.h
+bst_bronson_java_test_scalability.o: bst_bronson_java.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_bronson_java_test_scalability.o bst_bronson_java_test_scalability.c
 
 main: measurements.o ssalloc.o  bst_bronson_java.o bst_bronson_java_test_scalability.o

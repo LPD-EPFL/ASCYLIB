@@ -10,7 +10,7 @@ node_t* bst_initialize() {
 	// assign minimum key to the root, actual tree will be 
 	// the right subtree of the root
 	root->key = 0;
-	root->value = &root; //wanted to avoid using ssalloc for the dummy value stored in the root placeholder node.
+	root->value = FALSE; //wanted to avoid using ssalloc for the dummy value stored in the root placeholder node.
 	root->left = NULL;
 	root->right = NULL;
 	root->height = 0;
@@ -22,7 +22,7 @@ node_t* bst_initialize() {
 	return root;
 }
 
-bool_t bst_contains(bst_key_t k, node_t* root) {
+bool_t bst_contains(bst_key_t key, node_t* root) {
 	while(TRUE) {
 		node_t* right = root->right;
 
@@ -37,11 +37,11 @@ bool_t bst_contains(bst_key_t k, node_t* root) {
 
 			uint64_t ovl = right->version;
             if(IS_SHRINKING_OR_UNLINKED(ovl)){
-                waitUntilNotChanging(right);
+                wait_until_not_changing(right);
             } else if(right == root->right){
             	// if right_cmp < 0, we should go left, otherwise right
-                result_t vo = attemptGet(k, right, (rightCmp < 0 ? FALSE : TRUE), ovl);
-                if (vo != RESULT_RETRY) {
+                result_t vo = attempt_get(key, right, (right_cmp < 0 ? FALSE : TRUE), ovl);
+                if (vo != RETRY) {
                     return vo == FOUND;
                 }
             }
@@ -51,7 +51,7 @@ bool_t bst_contains(bst_key_t k, node_t* root) {
 
 result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v) {
 
-	while(true){
+	while(TRUE){
         node_t* child = CHILD(node, is_right);
 
         if(child == NULL){
@@ -69,12 +69,12 @@ result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v
 
             uint64_t child_ovl = child->version;
             if(IS_SHRINKING_OR_UNLINKED(child_ovl)){
-                waitUntilNotChanging(child);
+                wait_until_not_changing(child);
 
                 if(node->version != node_v){
                     return RETRY;
                 }
-            } else if(child != CHILD(node, dir)){
+            } else if(child != CHILD(node, is_right)){
                 if(node->version != node_v){
                     return RETRY;
                 }
@@ -93,33 +93,33 @@ result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v
 }
 
 
-bool_t bst_add(bst_key_t k, node_t* root) {
+bool_t bst_add(bst_key_t key, node_t* root) {
 
-	return update_under_root(k, UPDATE_IF_ABSENT, FALSE, TRUE, root) == NOT_FOUND;
+	return update_under_root(key, UPDATE_IF_ABSENT, FALSE, TRUE, root) == NOT_FOUND;
 }
 
-bool_t bst_remove(bst_key_t k, node_t* root) {
-	return update_under_root(k, UPDATE_IF_PRESENT, TRUE, FALSE, root) == FOUND;
+bool_t bst_remove(bst_key_t key, node_t* root) {
+	return update_under_root(key, UPDATE_IF_PRESENT, TRUE, FALSE, root) == FOUND;
 }
 
-result_t update_under_root(bst_key_t k, function_t func, bst_value_t expected, bst_value_t new_value, node_t* holder) {
+result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, node_t* holder) {
 
-	while(true){
+	while(TRUE){
         node_t* right = holder->right;
 
         if(right == NULL){
-            if(!SHOULD_UPDATE(func, false, expected)){
+            if(!SHOULD_UPDATE(func, FALSE)){
                 return NO_UPDATE_RESULT(func);
             }
 
-            if(!new_value || attempt_insert_into_empty(k, new_value, holder)){
+            if(!new_value || attempt_insert_into_empty(key, new_value, holder)){
                 return UPDATE_RESULT(func);
             }
         } else {
             uint64_t ovl = right->version;
 
             if(IS_SHRINKING_OR_UNLINKED(ovl)){
-                waitUntilNotChanging(right);
+                wait_until_not_changing(right);
             } else if(right == holder->right){
                 result_t vo = attempt_update(key, func, expected, new_value, holder, right, ovl);
                 if(vo != RETRY){
@@ -135,15 +135,15 @@ bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, node_t* holde
     LOCK(&(holder->lock));
 
     if(!holder->right){
-        holder->right = newNode(1, key, 0, value, holder, NULL, NULL);
+        holder->right = new_node(1, key, 0, value, holder, NULL, NULL);
         holder->height = 2;
 
         UNLOCK(&(holder->lock));
-        return true;
+        return TRUE;
     } else {
 
     	UNLOCK(&(holder->lock));
-        return false;
+        return FALSE;
     }
 }
 
@@ -200,14 +200,14 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
                         success = FALSE;
                         damaged = NULL;
                     } else {
-                        if(!SHOULD_UPDATE(func, FALSE, expected)){
+                        if(!SHOULD_UPDATE(func, FALSE)){
                             // releaseAll();
                             UNLOCK(&(node->lock));
-                            return NO_UPDATE_RESULT(func, FALSE);
+                            return NO_UPDATE_RESULT(func);
                         }
 
                         node_t* new_child = new_node(1, key, 0, TRUE, node, NULL, NULL);
-                        set_child(node, cmp, newChild);
+                        set_child(node, new_child, cmp);
 
                         success = TRUE;
                         damaged = fix_height_nl(node);
@@ -219,7 +219,7 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
 
                 if(success){
                     fix_height_and_rebalance(damaged);
-                    return updateResult(func, NULL);
+                    return UPDATE_RESULT(func);
                 }
             }
 
@@ -227,8 +227,8 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
             uint64_t child_v = child->version;
 
             if(IS_SHRINKING_OR_UNLINKED(child_v)){
-                waitUntilNotChanging(child);
-            } else if(child != node->CHILD(node, (cmp < 0 ? FALSE : TRUE))){
+                wait_until_not_changing(child);
+            } else if(child != CHILD(node, (cmp < 0 ? FALSE : TRUE))){
                 //RETRY
             } else {
                 if(node->version != node_v){
@@ -262,7 +262,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
             // scoped_lock parentLock(parent->lock);
             LOCK(&(parent->lock));
             
-            if(isUnlinked(parent->version) || node->parent != parent){
+            if(IS_UNLINKED(parent->version) || node->parent != parent){
                 // releaseAll();
                 UNLOCK(&(parent->lock));
                 return RETRY;
@@ -275,18 +275,18 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
                 
                 prev = node->value;
 
-                if(!SHOULD_UPDATE(func, prev, expected)){
+                if(!SHOULD_UPDATE(func, prev)){
                     // releaseAll();
                     UNLOCK(&(node->lock));
                     UNLOCK(&(parent->lock));
-                    return NO_UPDATE_RESULT(func, prev);
+                    return NO_UPDATE_RESULT(func);
                 }
 
                 if(!prev){
                     // releaseAll();
                     UNLOCK(&(node->lock));
                     UNLOCK(&(parent->lock));
-                    return UPDATE_RESULT(func, prev);
+                    return UPDATE_RESULT(func);
                 }
 
                 if(!attempt_unlink_nl(parent, node)){
@@ -305,7 +305,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
 
         fix_height_and_rebalance(damaged);
 
-        return UPDATE_RESULT(func, prev);
+        return UPDATE_RESULT(func);
     } else {
         // publish(node);
         // scoped_lock lock(node->lock);
@@ -318,10 +318,10 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
         }
 
         bst_value_t prev = node->value;
-        if(!SHOULD_UPDATE(func, prev, expected)){
+        if(!SHOULD_UPDATE(func, prev)){
 			// releaseAll();
 			UNLOCK(&(node->lock));
-            return noUpdateResult(func, prev);
+            return NO_UPDATE_RESULT(func);
         }
 
         if(!new_value && (node->left == NULL || node->right == NULL)){
@@ -334,11 +334,11 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
         
         // releaseAll();
         UNLOCK(&(node->lock));
-        return UPDATE_RESULT(func, prev);
+        return UPDATE_RESULT(func);
     }
 }
 
-void waitUntilNotChanging(node_t* node) {
+void wait_until_not_changing(node_t* node) {
 	uint64_t version = node->version;
 	int i;
 
@@ -437,7 +437,7 @@ void fix_height_and_rebalance(node_t* node) {
             // scoped_lock lock(n_parent->lock);
             LOCK(&(n_parent->lock));
 
-            if(!isUnlinked(n_parent->version) && node->parent == n_parent){
+            if(!IS_UNLINKED(n_parent->version) && node->parent == n_parent){
                 // publish(node);
                 // scoped_lock nodeLock(node->lock);
                 LOCK(&(node->lock));
@@ -474,7 +474,7 @@ node_t* rebalance_nl(node_t* n_parent, node_t* n){
 
     if((nl == NULL || nr == NULL) && !n->value){
         if(attempt_unlink_nl(n_parent, n)){
-            return fixheight_nl(n_parent);
+            return fix_height_nl(n_parent);
         } else {
             return n;
         }
@@ -509,7 +509,7 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
         return n;
     } else {
         // publish(nl->right);
-        node* nlr = nl->right;
+        node_t* nlr = nl->right;
 
         int hll0 = HEIGHT(nl->left);
         int hlr0 = HEIGHT(nlr);
@@ -562,7 +562,7 @@ node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0) {
     	UNLOCK(&(nr->lock));
         return n;
     } else {
-        node* nrl = nr->left;
+        node_t* nrl = nr->left;
         int hrl0 = HEIGHT(nrl);
         int hrr0 = HEIGHT(nr->right);
 
@@ -696,7 +696,7 @@ node_t* rotate_left_nl(node_t* n_parent, node_t* n, int hl, node_t* nr, node_t* 
     return fix_height_nl(n_parent);
 }
 
-node_t* rotaterightoverleft_nl(node_t* n_parent, node_t* n, node_t* nl, int hr, int hll, node_t* nlr, int hlrl){
+node_t* rotate_right_over_left_nl(node_t* n_parent, node_t* n, node_t* nl, int hr, int hll, node_t* nlr, int hlrl){
 
     uint64_t node_ovl = n->version;
     uint64_t left_ovl = nl->version;
@@ -704,7 +704,7 @@ node_t* rotaterightoverleft_nl(node_t* n_parent, node_t* n, node_t* nl, int hr, 
     node_t* npl = n_parent->left;
     node_t* nlrl = nlr->left;
     node_t* nlrr = nlr->right;
-    int hlrr = height(nlrr);
+    int hlrr = HEIGHT(nlrr);
 
     n->version = BEGIN_CHANGE(node_ovl);
     nl->version = BEGIN_CHANGE(left_ovl);
@@ -747,7 +747,7 @@ node_t* rotaterightoverleft_nl(node_t* n_parent, node_t* n, node_t* nl, int hr, 
         return n;
     }
 
-    if ((nlrr == NULL || hr == 0) && !n.value) {
+    if ((nlrr == NULL || hr == 0) && !n->value) {
         // repair involves splicing out n and maybe more rotations
         return n;
     }
