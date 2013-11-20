@@ -77,12 +77,13 @@ search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t*
 
 node_t* bst_initialize();
 bool_t bst_add(bst_key_t k, node_t* root);
-void bst_help_child_cas(child_cas_op_t* op, node_t* dest, node_t* root);
+void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root);
 bool_t bst_remove(bst_key_t k, node_t* root);
-bool_t bst_help_relocate(relocate_op_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root);
+bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root);
 void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* root);
 void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* curr_op, node_t* root );
-unsigned long bst_size(node_t* node); 
+unsigned long bst_size(node_t* node);
+void bst_print(node_t* node); 
 
 //Helper functions
 

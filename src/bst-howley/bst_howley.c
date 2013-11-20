@@ -31,8 +31,9 @@ bool_t bst_contains(bst_key_t k, node_t* root){
 	operation_t* curr_op;
 
 
-	//root is now a global pointer to a node, not a node
-	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
+	// root is now a global pointer to a node, not a node
+	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root) == FOUND;
+	// return TRUE;
 }
 
 search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
@@ -50,9 +51,10 @@ retry:
 	*curr_op = (*curr)->op;
 
 	if(GETFLAG(*curr_op) != STATE_OP_NONE){
+		fprintf(stderr, "Shouldn't be here\n");
 		//root is now a global pointer to a node, not a node
 		if (aux_root == root){
-			bst_help_child_cas(((child_cas_op_t*)UNFLAG(*curr_op)), *curr, aux_root);
+			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, aux_root);
 			goto retry;
 		} else {
 			return ABORT;
@@ -73,6 +75,7 @@ retry:
 
 
 		if(GETFLAG(*curr_op) != STATE_OP_NONE){
+			fprintf(stderr, "Shouldn't be here 2\n");
 			bst_help(*pred, *pred_op, *curr, *curr_op, aux_root);
 			goto retry;
 		}
@@ -92,10 +95,12 @@ retry:
 	}
 	
 	if ((result != FOUND) && (last_right_op != last_right->op)) {
+		fprintf(stderr, "Shouldn't be here 3\n");
 		goto retry;
 	}
 
 	if ((*curr)->op != *curr_op){
+		fprintf(stderr, "Shouldn't be here 4\n");
 		goto retry;
 	}
 
@@ -122,6 +127,10 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		// new_node = new Node(k);
 		new_node = (node_t*) ssalloc(sizeof(node_t));
 		new_node->key = k;
+		new_node->op = NULL;
+		new_node->left = NULL;
+		new_node->right = NULL;
+
 		bool_t is_left = (result == NOT_FOUND_L);
 		node_t* old;
 		if (is_left) {
@@ -132,29 +141,29 @@ bool_t bst_add(bst_key_t k, node_t* root){
 
 		// allocate memory
 		//cas_op = new child_cas_op_t(is_left, old, new_node)
-		cas_op = (operation_t*) ssalloc(sizeof(operation_t));
+		cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 		cas_op->child_cas_op.is_left = is_left;
 		cas_op->child_cas_op.expected = old;
 		cas_op->child_cas_op.update = new_node;
 
 		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
-			// legit cast? YES!!
-			bst_help_child_cas((child_cas_op_t*)cas_op, curr, root);
+			// legit cast? YES!! verif
+			bst_help_child_cas(cas_op, curr, root);
 			return TRUE;
 		}
 	}
 }
 
-void bst_help_child_cas(child_cas_op_t* op, node_t* dest, node_t* root){
+void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	//fprintf(stderr, "bst help child cas\n");
 	node_t** address = NULL;
-	if (op->is_left) {
+	if (op->child_cas_op.is_left) {
 		address = &(dest->left);
 	} else {
 		address = &(dest->right);
 	}
-	CAS_PTR(address, op->expected, op->update);
-	CAS_PTR(&(dest->op), FLAG((operation_t*)op, STATE_OP_CHILDCAS), FLAG((operation_t*)op, STATE_OP_NONE));
+	CAS_PTR(address, op->child_cas_op.expected, op->child_cas_op.update);
+	CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
 
 bool_t bst_remove(bst_key_t k, node_t* root){
@@ -185,7 +194,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 
 			//allocate memory
 			//reloc_op = new RelocateOP(curr, curr_op, k, replace->key);
-			reloc_op = (operation_t*) ssalloc(sizeof(operation_t));
+			reloc_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 			reloc_op->relocate_op.state = STATE_OP_ONGOING;
 			reloc_op->relocate_op.dest = curr;
 			reloc_op->relocate_op.dest_op = curr_op;
@@ -193,7 +202,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 			reloc_op->relocate_op.replace_key = replace->key;
 
 			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
-				if (bst_help_relocate((relocate_op_t *)reloc_op, pred, pred_op, replace, root)) {
+				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
 					return TRUE;
 				}
 			}
@@ -201,36 +210,36 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 	}
 }
 
-bool_t bst_help_relocate(relocate_op_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
+bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
 	//fprintf(stderr, "bst help relocate\n");
-	int seen_state = op->state;
+	int seen_state = op->relocate_op.state;
 	if (seen_state == STATE_OP_ONGOING) {
 		//VCAS in original implementation
-		operation_t* seen_op = CAS_PTR(&(op->dest->op), op->dest_op, FLAG((operation_t *)op, STATE_OP_RELOCATE));
-		if ((seen_op == op->dest_op) || (seen_op == (operation_t *)FLAG((operation_t *)op, STATE_OP_RELOCATE))){
-			CAS_PTR(&(op->state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
+		operation_t* seen_op = CAS_PTR(&(op->relocate_op.dest->op), op->relocate_op.dest_op, FLAG(op, STATE_OP_RELOCATE));
+		if ((seen_op == op->relocate_op.dest_op) || (seen_op == (operation_t *)FLAG(op, STATE_OP_RELOCATE))){
+			CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
 			seen_state = STATE_OP_SUCCESSFUL;
 		} else {
 			// VCAS
-			seen_state = CAS_PTR(&(op->state), STATE_OP_ONGOING, STATE_OP_FAILED);
+			seen_state = CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_FAILED);
 		}
 	}
 
 	if (seen_state == STATE_OP_SUCCESSFUL) {
 		// TODO not clear in the paper code
-		CAS_PTR(&(op->dest->key), op->remove_key, op->replace_key);
-		CAS_PTR(&(op->dest->op), FLAG((operation_t *)op, STATE_OP_RELOCATE), FLAG((operation_t *)op, STATE_OP_NONE));
+		CAS_PTR(&(op->relocate_op.dest->key), op->relocate_op.remove_key, op->relocate_op.replace_key);
+		CAS_PTR(&(op->relocate_op.dest->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, STATE_OP_NONE));
 	}
 
 	bool_t result = (seen_state == STATE_OP_SUCCESSFUL);
-	if (op->dest == curr) {
+	if (op->relocate_op.dest == curr) {
 		return result;
 	}
 
-	CAS_PTR(&(curr->op), FLAG((operation_t *)op, STATE_OP_RELOCATE), FLAG((operation_t *)op, result ? STATE_OP_MARK : STATE_OP_NONE));
+	CAS_PTR(&(curr->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, result ? STATE_OP_MARK : STATE_OP_NONE));
 	if (result) {
-		if (op->dest == pred) {
-			pred_op = (operation_t *)FLAG((operation_t *)op, STATE_OP_NONE);
+		if (op->relocate_op.dest == pred) {
+			pred_op = (operation_t *)FLAG(op, STATE_OP_NONE);
 		}
 		bst_help_marked(pred, pred_op, curr, root);
 	}
@@ -253,13 +262,13 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 
 	// allocate memory
 	// operation_t* cas_op = new child_cas_op(curr==pred->left, curr, new_ref);
-	operation_t* cas_op = (operation_t*) ssalloc(sizeof(operation_t));
+	operation_t* cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 	cas_op->child_cas_op.is_left = (curr == pred->left);
 	cas_op->child_cas_op.expected = curr;
 	cas_op->child_cas_op.update = new_ref;
 
 	if (CAS_PTR(&(pred->op), pred_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == pred_op) {
-		bst_help_child_cas((child_cas_op_t*)cas_op, pred, root);
+		bst_help_child_cas(cas_op, pred, root);
 	}
 }
 
@@ -267,9 +276,9 @@ void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* cur
 	
 	//fprintf(stderr, "bst help\n");
 	if (GETFLAG(curr_op) == STATE_OP_CHILDCAS) {
-		bst_help_child_cas(( child_cas_op_t *)UNFLAG(curr_op), curr, root);
+		bst_help_child_cas((operation_t*)UNFLAG(curr_op), curr, root);
 	} else if (GETFLAG(curr_op) == STATE_OP_RELOCATE) {
-		bst_help_relocate((relocate_op_t *)UNFLAG(curr_op), pred, pred_op, curr, root);
+		bst_help_relocate((operation_t*)UNFLAG(curr_op), pred, pred_op, curr, root);
 	} else if (GETFLAG(curr_op) == STATE_OP_MARK) {
 		bst_help_marked(pred, pred_op, curr, root);
 	}

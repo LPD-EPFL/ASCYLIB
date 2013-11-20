@@ -9,7 +9,7 @@
 #include <time.h>
 
 
-#include "bst_howley.h"
+#include "bst_bronson_java.h"
 #include "measurements.h"
 #include "utils.h"
 #include "ssalloc.h"
@@ -89,7 +89,6 @@ void barrier_cross(barrier_t *b)
 
 //data structure through which we send parameters to and get results from the worker threads
 typedef ALIGNED(64) struct thread_data {
-    pthread_mutex_t *init_lock;
     //pointer to the global barrier
     barrier_t *barrier;
     //counts the number of operations each thread performs
@@ -125,8 +124,6 @@ void *test(void *data)
     set_cpu(the_cores[d->id]);
     //initialize the custom memeory allocator for this thread (we do not use malloc due to concurrency bottleneck issues)
     ssalloc_init();
-    ssalloc_align();
-    // bst_init_local(d->id);
     //for fine-grain latency measurements, we need to get the lenght of a getticks() function call, which is also counted
     //by default when we do getticks(); //code... getticks(); PF_START and PF_STOP use this when fine grain measurements are enabled
     PF_CORRECTION;
@@ -144,28 +141,15 @@ void *test(void *data)
     //before starting the test, we insert a number of elements in the data structure
     //we do this at each thread to avoid the situation where the entire data structure 
     //resides in the same memory node
-
-    // int num_elem = 0;
-    // if (num_threads == 1){
-    //     num_elem = max_key/2;
-    // } else{
-    //     num_elem = max_key/4;
-    // }
-    // pthread_mutex_lock(d->init_lock);
-    // fprintf(stderr, "Starting critical section %d\n", d->id);
     for (i=0;i<d->num_add;++i) {
         key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
- 
+
         DDPRINT("key is %u\n",key);
         //we make sure the insert was effective (as opposed to just updating an existing entry)
-        //if (d->id < 2) {
-        if (bst_add(key,root)!=TRUE) {
+        if (bst_add(key, root)!=TRUE) {
             i--;
-        }  // }
-
+        }
     }
-    // fprintf(stderr, "Exiting critical section %d\n", d->id);
-    // pthread_mutex_unlock(d->init_lock);
     DDPRINT("added initial data\n",NULL);
 
     bool_t res;
@@ -184,17 +168,17 @@ void *test(void *data)
             //PF_START and PF_STOP can be used to do latency measurements of the operation
             //to enable them, DO_TIMINGS must be defined at compile time, otherwise they do nothing
             //PF_START(2);
-            bst_contains(key,root);
+            bst_contains(key, root);
             //PF_STOP(2);
         } else if (last == -1) {
             //do a write operation
-            if (bst_add(key,root)) {
+            if (bst_add(key, root) == TRUE) {
                 d->num_insert++;
                 last=1;
             }
         } else {
             //do a delete operation
-            if (bst_remove(key,root)) {
+            if (bst_remove(key, root) == TRUE) {
                 d->num_remove++;
                 last=-1;
             }
@@ -224,7 +208,6 @@ int main(int argc, char* const argv[]) {
     pthread_t *threads;
     pthread_attr_t attr;
     barrier_t barrier;
-    pthread_mutex_t init_lock;
     struct timeval start, end;
     struct timespec timeout;
 
@@ -352,7 +335,6 @@ int main(int argc, char* const argv[]) {
 
     //global barrier initialization (used to start the threads at the same time)
     barrier_init(&barrier, num_threads + 1);
-    pthread_mutex_init(&init_lock, NULL);
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
@@ -369,10 +351,8 @@ int main(int argc, char* const argv[]) {
         data[i].num_remove=0;
         data[i].num_search=0;
         data[i].num_add = max_key/(2 * num_threads); 
-        if (i< ((max_key/2)%num_threads)) data[i].num_add++;
         data[i].seed = rand();
         data[i].barrier = &barrier;
-        data[i].init_lock = &init_lock;
         if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
             fprintf(stderr, "Error creating thread\n");
             exit(1);
@@ -387,19 +367,6 @@ int main(int argc, char* const argv[]) {
         perror("signal");
         exit(1);
     }
-
-    // seeds = seed_rand();
-    // bst_key_t key;
-    // for (i=0;i<max_key/2;++i) {
-    //     key = my_random(&seeds[0],&seeds[1],&seeds[2]) & max_key;
-    //     //we make sure the insert was effective (as opposed to just updating an existing entry)
-    //     if (bst_add(key, root)!=TRUE) {
-    //         i--;
-    //     }
-    // }
-
-    // bst_print(root);
-
 
     /* Start threads */
     barrier_cross(&barrier);
@@ -447,6 +414,7 @@ int main(int argc, char* const argv[]) {
     printf("#txs     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
+
     printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
 
     free(threads);
