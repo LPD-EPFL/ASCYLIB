@@ -4,7 +4,7 @@
 // node_t* root;
 
 node_t* bst_initialize() {
-	// printf("bst_initialize\n");
+	printf("bst_initialize\n");
 	node_t* root = (node_t*) ssalloc(sizeof(node_t));
 
 	// assign minimum key to the root, actual tree will be 
@@ -94,17 +94,22 @@ result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v
 
 
 bool_t bst_add(bst_key_t key, node_t* root) {
-
+    printf("bst add\n");
 	return update_under_root(key, UPDATE_IF_ABSENT, FALSE, TRUE, root) == NOT_FOUND;
 }
 
 bool_t bst_remove(bst_key_t key, node_t* root) {
-	return update_under_root(key, UPDATE_IF_PRESENT, TRUE, FALSE, root) == FOUND;
+    printf("bst remove\n");
+
+    return update_under_root(key, UPDATE_IF_PRESENT, TRUE, FALSE, root) == FOUND;
 }
 
 result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, node_t* holder) {
 
+
 	while(TRUE){
+        printf("while true update under root\n");
+
         node_t* right = holder->right;
 
         if(right == NULL){
@@ -132,7 +137,9 @@ result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected,
 
 bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, node_t* holder){
 
+    printf("attempt_insert_into_empty\n");
     LOCK(&(holder->lock));
+
 
     if(!holder->right){
         holder->right = new_node(1, key, 0, value, holder, NULL, NULL);
@@ -166,12 +173,16 @@ node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value,
 
 result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, node_t* parent, node_t* node, uint64_t node_v) {
 
+    printf("attempt_update\n");
+
 	bst_key_t cmp = key - node->key;
     if(cmp == 0){
         return attempt_node_update(func, expected, new_value, parent, node);
     }
 
     while(TRUE){
+        printf("while true attempt_update\n");
+
         node_t* child = CHILD(node, (cmp < 0 ? FALSE : TRUE));
 
         if(node->version != node_v){
@@ -392,11 +403,15 @@ bool_t attempt_unlink_nl(node_t* parent, node_t* node) {
 
 int node_conditon(node_t* node) {
 
+    printf("node_conditon\n");
 	node_t* nl = node->left;
     node_t* nr = node->right;
 
     // unlink is required
     if((nl == NULL || nr == NULL) && !node->value){
+        
+        printf("return 3 node_conditon\n");
+
         return UNLINK_REQUIRED;
     }
 
@@ -408,23 +423,30 @@ int node_conditon(node_t* node) {
 
     // rebalance is required ?
     if(bal < -1 || bal > 1){
+        printf("return 2 node_conditon\n");
+
         return REBALANCE_REQUIRED;
     }
+
+    printf("return 1 node_conditon\n");
 
     return hn != hnrepl ? hnrepl : NOTHING_REQUIRED;
 }
 
 void fix_height_and_rebalance(node_t* node) {
 
+    printf("fix_height_and_rebalance\n");
 	while(node != NULL && node->parent != NULL){
         int condition = node_conditon(node);
         if(condition == NOTHING_REQUIRED || IS_UNLINKED(node->version)){
+            printf("return\n");
             return;
         }
 
         if(condition != UNLINK_REQUIRED && condition != REBALANCE_REQUIRED){
             // publish(node);
             // scoped_lock lock(node->lock);
+            printf("before mistery lock\n");
             LOCK(&(node->lock));
             
             node = fix_height_nl(node);
@@ -443,10 +465,12 @@ void fix_height_and_rebalance(node_t* node) {
                 LOCK(&(node->lock));
 
                 node = rebalance_nl(n_parent, node);
+                UNLOCK(&(node->lock));
             }
 
-            LOCK(&(n_parent->lock));
-            LOCK(&(node->lock));
+
+            UNLOCK(&(n_parent->lock));
+            
             // releaseAll();
         }
     }
@@ -454,6 +478,7 @@ void fix_height_and_rebalance(node_t* node) {
 
 node_t* fix_height_nl(node_t* node){
 
+    printf("fix_height_nl\n");
 	int c = node_conditon(node);
 
     switch(c){
@@ -469,6 +494,8 @@ node_t* fix_height_nl(node_t* node){
 }
 
 node_t* rebalance_nl(node_t* n_parent, node_t* n){
+    printf("rebalance_nl\n");
+
 	node_t* nl = n->left;
     node_t* nr = n->right;
 
@@ -501,6 +528,8 @@ node_t* rebalance_nl(node_t* n_parent, node_t* n){
 
 node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) {
 
+    printf("rebalance_to_right_nl\n");
+
 	LOCK(&(nl->lock));
 
 	int hl = nl->height;
@@ -529,16 +558,19 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
                 int hlr = nlr->height;
                 if(hll0 >= hlr){
                 	node_t* res = rotate_right_nl(n_parent, n, nl, hr0, hll0, nlr, hlr);
-                	UNLOCK(&(nl->lock));
-                	UNLOCK(&(nlr->lock));
+                	
+                    UNLOCK(&(nlr->lock));
+                    UNLOCK(&(nl->lock));
+                	
                     return res;
                 } else {
                     int hlrl = HEIGHT(nlr->left);
                     int b = hll0 - hlrl;
                     if(b >= -1 && b <= 1){
                     	node_t* res = rotate_right_over_left_nl(n_parent, n, nl, hr0, hll0, nlr, hlrl);
-                    	UNLOCK(&(nl->lock));
-                    	UNLOCK(&(nlr->lock));
+                    	
+                        UNLOCK(&(nlr->lock));
+                        UNLOCK(&(nl->lock));
                         return res;
                     }
                 }
@@ -552,6 +584,8 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
 }
 
 node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0) {
+
+    printf("rebalance_to_left_nl\n");
 
 	// publish(nR);
  //    scoped_lock lock(nR->lock);
@@ -591,7 +625,7 @@ node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0) {
                     }
                 }
             }
-			UNLOCK(&(nrl->lock));
+			//UNLOCK(&(nrl->lock));
             node_t* res = rebalance_to_right_nl(n, nr, nrl, hrr0);
             UNLOCK(&(nr->lock));
             return res;
