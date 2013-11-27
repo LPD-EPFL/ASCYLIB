@@ -1,0 +1,5 @@
+// What is intset and how is it used for the existing implementations? Will we use it later?
+// We downloaded the source code of the Bronson tree, but it seems much more complex than the paper version (and more recent). We should stick to the paper version, right?
+// Do we have to implement proposed optimizations (Section 3.10 for bronson, fast traversal for ellen)
+// Bronson tree holds key-value pairs , while Ellen and Howley hold simple integer keys. Keep their version, or adapt to just keys with no value field? 
+// Makefiles?
