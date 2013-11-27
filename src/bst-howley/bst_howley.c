@@ -6,7 +6,13 @@
 
 //node_t* root;
 
+bst_key_t glob_key = 1;
+
 node_t* bst_initialize() {
+
+
+	printf("[alloc] root\n");
+
 	node_t* root = (node_t*) ssalloc(sizeof(node_t));
 
 	// assign minimum key to the root, actual tree will be 
@@ -51,7 +57,7 @@ retry:
 	*curr_op = (*curr)->op;
 
 	if(GETFLAG(*curr_op) != STATE_OP_NONE){
-		fprintf(stderr, "Shouldn't be here\n");
+		//fprintf(stderr, "\nShouldn't be here\n");
 		//root is now a global pointer to a node, not a node
 		if (aux_root == root){
 			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, aux_root);
@@ -67,7 +73,6 @@ retry:
 	last_right_op = *curr_op;
 
 	while (!ISNULL(next)){
-
 		*pred = *curr;
 		*pred_op = *curr_op;
 		*curr = next;
@@ -75,7 +80,7 @@ retry:
 
 
 		if(GETFLAG(*curr_op) != STATE_OP_NONE){
-			fprintf(stderr, "Shouldn't be here 2\n");
+			//fprintf(stderr, "\nShouldn't be here 2\n");
 			bst_help(*pred, *pred_op, *curr, *curr_op, aux_root);
 			goto retry;
 		}
@@ -95,19 +100,19 @@ retry:
 	}
 	
 	if ((result != FOUND) && (last_right_op != last_right->op)) {
-		fprintf(stderr, "Shouldn't be here 3\n");
+		//fprintf(stderr, "\nShouldn't be here 3\n");
 		goto retry;
 	}
 
 	if ((*curr)->op != *curr_op){
-		fprintf(stderr, "Shouldn't be here 4\n");
+		//fprintf(stderr, "\nShouldn't be here 4\n");
 		goto retry;
 	}
 
 	return result;
 } 
   
-bool_t bst_add(bst_key_t k, node_t* root){
+bool_t bst_add(bst_key_t k, node_t* root, int node_id){
 	//fprintf(stderr, "bst add\n");
 	node_t* pred;
 	node_t* curr;
@@ -125,6 +130,8 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		}
 		// allocate memory 
 		// new_node = new Node(k);
+		printf("[%d][alloc] node\n", node_id);
+
 		new_node = (node_t*) ssalloc(sizeof(node_t));
 		new_node->key = k;
 		new_node->op = NULL;
@@ -141,6 +148,8 @@ bool_t bst_add(bst_key_t k, node_t* root){
 
 		// allocate memory
 		//cas_op = new child_cas_op_t(is_left, old, new_node)
+		printf("[%d][alloc] cas_op\n", node_id);
+
 		cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 		cas_op->child_cas_op.is_left = is_left;
 		cas_op->child_cas_op.expected = old;
@@ -149,6 +158,9 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
 			// legit cast? YES!! verif
 			bst_help_child_cas(cas_op, curr, root);
+			// if (k == glob_key) {
+			printf("[%d]key %d was allocated at address: %p\n",node_id, k, new_node);
+			// } 
 			return TRUE;
 		}
 	}
@@ -194,6 +206,8 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 
 			//allocate memory
 			//reloc_op = new RelocateOP(curr, curr_op, k, replace->key);
+			
+			printf("[alloc] Relocate op\n");
 			reloc_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 			reloc_op->relocate_op.state = STATE_OP_ONGOING;
 			reloc_op->relocate_op.dest = curr;
@@ -262,6 +276,8 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 
 	// allocate memory
 	// operation_t* cas_op = new child_cas_op(curr==pred->left, curr, new_ref);
+
+	printf("[alloc] cas_op\n");
 	operation_t* cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 	cas_op->child_cas_op.is_left = (curr == pred->left);
 	cas_op->child_cas_op.expected = curr;
