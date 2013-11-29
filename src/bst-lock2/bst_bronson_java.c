@@ -5,7 +5,9 @@
 
 node_t* bst_initialize() {
 	//printf("bst_initialize\n");
-	node_t* root = (node_t*) ssalloc(sizeof(node_t));
+
+    node_t* root = (node_t*) ssalloc(CACHE_LINE_SIZE);
+	//node_t* root = (node_t*) ssalloc(sizeof(node_t));
 
 	// assign minimum key to the root, actual tree will be 
 	// the right subtree of the root
@@ -519,7 +521,6 @@ node_t* fix_height_nl(node_t* node){
 // checked
 void fix_height_and_rebalance(node_t* node) {
     
-    return;
     // printf("fix_height_and_rebalance\n");
     while(node != NULL && node->parent != NULL){
         
