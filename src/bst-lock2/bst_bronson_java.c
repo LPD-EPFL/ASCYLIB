@@ -33,7 +33,7 @@ bool_t bst_contains(bst_key_t key, node_t* root) {
 			return FALSE;
 		} else {
 			int right_cmp = key - right->key;
-            // printf("cmp %d\n", right_cmp);
+            // //printf("cmp %d\n", right_cmp);
 			if (right_cmp == 0) {
 				return right->value;
 			}
@@ -66,7 +66,7 @@ result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v
             return NOT_FOUND;
         } else {
             int child_cmp = k - child->key;
-            // printf("cmp %d\n", child_cmp);
+            // //printf("cmp %d\n", child_cmp);
             if(child_cmp == 0){
             	//Verify that it's a value node
                 return child->value ? FOUND : NOT_FOUND;
@@ -99,13 +99,13 @@ result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v
 
 // checked
 bool_t bst_add(bst_key_t key, node_t* root) {
-    // printf("bst add %d\n", key);
+    // //printf("bst add %d\n", key);
 	return update_under_root(key, UPDATE_IF_ABSENT, FALSE, TRUE, root) == NOT_FOUND;
 }
 
 // checked
 bool_t bst_remove(bst_key_t key, node_t* root) {
-    // printf("bst remove %d\n", key);
+    // //printf("bst remove %d\n", key);
     return update_under_root(key, UPDATE_IF_PRESENT, TRUE, FALSE, root) == FOUND;
 }
 
@@ -113,7 +113,7 @@ bool_t bst_remove(bst_key_t key, node_t* root) {
 result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, node_t* holder) {
 
 	while(TRUE){
-       // printf("while true update under root\n");
+       // //printf("while true update under root\n");
 
         node_t* right = holder->right;
 
@@ -409,7 +409,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
 
 // checked (oana still has doubts?)
 void wait_until_not_changing(node_t* node) {
-    // printf("wait_until_not_changing\n");
+    // //printf("wait_until_not_changing\n");
 	uint64_t version = node->version;
 	int i;
 
@@ -432,7 +432,7 @@ void wait_until_not_changing(node_t* node) {
 // checked
 bool_t attempt_unlink_nl(node_t* parent, node_t* node) {
 
-    // printf("attempt_unlink_nl\n");
+    // //printf("attempt_unlink_nl\n");
 	node_t* parent_l = parent->left;
     node_t* parent_r = parent->right;
 
@@ -470,14 +470,14 @@ bool_t attempt_unlink_nl(node_t* parent, node_t* node) {
 // checked
 int node_conditon(node_t* node) {
 
-    // printf("node_conditon\n");
+    // //printf("node_conditon\n");
 	node_t* nl = node->left;
     node_t* nr = node->right;
 
     // unlink is required
     if((nl == NULL || nr == NULL) && !node->value){
         
-        // printf("UNLINK_REQUIRED\n");
+        // //printf("UNLINK_REQUIRED\n");
 
         return UNLINK_REQUIRED;
     }
@@ -490,12 +490,12 @@ int node_conditon(node_t* node) {
 
     // rebalance is required ?
     if(bal < -1 || bal > 1){
-        // printf("REBALANCE_REQUIRED\n");
+        // //printf("REBALANCE_REQUIRED\n");
 
         return REBALANCE_REQUIRED;
     }
 
-    // printf("hnrepl : NOTHING_REQUIRED\n");
+    // //printf("hnrepl : NOTHING_REQUIRED\n");
 
     return hn != hnrepl ? hnrepl : NOTHING_REQUIRED;
 }
@@ -521,7 +521,7 @@ node_t* fix_height_nl(node_t* node){
 // checked
 void fix_height_and_rebalance(node_t* node) {
     
-    // printf("fix_height_and_rebalance\n");
+    // //printf("fix_height_and_rebalance\n");
     while(node != NULL && node->parent != NULL){
         
         
@@ -633,7 +633,7 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
         int hll0 = HEIGHT(nl->left);
         int hlr0 = HEIGHT(nlr);
 
-        printf("hll0 %d, hlr0 %d \n", hll0, hlr0);
+        //printf("hll0 %d, hlr0 %d \n", hll0, hlr0);
 
         if(hll0 >= hlr0){ //poate daca facem >=...
         	node_t* res = rotate_right_nl(n_parent, n, nl, hr0, hll0, nlr, hlr0);
@@ -647,8 +647,8 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
                 // }
                 // scoped_lock sublock(nlr->lock);
                 bst_key_t nlr_key = nlr->key;
-                bst_print(n_parent);
-                printf("Lock node: %d\n", nlr_key); //SEGFAULT here
+                //bst_print(n_parent);
+                //printf("Lock node: %d\n", nlr_key); //SEGFAULT here
                 ptlock_t* nlr_lock = &nlr->lock;
                 LOCK(nlr_lock);
 
