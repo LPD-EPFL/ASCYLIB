@@ -33,7 +33,6 @@
 //the maximum value the key stored in the bst can take; defines the key range
 #define DEFAULT_RANGE 2048
 
-//#define DEBUG 1
 
 int duration;
 int num_threads;

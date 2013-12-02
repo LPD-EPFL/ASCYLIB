@@ -52,9 +52,9 @@ struct node_t {
 				 bst_value_t value;
 	/*volatile*/ uint64_t version;
 	
-	 node_t* parent;
-	 node_t* left;
-	 node_t* right;
+	 volatile node_t* parent;
+	 volatile node_t* left;
+	 volatile node_t* right;
 	 volatile ptlock_t lock;	
 };
 

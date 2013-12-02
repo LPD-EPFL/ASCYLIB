@@ -633,7 +633,9 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
         int hll0 = HEIGHT(nl->left);
         int hlr0 = HEIGHT(nlr);
 
-        if(hll0 > hlr0){
+        printf("hll0 %d, hlr0 %d \n", hll0, hlr0);
+
+        if(hll0 >= hlr0){ //poate daca facem >=...
         	node_t* res = rotate_right_nl(n_parent, n, nl, hr0, hll0, nlr, hlr0);
         	//printf("Unlock node: %d\n", nl_key);
             UNLOCK(nl_lock);
@@ -645,7 +647,8 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
                 // }
                 // scoped_lock sublock(nlr->lock);
                 bst_key_t nlr_key = nlr->key;
-                //printf("Lock node: %d\n", nlr_key);
+                bst_print(n_parent);
+                printf("Lock node: %d\n", nlr_key); //SEGFAULT here
                 ptlock_t* nlr_lock = &nlr->lock;
                 LOCK(nlr_lock);
 
