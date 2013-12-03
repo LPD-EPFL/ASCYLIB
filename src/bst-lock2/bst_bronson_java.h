@@ -47,10 +47,10 @@ typedef ALIGNED(64) struct node_t node_t;
 
 struct node_t {
 	// TODO should this be volatile?
-	/*volatile*/ int height;
+	volatile int height;
 				 bst_key_t key;
 				 bst_value_t value;
-	/*volatile*/ uint64_t version;
+	volatile uint64_t version;
 	
 	 volatile node_t* parent;
 	 volatile node_t* left;
