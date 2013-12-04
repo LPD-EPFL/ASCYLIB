@@ -212,7 +212,7 @@ void *test(void *data)
         }
         d->num_operations++;
         //memory barrier to ensure no unwanted reporderings are happening
-        //MEM_BARRIER;
+        MEM_BARRIER;
     }
     //summary of the fine grain measurements if enabled 
     PF_PRINT;
