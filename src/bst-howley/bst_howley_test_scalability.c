@@ -468,6 +468,7 @@ int main(int argc, char* const argv[]) {
     printf("#txs     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
+    MEM_BARRIER;
     printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
 
 
