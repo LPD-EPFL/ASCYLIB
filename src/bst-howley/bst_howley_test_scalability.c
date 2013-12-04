@@ -443,6 +443,7 @@ int main(int argc, char* const argv[]) {
         }
     }
     DDPRINT("threads finshed\n",NULL);
+    MEM_BARRIER;
     //compute the exact duration of the experiment
     duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
@@ -468,7 +469,7 @@ int main(int argc, char* const argv[]) {
     printf("#txs     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
-    MEM_BARRIER;
+
     printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
 
 

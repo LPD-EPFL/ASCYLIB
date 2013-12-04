@@ -176,6 +176,7 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	} else {
 		address = &(dest->right);
 	}
+	MEM_BARRIER;
 	CAS_PTR(address, op->child_cas_op.expected, op->child_cas_op.update);
 	CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
