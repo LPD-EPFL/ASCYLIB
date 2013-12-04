@@ -458,7 +458,7 @@ int main(int argc, char* const argv[]) {
         printf("  #adds      : %lu\n", data[i].num_add);
         printf("  #inserts   : %lu\n", data[i].num_insert);
         printf("  #removes   : %lu\n", data[i].num_remove);
-        printf("  #correct searches   : %f %%\n", data[i].num_found_search * 100.0/data[i].num_operations);
+
         operations += data[i].num_operations;
         total_ticks += data[i].total_time;
         reported_total = reported_total + data[i].num_add + data[i].num_insert - data[i].num_remove;
@@ -469,7 +469,7 @@ int main(int argc, char* const argv[]) {
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
     printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
-    printf("Size of node : %d, size of op: %d\n", sizeof(node_t), sizeof(operation_t));
+
 
     free(threads);
     free(data);
