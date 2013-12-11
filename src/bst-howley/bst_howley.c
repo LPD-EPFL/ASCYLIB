@@ -142,6 +142,7 @@ bool_t bst_add(bst_key_t k, node_t* root){
 
 		bool_t is_left = (result == NOT_FOUND_L);
 		node_t* old;
+		MEM_BARRIER;s
 		if (is_left) {
 			old = curr->left;
 		} else {
@@ -269,6 +270,7 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 	}
 
 	bool_t result = (seen_state == STATE_OP_SUCCESSFUL);
+	MEM_BARRIER;
 	if (op->relocate_op.dest == curr) {
 		MEM_BARRIER;
 		return result;
@@ -277,6 +279,7 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 	MEM_BARRIER;
 	CAS_PTR(&(curr->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, result ? STATE_OP_MARK : STATE_OP_NONE));
 	if (result) {
+		MEM_BARRIER;
 		if (op->relocate_op.dest == pred) {
 			pred_op = (operation_t *)FLAG(op, STATE_OP_NONE);
 		}
@@ -332,6 +335,7 @@ void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* cur
 }
 
 unsigned long bst_size(node_t* node) {
+	MEM_BARRIER;
 	if (ISNULL(node)) {
 		return 0;
 	} else {
