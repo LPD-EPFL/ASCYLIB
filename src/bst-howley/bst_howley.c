@@ -2,12 +2,6 @@
 
 // TODO initialize structures similar to my_search_result from bst_ellen?
 
-
-
-//node_t* root;
-
-bst_key_t glob_key = 1;
-
 node_t* bst_initialize() {
 
 
@@ -23,6 +17,7 @@ node_t* bst_initialize() {
 	root->right = NULL;
 	root->op = NULL;
 	
+	MEM_BARRIER;
 	// should we create an op pointer and flag it with NONE?
 	return root;
 }
@@ -36,7 +31,6 @@ bool_t bst_contains(bst_key_t k, node_t* root){
 	node_t* curr;
 	operation_t* pred_op;
 	operation_t* curr_op;
-
 
 	// root is now a global pointer to a node, not a node
 	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root) == FOUND;
