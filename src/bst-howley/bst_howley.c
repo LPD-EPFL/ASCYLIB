@@ -46,6 +46,7 @@ bool_t bst_contains(bst_key_t k, node_t* root){
 search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
 	//fprintf(stderr, "bst find\n");
 
+	MEM_BARRIER;
 	search_res_t result;
 	bst_key_t curr_key;
 	node_t* next;
@@ -78,7 +79,6 @@ retry:
 		*pred_op = *curr_op;
 		*curr = next;
 		*curr_op = (*curr)->op;
-
 
 		if(GETFLAG(*curr_op) != STATE_OP_NONE){
 			//fprintf(stderr, "\nShouldn't be here 2\n");
@@ -123,6 +123,7 @@ bool_t bst_add(bst_key_t k, node_t* root){
 	operation_t* cas_op;
 	search_res_t result;
 
+	MEM_BARRIER;
 	while(TRUE) {
 		//root is now a global pointer to a node, not a node
 		result = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
@@ -170,6 +171,7 @@ bool_t bst_add(bst_key_t k, node_t* root){
 
 void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	//fprintf(stderr, "bst help child cas\n");
+	MEM_BARRIER;
 	node_t** address = NULL;
 	if (op->child_cas_op.is_left) {
 		address = &(dest->left);
@@ -184,6 +186,7 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 
 bool_t bst_remove(bst_key_t k, node_t* root){
 	//fprintf(stderr, "bst remove\n");
+	MEM_BARRIER;
 	node_t* pred;
 	node_t* curr;
 	node_t* replace;
@@ -232,6 +235,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 
 bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
 	//fprintf(stderr, "bst help relocate\n");
+	MEM_BARRIER;
 	int seen_state = op->relocate_op.state;
 	if (seen_state == STATE_OP_ONGOING) {
 		//VCAS in original implementation
@@ -275,6 +279,7 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
 
 	//fprintf(stderr, "bst help marked\n");
+	MEM_BARRIER;
 	node_t* new_ref;
 	if (ISNULL(curr->left)) {
 		if (ISNULL(curr->right)) {
@@ -304,6 +309,7 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* curr_op, node_t* root ){
 	
 	//fprintf(stderr, "bst help\n");
+	MEM_BARRIER;
 	if (GETFLAG(curr_op) == STATE_OP_CHILDCAS) {
 		bst_help_child_cas((operation_t*)UNFLAG(curr_op), curr, root);
 	} else if (GETFLAG(curr_op) == STATE_OP_RELOCATE) {
