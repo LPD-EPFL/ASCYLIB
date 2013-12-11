@@ -142,7 +142,7 @@ bool_t bst_add(bst_key_t k, node_t* root){
 
 		bool_t is_left = (result == NOT_FOUND_L);
 		node_t* old;
-		MEM_BARRIER;s
+		MEM_BARRIER;
 		if (is_left) {
 			old = curr->left;
 		} else {
