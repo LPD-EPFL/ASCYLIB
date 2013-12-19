@@ -39,7 +39,8 @@ bool_t bst_contains(bst_key_t key, node_t* root) {
 			}
 
 			volatile uint64_t ovl = right->version;
-            if(IS_SHRINKING_OR_UNLINKED(ovl)){
+            if ((ovl & 3)) {
+            //if(IS_SHRINKING_OR_UNLINKED(ovl)){
                 wait_until_not_changing(right);
             } else if(right == root->right){
             	// if right_cmp < 0, we should go left, otherwise right
@@ -73,7 +74,8 @@ result_t attempt_get(bst_key_t k, volatile node_t* node, bool_t is_right, uint64
             }
 
             uint64_t child_ovl = child->version;
-            if(IS_SHRINKING_OR_UNLINKED(child_ovl)){
+            if ((child_ovl & 3)){
+            //if(IS_SHRINKING_OR_UNLINKED(child_ovl)){
                 wait_until_not_changing(child);
 
                 if(node->version != node_v){
@@ -264,7 +266,8 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
         } else {
             uint64_t child_v = child->version;
 
-            if(IS_SHRINKING_OR_UNLINKED(child_v)){
+            if ((child_v & 3)){
+            //if(IS_SHRINKING_OR_UNLINKED(child_v)){
                 wait_until_not_changing(child);
             } else if(child != CHILD(node, is_right)){
                 //RETRY
