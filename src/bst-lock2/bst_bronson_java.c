@@ -128,7 +128,8 @@ result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected,
         } else {
             volatile uint64_t ovl = right->version;
 
-            if(IS_SHRINKING_OR_UNLINKED(ovl)){
+            if ((ovl & 3) != 0L){
+            //if(IS_SHRINKING_OR_UNLINKED(ovl)){
                 wait_until_not_changing(right);
             } else if(right == holder->right){
                 result_t vo = attempt_update(key, func, expected, new_value, holder, right, ovl);
@@ -413,7 +414,8 @@ void wait_until_not_changing(node_t* node) {
 	volatile uint64_t version = node->version;
 	int i;
 
-	if (IS_SHRINKING(version)) {
+    if ((version & 1) != 0) {
+	//if (IS_SHRINKING(version)) {
 		for (i = 0; i < SPIN_COUNT; ++i) {
 			if (version != node->version) {
 				return;
