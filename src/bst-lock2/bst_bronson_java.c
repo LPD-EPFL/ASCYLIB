@@ -32,13 +32,13 @@ bool_t bst_contains(bst_key_t key, node_t* root) {
 		if (right == NULL) {
 			return FALSE;
 		} else {
-			int right_cmp = key - right->key;
+			volatile int right_cmp = key - right->key;
             // //printf("cmp %d\n", right_cmp);
 			if (right_cmp == 0) {
 				return right->value;
 			}
 
-			uint64_t ovl = right->version;
+			volatile uint64_t ovl = right->version;
             if(IS_SHRINKING_OR_UNLINKED(ovl)){
                 wait_until_not_changing(right);
             } else if(right == root->right){

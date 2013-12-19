@@ -94,12 +94,12 @@ static inline volatile node_t* CHILD(volatile node_t* parent, bool_t is_right) {
 }
 
 // checked
-static inline uint64_t BEGIN_CHANGE(uint64_t ovl) {
+static inline uint64_t BEGIN_CHANGE(volatile uint64_t ovl) {
 	return (ovl | 1);
 }
 
 // checked
-static inline uint64_t END_CHANGE(uint64_t ovl) {
+static inline uint64_t END_CHANGE(volatile uint64_t ovl) {
 	return (ovl | 3) + 1;
 }
 
@@ -109,18 +109,18 @@ static inline int HEIGHT(volatile node_t* node) {
 }
 
 // checked
-static inline bool_t IS_SHRINKING(bst_value_t ovl) {
+static inline bool_t IS_SHRINKING(volatile uint64_t ovl) {
 	return (bool_t)((ovl & 1) != 0);
 }
 
 
 // checked
-static inline bool_t IS_UNLINKED(bst_value_t ovl) {
+static inline bool_t IS_UNLINKED(volatile uint64_t ovl) {
 	return (bool_t)((ovl & 2) != 0);
 }
 
 // checked
-static inline bool_t IS_SHRINKING_OR_UNLINKED(uint64_t ovl){
+static inline bool_t IS_SHRINKING_OR_UNLINKED(volatile uint64_t ovl){
 	return (bool_t)((ovl & 3) != 0L);
 }
 
