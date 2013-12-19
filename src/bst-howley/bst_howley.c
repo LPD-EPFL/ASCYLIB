@@ -30,9 +30,13 @@ bool_t bst_contains(bst_key_t k, node_t* root){
 	
 	//fprintf(stderr, "bst contains\n");
 
+	MEM_BARRIER;
 	node_t* pred;
+	MEM_BARRIER;
 	node_t* curr;
+	MEM_BARRIER;
 	operation_t* pred_op;
+	MEM_BARRIER;
 	operation_t* curr_op;
 	MEM_BARRIER;
 
@@ -46,10 +50,15 @@ search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t*
 
 	MEM_BARRIER;
 	search_res_t result;
+	MEM_BARRIER;
 	bst_key_t curr_key;
+	MEM_BARRIER;
 	node_t* next;
+	MEM_BARRIER;
 	node_t* last_right;
+	MEM_BARRIER;
 	operation_t* last_right_op;
+	MEM_BARRIER;
 
 retry:
 	MEM_BARRIER;
@@ -151,12 +160,19 @@ retry:
   
 bool_t bst_add(bst_key_t k, node_t* root){
 	//fprintf(stderr, "bst add\n");
+	MEM_BARRIER;
 	node_t* pred;
+	MEM_BARRIER;
 	node_t* curr;
+	MEM_BARRIER;
 	node_t* new_node;
+	MEM_BARRIER;
 	operation_t* pred_op;
+	MEM_BARRIER;
 	operation_t* curr_op;
+	MEM_BARRIER;
 	operation_t* cas_op;
+	MEM_BARRIER;
 	search_res_t result;
 
 	MEM_BARRIER;
@@ -244,12 +260,19 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 	//fprintf(stderr, "bst remove\n");
 	MEM_BARRIER;
 	node_t* pred;
+	MEM_BARRIER;
 	node_t* curr;
+	MEM_BARRIER;
 	node_t* replace;
+	MEM_BARRIER;
 	operation_t* pred_op;
+	MEM_BARRIER;
 	operation_t* curr_op;
+	MEM_BARRIER;
 	operation_t* replace_op;
+	MEM_BARRIER;
 	operation_t* reloc_op;
+	MEM_BARRIER;
 
 	while(TRUE) {
 		//root is now a global pointer to a node, not a node
@@ -261,7 +284,9 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 
 		MEM_BARRIER;
 		bool_t no_right_child = ISNULL(curr->right);
+		MEM_BARRIER;
 		bool_t no_left_child = ISNULL(curr->left);
+		MEM_BARRIER;
 		if (no_right_child || no_left_child) { // node has less than two children
 			MEM_BARRIER;
 			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
