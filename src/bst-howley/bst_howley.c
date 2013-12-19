@@ -4,17 +4,20 @@
 
 node_t* bst_initialize() {
 
-
+	MEM_BARRIER;
 	// printf("[alloc] root\n");
-
 	// node_t* root = (node_t*) ssalloc(sizeof(node_t));
 	node_t* root = (node_t*) ssalloc(CACHE_LINE_SIZE);
+	MEM_BARRIER;
 
 	// assign minimum key to the root, actual tree will be 
 	// the right subtree of the root
 	root->key = 0;
+	MEM_BARRIER;
 	root->left = NULL;
+	MEM_BARRIER;
 	root->right = NULL;
+	MEM_BARRIER;
 	root->op = NULL;
 	
 	MEM_BARRIER;
@@ -31,6 +34,7 @@ bool_t bst_contains(bst_key_t k, node_t* root){
 	node_t* curr;
 	operation_t* pred_op;
 	operation_t* curr_op;
+	MEM_BARRIER;
 
 	// root is now a global pointer to a node, not a node
 	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root) == FOUND;
@@ -107,6 +111,7 @@ retry:
 			next = (*curr)->left;
 			MEM_BARRIER;
 		} else if(k > curr_key) {
+			MEM_BARRIER;
 			result = NOT_FOUND_R;
 			MEM_BARRIER;
 			next = (*curr)->right;
@@ -124,16 +129,19 @@ retry:
 	}
 	
 	MEM_BARRIER;
-	// TODO more membarrier here
-	if ((result != FOUND) && (last_right_op != last_right->op)) {
-		//fprintf(stderr, "\nShouldn't be here 3\n");
-		goto retry;
+	if ((result != FOUND)) {
+		MEM_BARRIER;
+		if (last_right_op != last_right->op){
+			//fprintf(stderr, "\nShouldn't be here 3\n");
+			MEM_BARRIER;
+			goto retry;
+		}
 	}
 
 	MEM_BARRIER;
-	// TODO more membarrrier here
 	if ((*curr)->op != *curr_op){
-		//fprintf(stderr, "\nShouldn't be here 4\n");
+		//fprintf(stderr, "\nShouldn't be here 4\n");$
+		MEM_BARRIER;
 		goto retry;
 	}
 
@@ -165,10 +173,15 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		// new_node = new Node(k);
 		// printf("[%d][alloc] node\n", node_id);
 
+		MEM_BARRIER;
 		new_node = (node_t*) ssalloc(sizeof(node_t));
+		MEM_BARRIER;
 		new_node->key = k;
+		MEM_BARRIER;
 		new_node->op = NULL;
+		MEM_BARRIER;
 		new_node->left = NULL;
+		MEM_BARRIER;
 		new_node->right = NULL;
 		MEM_BARRIER;
 
@@ -177,8 +190,10 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		node_t* old;
 		MEM_BARRIER;
 		if (is_left) {
+			MEM_BARRIER;
 			old = curr->left;
 		} else {
+			MEM_BARRIER;
 			old = curr->right;
 		}
 		MEM_BARRIER;
@@ -187,8 +202,11 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		// printf("[%d][alloc] cas_op\n", node_id);
 
 		cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
+		MEM_BARRIER;
 		cas_op->child_cas_op.is_left = is_left;
+		MEM_BARRIER;
 		cas_op->child_cas_op.expected = old;
+		MEM_BARRIER;
 		cas_op->child_cas_op.update = new_node;
 
 		MEM_BARRIER;
@@ -242,7 +260,9 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 		}
 
 		MEM_BARRIER;
-		if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
+		bool_t no_right_child = ISNULL(curr->right);
+		bool_t no_left_child = ISNULL(curr->left);
+		if (no_right_child || no_left_child) { // node has less than two children
 			MEM_BARRIER;
 			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
 				MEM_BARRIER;
@@ -263,10 +283,15 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 			// printf("[alloc] Relocate op\n");
 			MEM_BARRIER;
 			reloc_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
+			MEM_BARRIER;
 			reloc_op->relocate_op.state = STATE_OP_ONGOING;
+			MEM_BARRIER;
 			reloc_op->relocate_op.dest = curr;
+			MEM_BARRIER;
 			reloc_op->relocate_op.dest_op = curr_op;
+			MEM_BARRIER;
 			reloc_op->relocate_op.remove_key = k;
+			MEM_BARRIER;
 			reloc_op->relocate_op.replace_key = replace->key;
 
 			MEM_BARRIER;
@@ -295,7 +320,11 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 		MEM_BARRIER;
 		operation_t* seen_op = CAS_PTR(&(op->relocate_op.dest->op), op->relocate_op.dest_op, FLAG(op, STATE_OP_RELOCATE));
 		MEM_BARRIER;
-		if ((seen_op == op->relocate_op.dest_op) || (seen_op == (operation_t *)FLAG(op, STATE_OP_RELOCATE))){
+		bool_t is_relocating_op = (seen_op == op->relocate_op.dest_op);
+		MEM_BARRIER;
+		bool_t is_relocating_flag = (seen_op == (operation_t *)FLAG(op, STATE_OP_RELOCATE));
+		MEM_BARRIER;
+		if (is_relocating_op || is_relocating_flag){
 
 			MEM_BARRIER;
 			CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
@@ -350,6 +379,7 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 	//fprintf(stderr, "bst help marked\n");
 	MEM_BARRIER;
 	node_t* new_ref;
+	MEM_BARRIER;
 	if (ISNULL(curr->left)) {
 		MEM_BARRIER;
 		if (ISNULL(curr->right)) {
@@ -375,8 +405,11 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 	// printf("[alloc] cas_op\n");
 	MEM_BARRIER;
 	operation_t* cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
+	MEM_BARRIER;
 	cas_op->child_cas_op.is_left = (curr == pred->left);
+	MEM_BARRIER;
 	cas_op->child_cas_op.expected = curr;
+	MEM_BARRIER;
 	cas_op->child_cas_op.update = new_ref;
 
 	MEM_BARRIER;
