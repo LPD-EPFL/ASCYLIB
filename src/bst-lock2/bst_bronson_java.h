@@ -69,7 +69,7 @@ void wait_until_not_changing(node_t* node);
 bool_t attempt_unlink_nl(node_t* parent, node_t* node);
 int node_conditon(node_t* node);
 void fix_height_and_rebalance(node_t* node);
-node_t* fix_height_nl(node_t* node);
+volatile node_t* fix_height_nl(node_t* node);
 node_t* rebalance_nl(node_t* n_parent, node_t* n);
 node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0);
 node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0);
