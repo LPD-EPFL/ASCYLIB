@@ -414,7 +414,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
 // checked (oana still has doubts?)
 void wait_until_not_changing(volatile node_t* node) {
     // //printf("wait_until_not_changing\n");
-	uint64_t version = node->version;
+	volatile uint64_t version = node->version;
 	int i;
 
     if ((version & 1)) {
