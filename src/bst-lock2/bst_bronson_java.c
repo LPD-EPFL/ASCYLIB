@@ -38,7 +38,7 @@ bool_t bst_contains(bst_key_t key, node_t* root) {
 				return right->value;
 			}
 
-			uint64_t ovl = right->version;
+			volatile uint64_t ovl = right->version;
             if(IS_SHRINKING_OR_UNLINKED(ovl)){
                 wait_until_not_changing(right);
             } else if(right == root->right){
@@ -72,7 +72,7 @@ result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v
                 return child->value ? FOUND : NOT_FOUND;
             }
 
-            uint64_t child_ovl = child->version;
+            volatile uint64_t child_ovl = child->version;
             if(IS_SHRINKING_OR_UNLINKED(child_ovl)){
                 wait_until_not_changing(child);
 
@@ -126,7 +126,7 @@ result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected,
                 return UPDATE_RESULT(func);
             }
         } else {
-            uint64_t ovl = right->version;
+            volatile uint64_t ovl = right->version;
 
             if(IS_SHRINKING_OR_UNLINKED(ovl)){
                 wait_until_not_changing(right);
@@ -261,7 +261,7 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
             }
 
         } else {
-            uint64_t child_v = child->version;
+            volatile uint64_t child_v = child->version;
 
             if(IS_SHRINKING_OR_UNLINKED(child_v)){
                 wait_until_not_changing(child);
@@ -410,7 +410,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
 // checked (oana still has doubts?)
 void wait_until_not_changing(node_t* node) {
     // //printf("wait_until_not_changing\n");
-	uint64_t version = node->version;
+	volatile uint64_t version = node->version;
 	int i;
 
 	if (IS_SHRINKING(version)) {
@@ -525,7 +525,7 @@ void fix_height_and_rebalance(node_t* node) {
     while(node != NULL && node->parent != NULL){
         
         
-        int condition = node_conditon(node);
+        volatile int condition = node_conditon(node);
         if(condition == NOTHING_REQUIRED || IS_UNLINKED(node->version)){
             return;
         }
