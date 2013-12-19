@@ -48,60 +48,90 @@ search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t*
 	operation_t* last_right_op;
 
 retry:
+	MEM_BARRIER;
 	result = NOT_FOUND_R;
+	MEM_BARRIER;
 	*curr = aux_root;
+	MEM_BARRIER;
 	*curr_op = (*curr)->op;
+	MEM_BARRIER;
 
 	if(GETFLAG(*curr_op) != STATE_OP_NONE){
 		//fprintf(stderr, "\nShouldn't be here\n");
 		//root is now a global pointer to a node, not a node
+		MEM_BARRIER;
 		if (aux_root == root){
+			MEM_BARRIER;
 			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, aux_root);
+			MEM_BARRIER;
 			goto retry;
 		} else {
+			MEM_BARRIER;
 			return ABORT;
 		}
 	}
 
-
+	MEM_BARRIER;
 	next = (*curr)->right;
+	MEM_BARRIER;
 	last_right = *curr;
+	MEM_BARRIER;
 	last_right_op = *curr_op;
+	MEM_BARRIER;
 
 	while (!ISNULL(next)){
 		MEM_BARRIER;
 		*pred = *curr;
+		MEM_BARRIER;
 		*pred_op = *curr_op;
+		MEM_BARRIER;
 		*curr = next;
+		MEM_BARRIER;
 		*curr_op = (*curr)->op;
+		MEM_BARRIER;
 
 		if(GETFLAG(*curr_op) != STATE_OP_NONE){
 			//fprintf(stderr, "\nShouldn't be here 2\n");
+			MEM_BARRIER;
 			bst_help(*pred, *pred_op, *curr, *curr_op, aux_root);
+			MEM_BARRIER;
 			goto retry;
 		}
+		MEM_BARRIER;
 		curr_key = (*curr)->key;
+		MEM_BARRIER;
 		if(k < curr_key){
+			MEM_BARRIER;
 			result = NOT_FOUND_L;
+			MEM_BARRIER;
 			next = (*curr)->left;
+			MEM_BARRIER;
 		} else if(k > curr_key) {
 			result = NOT_FOUND_R;
+			MEM_BARRIER;
 			next = (*curr)->right;
+			MEM_BARRIER;
 			last_right = *curr;
+			MEM_BARRIER;
 			last_right_op = *curr_op;
+			MEM_BARRIER;
 		} else{
+			MEM_BARRIER;
 			result = FOUND;
+			MEM_BARRIER;
 			break;
 		}
 	}
 	
 	MEM_BARRIER;
+	// TODO more membarrier here
 	if ((result != FOUND) && (last_right_op != last_right->op)) {
 		//fprintf(stderr, "\nShouldn't be here 3\n");
 		goto retry;
 	}
 
 	MEM_BARRIER;
+	// TODO more membarrrier here
 	if ((*curr)->op != *curr_op){
 		//fprintf(stderr, "\nShouldn't be here 4\n");
 		goto retry;
@@ -124,7 +154,9 @@ bool_t bst_add(bst_key_t k, node_t* root){
 	MEM_BARRIER;
 	while(TRUE) {
 		//root is now a global pointer to a node, not a node
+		MEM_BARRIER;
 		result = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
+		MEM_BARRIER;
 		if (result == FOUND) {
 			MEM_BARRIER;
 			return FALSE;
@@ -141,6 +173,7 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		MEM_BARRIER;
 
 		bool_t is_left = (result == NOT_FOUND_L);
+		MEM_BARRIER;
 		node_t* old;
 		MEM_BARRIER;
 		if (is_left) {
@@ -148,7 +181,7 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		} else {
 			old = curr->right;
 		}
-
+		MEM_BARRIER;
 		// allocate memory
 		//cas_op = new child_cas_op_t(is_left, old, new_node)
 		// printf("[%d][alloc] cas_op\n", node_id);
@@ -160,6 +193,7 @@ bool_t bst_add(bst_key_t k, node_t* root){
 
 		MEM_BARRIER;
 		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
+			MEM_BARRIER;
 			bst_help_child_cas(cas_op, curr, root);
 
 			MEM_BARRIER;
@@ -173,9 +207,12 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	//fprintf(stderr, "bst help child cas\n");
 	MEM_BARRIER;
 	node_t** address = NULL;
+	MEM_BARRIER;
 	if (op->child_cas_op.is_left) {
+		MEM_BARRIER;
 		address = &(dest->left);
 	} else {
+		MEM_BARRIER;
 		address = &(dest->right);
 	}
 	MEM_BARRIER;
@@ -208,6 +245,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 		if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
 			MEM_BARRIER;
 			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
+				MEM_BARRIER;
 				bst_help_marked(pred, pred_op, curr, root);
 				MEM_BARRIER;
 				return TRUE;
@@ -215,6 +253,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 		} else { // node has two children
 			MEM_BARRIER;
 			if ((bst_find(k, &pred, &pred_op, &replace, &replace_op, curr, root) == ABORT) || (curr->op != curr_op)) {
+				MEM_BARRIER;
 				continue;
 			} 
 
@@ -222,6 +261,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 			//reloc_op = new RelocateOP(curr, curr_op, k, replace->key);
 			
 			// printf("[alloc] Relocate op\n");
+			MEM_BARRIER;
 			reloc_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 			reloc_op->relocate_op.state = STATE_OP_ONGOING;
 			reloc_op->relocate_op.dest = curr;
@@ -231,12 +271,16 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 
 			MEM_BARRIER;
 			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
+				MEM_BARRIER;
 				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
 					MEM_BARRIER;
 					return TRUE;
 				}
+				MEM_BARRIER;
 			}
+			MEM_BARRIER;
 		}
+		MEM_BARRIER;
 	}
 	MEM_BARRIER;
 }
@@ -245,20 +289,26 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 	//fprintf(stderr, "bst help relocate\n");
 	MEM_BARRIER;
 	int seen_state = op->relocate_op.state;
+	MEM_BARRIER;
 	if (seen_state == STATE_OP_ONGOING) {
 		//VCAS in original implementation
 		MEM_BARRIER;
 		operation_t* seen_op = CAS_PTR(&(op->relocate_op.dest->op), op->relocate_op.dest_op, FLAG(op, STATE_OP_RELOCATE));
+		MEM_BARRIER;
 		if ((seen_op == op->relocate_op.dest_op) || (seen_op == (operation_t *)FLAG(op, STATE_OP_RELOCATE))){
 
 			MEM_BARRIER;
 			CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
+			MEM_BARRIER;
 			seen_state = STATE_OP_SUCCESSFUL;
+			MEM_BARRIER;
 		} else {
 			// VCAS
 			MEM_BARRIER;
 			seen_state = CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_FAILED);
+			MEM_BARRIER;
 		}
+		MEM_BARRIER;
 	}
 
 	if (seen_state == STATE_OP_SUCCESSFUL) {
@@ -267,8 +317,9 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 		CAS_PTR(&(op->relocate_op.dest->key), op->relocate_op.remove_key, op->relocate_op.replace_key);
 		MEM_BARRIER;
 		CAS_PTR(&(op->relocate_op.dest->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, STATE_OP_NONE));
+		MEM_BARRIER;
 	}
-
+	MEM_BARRIER;
 	bool_t result = (seen_state == STATE_OP_SUCCESSFUL);
 	MEM_BARRIER;
 	if (op->relocate_op.dest == curr) {
@@ -278,12 +329,17 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 
 	MEM_BARRIER;
 	CAS_PTR(&(curr->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, result ? STATE_OP_MARK : STATE_OP_NONE));
+	MEM_BARRIER;
 	if (result) {
 		MEM_BARRIER;
 		if (op->relocate_op.dest == pred) {
+			MEM_BARRIER;
 			pred_op = (operation_t *)FLAG(op, STATE_OP_NONE);
+			MEM_BARRIER;
 		}
+		MEM_BARRIER;
 		bst_help_marked(pred, pred_op, curr, root);
+		MEM_BARRIER;
 	}
 	MEM_BARRIER;
 	return result;
@@ -295,19 +351,29 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 	MEM_BARRIER;
 	node_t* new_ref;
 	if (ISNULL(curr->left)) {
+		MEM_BARRIER;
 		if (ISNULL(curr->right)) {
+			MEM_BARRIER;
 			new_ref = (node_t*)SETNULL(curr);
+			MEM_BARRIER;
 		} else {
+			MEM_BARRIER;
 			new_ref = curr->right;
+			MEM_BARRIER;
 		}
 	} else {
+		MEM_BARRIER;
 		new_ref = curr->left;
+		MEM_BARRIER;
 	}
+
+	MEM_BARRIER;
 
 	// allocate memory
 	// operation_t* cas_op = new child_cas_op(curr==pred->left, curr, new_ref);
 
 	// printf("[alloc] cas_op\n");
+	MEM_BARRIER;
 	operation_t* cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 	cas_op->child_cas_op.is_left = (curr == pred->left);
 	cas_op->child_cas_op.expected = curr;
@@ -315,7 +381,9 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 
 	MEM_BARRIER;
 	if (CAS_PTR(&(pred->op), pred_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == pred_op) {
+		MEM_BARRIER;
 		bst_help_child_cas(cas_op, pred, root);
+		MEM_BARRIER;
 	}
 	MEM_BARRIER;
 }
@@ -325,10 +393,13 @@ void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* cur
 	//fprintf(stderr, "bst help\n");
 	MEM_BARRIER;
 	if (GETFLAG(curr_op) == STATE_OP_CHILDCAS) {
+		MEM_BARRIER;
 		bst_help_child_cas((operation_t*)UNFLAG(curr_op), curr, root);
 	} else if (GETFLAG(curr_op) == STATE_OP_RELOCATE) {
+		MEM_BARRIER;
 		bst_help_relocate((operation_t*)UNFLAG(curr_op), pred, pred_op, curr, root);
 	} else if (GETFLAG(curr_op) == STATE_OP_MARK) {
+		MEM_BARRIER;
 		bst_help_marked(pred, pred_op, curr, root);
 	}
 	MEM_BARRIER;

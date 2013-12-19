@@ -166,7 +166,7 @@ void *test(void *data)
  
         // printf("%d: key is %u\n",d->id, key);
         //we make sure the insert was effective (as opposed to just updating an existing entry)
-
+        MEM_BARRIER;
         if (bst_add(key,root) != TRUE) {
             i--;
             MEM_BARRIER;
@@ -194,12 +194,13 @@ void *test(void *data)
             //PF_START and PF_STOP can be used to do latency measurements of the operation
             //to enable them, DO_TIMINGS must be defined at compile time, otherwise they do nothing
             //PF_START(2);
-
+            
             bst_contains(key,root);
 
             //PF_STOP(2);
         } else if (last == -1) {
             //do a write operation
+            MEM_BARRIER;
             if (bst_add(key,root) == TRUE) {
                 MEM_BARRIER;
                 d->num_insert++;
@@ -208,6 +209,7 @@ void *test(void *data)
             }
         } else {
             //do a delete operation
+            MEM_BARRIER;
             if (bst_remove(key,root) == TRUE) {
                 MEM_BARRIER;
                 d->num_remove++;
@@ -397,6 +399,7 @@ int main(int argc, char* const argv[]) {
         data[i].barrier2 = &barrier2;
 
         data[i].init_lock = &init_lock;
+        MEM_BARRIER;
         if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
             fprintf(stderr, "Error creating thread\n");
             exit(1);
@@ -440,6 +443,7 @@ int main(int argc, char* const argv[]) {
     }
  
     //signal the threads to stop
+    MEM_BARRIER;
     *running = 0;
     MEM_BARRIER;
     gettimeofday(&end, NULL);
@@ -462,6 +466,7 @@ int main(int argc, char* const argv[]) {
     ticks total_ticks = 0;
     long reported_total = 1; //the tree contains two initial dummy nodes, INF1 and INF2
     //report some experiment statistics
+    MEM_BARRIER;
     for (i = 0; i < num_threads; i++) {
         printf("Thread %d\n", i);
         printf("  #operations   : %lu\n", data[i].num_operations);
