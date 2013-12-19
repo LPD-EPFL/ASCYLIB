@@ -167,9 +167,9 @@ bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, volatile node
 }
 
 // checked
- node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value,  node_t* parent,  node_t* left,  node_t* right) {
+ volatile node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value, volatile node_t* parent,   volatile node_t* left, volatile node_t* right) {
 
-	node_t* node = (node_t*) ssalloc(sizeof(node_t));
+	volatile node_t* node = (node_t*) ssalloc(sizeof(node_t));
 
 	node->height = height;
     node->key = key;
@@ -656,7 +656,7 @@ volatile node_t* rebalance_to_right_nl(volatile node_t* n_parent, volatile node_
 
                 int hlr = nlr->height;
                 if(hll0 >= hlr){
-                	node_t* res = rotate_right_nl(n_parent, n, nl, hr0, hll0, nlr, hlr);
+                	volatile node_t* res = rotate_right_nl(n_parent, n, nl, hr0, hll0, nlr, hlr);
                 	
                     //printf("Unlock node: %d\n", nlr_key);
                     UNLOCK(nlr_lock);
