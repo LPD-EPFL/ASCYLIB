@@ -58,16 +58,16 @@ typedef struct relocate_op_t {
 
 
 struct node_t {
-	volatile bst_key_t key; //volatile? (for all variables)
-	volatile operation_t* op;
-	volatile node_t* left;
-	volatile node_t* right;
+	bst_key_t key; //volatile? (for all variables)
+	operation_t* op;
+	node_t* left;
+	node_t* right;
 	// char padding[32];
 };
 
 union operation_t {
-	volatile child_cas_op_t child_cas_op;
-	volatile relocate_op_t relocate_op;
+	child_cas_op_t child_cas_op;
+	relocate_op_t relocate_op;
 };
 
 //BST functions
