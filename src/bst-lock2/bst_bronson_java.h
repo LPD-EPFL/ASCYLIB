@@ -89,7 +89,7 @@ void bst_print(volatile node_t* node);
 uint64_t bst_size(volatile node_t* node);
 
 // checked
-static inline node_t* CHILD(node_t* parent, bool_t is_right) {
+static inline volatile node_t* CHILD(volatile node_t* parent, bool_t is_right) {
 	return is_right ? parent->right : parent->left;
 }
 
@@ -104,7 +104,7 @@ static inline uint64_t END_CHANGE(uint64_t ovl) {
 }
 
 // checked
-static inline int HEIGHT(node_t* node) {
+static inline int HEIGHT(volatile node_t* node) {
 	return node == NULL ? 0 : node->height;
 }
 
