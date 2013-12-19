@@ -169,6 +169,7 @@ void *test(void *data)
 
         if (bst_add(key,root) != TRUE) {
             i--;
+            MEM_BARRIER;
         } 
     }
     // }
@@ -200,16 +201,21 @@ void *test(void *data)
         } else if (last == -1) {
             //do a write operation
             if (bst_add(key,root) == TRUE) {
+                MEM_BARRIER;
                 d->num_insert++;
                 last=1;
+                MEM_BARRIER;
             }
         } else {
             //do a delete operation
             if (bst_remove(key,root) == TRUE) {
+                MEM_BARRIER;
                 d->num_remove++;
                 last=-1;
+                MEM_BARRIER;
             }
         }
+        MEM_BARRIER;
         d->num_operations++;
         //memory barrier to ensure no unwanted reporderings are happening
         MEM_BARRIER;
@@ -343,6 +349,7 @@ int main(int argc, char* const argv[]) {
  
     //initialization of the tree
     root = bst_initialize();
+    MEM_BARRIER;
  
     //initialize the data which will be passed to the threads
     if ((data = (thread_data_t *)malloc(num_threads * sizeof(thread_data_t))) == NULL) {
@@ -395,6 +402,7 @@ int main(int argc, char* const argv[]) {
             exit(1);
         }
     }
+    MEM_BARRIER;
     pthread_attr_destroy(&attr);
  
     /* Catch some signals */
@@ -433,6 +441,7 @@ int main(int argc, char* const argv[]) {
  
     //signal the threads to stop
     *running = 0;
+    MEM_BARRIER;
     gettimeofday(&end, NULL);
  
     /* Wait for thread completion */
@@ -470,6 +479,7 @@ int main(int argc, char* const argv[]) {
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
 
+    MEM_BARRIER;
     printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
 
 
