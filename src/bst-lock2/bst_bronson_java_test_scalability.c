@@ -33,7 +33,6 @@
 //the maximum value the key stored in the bst can take; defines the key range
 #define DEFAULT_RANGE 2048
 
-//#define DEBUG 1
 
 int duration;
 int num_threads;
@@ -88,7 +87,7 @@ void barrier_cross(barrier_t *b)
 }
 
 //data structure through which we send parameters to and get results from the worker threads
-typedef ALIGNED(64) struct thread_data {
+typedef ALIGNED(128) struct thread_data {
     //pointer to the global barrier
     barrier_t *barrier;
     //counts the number of operations each thread performs

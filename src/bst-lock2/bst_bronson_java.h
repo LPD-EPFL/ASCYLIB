@@ -47,80 +47,80 @@ typedef ALIGNED(64) struct node_t node_t;
 
 struct node_t {
 	// TODO should this be volatile?
-	/*volatile*/ int height;
-				 bst_key_t key;
-				 bst_value_t value;
-	/*volatile*/ uint64_t version;
+	volatile int height;
+	volatile bst_key_t key;
+	volatile bst_value_t value;
+	volatile uint64_t version;
 	
-	volatile node_t* parent;
-	volatile node_t* left;
-	volatile node_t* right;
-	volatile ptlock_t lock;	
+	 volatile node_t* parent;
+	 volatile node_t* left;
+	 volatile node_t* right;
+	 volatile ptlock_t lock;	
 };
 
 // bst functions
-node_t* bst_initialize();
-bool_t bst_contains(bst_key_t k, node_t* root);
-bool_t bst_add(bst_key_t k, node_t* root);
-bool_t bst_remove(bst_key_t k, node_t* root);
+volatile node_t* bst_initialize();
+bool_t bst_contains(bst_key_t k, volatile node_t* root);
+bool_t bst_add(bst_key_t k, volatile node_t* root);
+bool_t bst_remove(bst_key_t k, volatile node_t* root);
 
 // private functions
-void wait_until_not_changing(node_t* node);
-bool_t attempt_unlink_nl(node_t* parent, node_t* node);
-int node_conditon(node_t* node);
-void fix_height_and_rebalance(node_t* node);
-node_t* fix_height_nl(node_t* node);
-node_t* rebalance_nl(node_t* n_parent, node_t* n);
-node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0);
-node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0);
-node_t* rotate_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr, int hll, node_t* nlr, int hlr);
-node_t* rotate_left_nl(node_t* n_parent, node_t* n, int hl, node_t* nr, node_t* nrl, int hrl, int hrr);
-node_t* rotate_right_over_left_nl(node_t* n_parent, node_t* n, node_t* nl, int hr, int hll, node_t* nlr, int hlrl);
-node_t* rotate_left_over_right_nl(node_t* n_parent, node_t* n, int hl, node_t* nr, node_t* nrl, int hrr, int hrlr);
-void set_child(node_t* parent, node_t* child, bool_t is_right);
-result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t new_value, node_t* parent, node_t* node);
-result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, node_t* parent, node_t* node, uint64_t node_v);
-node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value, node_t* parent, node_t* left, node_t* right);
-bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, node_t* holder);
-result_t update_under_root(bst_key_t k, function_t func, bst_value_t expected, bst_value_t new_value, node_t* holder);
-result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v);
-void bst_print(node_t* node);
+void wait_until_not_changing(volatile node_t* node);
+bool_t attempt_unlink_nl(volatile node_t* parent, volatile node_t* node);
+int node_conditon(volatile node_t* node);
+void fix_height_and_rebalance(volatile node_t* node);
+volatile node_t* fix_height_nl(volatile node_t* node);
+volatile node_t* rebalance_nl(volatile node_t* n_parent, volatile node_t* n);
+volatile node_t* rebalance_to_right_nl(volatile node_t* n_parent, volatile node_t* n, volatile node_t* nl, int hr0);
+volatile node_t* rebalance_to_left_nl(volatile node_t* n_parent, volatile node_t* n, volatile node_t* nr, int hl0);
+volatile node_t* rotate_right_nl(volatile node_t* n_parent, volatile node_t* n, volatile node_t* nl, int hr, int hll, volatile node_t* nlr, int hlr);
+volatile node_t* rotate_left_nl(volatile node_t* n_parent, volatile node_t* n, int hl, volatile node_t* nr, volatile node_t* nrl, int hrl, int hrr);
+volatile node_t* rotate_right_over_left_nl(volatile node_t* n_parent, volatile node_t* n, volatile node_t* nl, int hr, int hll, volatile node_t* nlr, int hlrl);
+volatile node_t* rotate_left_over_right_nl(volatile node_t* n_parent, volatile node_t* n, int hl, volatile node_t* nr, volatile node_t* nrl, int hrr, int hrlr);
+void set_child(volatile node_t* parent, volatile node_t* child, bool_t is_right);
+result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node);
+result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v);
+volatile node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value, volatile node_t* parent, volatile node_t* left, volatile node_t* right);
+bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, volatile node_t* holder);
+result_t update_under_root(bst_key_t k, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* holder);
+result_t attempt_get(bst_key_t k, volatile node_t* node, bool_t is_right, uint64_t node_v);
+void bst_print(volatile node_t* node);
 
-uint64_t bst_size(node_t* node);
+uint64_t bst_size(volatile node_t* node);
 
 // checked
-static inline node_t* CHILD(node_t* parent, bool_t is_right) {
+static inline volatile node_t* CHILD(volatile node_t* parent, bool_t is_right) {
 	return is_right ? parent->right : parent->left;
 }
 
 // checked
-static inline uint64_t BEGIN_CHANGE(uint64_t ovl) {
+static inline uint64_t BEGIN_CHANGE(volatile uint64_t ovl) {
 	return (ovl | 1);
 }
 
 // checked
-static inline uint64_t END_CHANGE(uint64_t ovl) {
+static inline uint64_t END_CHANGE(volatile uint64_t ovl) {
 	return (ovl | 3) + 1;
 }
 
 // checked
-static inline int HEIGHT(node_t* node) {
+static inline int HEIGHT(volatile node_t* node) {
 	return node == NULL ? 0 : node->height;
 }
 
 // checked
-static inline bool_t IS_SHRINKING(bst_value_t ovl) {
+static inline bool_t IS_SHRINKING(volatile uint64_t ovl) {
 	return (bool_t)((ovl & 1) != 0);
 }
 
 
 // checked
-static inline bool_t IS_UNLINKED(bst_value_t ovl) {
+static inline bool_t IS_UNLINKED(volatile uint64_t ovl) {
 	return (bool_t)((ovl & 2) != 0);
 }
 
 // checked
-static inline bool_t IS_SHRINKING_OR_UNLINKED(uint64_t ovl){
+static inline bool_t IS_SHRINKING_OR_UNLINKED(volatile uint64_t ovl){
 	return (bool_t)((ovl & 3) != 0L);
 }
 

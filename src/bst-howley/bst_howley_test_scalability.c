@@ -212,7 +212,7 @@ void *test(void *data)
         }
         d->num_operations++;
         //memory barrier to ensure no unwanted reporderings are happening
-        //MEM_BARRIER;
+        MEM_BARRIER;
     }
     //summary of the fine grain measurements if enabled 
     PF_PRINT;
@@ -443,6 +443,7 @@ int main(int argc, char* const argv[]) {
         }
     }
     DDPRINT("threads finshed\n",NULL);
+    MEM_BARRIER;
     //compute the exact duration of the experiment
     duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
@@ -458,7 +459,7 @@ int main(int argc, char* const argv[]) {
         printf("  #adds      : %lu\n", data[i].num_add);
         printf("  #inserts   : %lu\n", data[i].num_insert);
         printf("  #removes   : %lu\n", data[i].num_remove);
-        printf("  #correct searches   : %f %%\n", data[i].num_found_search * 100.0/data[i].num_operations);
+
         operations += data[i].num_operations;
         total_ticks += data[i].total_time;
         reported_total = reported_total + data[i].num_add + data[i].num_insert - data[i].num_remove;
@@ -468,8 +469,9 @@ int main(int argc, char* const argv[]) {
     printf("#txs     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
+
     printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
-    printf("Size of node : %d, size of op: %d\n", sizeof(node_t), sizeof(operation_t));
+
 
     free(threads);
     free(data);
