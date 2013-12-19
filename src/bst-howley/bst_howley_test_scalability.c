@@ -190,7 +190,7 @@ void *test(void *data)
     //start the test
     while (*running) {
         //generate a key (node that rand_max is expected to be a power of 2)
-        key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;$
+        key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
         MEM_BARRIER;
         //generate the operation
         op = my_random(&seeds[0],&seeds[1],&seeds[2]) & 0xff;
