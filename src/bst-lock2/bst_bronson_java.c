@@ -1019,7 +1019,7 @@ void set_child(volatile node_t* parent, volatile node_t* child, bool_t is_right)
 	}
 }
 
-volatile uint64_t bst_size(volatile node_t* node) {
+uint64_t bst_size(volatile node_t* node) {
 	if (node == NULL || node->version == UNLINKED_OVL) {
 		return 0;
 	} else if (!node->value) {
