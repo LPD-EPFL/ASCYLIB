@@ -521,7 +521,7 @@ volatile node_t* fix_height_nl(volatile node_t* node){
 }
 
 // checked
-void fix_height_and_rebalance(node_t* node) {
+void fix_height_and_rebalance(volatile node_t* node) {
     
     // //printf("fix_height_and_rebalance\n");
     while(node != NULL && node->parent != NULL){
