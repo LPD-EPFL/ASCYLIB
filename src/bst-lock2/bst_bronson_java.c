@@ -3,10 +3,10 @@
 
 // node_t* root;
 
-node_t* bst_initialize() {
+volatile node_t* bst_initialize() {
 	//printf("bst_initialize\n");
 
-    node_t* root = (node_t*) ssalloc(CACHE_LINE_SIZE);
+    volatile node_t* root = (node_t*) ssalloc(CACHE_LINE_SIZE);
 	//node_t* root = (node_t*) ssalloc(sizeof(node_t));
 
 	// assign minimum key to the root, actual tree will be 
@@ -25,7 +25,7 @@ node_t* bst_initialize() {
 }
 
 // checked
-bool_t bst_contains(bst_key_t key, node_t* root) {
+bool_t bst_contains(bst_key_t key, volatile node_t* root) {
 	while(TRUE) {
 		volatile node_t* right = root->right;
 
@@ -100,13 +100,13 @@ result_t attempt_get(bst_key_t k, volatile node_t* node, bool_t is_right, uint64
 }
 
 // checked
-bool_t bst_add(bst_key_t key,  node_t* root) {
+bool_t bst_add(bst_key_t key, volatile node_t* root) {
     // //printf("bst add %d\n", key);
 	return update_under_root(key, UPDATE_IF_ABSENT, FALSE, TRUE, root) == NOT_FOUND;
 }
 
 // checked
-bool_t bst_remove(bst_key_t key, node_t* root) {
+bool_t bst_remove(bst_key_t key, volatile node_t* root) {
     // //printf("bst remove %d\n", key);
     return update_under_root(key, UPDATE_IF_PRESENT, TRUE, FALSE, root) == FOUND;
 }
@@ -414,12 +414,13 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
 // checked (oana still has doubts?)
 void wait_until_not_changing(volatile node_t* node) {
     // //printf("wait_until_not_changing\n");
-	volatile uint64_t version = node->version;
-	int i;
+	volatile uint64_t version = node->version;	
+    int i;
 
     if ((version & 1)) {
 	//if (IS_SHRINKING(version)) {
-		for (i = 0; i < SPIN_COUNT; ++i) {
+		printf("version %d\n", version)
+        for (i = 0; i < SPIN_COUNT; ++i) {
 			if (version != node->version) {
 				return;
 			}

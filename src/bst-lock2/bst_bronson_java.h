@@ -59,10 +59,10 @@ struct node_t {
 };
 
 // bst functions
-node_t* bst_initialize();
-bool_t bst_contains(bst_key_t k, node_t* root);
-bool_t bst_add(bst_key_t k, node_t* root);
-bool_t bst_remove(bst_key_t k, node_t* root);
+volatile node_t* bst_initialize();
+bool_t bst_contains(bst_key_t k, volatile node_t* root);
+bool_t bst_add(bst_key_t k, volatile node_t* root);
+bool_t bst_remove(bst_key_t k, volatile node_t* root);
 
 // private functions
 void wait_until_not_changing(volatile node_t* node);
