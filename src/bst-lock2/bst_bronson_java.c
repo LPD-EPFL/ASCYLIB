@@ -53,10 +53,10 @@ bool_t bst_contains(bst_key_t key, node_t* root) {
 }
 
 // checked
-result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v) {
+result_t attempt_get(bst_key_t k, volatile node_t* node, bool_t is_right, uint64_t node_v) {
 
 	while(TRUE){
-        node_t* child = CHILD(node, is_right);
+        volatile node_t* child = CHILD(node, is_right);
 
         if(child == NULL){
             if(node->version != node_v){
@@ -98,7 +98,7 @@ result_t attempt_get(bst_key_t k, node_t* node, bool_t is_right, uint64_t node_v
 }
 
 // checked
-bool_t bst_add(bst_key_t key, node_t* root) {
+bool_t bst_add(bst_key_t key,  node_t* root) {
     // //printf("bst add %d\n", key);
 	return update_under_root(key, UPDATE_IF_ABSENT, FALSE, TRUE, root) == NOT_FOUND;
 }
@@ -110,7 +110,7 @@ bool_t bst_remove(bst_key_t key, node_t* root) {
 }
 
 // checked
-result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, node_t* holder) {
+result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* holder) {
 
 	while(TRUE){
        // //printf("while true update under root\n");
@@ -142,7 +142,7 @@ result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected,
 }
 
 // checked
-bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, node_t* holder){
+bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, volatile node_t* holder){
 
     bst_key_t holder_key = holder->key;
 
@@ -167,7 +167,7 @@ bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, node_t* holde
 }
 
 // checked
-node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value, node_t* parent, node_t* left, node_t* right) {
+ node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value,  node_t* parent,  node_t* left,  node_t* right) {
 
 	node_t* node = (node_t*) ssalloc(sizeof(node_t));
 
@@ -184,7 +184,7 @@ node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value,
 }
 
 // checked
-result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, node_t* parent, node_t* node, uint64_t node_v) {
+result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v) {
 
     //printf("attempt_update\n");
 	int cmp = key - node->key;
@@ -199,7 +199,7 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
     while(TRUE){
         //printf("while true attempt_update\n");
 
-        node_t* child = CHILD(node, is_right);
+        volatile node_t* child = CHILD(node, is_right);
 
         if(node->version != node_v){
 
@@ -213,7 +213,7 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
                 return NOT_FOUND;
             } else {
                 bool_t success;
-                node_t* damaged;
+                volatile node_t* damaged;
 
                 {
                     // publish(node);
@@ -242,7 +242,7 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
                             return NO_UPDATE_RESULT(func);
                         }
 
-                        node_t* new_child = new_node(1, key, 0, TRUE, node, NULL, NULL);
+                        volatile node_t* new_child = new_node(1, key, 0, TRUE, node, NULL, NULL);
                         set_child(node, new_child, is_right);
 
                         success = TRUE;
@@ -285,7 +285,7 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
 }
 
 // checked
-result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t new_value, node_t* parent, node_t* node) {
+result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node) {
 
 
 	if(!new_value){
@@ -298,7 +298,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
     if(!new_value && (node->left == NULL || node->right == NULL)){
         
         bst_value_t prev;
-        node_t* damaged;
+        volatile node_t* damaged;
 
         {
             // publish(parent);
@@ -409,7 +409,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
 }
 
 // checked (oana still has doubts?)
-void wait_until_not_changing(node_t* node) {
+void wait_until_not_changing(volatile node_t* node) {
     // //printf("wait_until_not_changing\n");
 	uint64_t version = node->version;
 	int i;
@@ -432,7 +432,7 @@ void wait_until_not_changing(node_t* node) {
 }
 
 // checked
-bool_t attempt_unlink_nl(node_t* parent, node_t* node) {
+bool_t attempt_unlink_nl(volatile node_t* parent, volatile node_t* node) {
 
     // //printf("attempt_unlink_nl\n");
 	volatile node_t* parent_l = parent->left;
@@ -450,7 +450,7 @@ bool_t attempt_unlink_nl(node_t* parent, node_t* node) {
         return FALSE;
     }
 
-    node_t* splice = (left != NULL) ? left : right;
+    volatile node_t* splice = (left != NULL) ? left : right;
     
     if(parent_l == node){
         parent->left = splice;
@@ -470,7 +470,7 @@ bool_t attempt_unlink_nl(node_t* parent, node_t* node) {
 }
 
 // checked
-int node_conditon(node_t* node) {
+int node_conditon(volatile node_t* node) {
 
     // //printf("node_conditon\n");
 	volatile node_t* nl = node->left;
@@ -503,7 +503,7 @@ int node_conditon(node_t* node) {
 }
 
 // checked
-volatile node_t* fix_height_nl(node_t* node){
+volatile node_t* fix_height_nl(volatile node_t* node){
 
     //printf("fix_height_nl node key %d\n", node->key);
     int c = node_conditon(node);
@@ -580,7 +580,7 @@ void fix_height_and_rebalance(node_t* node) {
 }
 
 //checked
-node_t* rebalance_nl(node_t* n_parent, node_t* n){
+volatile node_t* rebalance_nl(volatile node_t* n_parent, volatile node_t* n){
     //printf("rebalance_nl: n_parent key %d, n_key %d\n", n_parent->key, n->key);
 
 	volatile node_t* nl = n->left;
@@ -614,7 +614,7 @@ node_t* rebalance_nl(node_t* n_parent, node_t* n){
 }
 
 // checked
-node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) {
+volatile node_t* rebalance_to_right_nl(volatile node_t* n_parent, volatile node_t* n, volatile node_t* nl, int hr0) {
 
     //printf("rebalance_to_right_nl\n");
     
@@ -638,7 +638,7 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
         //printf("hll0 %d, hlr0 %d \n", hll0, hlr0);
 
         if(hll0 >= hlr0){ //poate daca facem >=...
-        	node_t* res = rotate_right_nl(n_parent, n, nl, hr0, hll0, nlr, hlr0);
+        	volatile node_t* res = rotate_right_nl(n_parent, n, nl, hr0, hll0, nlr, hlr0);
         	//printf("Unlock node: %d\n", nl_key);
             UNLOCK(nl_lock);
             return res ;
@@ -668,7 +668,7 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
                     int b = hll0 - hlrl;
                     // CHANGED: Java and C++ implementations differ
                     if(b >= -1 && b <= 1 && !((hll0 == 0 || hlrl == 0) && !nl->value)){
-                    	node_t* res = rotate_right_over_left_nl(n_parent, n, nl, hr0, hll0, nlr, hlrl);
+                    	volatile node_t* res = rotate_right_over_left_nl(n_parent, n, nl, hr0, hll0, nlr, hlrl);
                     	//printf("Unlock node: %d\n", nlr_key);
                         UNLOCK(nlr_lock);
                         //printf("Unlock node: %d\n", nl_key);
@@ -681,7 +681,7 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
                 UNLOCK(nlr_lock);
             }
 
-            node_t* res = rebalance_to_left_nl(n, nl, nlr, hll0);
+            volatile node_t* res = rebalance_to_left_nl(n, nl, nlr, hll0);
             //printf("Unlock node: %d\n", nl_key);
             UNLOCK(nl_lock);
             return res;
@@ -693,7 +693,7 @@ node_t* rebalance_to_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr0) 
 }
 
 // checked
-node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0) {
+volatile node_t* rebalance_to_left_nl(volatile node_t* n_parent, volatile node_t* n, volatile node_t* nr, int hl0) {
 
     //printf("rebalance_to_left_nl");
 
@@ -717,7 +717,7 @@ node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0) {
 
         if(hrr0 >= hrl0){
 
-            node_t* res = rotate_left_nl(n_parent, n, hl0, nr, nrl, hrl0, hrr0);
+            volatile node_t* res = rotate_left_nl(n_parent, n, hl0, nr, nrl, hrl0, hrr0);
             UNLOCK(nr_lock);
             return res;
         } else {
@@ -731,7 +731,7 @@ node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0) {
 
                 int hrl = nrl->height;
                 if(hrr0 >= hrl){
-                	node_t* res = rotate_left_nl(n_parent, n, hl0, nr, nrl, hrl, hrr0);
+                	volatile node_t* res = rotate_left_nl(n_parent, n, hl0, nr, nrl, hrl, hrr0);
                 	//printf("Unlock node: %d\n", nrl_key);
                     UNLOCK(nrl_lock);
                     //printf("Unlock node: %d\n", nr_key);
@@ -742,7 +742,7 @@ node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0) {
                     int b = hrr0 - hrlr;
                     // CHANGED
                     if(b >= -1 && b <= 1 && !((hrr0 == 0 || hrlr == 0) && !nr->value)){
-                    	node_t* res = rotate_left_over_right_nl(n_parent, n, hl0, nr, nrl, hrr0, hrlr);
+                    	volatile node_t* res = rotate_left_over_right_nl(n_parent, n, hl0, nr, nrl, hrr0, hrlr);
 
                         //printf("Unlock node: %d\n", nrl_key);
                         UNLOCK(nrl_lock);
@@ -755,7 +755,7 @@ node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0) {
                 UNLOCK(nrl_lock);
 
             }
-            node_t* res = rebalance_to_right_nl(n, nr, nrl, hrr0);
+            volatile node_t* res = rebalance_to_right_nl(n, nr, nrl, hrr0);
             //printf("Unlock node: %d\n", nr_key);
             UNLOCK(nr_lock);
             return res;
@@ -766,7 +766,7 @@ node_t* rebalance_to_left_nl(node_t* n_parent, node_t* n, node_t* nr, int hl0) {
 }
 
 // checked
-node_t* rotate_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr, int hll, node_t* nlr, int hlr) {
+volatile node_t* rotate_right_nl(volatile node_t* n_parent, volatile node_t* n, volatile node_t* nl, int hr, int hll, volatile node_t* nlr, int hlr) {
 
     //printf("rotate_right_nl\n");
 
@@ -820,7 +820,7 @@ node_t* rotate_right_nl(node_t* n_parent, node_t* n, node_t* nl, int hr, int hll
 }
 
 // checked
-node_t* rotate_left_nl(node_t* n_parent, node_t* n, int hl, node_t* nr, node_t* nrl, int hrl, int hrr){
+volatile node_t* rotate_left_nl(volatile node_t* n_parent, volatile node_t* n, int hl, volatile node_t* nr, volatile node_t* nrl, int hrl, int hrr){
 
     //printf("rotate_left_nl");
 
@@ -875,7 +875,7 @@ node_t* rotate_left_nl(node_t* n_parent, node_t* n, int hl, node_t* nr, node_t* 
 }
 
 // checked
-node_t* rotate_right_over_left_nl(node_t* n_parent, node_t* n, node_t* nl, int hr, int hll, node_t* nlr, int hlrl){
+volatile node_t* rotate_right_over_left_nl(volatile node_t* n_parent, volatile node_t* n, volatile node_t* nl, int hr, int hll, volatile node_t* nlr, int hlrl){
 
     //printf("rotate_right_over_left_nl\n");
 
@@ -943,7 +943,7 @@ node_t* rotate_right_over_left_nl(node_t* n_parent, node_t* n, node_t* nl, int h
 }
 
 // checked
-node_t* rotate_left_over_right_nl(node_t* n_parent, node_t* n, int hl, node_t* nr, node_t* nrl, int hrr, int hrlr){
+volatile node_t* rotate_left_over_right_nl(volatile node_t* n_parent, volatile node_t* n, int hl, volatile node_t* nr, volatile node_t* nrl, int hrr, int hrlr){
 
     //printf("rotate_left_over_right_nl\n");
 
@@ -1011,7 +1011,7 @@ node_t* rotate_left_over_right_nl(node_t* n_parent, node_t* n, int hl, node_t* n
 }
 
 // checked
-void set_child(node_t* parent, node_t* child, bool_t is_right) {
+void set_child(volatile node_t* parent, volatile node_t* child, bool_t is_right) {
 	if (is_right) {
 		parent->right = child;
 	} else {
@@ -1019,7 +1019,7 @@ void set_child(node_t* parent, node_t* child, bool_t is_right) {
 	}
 }
 
-volatile uint64_t bst_size(node_t* node) {
+volatile uint64_t bst_size(volatile node_t* node) {
 	if (node == NULL || node->version == UNLINKED_OVL) {
 		return 0;
 	} else if (!node->value) {
@@ -1030,7 +1030,7 @@ volatile uint64_t bst_size(node_t* node) {
 }
 
 
-void bst_print(node_t* node) {
+void bst_print(volatile node_t* node) {
 
     if (node == NULL) {
         return;

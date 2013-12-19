@@ -80,7 +80,7 @@ volatile node_t* rotate_left_over_right_nl(volatile node_t* n_parent, volatile n
 void set_child(volatile node_t* parent, volatile node_t* child, bool_t is_right);
 result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node);
 result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v);
-volatile node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value, volatile node_t* parent, volatile node_t* left, volatile node_t* right);
+ node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value,  node_t* parent,  node_t* left,  node_t* right);
 bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, volatile node_t* holder);
 result_t update_under_root(bst_key_t k, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* holder);
 result_t attempt_get(bst_key_t k, volatile node_t* node, bool_t is_right, uint64_t node_v);
