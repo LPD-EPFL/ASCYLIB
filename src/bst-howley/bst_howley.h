@@ -39,35 +39,35 @@ typedef ALIGNED(64) union operation_t operation_t;
 typedef ALIGNED(64) struct node_t node_t;
 
 typedef struct child_cas_op_t {
-	bool_t is_left;
-	node_t* expected;
-	node_t* update;
-	char padding[40]; 
+	volatile bool_t is_left;
+	volatile node_t* expected;
+	volatile node_t* update;
+	// char padding[40]; 
 
 } child_cas_op_t;
 
 typedef struct relocate_op_t {
-	int state; //TODO initialize to ONGOING
-	node_t* dest;
-	operation_t* dest_op;
-	bst_key_t remove_key;
-	bst_key_t replace_key;
-	char padding[32]; 
+	volatile int state; //TODO initialize to ONGOING
+	volatile node_t* dest;
+	volatile operation_t* dest_op;
+	volatile bst_key_t remove_key;
+	volatile bst_key_t replace_key;
+	// char padding[32]; 
 
 } relocate_op_t;
 
 
 struct node_t {
-	bst_key_t key; //volatile? (for all variables)
-	operation_t* op;
-	node_t* left;
-	node_t* right;
+	volatile bst_key_t key; //volatile? (for all variables)
+	volatile operation_t* op;
+	volatile node_t* left;
+	volatile node_t* right;
 	// char padding[32];
 };
 
 union operation_t {
-	child_cas_op_t child_cas_op;
-	relocate_op_t relocate_op;
+	volatile child_cas_op_t child_cas_op;
+	volatile relocate_op_t relocate_op;
 };
 
 //BST functions
