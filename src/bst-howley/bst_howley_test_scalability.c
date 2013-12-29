@@ -122,7 +122,6 @@ void *test(void *data)
     DDPRINT("starting test\n",NULL);
     //get the per-thread data
     thread_data_t *d = (thread_data_t *)data;
-    // MEM_BARRIER;
     //scale percentages of the various operations to the range 0..255
     //this saves us a floating point operation during the benchmark
     //e.g instead of random()%100 to determine the next operation we will do, we can simply do random()&256
@@ -134,7 +133,7 @@ void *test(void *data)
     //initialize the custom memeory allocator for this thread (we do not use malloc due to concurrency bottleneck issues)
     ssalloc_init();
     ssalloc_align();
-    // MEM_BARRIER;
+
     // bst_init_local(d->id);
     //for fine-grain latency measurements, we need to get the lenght of a getticks() function call, which is also counted
     //by default when we do getticks(); //code... getticks(); PF_START and PF_STOP use this when fine grain measurements are enabled
@@ -147,7 +146,7 @@ void *test(void *data)
     bst_key_t key;
     int i;
     int last = -1;
-    // MEM_BARRIER;
+ 
     DDPRINT("staring initial insert\n",NULL);
     DDPRINT("number of inserts: %u up to %u\n",d->num_add,rand_max);
     //before starting the test, we insert a number of elements in the data structure
@@ -162,19 +161,15 @@ void *test(void *data)
     // if (d->id == num_threads  -1 ) {
     for (i=0;i<d->num_add;++i) {
         
-        // MEM_BARRIER;
         key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
         
  
         // printf("%d: key is %u\n",d->id, key);
         //we make sure the insert was effective (as opposed to just updating an existing entry)
-        // MEM_BARRIER;
+
         if (bst_add(key,root) != TRUE) {
-            // MEM_BARRIER;
             i--;
-            // MEM_BARRIER;
-        }
-        // MEM_BARRIER; 
+        } 
     }
     // }
 
@@ -191,47 +186,33 @@ void *test(void *data)
     while (*running) {
         //generate a key (node that rand_max is expected to be a power of 2)
         key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
-        // MEM_BARRIER;
         //generate the operation
         op = my_random(&seeds[0],&seeds[1],&seeds[2]) & 0xff;
-        // MEM_BARRIER;
         if (op < read_thresh) {
             //do a find operation
             //PF_START and PF_STOP can be used to do latency measurements of the operation
             //to enable them, DO_TIMINGS must be defined at compile time, otherwise they do nothing
             //PF_START(2);
-            // MEM_BARRIER;
+
             bst_contains(key,root);
-            // MEM_BARRIER;
 
             //PF_STOP(2);
         } else if (last == -1) {
             //do a write operation
-            // MEM_BARRIER;
             if (bst_add(key,root) == TRUE) {
-                // MEM_BARRIER;
                 d->num_insert++;
-                // MEM_BARRIER;
                 last=1;
-                // MEM_BARRIER;
             }
-            // MEM_BARRIER;
         } else {
             //do a delete operation
-            // MEM_BARRIER;
             if (bst_remove(key,root) == TRUE) {
-                // MEM_BARRIER;
                 d->num_remove++;
-                // MEM_BARRIER;
                 last=-1;
-                // MEM_BARRIER;
             }
-            // MEM_BARRIER;
         }
-        // MEM_BARRIER;
         d->num_operations++;
         //memory barrier to ensure no unwanted reporderings are happening
-        // MEM_BARRIER;
+        //MEM_BARRIER;
     }
     //summary of the fine grain measurements if enabled 
     PF_PRINT;
@@ -361,9 +342,7 @@ int main(int argc, char* const argv[]) {
     max_key = pow2roundup(max_key)-1;
  
     //initialization of the tree
-    // MEM_BARRIER;
     root = bst_initialize();
-    // MEM_BARRIER;
  
     //initialize the data which will be passed to the threads
     if ((data = (thread_data_t *)malloc(num_threads * sizeof(thread_data_t))) == NULL) {
@@ -382,9 +361,7 @@ int main(int argc, char* const argv[]) {
         srand(seed);
  
     //flag signaling the threads until when to run
-    // MEM_BARRIER;
     *running = 1;
-    // MEM_BARRIER;
  
     //global barrier initialization (used to start the threads at the same time)
     barrier_init(&barrier, num_threads + 1);
@@ -400,38 +377,24 @@ int main(int argc, char* const argv[]) {
     //set the data for each thread and create the threads
     for (i = 0; i < num_threads; i++) {
         data[i].id = i;
-        // MEM_BARRIER;
         data[i].num_operations = 0;
-        // MEM_BARRIER;
         data[i].total_time=0;
-        // MEM_BARRIER;
         data[i].num_insert=0;
-        // MEM_BARRIER;
         data[i].num_remove=0;
-        // MEM_BARRIER;
         data[i].num_search=0;
-        // MEM_BARRIER;
         data[i].num_found_search=0;
-        // MEM_BARRIER;
         data[i].num_add = max_key/(2 * num_threads); 
-        // MEM_BARRIER;
         if (i< ((max_key/2)%num_threads)) data[i].num_add++;
-        // MEM_BARRIER;
         data[i].seed = rand();
-        // MEM_BARRIER;
         data[i].barrier = &barrier;
-        // MEM_BARRIER;
         data[i].barrier2 = &barrier2;
-        // MEM_BARRIER;
 
         data[i].init_lock = &init_lock;
-        // MEM_BARRIER;
         if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
             fprintf(stderr, "Error creating thread\n");
             exit(1);
         }
     }
-    // MEM_BARRIER;
     pthread_attr_destroy(&attr);
  
     /* Catch some signals */
@@ -469,9 +432,7 @@ int main(int argc, char* const argv[]) {
     }
  
     //signal the threads to stop
-    // MEM_BARRIER;
     *running = 0;
-    // MEM_BARRIER;
     gettimeofday(&end, NULL);
  
     /* Wait for thread completion */
@@ -482,7 +443,6 @@ int main(int argc, char* const argv[]) {
         }
     }
     DDPRINT("threads finshed\n",NULL);
-    // MEM_BARRIER;
     //compute the exact duration of the experiment
     duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
@@ -492,29 +452,22 @@ int main(int argc, char* const argv[]) {
     ticks total_ticks = 0;
     long reported_total = 1; //the tree contains two initial dummy nodes, INF1 and INF2
     //report some experiment statistics
-    // MEM_BARRIER;
     for (i = 0; i < num_threads; i++) {
-        // printf("Thread %d\n", i);
-        // printf("  #operations   : %lu\n", data[i].num_operations);
-        // printf("  #adds      : %lu\n", data[i].num_add);
-        // printf("  #inserts   : %lu\n", data[i].num_insert);
-        // printf("  #removes   : %lu\n", data[i].num_remove);
+        printf("Thread %d\n", i);
+        printf("  #operations   : %lu\n", data[i].num_operations);
+        printf("  #adds      : %lu\n", data[i].num_add);
+        printf("  #inserts   : %lu\n", data[i].num_insert);
+        printf("  #removes   : %lu\n", data[i].num_remove);
 
-        // MEM_BARRIER;
         operations += data[i].num_operations;
-        // MEM_BARRIER;
         total_ticks += data[i].total_time;
-        // MEM_BARRIER;
         reported_total = reported_total + data[i].num_add + data[i].num_insert - data[i].num_remove;
-        // MEM_BARRIER;
     }
  
     printf("Duration      : %d (ms)\n", duration);
     printf("#txs     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
-
-    // MEM_BARRIER;
     printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
 
 
