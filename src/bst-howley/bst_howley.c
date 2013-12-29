@@ -338,7 +338,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
 	//fprintf(stderr, "bst help relocate\n");
 	MEM_BARRIER;
-	int seen_state = op->relocate_op.state;
+	int volatile seen_state = op->relocate_op.state;
 	MEM_BARRIER;
 	if (seen_state == STATE_OP_ONGOING) {
 		//VCAS in original implementation
