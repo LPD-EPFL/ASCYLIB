@@ -240,7 +240,7 @@ bool_t bst_add(bst_key_t k, node_t* root){
 void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	//fprintf(stderr, "bst help child cas\n");
 	MEM_BARRIER;
-	node_t** address = NULL;
+	volatile node_t** address = NULL;
 	MEM_BARRIER;
 	if (op->child_cas_op.is_left) {
 		MEM_BARRIER;
