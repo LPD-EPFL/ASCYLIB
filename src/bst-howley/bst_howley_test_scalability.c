@@ -468,8 +468,11 @@ int main(int argc, char* const argv[]) {
     printf("#txs     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
-    printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
-
+    int actual_size = bst_size(root);
+    printf("Expected size: %ld Actual size: %lu\n",reported_total, actual_size);
+    if (actual_size != reported_total) {
+        bst_print(root);
+    }
 
     free(threads);
     free(data);
