@@ -45,18 +45,22 @@ typedef ALIGNED(64) struct node_t node_t;
 
 // TODO define constants (Fig 3 on page 3)
 
-struct node_t {
-	// TODO should this be volatile?
-	volatile int height;
-	volatile bst_key_t key;
-	volatile bst_value_t value;
-	volatile uint64_t version;
-	
-	 volatile node_t* parent;
-	 volatile node_t* left;
-	 volatile node_t* right;
-	 volatile ptlock_t lock;	
-};
+typedef ALIGNED(64) struct node_t {
+	union {
+		struct {
+			volatile int height;
+			volatile bst_key_t key;
+			volatile bst_value_t value;
+			volatile uint64_t version;
+			
+			volatile node_t* parent;
+			volatile node_t* left;
+			volatile node_t* right;
+			volatile ptlock_t lock;				
+		};
+		char padding[64];
+	};
+} node_t;
 
 // bst functions
 volatile node_t* bst_initialize();
