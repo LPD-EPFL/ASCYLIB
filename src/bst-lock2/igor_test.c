@@ -13,6 +13,7 @@
 #include "measurements.h"
 #include "utils.h"
 #include "ssalloc.h"
+#include "lock_if.h"
 
 int main(int argc, char const *argv[])
 {
@@ -22,6 +23,7 @@ int main(int argc, char const *argv[])
 	node_t* root = bst_initialize();
 
 	printf("node size: %d\n", sizeof(node_t));
+	printf("lock size: %d\n", sizeof(ptlock_t));
 
 	// bst_add(3, root);
 	// bst_add(1, root);
