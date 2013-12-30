@@ -48,17 +48,17 @@ typedef ALIGNED(64) struct node_t node_t;
 typedef ALIGNED(64) struct node_t {
 	union {
 		struct {
-			volatile int height;
-			volatile bst_key_t key;
-			volatile bst_value_t value;
-			volatile uint64_t version;
+			volatile int height; //4
+			volatile bst_key_t key; //4
+			volatile bst_value_t value; //1?
+			volatile uint64_t version; //8
 			
-			volatile node_t* parent;
-			volatile node_t* left;
-			volatile node_t* right;
-			volatile ptlock_t lock;				
+			volatile node_t* parent; //8
+			volatile node_t* left; //8
+			volatile node_t* right; //8
+			volatile ptlock_t lock;	// mutex - 40			
 		};
-		char padding[64];
+		char padding[64*((48+sizeof(ptlock_t))/64+1)];
 	};
 } node_t;
 
