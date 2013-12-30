@@ -47,7 +47,7 @@ typedef struct child_cas_op_t {
 } child_cas_op_t;
 
 typedef struct relocate_op_t {
-	int state; //TODO initialize to ONGOING
+	int volatile state; //TODO initialize to ONGOING
 	node_t* dest;
 	operation_t* dest_op;
 	bst_key_t remove_key;
@@ -58,10 +58,10 @@ typedef struct relocate_op_t {
 
 
 struct node_t {
-	bst_key_t key; //volatile? (for all variables)
-	operation_t* op;
-	node_t* left;
-	node_t* right;
+	bst_key_t volatile key; //volatile? (for all variables)
+	operation_t* volatile op;
+	node_t* volatile left;
+	node_t* volatile right;
 	// char padding[32];
 };
 

@@ -6,7 +6,7 @@
 
 //node_t* root;
 
-bst_key_t glob_key = 1;
+//bst_key_t glob_key = 1;
 
 node_t* bst_initialize() {
 
@@ -61,7 +61,7 @@ retry:
 		//fprintf(stderr, "\nShouldn't be here\n");
 		//root is now a global pointer to a node, not a node
 		if (aux_root == root){
-			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, aux_root);
+			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, root);
 			goto retry;
 		} else {
 			return ABORT;
@@ -82,7 +82,8 @@ retry:
 
 		if(GETFLAG(*curr_op) != STATE_OP_NONE){
 			//fprintf(stderr, "\nShouldn't be here 2\n");
-			bst_help(*pred, *pred_op, *curr, *curr_op, aux_root);
+			//TODO ?? root sau aux_root
+			bst_help(*pred, *pred_op, *curr, *curr_op, root);
 			goto retry;
 		}
 		curr_key = (*curr)->key;
@@ -202,6 +203,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 				return TRUE;
 			}
 		} else { // node has two children
+
 			if ((bst_find(k, &pred, &pred_op, &replace, &replace_op, curr, root) == ABORT) || (curr->op != curr_op)) {
 				continue;
 			} 
