@@ -308,9 +308,11 @@ void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* cur
 unsigned long bst_size(node_t* node) {
 	if (ISNULL(node)) {
 		return 0;
-	} else {
+	} else if (GETFLAG(node->op) != STATE_OP_MARK) {
 		// fprintf(stderr, "node %p ; left: %p; right: %p\n", node, node->left, node->right);
 		return 1 + bst_size(node->right) + bst_size(node->left);
+	} else {
+		return bst_size(node->right) + bst_size(node->left);
 	}
 }
 
@@ -320,7 +322,7 @@ void bst_print(node_t* node){
 	}
 	fprintf(stderr, "key: %lu ", node->key);
 	fprintf(stderr, "address %p ", node);
-	fprintf(stderr, "left: %p; right: %p \n", node->left, node->right);
+	fprintf(stderr, "left: %p; right: %p, op: %p \n", node->left, node->right, node->op);
 	
 	bst_print(node->left);
 	bst_print(node->right);
