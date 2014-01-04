@@ -212,7 +212,7 @@ void *test(void *data)
         }
         d->num_operations++;
         //memory barrier to ensure no unwanted reporderings are happening
-        MEM_BARRIER;
+        //MEM_BARRIER;
     }
     //summary of the fine grain measurements if enabled 
     PF_PRINT;
@@ -443,7 +443,6 @@ int main(int argc, char* const argv[]) {
         }
     }
     DDPRINT("threads finshed\n",NULL);
-    MEM_BARRIER;
     //compute the exact duration of the experiment
     duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
@@ -469,9 +468,11 @@ int main(int argc, char* const argv[]) {
     printf("#txs     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
-
-    printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
-
+    int actual_size = bst_size(root);
+    printf("Expected size: %ld Actual size: %lu\n",reported_total, actual_size);
+    if (actual_size != reported_total) {
+        bst_print(root);
+    }
 
     free(threads);
     free(data);

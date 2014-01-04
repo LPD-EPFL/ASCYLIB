@@ -6,7 +6,7 @@
 
 //node_t* root;
 
-bst_key_t glob_key = 1;
+//bst_key_t glob_key = 1;
 
 node_t* bst_initialize() {
 
@@ -46,7 +46,6 @@ bool_t bst_contains(bst_key_t k, node_t* root){
 search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
 	//fprintf(stderr, "bst find\n");
 
-	MEM_BARRIER;
 	search_res_t result;
 	bst_key_t curr_key;
 	node_t* next;
@@ -62,7 +61,7 @@ retry:
 		//fprintf(stderr, "\nShouldn't be here\n");
 		//root is now a global pointer to a node, not a node
 		if (aux_root == root){
-			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, aux_root);
+			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, root);
 			goto retry;
 		} else {
 			return ABORT;
@@ -80,9 +79,11 @@ retry:
 		*curr = next;
 		*curr_op = (*curr)->op;
 
+
 		if(GETFLAG(*curr_op) != STATE_OP_NONE){
 			//fprintf(stderr, "\nShouldn't be here 2\n");
-			bst_help(*pred, *pred_op, *curr, *curr_op, aux_root);
+			//TODO ?? root sau aux_root
+			bst_help(*pred, *pred_op, *curr, *curr_op, root);
 			goto retry;
 		}
 		curr_key = (*curr)->key;
@@ -123,7 +124,6 @@ bool_t bst_add(bst_key_t k, node_t* root){
 	operation_t* cas_op;
 	search_res_t result;
 
-	MEM_BARRIER;
 	while(TRUE) {
 		//root is now a global pointer to a node, not a node
 		result = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
@@ -171,22 +171,18 @@ bool_t bst_add(bst_key_t k, node_t* root){
 
 void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	//fprintf(stderr, "bst help child cas\n");
-	MEM_BARRIER;
 	node_t** address = NULL;
 	if (op->child_cas_op.is_left) {
 		address = &(dest->left);
 	} else {
 		address = &(dest->right);
 	}
-	MEM_BARRIER;
 	CAS_PTR(address, op->child_cas_op.expected, op->child_cas_op.update);
-	MEM_BARRIER;
 	CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
 
 bool_t bst_remove(bst_key_t k, node_t* root){
 	//fprintf(stderr, "bst remove\n");
-	MEM_BARRIER;
 	node_t* pred;
 	node_t* curr;
 	node_t* replace;
@@ -202,12 +198,12 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 		}
 
 		if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
-			MEM_BARRIER;
 			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
 				bst_help_marked(pred, pred_op, curr, root);
 				return TRUE;
 			}
 		} else { // node has two children
+
 			if ((bst_find(k, &pred, &pred_op, &replace, &replace_op, curr, root) == ABORT) || (curr->op != curr_op)) {
 				continue;
 			} 
@@ -235,28 +231,22 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 
 bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
 	//fprintf(stderr, "bst help relocate\n");
-	MEM_BARRIER;
 	int seen_state = op->relocate_op.state;
 	if (seen_state == STATE_OP_ONGOING) {
 		//VCAS in original implementation
-		MEM_BARRIER;
 		operation_t* seen_op = CAS_PTR(&(op->relocate_op.dest->op), op->relocate_op.dest_op, FLAG(op, STATE_OP_RELOCATE));
 		if ((seen_op == op->relocate_op.dest_op) || (seen_op == (operation_t *)FLAG(op, STATE_OP_RELOCATE))){
-			MEM_BARRIER;
 			CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
 			seen_state = STATE_OP_SUCCESSFUL;
 		} else {
 			// VCAS
-			MEM_BARRIER;
 			seen_state = CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_FAILED);
 		}
 	}
 
 	if (seen_state == STATE_OP_SUCCESSFUL) {
 		// TODO not clear in the paper code
-		MEM_BARRIER;
 		CAS_PTR(&(op->relocate_op.dest->key), op->relocate_op.remove_key, op->relocate_op.replace_key);
-		MEM_BARRIER;
 		CAS_PTR(&(op->relocate_op.dest->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, STATE_OP_NONE));
 	}
 
@@ -265,7 +255,6 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 		return result;
 	}
 
-	MEM_BARRIER;
 	CAS_PTR(&(curr->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, result ? STATE_OP_MARK : STATE_OP_NONE));
 	if (result) {
 		if (op->relocate_op.dest == pred) {
@@ -279,7 +268,6 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
 
 	//fprintf(stderr, "bst help marked\n");
-	MEM_BARRIER;
 	node_t* new_ref;
 	if (ISNULL(curr->left)) {
 		if (ISNULL(curr->right)) {
@@ -300,7 +288,6 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 	cas_op->child_cas_op.expected = curr;
 	cas_op->child_cas_op.update = new_ref;
 
-	MEM_BARRIER;
 	if (CAS_PTR(&(pred->op), pred_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == pred_op) {
 		bst_help_child_cas(cas_op, pred, root);
 	}
@@ -309,7 +296,6 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* curr_op, node_t* root ){
 	
 	//fprintf(stderr, "bst help\n");
-	MEM_BARRIER;
 	if (GETFLAG(curr_op) == STATE_OP_CHILDCAS) {
 		bst_help_child_cas((operation_t*)UNFLAG(curr_op), curr, root);
 	} else if (GETFLAG(curr_op) == STATE_OP_RELOCATE) {
@@ -322,9 +308,11 @@ void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* cur
 unsigned long bst_size(node_t* node) {
 	if (ISNULL(node)) {
 		return 0;
-	} else {
+	} else if (GETFLAG(node->op) != STATE_OP_MARK) {
 		// fprintf(stderr, "node %p ; left: %p; right: %p\n", node, node->left, node->right);
 		return 1 + bst_size(node->right) + bst_size(node->left);
+	} else {
+		return bst_size(node->right) + bst_size(node->left);
 	}
 }
 
@@ -334,7 +322,7 @@ void bst_print(node_t* node){
 	}
 	fprintf(stderr, "key: %lu ", node->key);
 	fprintf(stderr, "address %p ", node);
-	fprintf(stderr, "left: %p; right: %p \n", node->left, node->right);
+	fprintf(stderr, "left: %p; right: %p, op: %p \n", node->left, node->right, node->op);
 	
 	bst_print(node->left);
 	bst_print(node->right);
