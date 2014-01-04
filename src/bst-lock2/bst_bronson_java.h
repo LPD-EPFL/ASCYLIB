@@ -40,27 +40,26 @@ typedef uint8_t function_t;
 typedef uint32_t bst_key_t;
 typedef bool_t bst_value_t;
 
-typedef ALIGNED(64) struct node_t node_t;
+typedef ALIGNED(64) union node_t node_t;
 
 
 // TODO define constants (Fig 3 on page 3)
 
-typedef ALIGNED(64) struct node_t {
-	union {
-		struct {
-			volatile int height; //4
-			volatile bst_key_t key; //4
-			volatile bst_value_t value; //1?
-			volatile uint64_t version; //8
-			
-			volatile node_t* parent; //8
-			volatile node_t* left; //8
-			volatile node_t* right; //8
-			volatile ptlock_t lock;	// mutex - 40			
-		};
-		char padding[64*((48+sizeof(ptlock_t))/64+1)];
+union node_t {
+	
+	struct {
+		volatile int height; //4
+		volatile bst_key_t key; //4
+		volatile bst_value_t value; //1?
+		volatile uint64_t version; //8
+		
+		volatile node_t* parent; //8
+		volatile node_t* left; //8
+		volatile node_t* right; //8
+		volatile ptlock_t lock;	// mutex - 40			
 	};
-} node_t;
+	char padding[64*((48+sizeof(ptlock_t))/64+1)];
+};
 
 // bst functions
 volatile node_t* bst_initialize();

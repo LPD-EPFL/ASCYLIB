@@ -417,9 +417,10 @@ void wait_until_not_changing(volatile node_t* node) {
 	volatile uint64_t version = node->version;	
     int i;
 
+	// TODO revert to macros
     if ((version & 1)) {
 	//if (IS_SHRINKING(version)) {
-		printf("version %d\n", version);
+		//printf("version %d\n", version);
         for (i = 0; i < SPIN_COUNT; ++i) {
 			if (version != node->version) {
 				return;
