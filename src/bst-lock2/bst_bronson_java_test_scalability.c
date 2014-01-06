@@ -33,7 +33,6 @@
 //the maximum value the key stored in the bst can take; defines the key range
 #define DEFAULT_RANGE 2048
 
-//#define DEBUG 1
 
 int duration;
 int num_threads;
@@ -88,7 +87,7 @@ void barrier_cross(barrier_t *b)
 }
 
 //data structure through which we send parameters to and get results from the worker threads
-typedef ALIGNED(64) struct thread_data {
+typedef ALIGNED(128) struct thread_data {
     //pointer to the global barrier
     barrier_t *barrier;
     //counts the number of operations each thread performs
@@ -134,7 +133,7 @@ void *test(void *data)
     uint32_t op;
     bst_key_t key;
     int i;
-    int last = 1;
+    int last = -1;
 
     DDPRINT("staring initial insert\n",NULL);
     DDPRINT("number of inserts: %u up to %u\n",d->num_add,rand_max);
@@ -144,7 +143,7 @@ void *test(void *data)
     for (i=0;i<d->num_add;++i) {
         key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
 
-        // DDPRINT("key is %u\n",key);
+        DDPRINT("key is %u\n",key);
         //we make sure the insert was effective (as opposed to just updating an existing entry)
         if (bst_add(key, root)!=TRUE) {
             i--;
@@ -182,7 +181,7 @@ void *test(void *data)
             //do a delete operation
             if (bst_remove(key, root) == TRUE) {
                 d->num_remove++;
-                // last=-1;
+                last=-1;
             }
         }
         d->num_operations++;

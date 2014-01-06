@@ -52,8 +52,6 @@ __thread unsigned long * seeds;
  
 //the root of the binary search tree
 node_t * root;
-bst_key_t global_key;
-bst_key_t never_used_key;
  
 //a simple barrier implementation
 //used to make sure all threads start the experiment at the same time
@@ -89,7 +87,8 @@ void barrier_cross(barrier_t *b)
 }
  
 //data structure through which we send parameters to and get results from the worker threads
-typedef ALIGNED(64) struct thread_data {
+typedef ALIGNED(128) struct thread_data {
+    // union { struct {
     pthread_mutex_t *init_lock;
     //pointer to the global barrier
     barrier_t *barrier;
@@ -113,7 +112,9 @@ typedef ALIGNED(64) struct thread_data {
     //number of searches that return true a thread performs
     unsigned long num_found_search;
     //the id of the thread (used for thread placement on cores)
-    int id;
+    int id; 
+    // };
+    // char padding[128]; }
 } thread_data_t;
  
 void *test(void *data)
@@ -133,7 +134,6 @@ void *test(void *data)
     ssalloc_init();
     ssalloc_align();
 
-    printf("Thread %d has memory region beginning at ", d->id);
     // bst_init_local(d->id);
     //for fine-grain latency measurements, we need to get the lenght of a getticks() function call, which is also counted
     //by default when we do getticks(); //code... getticks(); PF_START and PF_STOP use this when fine grain measurements are enabled
@@ -153,39 +153,26 @@ void *test(void *data)
     //we do this at each thread to avoid the situation where the entire data structure 
     //resides in the same memory node
  
-    // if (d -> id == 0){
-    //     root = bst_initialize();
-    // }
     barrier_cross(d->barrier2);
 
     //pthread_mutex_lock(d->init_lock);
-    // fprintf(stderr, "Starting critical section %d\n", d->id);
 
+    // d->num_add = rand_max>>1;
+    // if (d->id == num_threads  -1 ) {
     for (i=0;i<d->num_add;++i) {
-        do {
-            key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
-        } while (key == never_used_key);
+        
+        key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
+        
  
-        printf("%d: key is %u\n",d->id, key);
+        // printf("%d: key is %u\n",d->id, key);
         //we make sure the insert was effective (as opposed to just updating an existing entry)
 
-        // if(key != global_key){
-        //if (d->id == 0){
-            if (bst_add(key,root, d->id) != TRUE) {
-                i--;
-            } 
-        //}
-        // } else {
-        //     i--;
-        // }
- 
- 
-        // if (d->id == 0){
-        //     while (bst_add(global_key,root, d->id)!=TRUE && bst_contains(global_key,root)!=TRUE ){}
-        //     printf("%d: added global key is %u\n",d->id, global_key);
-        // }
-
+        if (bst_add(key,root) != TRUE) {
+            i--;
+        } 
     }
+    // }
+
     // fprintf(stderr, "Exiting critical section %d\n", d->id);
     //pthread_mutex_unlock(d->init_lock);
     DDPRINT("added initial data\n",NULL);
@@ -207,25 +194,18 @@ void *test(void *data)
             //to enable them, DO_TIMINGS must be defined at compile time, otherwise they do nothing
             //PF_START(2);
 
-            // if (bst_contains(global_key,root) == TRUE){
-            //     d->num_found_search ++;
-            // }
-
-            // if (bst_contains(never_used_key,root) == TRUE){
-            //     d->num_found_search ++;
-            // }
             bst_contains(key,root);
 
             //PF_STOP(2);
         } else if (last == -1) {
             //do a write operation
-            if (bst_add(key,root, d->id)) {
+            if (bst_add(key,root) == TRUE) {
                 d->num_insert++;
                 last=1;
             }
         } else {
             //do a delete operation
-            if (bst_remove(key,root)) {
+            if (bst_remove(key,root) == TRUE) {
                 d->num_remove++;
                 last=-1;
             }
@@ -363,8 +343,6 @@ int main(int argc, char* const argv[]) {
  
     //initialization of the tree
     root = bst_initialize();
-    global_key = 1;
-    never_used_key = 8;
  
     //initialize the data which will be passed to the threads
     if ((data = (thread_data_t *)malloc(num_threads * sizeof(thread_data_t))) == NULL) {
@@ -477,9 +455,10 @@ int main(int argc, char* const argv[]) {
     for (i = 0; i < num_threads; i++) {
         printf("Thread %d\n", i);
         printf("  #operations   : %lu\n", data[i].num_operations);
+        printf("  #adds      : %lu\n", data[i].num_add);
         printf("  #inserts   : %lu\n", data[i].num_insert);
         printf("  #removes   : %lu\n", data[i].num_remove);
-        printf("  #correct searches   : %f %%\n", data[i].num_found_search * 100.0/data[i].num_operations);
+
         operations += data[i].num_operations;
         total_ticks += data[i].total_time;
         reported_total = reported_total + data[i].num_add + data[i].num_insert - data[i].num_remove;
@@ -489,8 +468,11 @@ int main(int argc, char* const argv[]) {
     printf("#txs     : %lu (%f / s)\n", operations, operations * 1000.0 / duration);
     //printf("Operation latency %lu\n", total_ticks / operations);
     //make sure the tree is correct
-    printf("Expected size: %ld Actual size: %lu\n",reported_total,bst_size(root));
-    printf("Size of node : %d, size of op: %d\n", sizeof(node_t), sizeof(operation_t));
+    int actual_size = bst_size(root);
+    printf("Expected size: %ld Actual size: %lu\n",reported_total, actual_size);
+    if (actual_size != reported_total) {
+        bst_print(root);
+    }
 
     free(threads);
     free(data);

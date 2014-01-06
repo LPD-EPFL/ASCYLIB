@@ -6,14 +6,15 @@
 
 //node_t* root;
 
-bst_key_t glob_key = 1;
+//bst_key_t glob_key = 1;
 
 node_t* bst_initialize() {
 
 
-	printf("[alloc] root\n");
+	// printf("[alloc] root\n");
 
-	node_t* root = (node_t*) ssalloc(sizeof(node_t));
+	// node_t* root = (node_t*) ssalloc(sizeof(node_t));
+	node_t* root = (node_t*) ssalloc(CACHE_LINE_SIZE);
 
 	// assign minimum key to the root, actual tree will be 
 	// the right subtree of the root
@@ -60,7 +61,7 @@ retry:
 		//fprintf(stderr, "\nShouldn't be here\n");
 		//root is now a global pointer to a node, not a node
 		if (aux_root == root){
-			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, aux_root);
+			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, root);
 			goto retry;
 		} else {
 			return ABORT;
@@ -81,7 +82,8 @@ retry:
 
 		if(GETFLAG(*curr_op) != STATE_OP_NONE){
 			//fprintf(stderr, "\nShouldn't be here 2\n");
-			bst_help(*pred, *pred_op, *curr, *curr_op, aux_root);
+			//TODO ?? root sau aux_root
+			bst_help(*pred, *pred_op, *curr, *curr_op, root);
 			goto retry;
 		}
 		curr_key = (*curr)->key;
@@ -112,7 +114,7 @@ retry:
 	return result;
 } 
   
-bool_t bst_add(bst_key_t k, node_t* root, int node_id){
+bool_t bst_add(bst_key_t k, node_t* root){
 	//fprintf(stderr, "bst add\n");
 	node_t* pred;
 	node_t* curr;
@@ -130,7 +132,7 @@ bool_t bst_add(bst_key_t k, node_t* root, int node_id){
 		}
 		// allocate memory 
 		// new_node = new Node(k);
-		printf("[%d][alloc] node\n", node_id);
+		// printf("[%d][alloc] node\n", node_id);
 
 		new_node = (node_t*) ssalloc(sizeof(node_t));
 		new_node->key = k;
@@ -148,18 +150,19 @@ bool_t bst_add(bst_key_t k, node_t* root, int node_id){
 
 		// allocate memory
 		//cas_op = new child_cas_op_t(is_left, old, new_node)
-		printf("[%d][alloc] cas_op\n", node_id);
+		// printf("[%d][alloc] cas_op\n", node_id);
 
 		cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 		cas_op->child_cas_op.is_left = is_left;
 		cas_op->child_cas_op.expected = old;
 		cas_op->child_cas_op.update = new_node;
 
+		MEM_BARRIER;
 		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
 			// legit cast? YES!! verif
 			bst_help_child_cas(cas_op, curr, root);
 			// if (k == glob_key) {
-			printf("[%d]key %d was allocated at address: %p\n",node_id, k, new_node);
+			// printf("[%d]key %d was allocated at address: %p\n",node_id, k, new_node);
 			// } 
 			return TRUE;
 		}
@@ -200,6 +203,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 				return TRUE;
 			}
 		} else { // node has two children
+
 			if ((bst_find(k, &pred, &pred_op, &replace, &replace_op, curr, root) == ABORT) || (curr->op != curr_op)) {
 				continue;
 			} 
@@ -207,7 +211,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 			//allocate memory
 			//reloc_op = new RelocateOP(curr, curr_op, k, replace->key);
 			
-			printf("[alloc] Relocate op\n");
+			// printf("[alloc] Relocate op\n");
 			reloc_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 			reloc_op->relocate_op.state = STATE_OP_ONGOING;
 			reloc_op->relocate_op.dest = curr;
@@ -215,6 +219,7 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 			reloc_op->relocate_op.remove_key = k;
 			reloc_op->relocate_op.replace_key = replace->key;
 
+			MEM_BARRIER;
 			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
 				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
 					return TRUE;
@@ -277,7 +282,7 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 	// allocate memory
 	// operation_t* cas_op = new child_cas_op(curr==pred->left, curr, new_ref);
 
-	printf("[alloc] cas_op\n");
+	// printf("[alloc] cas_op\n");
 	operation_t* cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 	cas_op->child_cas_op.is_left = (curr == pred->left);
 	cas_op->child_cas_op.expected = curr;
@@ -303,9 +308,11 @@ void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* cur
 unsigned long bst_size(node_t* node) {
 	if (ISNULL(node)) {
 		return 0;
-	} else {
+	} else if (GETFLAG(node->op) != STATE_OP_MARK) {
 		// fprintf(stderr, "node %p ; left: %p; right: %p\n", node, node->left, node->right);
 		return 1 + bst_size(node->right) + bst_size(node->left);
+	} else {
+		return bst_size(node->right) + bst_size(node->left);
 	}
 }
 
@@ -315,7 +322,7 @@ void bst_print(node_t* node){
 	}
 	fprintf(stderr, "key: %lu ", node->key);
 	fprintf(stderr, "address %p ", node);
-	fprintf(stderr, "left: %p; right: %p \n", node->left, node->right);
+	fprintf(stderr, "left: %p; right: %p, op: %p \n", node->left, node->right, node->op);
 	
 	bst_print(node->left);
 	bst_print(node->right);

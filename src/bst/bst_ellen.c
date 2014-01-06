@@ -4,9 +4,9 @@ node_t* bst_initialize(int num_proc){
     node_t* root;
     node_t* i1;
     node_t* i2;
-    root = (node_t*) ssalloc(sizeof(node_t));
-    i1 = (node_t*) ssalloc(sizeof(node_t));
-    i2 = (node_t*) ssalloc(sizeof(node_t));
+    root = (node_t*) ssalloc(64);
+    i1 = (node_t*) ssalloc(64);
+    i2 = (node_t*) ssalloc(64);
 
     root->key=INF2;
     root->leaf=FALSE;

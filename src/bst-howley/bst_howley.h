@@ -47,7 +47,7 @@ typedef struct child_cas_op_t {
 } child_cas_op_t;
 
 typedef struct relocate_op_t {
-	int state; //TODO initialize to ONGOING
+	int volatile state; //TODO initialize to ONGOING
 	node_t* dest;
 	operation_t* dest_op;
 	bst_key_t remove_key;
@@ -58,11 +58,11 @@ typedef struct relocate_op_t {
 
 
 struct node_t {
-	bst_key_t key; //volatile? (for all variables)
-	operation_t* op;
-	node_t* left;
-	node_t* right;
-	char padding[32];
+	bst_key_t volatile key; //volatile? (for all variables)
+	operation_t* volatile op;
+	node_t* volatile left;
+	node_t* volatile right;
+	// char padding[32];
 };
 
 union operation_t {
@@ -79,7 +79,7 @@ search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t*
 //to live outside the function call, we need **.  
 
 node_t* bst_initialize();
-bool_t bst_add(bst_key_t k, node_t* root, int node_id);
+bool_t bst_add(bst_key_t k, node_t* root);
 void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root);
 bool_t bst_remove(bst_key_t k, node_t* root);
 bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root);
