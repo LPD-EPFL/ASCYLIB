@@ -399,7 +399,8 @@ int main(int argc, char* const argv[]) {
 
     unsigned long operations = 0;
     ticks total_ticks = 0;
-    long reported_total = 0; //the tree contains two initial dummy nodes, INF1 and INF2
+    long reported_total = 0; //the tree size function does not report the dummy root, so this should be set to 0.
+    
     //report some experiment statistics
     for (i = 0; i < num_threads; i++) {
         printf("Thread %d\n", i);
