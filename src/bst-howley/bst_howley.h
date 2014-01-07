@@ -29,7 +29,6 @@
 #define ABORT 3
 
 #define INF UINT32_MAX
-//TODO min key; max key values
 
 typedef uint32_t bst_key_t;
 typedef uint8_t bool_t;
@@ -42,26 +41,26 @@ typedef struct child_cas_op_t {
 	bool_t is_left;
 	node_t* expected;
 	node_t* update;
-	char padding[40]; 
+	//char padding[40]; 
 
 } child_cas_op_t;
 
 typedef struct relocate_op_t {
-	int volatile state; //TODO initialize to ONGOING
+	int /*volatile*/ state; // initialize to ONGOING every time a relocate operation is created
 	node_t* dest;
 	operation_t* dest_op;
 	bst_key_t remove_key;
 	bst_key_t replace_key;
-	char padding[32]; 
+	//char padding[32]; 
 
 } relocate_op_t;
 
 
 struct node_t {
-	bst_key_t volatile key; //volatile? (for all variables)
-	operation_t* volatile op;
-	node_t* volatile left;
-	node_t* volatile right;
+	bst_key_t /*volatile*/ key; 
+	operation_t* /*volatile*/ op;
+	node_t* /*volatile*/ left;
+	node_t* /*volatile*/ right;
 	// char padding[32];
 };
 
@@ -111,7 +110,5 @@ static inline uint64_t ISNULL(node_t* node){
 static inline uint64_t SETNULL(node_t* node){
 	return (((uint64_t)node) & 0xfffffffffffffffe) | 1;
 }
-
-//TODO QUESTION: do we need to set specifically the last bit to 0 when the pointer is not null, to make sure that we don't have it marked as null when in fact it is not null?
 
 #endif

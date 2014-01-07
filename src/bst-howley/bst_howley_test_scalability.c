@@ -88,12 +88,10 @@ void barrier_cross(barrier_t *b)
  
 //data structure through which we send parameters to and get results from the worker threads
 typedef ALIGNED(128) struct thread_data {
-    // union { struct {
+     union { struct {
     pthread_mutex_t *init_lock;
     //pointer to the global barrier
     barrier_t *barrier;
-
-    barrier_t *barrier2;
 
     //counts the number of operations each thread performs
     unsigned long num_operations;
@@ -113,8 +111,8 @@ typedef ALIGNED(128) struct thread_data {
     unsigned long num_found_search;
     //the id of the thread (used for thread placement on cores)
     int id; 
-    // };
-    // char padding[128]; }
+     };
+     char padding[128]; }
 } thread_data_t;
  
 void *test(void *data)
@@ -134,7 +132,6 @@ void *test(void *data)
     ssalloc_init();
     ssalloc_align();
 
-    // bst_init_local(d->id);
     //for fine-grain latency measurements, we need to get the lenght of a getticks() function call, which is also counted
     //by default when we do getticks(); //code... getticks(); PF_START and PF_STOP use this when fine grain measurements are enabled
     PF_CORRECTION;
@@ -153,12 +150,7 @@ void *test(void *data)
     //we do this at each thread to avoid the situation where the entire data structure 
     //resides in the same memory node
  
-    barrier_cross(d->barrier2);
 
-    //pthread_mutex_lock(d->init_lock);
-
-    // d->num_add = rand_max>>1;
-    // if (d->id == num_threads  -1 ) {
     for (i=0;i<d->num_add;++i) {
         
         key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
@@ -171,10 +163,7 @@ void *test(void *data)
             i--;
         } 
     }
-    // }
 
-    // fprintf(stderr, "Exiting critical section %d\n", d->id);
-    //pthread_mutex_unlock(d->init_lock);
     DDPRINT("added initial data\n",NULL);
  
     bool_t res;
@@ -229,13 +218,12 @@ void catcher(int sig)
  
 int main(int argc, char* const argv[]) {
     //place thread on the first cpu
-    set_cpu(the_cores[5]);
+    set_cpu(the_cores[0]);
     //initialize the custom memory allocator
     ssalloc_init();
     pthread_t *threads;
     pthread_attr_t attr;
     barrier_t barrier;
-    barrier_t barrier2;
 
     pthread_mutex_t init_lock;
     struct timeval start, end;
@@ -365,7 +353,6 @@ int main(int argc, char* const argv[]) {
  
     //global barrier initialization (used to start the threads at the same time)
     barrier_init(&barrier, num_threads + 1);
-    barrier_init(&barrier2, num_threads + 1);
     pthread_mutex_init(&init_lock, NULL);
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
@@ -387,7 +374,7 @@ int main(int argc, char* const argv[]) {
         if (i< ((max_key/2)%num_threads)) data[i].num_add++;
         data[i].seed = rand();
         data[i].barrier = &barrier;
-        data[i].barrier2 = &barrier2;
+
 
         data[i].init_lock = &init_lock;
         if (pthread_create(&threads[i], &attr, test, (void *)(&data[i])) != 0) {
@@ -405,20 +392,6 @@ int main(int argc, char* const argv[]) {
         exit(1);
     }
  
-    // seeds = seed_rand();
-    // bst_key_t key;
-    // for (i=0;i<max_key/2;++i) {
-    //     key = my_random(&seeds[0],&seeds[1],&seeds[2]) & max_key;
-    //     //we make sure the insert was effective (as opposed to just updating an existing entry)
-    //     if (bst_add(key, root,0)!=TRUE) {
-    //         i--;
-    //     }
-    // }
- 
-    // bst_print(root);
-
-    barrier_cross(&barrier2);
-
  
     /* Start threads */
     barrier_cross(&barrier);
@@ -450,7 +423,7 @@ int main(int argc, char* const argv[]) {
  
     unsigned long operations = 0;
     ticks total_ticks = 0;
-    long reported_total = 1; //the tree contains two initial dummy nodes, INF1 and INF2
+    long reported_total = 1; //the tree contains one initial dummy root holder node
     //report some experiment statistics
     for (i = 0; i < num_threads; i++) {
         printf("Thread %d\n", i);
