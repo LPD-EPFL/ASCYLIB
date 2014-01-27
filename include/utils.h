@@ -247,6 +247,23 @@ extern "C" {
 
 #endif
 
+#if defined(LPDXEON)
+#  define NUMBER_OF_SOCKETS 2
+#  define CORES_PER_SOCKET 10
+#  define CACHE_LINE_SIZE 64
+#  define NOP_DURATION 1
+  static uint8_t __attribute__ ((unused)) the_cores[] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 
+    10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+  };
+  static uint8_t __attribute__ ((unused)) the_sockets[] = 
+  {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+  };
+
+#endif
+
 #if defined(LAPTOP)
 #  define NUMBER_OF_SOCKETS 1
 #  define CORES_PER_SOCKET 8
@@ -274,6 +291,8 @@ extern "C" {
 #elif defined(__sparc__)
 #  define PREFETCHW(x)		
 #elif defined(XEON)
+#  define PREFETCHW(x)		
+#elif defined(LPDXEON)
 #  define PREFETCHW(x)		
 #else
 #  define PREFETCHW(x)		
