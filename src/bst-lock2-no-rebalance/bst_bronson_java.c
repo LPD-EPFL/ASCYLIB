@@ -226,7 +226,7 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
                         set_child(node, new_child, is_right);
 
                         success = TRUE;
-                        damaged = fix_height_nl(node);
+                        //damaged = fix_height_nl(node);
                     }
                     
                     // releaseAll();
@@ -234,7 +234,7 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
                 }
 
                 if(success){
-                    fix_height_and_rebalance(damaged);
+                    //fix_height_and_rebalance(damaged);
                     
                     return UPDATE_RESULT(func);
                 }
@@ -327,11 +327,11 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
             
             // releaseAll();
 
-            damaged = fix_height_nl(parent);
+            //damaged = fix_height_nl(parent);
             UNLOCK(parent_lock);
         }
 
-        fix_height_and_rebalance(damaged);
+        //fix_height_and_rebalance(damaged);
         
         return UPDATE_RESULT(func);
     } else {

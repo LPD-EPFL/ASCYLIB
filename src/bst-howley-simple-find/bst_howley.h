@@ -72,6 +72,8 @@ union operation_t {
 //BST functions
 bool_t bst_contains(bst_key_t k, node_t* root);
 search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root); 
+search_res_t bst_find2(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root); 
+
 //do we need * or ** for node_t? if only the 
 //value pointed to by pred is modified, we need *; if the 
 //place pred points to is modified and we want the modif

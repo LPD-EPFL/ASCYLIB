@@ -24,8 +24,50 @@ bool_t bst_contains(bst_key_t k, node_t* root){
 	operation_t* pred_op;
 	operation_t* curr_op;
 
-	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root) == FOUND;
+	return bst_find2(k, &pred, &pred_op, &curr, &curr_op, root, root) == FOUND;
 }
+
+
+search_res_t bst_find2(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
+
+	search_res_t result;
+	bst_key_t curr_key;
+	node_t* next;
+	node_t* last_right;
+	operation_t* last_right_op;
+
+retry:
+	result = NOT_FOUND_R;
+	*curr = aux_root;
+	*curr_op = (*curr)->op;
+
+	next = (*curr)->right;
+	last_right = *curr;
+	last_right_op = *curr_op;
+
+	while (!ISNULL(next)){
+		*pred = *curr;
+		*pred_op = *curr_op;
+		*curr = next;
+		*curr_op = (*curr)->op;
+
+		curr_key = (*curr)->key;
+		if(k < curr_key){
+			result = NOT_FOUND_L;
+			next = (*curr)->left;
+		} else if(k > curr_key) {
+			result = NOT_FOUND_R;
+			next = (*curr)->right;
+			last_right = *curr;
+			last_right_op = *curr_op;
+		} else{
+			result = FOUND;
+			break;
+		}
+	}
+	return result;
+} 
+
 
 search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
 
