@@ -8,6 +8,12 @@ CC=gcc
 PLATFORM_NUMA=1
 endif
 
+ifeq ($(UNAME), lpdxeon2680)
+PLATFORM=LPDXEON
+CC=gcc
+PLATFORM_NUMA=1
+endif
+
 ifeq ($(UNAME), diassrv8)
 PLATFORM=XEON
 CC=gcc

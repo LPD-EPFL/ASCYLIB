@@ -190,14 +190,33 @@ ifeq ($(PC_NAME), parsasrv1.epfl.ch)
     OS = Linux
     CC = $(TILERA_CC)
     LDFLAGS += -ltmc
+    PLATFORM_NUMA = 1
 endif
 
 ifeq ($(PC_NAME), lpd48core)
     CFLAGS += -DOPTERON -DPLATFORM_MCORE -DOPTERON_OPTIMIZE
+    PLATFORM_NUMA = 1
+endif
+ifeq ($(PC_NAME), lpdxeon2680)
+    CFLAGS += -DLPDXEON -DPLATFORM_MCORE -DOPTERON_OPTIMIZE
+    PLATFORM_NUMA = 1
 endif
 
 ifeq ($(PC_NAME), diassrv8)
     CFLAGS += -DXEON -DPLATFORM_MCORE -DOPTERON_OPTIMIZE
+    PLATFORM_NUMA = 1
+endif
+
+ifeq ($(PC_NAME), trigonak-laptop)
+    CFLAGS += -DLAPTOP
+endif
+
+ifeq ($(PC_NAME), igor-M17xR4)
+    CFLAGS += -DIGORLAPTOPLINUX
+endif
+
+ifeq ($(PC_NAME), oana-MacBookPro)
+    CFLAGS += -DOANALAPTOPLINUX
 endif
 
 #################################
@@ -223,7 +242,7 @@ endif
 ifeq ($(ARCH_NAME), x86_64)
     ARCH = x86_64
     CFLAGS += -m64
-    LDFLAGS += -m64 -lnuma
+    LDFLAGS += -m64
 endif
 
 ifeq ($(ARCH_NAME), sun4v)
@@ -231,6 +250,11 @@ ifeq ($(ARCH_NAME), sun4v)
     CFLAGS += -DSPARC=1 -DINLINED=1 -m64
     LDFLAGS += -lrt -m64
 endif
+
+ifeq ($(PLATFORM_NUMA), 1)
+    LDFLAGS += -lnuma
+endif
+
 
 #################
 # Global settings
