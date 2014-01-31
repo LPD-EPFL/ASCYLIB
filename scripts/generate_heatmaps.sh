@@ -1,4 +1,9 @@
 #!/bin/bash
+if [ "$#" -ne 1 ]; then
+    echo "Illegal number of parameters"
+    exit;
+fi
+
 core=$1
 
 ./scripts/heatmap.sh ./bin/lb-ll ./bin/lf-ll u s -n${core} -d1000 > data/ll_heatmap_${core}.csv
