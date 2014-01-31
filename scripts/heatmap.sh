@@ -31,6 +31,11 @@ else
 cores=$(seq 6 6 48);
 fi;
 
+if [ $unm = "parsasrv1.epfl.ch" ];
+then
+    run_script="./run"
+fi;
+
 source scripts/lock_exec;
 
 case "${y_axis}" in
@@ -82,12 +87,12 @@ do
 
     prog=$prog1;
     thr1=$thr1a;
-    thr=$($run_script $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val}  | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
+    thr=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val}  | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 
     prog=$prog2;
     thr1=$thr1b;
 
-    thrt2=$($run_script $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val} | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
+    thrt2=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val} | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
 
     ratio=$(echo "100* $thrt2/$thr" | bc -l);
     
