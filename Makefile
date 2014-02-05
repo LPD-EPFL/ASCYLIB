@@ -1,11 +1,11 @@
 .PHONY:	all
 
-BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque src/bst
+BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque src/bst src/noise/
 LBENCHS = src/linkedlist-lock src/hashtable-lock src/skiplist-lock src/bst-lock2
 LFBENCHS = src/linkedlist src/hashtable src/skiplist src/bst src/bst-howley
+NOISE = src/noise
 
-
-.PHONY:	clean all $(BENCHS) $(LBENCHS)
+.PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE)
 
 all:	ticket
 
@@ -33,6 +33,9 @@ sequential:
 lockfree:
 	$(MAKE) "STM=LOCKFREE" $(LFBENCHS)
 
+noise:
+	$(MAKE) $(NOISE)
+
 clean:
 	$(MAKE) -C src/linkedlist clean	
 	$(MAKE) -C src/skiplist clean
@@ -44,6 +47,7 @@ clean:
 	$(MAKE) -C src/sftree clean
 	$(MAKE) -C src/bst clean
 	$(MAKE) -C src/deque clean
+	$(MAKE) -C src/noise clean
 	rm -rf build
 #	$(MAKE) -C rbtree-boosted clean
 
@@ -55,3 +59,7 @@ $(LBENCHS):
 
 $(LFBENCHS):
 	$(MAKE) -C $@ $(TARGET)
+
+$(NOISE):
+	$(MAKE) -C $@ $(TARGET)
+
