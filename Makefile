@@ -51,8 +51,8 @@ clean:
 	rm -rf build
 #	$(MAKE) -C rbtree-boosted clean
 
-$(BENCHS):
-	$(MAKE) -C $@ $(TARGET)
+# $(BENCHS):
+# 	$(MAKE) -C $@ $(TARGET)
 
 $(LBENCHS):
 	$(MAKE) -C $@ $(TARGET)
