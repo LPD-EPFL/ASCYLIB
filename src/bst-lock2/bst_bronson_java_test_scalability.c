@@ -153,9 +153,9 @@ void *test(void *data)
     }
     DDPRINT("added initial data\n",NULL);
 
-    bool_t res;
+    bool_t UNUSED res;
     /* Init of local data if necessary */
-    ticks t1,t2;
+    ticks UNUSED t1,t2;
     /* Wait on barrier */
     barrier_cross(d->barrier);
     //start the test
@@ -313,7 +313,7 @@ int main(int argc, char* const argv[]) {
     max_key = pow2roundup(max_key)-1;
 
     //initialization of the tree
-    root = bst_initialize();
+    root = (node_t*) bst_initialize();
 
     //initialize the data which will be passed to the threads
     if ((data = (thread_data_t *)malloc(num_threads * sizeof(thread_data_t))) == NULL) {

@@ -133,7 +133,7 @@ result_t update_under_root(bst_key_t key, function_t func, bst_value_t expected,
 
 bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, volatile node_t* holder){
 
-    bst_key_t holder_key = holder->key;
+    bst_key_t UNUSED holder_key = holder->key;
 
     //printf("Lock node: %d\n", holder_key);
     volatile ptlock_t* holder_lock = &holder->lock;
@@ -200,7 +200,7 @@ result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bs
 
                 {
                     // publish(node);
-                    bst_key_t node_key = node->key;
+                    bst_key_t UNUSED node_key = node->key;
                     volatile ptlock_t* node_lock = &node->lock;
                     LOCK(node_lock); 
                 
@@ -282,7 +282,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
         {
             // publish(parent);
             // scoped_lock parentLock(parent->lock);
-            bst_key_t parent_key = parent->key;
+            bst_key_t UNUSED parent_key = parent->key;
             volatile ptlock_t* parent_lock = &parent->lock;
             LOCK(parent_lock);
             
@@ -295,7 +295,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
             {
                 // publish(node);
                 // scoped_lock lock(node->lock);
-                bst_key_t node_key = node->key;
+                bst_key_t UNUSED node_key = node->key;
                 volatile ptlock_t* node_lock = &node->lock;
                 LOCK(node_lock);
                 
@@ -337,7 +337,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
     } else {
         // publish(node);
         // scoped_lock lock(node->lock);
-        bst_key_t node_key = node->key;
+        bst_key_t UNUSED node_key = node->key;
         volatile ptlock_t* node_lock = &node->lock;
         LOCK(node_lock);
 
@@ -381,7 +381,7 @@ void wait_until_not_changing(volatile node_t* node) {
 			}
 		}
 
-        bst_key_t node_key = node->key;
+        bst_key_t UNUSED node_key = node->key;
 		volatile ptlock_t* node_lock = &node->lock;
 
 		LOCK(node_lock);
@@ -481,7 +481,7 @@ void fix_height_and_rebalance(volatile node_t* node) {
             // publish(node);
             // scoped_lock lock(node->lock);
 
-            bst_key_t node_key = node->key;
+            bst_key_t UNUSED node_key = node->key;
 
             volatile ptlock_t* node_lock = &node->lock;
             LOCK(node_lock);
@@ -496,14 +496,14 @@ void fix_height_and_rebalance(volatile node_t* node) {
             volatile node_t* n_parent = node->parent;
             // publish(n_parent);
             // scoped_lock lock(n_parent->lock);
-            bst_key_t n_parent_key = n_parent->key;
+            bst_key_t UNUSED n_parent_key = n_parent->key;
             volatile ptlock_t* n_parent_lock = &n_parent->lock;
             LOCK(n_parent_lock);
 
             if(!IS_UNLINKED(n_parent->version) && node->parent == n_parent){
                 // publish(node);
                 // scoped_lock nodeLock(node->lock);
-                bst_key_t node_key = node->key;
+                bst_key_t UNUSED node_key = node->key;
                 volatile ptlock_t* node_lock = &node->lock;
                 LOCK(node_lock);
 
@@ -553,7 +553,7 @@ volatile node_t* rebalance_nl(volatile node_t* n_parent, volatile node_t* n){
 // checked
 volatile node_t* rebalance_to_right_nl(volatile node_t* n_parent, volatile node_t* n, volatile node_t* nl, int hr0) {
     
-    bst_key_t nl_key = nl->key;
+    bst_key_t UNUSED nl_key = nl->key;
     volatile ptlock_t* nl_lock = &nl->lock;
 	LOCK(nl_lock);
 
@@ -577,7 +577,7 @@ volatile node_t* rebalance_to_right_nl(volatile node_t* n_parent, volatile node_
             {
 
                 // scoped_lock sublock(nlr->lock);
-                bst_key_t nlr_key = nlr->key;
+                bst_key_t UNUSED nlr_key = nlr->key;
                 volatile ptlock_t* nlr_lock = &nlr->lock;
                 LOCK(nlr_lock);
 
@@ -619,7 +619,7 @@ volatile node_t* rebalance_to_left_nl(volatile node_t* n_parent, volatile node_t
 	// publish(nR);
     // scoped_lock lock(nR->lock);
     
-    bst_key_t nr_key = nr->key;
+    bst_key_t UNUSED nr_key = nr->key;
     volatile ptlock_t* nr_lock = &nr->lock;
 	LOCK(nr_lock);
 
@@ -641,7 +641,7 @@ volatile node_t* rebalance_to_left_nl(volatile node_t* n_parent, volatile node_t
             {
                 // publish(nrl);
                 // scoped_lock sublock(nrl->lock);
-                bst_key_t nrl_key = nrl->key;
+	        bst_key_t UNUSED nrl_key = nrl->key;
                 volatile ptlock_t* nrl_lock = &nrl->lock;
                 LOCK(nrl_lock);
 
