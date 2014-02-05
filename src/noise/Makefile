@@ -80,7 +80,7 @@ noise: 	 noise.o
 	$(CC) $(VER_FLAGS) -o noise noise.o -lm -lrt -pthread $(DEBUG_CFLAGS) $(PERF_CLFAGS) 
 
 noise.o: noise.c
-	$(CC) $(VER_FLAGS) -D_GNU_SOURCE -I./include -c noise.c $(DEBUG_CFLAGS) $(PERF_CLFAGS) 
+	$(CC) $(VER_FLAGS) -D_GNU_SOURCE -I./../../include -c noise.c $(DEBUG_CFLAGS) $(PERF_CLFAGS) 
 
 
 clean:
