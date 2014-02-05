@@ -21,8 +21,14 @@ bst_ellen.o:
 bst_test.o: bst_ellen.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_test.o bst_test.c
 
+bst_ellen_test2.o: bst_ellen.h
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_ellen_test2.o bst_ellen_test2.c
+
 main: measurements.o ssalloc.o  bst_ellen.o bst_test.o 
 	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_ellen.o  $(BUILDIR)/bst_test.o -o $(BINS) $(LDFLAGS)
+
+fairness: measurements.o ssalloc.o  bst_ellen.o bst_ellen_test2.o 
+	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_ellen.o  $(BUILDIR)/bst_ellen_test2.o -o $(BINS) $(LDFLAGS)
 
 clean:
 	-rm -f $(BINS)

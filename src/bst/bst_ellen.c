@@ -4,9 +4,9 @@ node_t* bst_initialize(int num_proc){
     node_t* root;
     node_t* i1;
     node_t* i2;
-    root = (node_t*) ssalloc(sizeof(node_t));
-    i1 = (node_t*) ssalloc(sizeof(node_t));
-    i2 = (node_t*) ssalloc(sizeof(node_t));
+    root = (node_t*) ssalloc(64);
+    i1 = (node_t*) ssalloc(64);
+    i2 = (node_t*) ssalloc(64);
 
     root->key=INF2;
     root->leaf=FALSE;
@@ -21,14 +21,19 @@ node_t* bst_initialize(int num_proc){
     root->left = i1;
     root->right = i2;
     
-    my_search_result = (search_result_t*) ssalloc(num_proc * sizeof(search_result_t));
+    my_search_result = (search_result_t**) malloc(num_proc * sizeof(search_result_t*));
 
     return root;
 }
 
+void bst_init_local(int id){
+    my_search_result[id] = (search_result_t*) malloc(sizeof(search_result_t));
+}
+
 search_result_t* bst_search(bst_key_t key, node_t* root, int id) {
 //    search_result_t * result = (search_result_t*) malloc(sizeof(search_result_t));
-    search_result_t * result = &(my_search_result[id]);
+    search_result_t * result = my_search_result[id];
+
     result->l = root;
     while (!(result->l->leaf)) {
         result->gp = result->p;
@@ -91,11 +96,11 @@ bool_t bst_insert(bst_key_t key, node_t* root, int id) {
                 new_internal->left = new_sibling;
                 new_internal->right = new_node;
             }
-            op = (info_t*) ssalloc(sizeof(info_t));
+            op = (info_t*) ssalloc_alloc(1,sizeof(info_t));
             op->iinfo.p = search_result->p;
             op->iinfo.new_internal = new_internal;
             op->iinfo.l =  search_result->l;
-
+            MEM_BARRIER;
             result = CAS_PTR(&(search_result->p->update),search_result->pupdate,FLAG(op,STATE_IFLAG));
             if (result == search_result->pupdate) {
                 bst_help_insert(op);
@@ -129,11 +134,12 @@ bool_t bst_delete(bst_key_t key, node_t* root, int id) {
         } else if (GETFLAG(search_result->pupdate)!=STATE_CLEAN){
             bst_help(search_result->pupdate);
         } else {
-            op = (info_t*) ssalloc(sizeof(info_t));
+            op = (info_t*) ssalloc_alloc(1,sizeof(info_t));
             op->dinfo.gp = search_result->gp;
             op->dinfo.p = search_result->p;
             op->dinfo.l = search_result->l;
             op->dinfo.pupdate = search_result->pupdate;
+            MEM_BARRIER;
             result = CAS_PTR(&(search_result->gp->update),search_result->gpupdate,FLAG(op,STATE_DFLAG));
             if (result == search_result->gpupdate) {
                 if (bst_help_delete(op)==TRUE) {
@@ -148,7 +154,6 @@ bool_t bst_delete(bst_key_t key, node_t* root, int id) {
 
 bool_t bst_help_delete(info_t* op) {
    update_t result; 
-
     result = CAS_PTR(&(op->dinfo.p->update), op->dinfo.pupdate, FLAG(op,STATE_MARK));
     if ((result == op->dinfo.pupdate) || (result == ((info_t*)FLAG(op,STATE_MARK)))) {
         bst_help_marked(op);

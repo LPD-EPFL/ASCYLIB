@@ -44,7 +44,9 @@ static inline void
 tas_init(volatile uint32_t* l)
 {
   *l = TAS_FREE;
+#if defined(__tile__)
   MEM_BARRIER;
+#endif
 }
 
 static inline uint32_t
