@@ -55,9 +55,9 @@
 
 #define ATOMIC_CAS_MB_NOBAR(a, e, v)    (AO_compare_and_swap((volatile AO_t *)(a), (AO_t)(e), (AO_t)(v)))
 
-static volatile AO_t stop;
+static volatile int stop;
 
-#define TRANSACTIONAL                   d->unit_tx
+#define TRANSACTIONAL                   transactional
 
 typedef intptr_t val_t;
 #define VAL_MIN                         INT_MIN

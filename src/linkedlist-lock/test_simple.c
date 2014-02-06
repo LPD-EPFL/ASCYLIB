@@ -34,14 +34,14 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k,t)  set_contains(s, k, t)
-#define DS_ADD(s,k,t)       set_add(s, k, t)
-#define DS_REMOVE(s,k,t)    set_remove(s, k, t)
-#define DS_SIZE(s)          set_size(s)
-#define DS_NEW()            set_new()
+#define DS_CONTAINS(s,k,t)  set_contains_l(s, k, t)
+#define DS_ADD(s,k,t)       set_add_l(s, k, t)
+#define DS_REMOVE(s,k,t)    set_remove_l(s, k, t)
+#define DS_SIZE(s)          set_size_l(s)
+#define DS_NEW()            set_new_l()
 
-#define DS_TYPE             intset_t
-#define DS_NODE             node_t
+#define DS_TYPE             intset_l_t
+#define DS_NODE             node_l_t
 
 /* ################################################################### *
  * GLOBALS
@@ -53,6 +53,7 @@ size_t update = DEFAULT_UPDATE;
 size_t load_factor;
 size_t num_threads = DEFAULT_NB_THREADS; 
 size_t duration = DEFAULT_DURATION;
+int transactional = DEFAULT_LOCKTYPE;
 
 size_t print_vals_num = 100; 
 size_t pf_vals_num = 8;
@@ -358,7 +359,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:x:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -399,6 +400,10 @@ main(int argc, char **argv)
 		 "        When using detailed profiling, how many values to print.\n"
 		 "  -f, --val-pf <int>\n"
 		 "        When using detailed profiling, how many values to keep track of.\n"
+		 "  -x, --lock-based algorithm (default=1)\n"
+		 "        Use lock-based algorithm\n"
+		 "        1 = lock-coupling,\n"
+		 "        2 = lazy algorithm\n"
 		 );
 	  exit(0);
 	case 'd':
@@ -423,9 +428,12 @@ main(int argc, char **argv)
 	case 'l':
 	  load_factor = atoi(optarg);
 	  break;
-	/* case 'b': */
-	/*   num_buckets_param = atoi(optarg); */
-	/*   break; */
+	  /* case 'b': */
+	  /*   num_buckets_param = atoi(optarg); */
+	  /*   break; */
+	case 'x':
+	  transactional = atoi(optarg);
+	  break;
 	case 'v':
 	  print_vals_num = atoi(optarg);
 	  break;
@@ -452,7 +460,7 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
-  printf("## Initial: %zu / Range: %zu\n", initial, range);
+  printf("## Initial: %zu / Range: %zu / %s\n", initial, range, (transactional == 1) ? "handover-hand locks" : "lazy locks");
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;

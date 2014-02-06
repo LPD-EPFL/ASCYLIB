@@ -7,6 +7,11 @@ PROF = $(ROOT)/src
 
 .PHONY:	all clean
 
+TEST_FILE = test_simple.c
+ifeq ($(TEST),old)
+	TEST_FILE = test.c
+endif
+
 all:	main
 
 measurements.o:
@@ -34,7 +39,7 @@ intset.o: linkedlist-lock.h coupling.h lazy.h clh.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/intset.o intset.c
 
 test.o: linkedlist-lock.h coupling.h lazy.h intset.h
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o test.c
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
 main: measurements.o ssalloc.o linkedlist-lock.o coupling.o lazy.o intset.o test.o htlock.o clh.o
 	$(CC) $(CFLAGS)l $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/lazy.o $(BUILDIR)/coupling.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS) 

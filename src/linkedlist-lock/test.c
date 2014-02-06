@@ -105,7 +105,8 @@ test(void *data)
   val_t val = 0;
 	
   thread_data_t *d = (thread_data_t *)data;
-	
+  int transactional = d->unit_tx;
+
   set_cpu(the_cores[d->id]);
 
   ssalloc_init();

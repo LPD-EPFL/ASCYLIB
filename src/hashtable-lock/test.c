@@ -122,6 +122,8 @@ test(void *data)
 	
   thread_data_t *d = (thread_data_t *)data;
 	
+  int transactional = d->unit_tx;
+
   /* Create transaction */
   set_cpu(the_cores[d->id]);
 
