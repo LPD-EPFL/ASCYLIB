@@ -31,14 +31,16 @@
 #endif
 
 /* ################################################################### *
- * Definition of operations : per data structure
+ * Definition of macros: per data structure
  * ################################################################### */
 
 #define DS_CONTAINS(s,k,t)  set_contains(s, k, t)
 #define DS_ADD(s,k,t)       set_add(s, k, t)
 #define DS_REMOVE(s,k,t)    set_remove(s, k, t)
 #define DS_SIZE(s)          set_size(s)
+#define DS_NEW()            set_new()
 
+#define DS_TYPE             intset_t
 
 /* ################################################################### *
  * GLOBALS
@@ -167,7 +169,7 @@ barrier_t barrier, barrier_global;
 typedef struct thread_data
 {
   uint8_t id;
-  intset_t* set;
+  DS_TYPE* set;
 } thread_data_t;
 
 void*
@@ -179,7 +181,7 @@ test(void* thread)
   set_cpu(phys_id);
   ssalloc_init();
 
-  intset_t* set = td->set;
+  DS_TYPE* set = td->set;
 
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
 
@@ -499,7 +501,7 @@ main(int argc, char **argv)
   stop = 0;
     
   ssalloc_align();
-  intset_t* set = set_new();
+  DS_TYPE* set = DS_NEW();
   assert(set != NULL);
 
   /* Initializes the local data */
