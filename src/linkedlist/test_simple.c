@@ -31,6 +31,16 @@
 #endif
 
 /* ################################################################### *
+ * Definition of operations : per data structure
+ * ################################################################### */
+
+#define DS_CONTAINS(s,k,t)  set_contains(s, k, t)
+#define DS_ADD(s,k,t)       set_add(s, k, t)
+#define DS_REMOVE(s,k,t)    set_remove(s, k, t)
+#define DS_SIZE(s)          set_size(s)
+
+
+/* ################################################################### *
  * GLOBALS
  * ################################################################### */
 
@@ -213,7 +223,7 @@ test(void* thread)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(set_add(set, key, TRANSACTIONAL) == false)
+      if(DS_ADD(set, key, TRANSACTIONAL) == false)
 	{
 	  i--;
 	}
@@ -224,7 +234,7 @@ test(void* thread)
 
   if (!ID)
     {
-      printf("#BEFORE size is: %zu\n", (size_t) set_size(set));
+      printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
 
@@ -239,7 +249,7 @@ test(void* thread)
 	{
 	  int res;
 	  START_TS(1);
-	  res = set_add(set, key, TRANSACTIONAL);
+	  res = DS_ADD(set, key, TRANSACTIONAL);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -253,7 +263,7 @@ test(void* thread)
 	{
 	  int removed;
 	  START_TS(2);
-	  removed = set_remove(set, key, TRANSACTIONAL);
+	  removed = DS_REMOVE(set, key, TRANSACTIONAL);
 	  END_TS(2, my_removing_count);
 	  if(removed != 0) 
 	    {
@@ -267,7 +277,7 @@ test(void* thread)
 	{ 
 	  int res;
 	  START_TS(0);
-	  res = set_contains(set, key, TRANSACTIONAL);
+	  res = DS_CONTAINS(set, key, TRANSACTIONAL);
 	  END_TS(0, my_getting_count);
 	  if(res != 0) 
 	    {
@@ -283,7 +293,7 @@ test(void* thread)
 
   if (!ID)
     {
-      printf("#AFTER  size is: %zu\n", (size_t) set_size(set));
+      printf("#AFTER  size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
 #if defined(COMPUTE_LATENCY)
@@ -605,7 +615,7 @@ main(int argc, char **argv)
 #define LLU long long unsigned int
 
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
-  int UNUSED size_after = set_size(set);
+  int UNUSED size_after = DS_SIZE(set);
   assert(size_after == (initial + pr));
 
   printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success", "succ %", "total %", "effective %");
