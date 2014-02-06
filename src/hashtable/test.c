@@ -432,7 +432,6 @@ main(int argc, char **argv)
   int initial = DEFAULT_INITIAL;
   int nb_threads = DEFAULT_NB_THREADS;
   long range = DEFAULT_RANGE;
-  int seed = DEFAULT_SEED;
   int update = DEFAULT_UPDATE;
   int load_factor = DEFAULT_LOAD;
   int move = DEFAULT_MOVE;
@@ -521,9 +520,6 @@ main(int argc, char **argv)
 	case 'r':
 	  range = atol(optarg);
 	  break;
-	case 's':
-	  seed = atoi(optarg);
-	  break;
 	case 'u':
 	  update = atoi(optarg);
 	  break;
@@ -569,7 +565,6 @@ main(int argc, char **argv)
       printf("Initial size : %d\n", initial);
       printf("Nb threads   : %d\n", nb_threads);
       printf("Value range  : %ld\n", range);
-      printf("Seed         : %d\n", seed);
       printf("Update rate  : %d\n", update);
       printf("Load factor  : %d\n", load_factor);
       printf("Move rate    : %d\n", move);
@@ -597,11 +592,7 @@ main(int argc, char **argv)
     exit(1);
   }
 	
-  if (seed == 0)
-    srand((int)time(0));
-  else
-    srand(seed);
-	
+  srand((int)time(0));
   maxhtlength = (unsigned int*) ssalloc(64);//memalign(64, 64);
   assert(maxhtlength != NULL);
 

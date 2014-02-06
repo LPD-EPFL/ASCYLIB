@@ -65,7 +65,6 @@ typedef ALIGNED(64) struct thread_data
   val_t first;
   long range;
   int update;
-  int unit_tx;
   int alternate;
   int effective;
   int nb_threads;
@@ -251,9 +250,7 @@ main(int argc, char **argv)
   int initial = DEFAULT_INITIAL;
   int nb_threads = DEFAULT_NB_THREADS;
   long range = DEFAULT_RANGE;
-  int seed = DEFAULT_SEED;
   int update = DEFAULT_UPDATE;
-  int unit_tx = DEFAULT_ELASTICITY;
   int alternate = DEFAULT_ALTERNATE;
   int effective = DEFAULT_EFFECTIVE;
   sigset_t block_set;
@@ -294,19 +291,8 @@ main(int argc, char **argv)
 	     "        Number of threads (default=" XSTR(DEFAULT_NB_THREADS) ")\n"
 	     "  -r, --range <int>\n"
 	     "        Range of integer values inserted in set (default=" XSTR(DEFAULT_RANGE) ")\n"
-	     "  -s, --seed <int>\n"
-	     "        RNG seed (0=time-based, default=" XSTR(DEFAULT_SEED) ")\n"
 	     "  -u, --update-rate <int>\n"
 	     "        Percentage of update transactions (default=" XSTR(DEFAULT_UPDATE) ")\n"
-	     "  -x, --elasticity (default=4)\n"
-	     "        Use elastic transactions\n"
-	     "        0 = non-protected,\n"
-	     "        1 = normal transaction,\n"
-	     "        2 = read elastic-tx,\n"
-	     "        3 = read/add elastic-tx,\n"
-	     "        4 = read/add/rem elastic-tx,\n"
-	     "        5 = all recursive elastic-tx,\n"
-	     "        6 = harris lock-free\n"
 	     );
       exit(0);
     case 'A':
@@ -327,14 +313,8 @@ main(int argc, char **argv)
     case 'r':
       range = atol(optarg);
       break;
-    case 's':
-      seed = atoi(optarg);
-      break;
     case 'u':
       update = atoi(optarg);
-      break;
-    case 'x':
-      unit_tx = atoi(optarg);
       break;
     case 'l':
       break;
@@ -361,9 +341,7 @@ main(int argc, char **argv)
   printf("Initial size : %d\n", initial);
   printf("Nb threads   : %d\n", nb_threads);
   printf("Value range  : %ld\n", range);
-  printf("Seed         : %d\n", seed);
   printf("Update rate  : %d\n", update);
-  printf("Elasticity   : %d\n", unit_tx);
   printf("Alternate    : %d\n", alternate);
   printf("Effective    : %d\n", effective);
   printf("Type sizes   : int=%d/long=%d/ptr=%d/word=%d\n",
@@ -384,11 +362,7 @@ main(int argc, char **argv)
     exit(1);
   }
 	
-  if (seed == 0)
-    srand((int)time(0));
-  else
-    srand(seed);
-	
+  srand((int)time(0));
 
   ssalloc_align();
   set = set_new();
@@ -450,7 +424,6 @@ main(int argc, char **argv)
       data[i].first = last;
       data[i].range = range;
       data[i].update = update;
-      data[i].unit_tx = unit_tx;
       data[i].alternate = alternate;
       data[i].effective = effective;
       data[i].nb_threads = nb_threads;

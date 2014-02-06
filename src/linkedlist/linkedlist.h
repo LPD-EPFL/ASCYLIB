@@ -36,18 +36,16 @@
 #define DEFAULT_INITIAL                 1024
 #define DEFAULT_NB_THREADS              1
 #define DEFAULT_RANGE                   (2 * DEFAULT_INITIAL)
-#define DEFAULT_SEED                    0
 #define DEFAULT_UPDATE                  20
-#define DEFAULT_ELASTICITY		4
 #define DEFAULT_ALTERNATE		0
 #define DEFAULT_EFFECTIVE		1
 
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
 
-static volatile AO_t stop;
+static volatile int stop;
 
-#define TRANSACTIONAL                   d->unit_tx
+#define TRANSACTIONAL                   4
 
 typedef intptr_t val_t;
 #define VAL_MIN                         INT_MIN
