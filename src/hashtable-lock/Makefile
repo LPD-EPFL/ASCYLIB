@@ -8,6 +8,11 @@ PROF = $(ROOT)/src
 
 .PHONY:	all clean
 
+TEST_FILE = test_simple.c
+ifeq ($(TEST),old)
+	TEST_FILE = test.c
+endif
+
 all:	main
 
 measurements.o:
@@ -38,7 +43,7 @@ hashtable-lock.o: ll-intset.o coupling.o lazy.o linkedlist-lock.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/hashtable-lock.o hashtable-lock.c
 
 test.o: ll-intset.o coupling.o lazy.o linkedlist-lock.o hashtable-lock.o
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o test.c
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
 main: measurements.o ssalloc.o ll-intset.o coupling.o lazy.o linkedlist-lock.o hashtable-lock.o test.o htlock.o
 	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/intset.o $(BUILDIR)/coupling.o $(BUILDIR)/lazy.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/hashtable-lock.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)

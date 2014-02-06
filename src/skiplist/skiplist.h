@@ -53,7 +53,7 @@
 
 extern uint8_t levelmax[64];
 
-#define TRANSACTIONAL                   d->unit_tx
+#define TRANSACTIONAL                   DEFAULT_ELASTICITY
 
 typedef intptr_t val_t;
 typedef intptr_t level_t;

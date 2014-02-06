@@ -9,6 +9,11 @@ PROF = $(ROOT)/src
 
 all:	main
 
+TEST_FILE = test_simple.c
+ifeq ($(TEST),old)
+	TEST_FILE = test.c
+endif
+
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
 
@@ -31,7 +36,7 @@ intset.o: skiplist-lock.h optimistic.h htlock.o clh.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/intset.o intset.c
 
 test.o: skiplist-lock.h optimistic.h intset.h
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o test.c
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
 main: measurements.o ssalloc.o skiplist-lock.o optimistic.o intset.o test.o clh.o
 	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/skiplist-lock.o $(BUILDIR)/optimistic.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)

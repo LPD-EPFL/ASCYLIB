@@ -48,7 +48,6 @@
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
 
-extern volatile AO_t stop;
 extern unsigned int global_seed;
 /* Skip list level */
 #ifdef TLS
@@ -58,7 +57,7 @@ extern pthread_key_t rng_seed_key;
 #endif /* ! TLS */
 extern unsigned int levelmax;
 
-#define TRANSACTIONAL                   d->unit_tx
+#define TRANSACTIONAL                   DEFAULT_ELASTICITY
 
 typedef intptr_t val_t;
 #define VAL_MIN                         INT_MIN

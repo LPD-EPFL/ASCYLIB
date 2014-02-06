@@ -123,7 +123,7 @@ void
 
   int val2, numtx, r, last = -1;
   val_t val = 0;
-  int unext, mnext, cnext;
+  int unext = 0 , mnext = 0, cnext = 1;
 	
   thread_data_t *d = (thread_data_t *)data;
 	
@@ -135,61 +135,11 @@ void
 
   seeds = seed_rand();
 
-  int succ = 1, putting = 1;
-
   /* Wait on barrier */
   barrier_cross(d->barrier);
 	
-#define TEST_SIMPLE
-
-  /* while (stop == 0) */
   while (*running)
     {
-#if defined(TEST_SIMPLE)
-      val = rand_range_re(&d->seed, d->range);
-
-      if(succ)
-      	{
-	  r = rand_range_re(&d->seed, 100) - 1;
-	  unext = (r < d->update);
-
-      	  succ = 0;
-      	}
-
-      if(unext) 
-	{
-	  if(putting) 
-	    {
-	      if (ht_add(d->set, val, TRANSACTIONAL))
-		{
-		  d->nb_added++;
-		  succ = 1;
-		  putting = 0;
-		} 				
-	      d->nb_add++;
-	    } 
-	  else 
-	    {
-	      if (ht_remove(d->set, val, TRANSACTIONAL))
-		{
-		  d->nb_removed++;
-		  succ = 1;
-		  putting = 1;
-		}
-	      d->nb_remove++;
-	    }
-	} 
-      else
-	{ 
-	  if (ht_contains(d->set, val, TRANSACTIONAL))
-	    {
-	      d->nb_found++;
-	      succ = 1;
-	    }
-	  d->nb_contains++;
-	}
-
-#else  /* !TEST_SIMPLE */
       if (unext) { // update
 	    
 	if (mnext) { // move
@@ -279,8 +229,6 @@ void
 	mnext = (r < d->move);
 	cnext = (r >= d->update + d->snapshot);
       }
-
-#endif	/* TEST_SIMPLE */
     }
 
 
