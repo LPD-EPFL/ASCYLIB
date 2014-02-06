@@ -1,4 +1,10 @@
 #!/bin/bash
+
+#default axes values
+ranges="16 32 64 128 256 512 1024 2048 4096 8192 16384";
+updates="0 1 10 20 50 100";
+cores="socket"
+
 prog1=$1
 shift;
 prog2=$1
@@ -9,33 +15,7 @@ x_axis=$1
 shift;
 params=$@
 
-unm=$(uname -n);
-ranges="16 32 64 128 256 512 1024 2048 4096 8192 16384";
-updates="0 1 10 20 50 100";
-if [ $unm = "maglite" ];
-then
-cores=$(seq 8 8 64);
-elif [ $unm = "parsasrv1.epfl.ch" ];
-then
-cores=$(seq 6 6 36);
-elif [ $unm = "diassrv8" ];
-then
-cores=$(seq 10 10 80);
-elif [ $unm = "lpdxeon2680" ];
-then
-cores=$(seq 10 10 20);
-elif [ $unm = "lpdpc34" ];
-then
-cores=$(seq 2 1 8);
-else
-cores=$(seq 6 6 48);
-fi;
-
-if [ $unm = "parsasrv1.epfl.ch" ];
-then
-    run_script="./run"
-fi;
-
+source scripts/config;
 source scripts/lock_exec;
 
 case "${y_axis}" in
