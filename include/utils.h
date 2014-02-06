@@ -54,6 +54,18 @@ extern "C" {
   /* #define DO_PAD */
 
 
+#if !defined(false)
+#  define false 0
+#endif
+
+#if !defined(true)
+#  define true 1
+#endif
+
+#define likely(x)       __builtin_expect((x), 1)
+#define unlikely(x)     __builtin_expect((x), 0)
+
+
 #if !defined(UNUSED)
 #  define UNUSED __attribute__ ((unused))
 #endif
@@ -63,6 +75,13 @@ extern "C" {
 #else
 #  define ALIGNED(N)
 #endif
+
+static inline int
+is_power_of_two (unsigned int x) 
+{
+  return ((x != 0) && !(x & (x - 1)));
+}
+
 
 #ifdef __sparc__
 #  define PAUSE    asm volatile("rd    %%ccr, %%g0\n\t" \
