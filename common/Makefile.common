@@ -282,3 +282,12 @@ ifdef STM
 	endif
   endif
 endif
+
+TEST_FILE = test_simple.c
+ifeq ($(TEST),old)
+	TEST_FILE = test.c
+endif
+
+ifeq ($(LATENCY),1)
+	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS
+endif

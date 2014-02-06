@@ -7,11 +7,6 @@ PROF = $(ROOT)/src
 
 .PHONY:	all clean
 
-TEST_FILE = test_simple.c
-ifeq ($(TEST),old)
-	TEST_FILE = test.c
-endif
-
 all:	main
 
 measurements.o:

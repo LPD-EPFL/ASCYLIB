@@ -2,7 +2,6 @@
 
 BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque src/bst src/noise/
 LBENCHS = src/linkedlist-lock src/hashtable-lock src/skiplist-lock src/bst-lock2
-LBENCHS = src/hashtable-lock
 LFBENCHS = src/linkedlist src/hashtable src/skiplist src/bst src/bst-howley
 NOISE = src/noise
 

@@ -9,11 +9,6 @@ PROF = $(ROOT)/src
 
 all:	main
 
-TEST_FILE = test_simple.c
-ifeq ($(TEST),old)
-	TEST_FILE = test.c
-endif
-
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
 

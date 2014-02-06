@@ -21,7 +21,7 @@ ticks getticks_correction_calc()
     t_dur += t_end - t_start;
   }
   getticks_correction = (ticks)(t_dur / (double) GETTICKS_CALC_REPS);
-  printf("(cor: %llu)", (unsigned long long int) getticks_correction);
+  /* printf("(cor: %llu)", (unsigned long long int) getticks_correction); */
   return getticks_correction;
 }
 

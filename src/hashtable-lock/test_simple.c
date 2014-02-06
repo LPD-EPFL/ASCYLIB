@@ -610,18 +610,14 @@ main(int argc, char **argv)
     }
 
 #if defined(COMPUTE_LATENCY)
-#  if defined(DEBUG)
-  printf("#thread get_suc get_fal put_suc put_fal rem_suc rem_fal\n"); fflush(stdout);
-#  endif
-
+  printf("#thread srch_suc srch_fal insr_suc insr_fal remv_suc remv_fal   ## latency (in cycles) \n"); fflush(stdout);
   long unsigned get_suc = (getting_count_total_succ) ? getting_suc_total / getting_count_total_succ : 0;
   long unsigned get_fal = (getting_count_total - getting_count_total_succ) ? getting_fal_total / (getting_count_total - getting_count_total_succ) : 0;
   long unsigned put_suc = putting_count_total_succ ? putting_suc_total / putting_count_total_succ : 0;
   long unsigned put_fal = (putting_count_total - putting_count_total_succ) ? putting_fal_total / (putting_count_total - putting_count_total_succ) : 0;
   long unsigned rem_suc = removing_count_total_succ ? removing_suc_total / removing_count_total_succ : 0;
   long unsigned rem_fal = (removing_count_total - removing_count_total_succ) ? removing_fal_total / (removing_count_total - removing_count_total_succ) : 0;
-  printf("%d\t%lu\t%lu\t%lu\t%lu\t%lu\t%lu\n",
-	 num_threads, get_suc, get_fal, put_suc, put_fal, rem_suc, rem_fal);
+  printf("%-7zu %-8lu %-8lu %-8lu %-8lu %-8lu %-8lu\n", num_threads, get_suc, get_fal, put_suc, put_fal, rem_suc, rem_fal);
 #endif
 
     
