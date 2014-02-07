@@ -15,7 +15,7 @@ int set_contains(intset_t *set, val_t val, int transactional)
 {
 	int result;
 	
-#ifdef DEBUG
+#ifdef DEBUG_PRINT
 	printf("++> set_contains(%d)\n", (int)val);
 	IO_FLUSH;
 #endif
@@ -101,7 +101,7 @@ int set_add(intset_t *set, val_t val, int transactional)
 {
   int result;
 	
-#ifdef DEBUG
+#ifdef DEBUG_PRINT
   printf("++> set_add(%d)\n", (int)val);
   IO_FLUSH;
 #endif
@@ -174,7 +174,7 @@ int set_remove(intset_t *set, val_t val, int transactional)
 {
 	int result = 0;
 	
-#ifdef DEBUG
+#ifdef DEBUG_PRINT
 	printf("++> set_remove(%d)\n", (int)val);
 	IO_FLUSH;
 #endif
