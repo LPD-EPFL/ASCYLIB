@@ -1,6 +1,8 @@
 #include "bst_ellen.h"
 
-node_t* bst_initialize(int num_proc){
+__thread search_result_t * last_result;
+
+node_t* bst_initialize(){
     node_t* root;
     node_t* i1;
     node_t* i2;
@@ -21,18 +23,15 @@ node_t* bst_initialize(int num_proc){
     root->left = i1;
     root->right = i2;
     
-    my_search_result = (search_result_t**) malloc(num_proc * sizeof(search_result_t*));
-
     return root;
 }
 
-void bst_init_local(int id){
-    my_search_result[id] = (search_result_t*) malloc(sizeof(search_result_t));
+void bst_init_local(){
+    last_result = (search_result_t*) malloc(sizeof(search_result_t));
 }
 
-search_result_t* bst_search(bst_key_t key, node_t* root, int id) {
-//    search_result_t * result = (search_result_t*) malloc(sizeof(search_result_t));
-    search_result_t * result = my_search_result[id];
+search_result_t* bst_search(bst_key_t key, node_t* root) {
+    search_result_t * result = last_result;
 
     result->l = root;
     while (!(result->l->leaf)) {
@@ -50,15 +49,15 @@ search_result_t* bst_search(bst_key_t key, node_t* root, int id) {
 }
 
 
-node_t* bst_find(bst_key_t key, node_t* root, int id) {
-    search_result_t * result = bst_search(key,root, id);
+node_t* bst_find(bst_key_t key, node_t* root) {
+    search_result_t * result = bst_search(key,root);
     if (result->l->key == key) {
         return result->l;
     }
     return NULL;
 }
 
-bool_t bst_insert(bst_key_t key, node_t* root, int id) {
+bool_t bst_insert(bst_key_t key, node_t* root) {
     node_t * new_internal;
     node_t *new_sibling;
 
@@ -73,7 +72,7 @@ bool_t bst_insert(bst_key_t key, node_t* root, int id) {
     search_result_t* search_result;
 
     while(1) {
-        search_result = bst_search(key,root, id);
+        search_result = bst_search(key,root);
         if (search_result->l->key == key) {
             return FALSE;
         }
@@ -118,14 +117,14 @@ void bst_help_insert(info_t * op) {
     CAS_PTR(&(op->iinfo.p->update),FLAG(op,STATE_IFLAG),FLAG(op,STATE_CLEAN));
 }
 
-bool_t bst_delete(bst_key_t key, node_t* root, int id) {
+bool_t bst_delete(bst_key_t key, node_t* root) {
     update_t result;
     info_t* op;
 
     search_result_t* search_result;
 
     while (1) {
-        search_result = bst_search(key,root, id); 
+        search_result = bst_search(key,root); 
         if (search_result->l->key!=key) {
             return FALSE;
         }
@@ -211,10 +210,14 @@ void bst_print(node_t* node){
         }
 }
 
-unsigned long bst_size(node_t* node){
+size_t bst_size_rec(node_t* node){
         if (node->leaf==FALSE) {
-            return (bst_size(node->right) + bst_size(node->left));
+            return (bst_size_rec(node->right) + bst_size_rec(node->left));
         } else {
             return 1;
         }
+}
+
+size_t bst_size(node_t* node){
+    return bst_size_rec(node)-2;
 }
