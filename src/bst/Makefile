@@ -21,8 +21,8 @@ bst_ellen.o:
 bst_test.o: bst_ellen.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_test.o bst_test.c
 
-test_simple.o: bst_ellen.h
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test_simple.o test_simple.c
+test.o: bst_ellen.h
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
 bst_ellen_test2.o: bst_ellen.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_ellen_test2.o bst_ellen_test2.c
@@ -30,8 +30,8 @@ bst_ellen_test2.o: bst_ellen.h
 old: measurements.o ssalloc.o  bst_ellen.o bst_test.o 
 	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_ellen.o  $(BUILDIR)/bst_test.o -o $(BINS) $(LDFLAGS)
 
-main: measurements.o ssalloc.o  bst_ellen.o test_simple.o 
-	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_ellen.o  $(BUILDIR)/test_simple.o -o $(BINS) $(LDFLAGS)
+main: measurements.o ssalloc.o  bst_ellen.o test.o 
+	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_ellen.o  $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 fairness: measurements.o ssalloc.o  bst_ellen.o bst_ellen_test2.o 
 	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_ellen.o  $(BUILDIR)/bst_ellen_test2.o -o $(BINS) $(LDFLAGS)

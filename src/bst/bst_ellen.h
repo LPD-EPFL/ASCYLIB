@@ -99,21 +99,19 @@ void bst_help_marked(info_t* op);
 
 bool_t bst_help_delete(info_t* op);
 
-bool_t bst_delete(bst_key_t key, node_t* root, int id);
+bool_t bst_delete(bst_key_t key, node_t* root);
 
 void bst_help_insert(info_t * op);
 
-bool_t bst_insert(bst_key_t key, node_t* root, int id);
+bool_t bst_insert(bst_key_t key, node_t* root);
 
-node_t* bst_find(bst_key_t key, node_t* root, int id);
+node_t* bst_find(bst_key_t key, node_t* root);
 
-search_result_t* bst_search(bst_key_t key, node_t* root, int id);
+search_result_t* bst_search(bst_key_t key, node_t* root);
 
 node_t* bst_initialize();
 
-void bst_init_local(int id);
-
-search_result_t** my_search_result;
+void bst_init_local();
 
 static inline uint64_t GETFLAG(update_t ptr) {
     return ((uint64_t)ptr) & 3;
@@ -131,7 +129,7 @@ static inline uint64_t UNFLAG(update_t ptr) {
 void bst_print(node_t* node);
 
 //for testing purposes
-unsigned long bst_size(node_t* node);
+size_t bst_size(node_t* node);
 
 //#define SETFLAG(ptr,state) ptr= (ptr & ~(0x3)) |state
 //#define FLAG(ptr,state) ((ptr & ~(0x3)) | state)

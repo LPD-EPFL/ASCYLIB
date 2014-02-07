@@ -124,7 +124,7 @@ void *test(void *data)
     set_cpu(the_cores[d->id]);
     //initialize the custom memeory allocator for this thread (we do not use malloc due to concurrency bottleneck issues)
     ssalloc_init();
-    bst_init_local(d->id);
+    bst_init_local();
     //for fine-grain latency measurements, we need to get the lenght of a getticks() function call, which is also counted
     //by default when we do getticks(); //code... getticks(); PF_START and PF_STOP use this when fine grain measurements are enabled
     PF_CORRECTION;
@@ -146,7 +146,7 @@ void *test(void *data)
         key = my_random(&seeds[0],&seeds[1],&seeds[2]) & rand_max;
         DDPRINT("key is %u\n",key);
         //we make sure the insert was effective (as opposed to just updating an existing entry)
-        if (bst_insert(key,root,d->id)!=TRUE) {
+        if (bst_insert(key,root)!=TRUE) {
             i--;
         }
     }
@@ -168,17 +168,17 @@ void *test(void *data)
             //PF_START and PF_STOP can be used to do latency measurements of the operation
             //to enable them, DO_TIMINGS must be defined at compile time, otherwise they do nothing
             //PF_START(2);
-            bst_find(key,root,d->id);
+            bst_find(key,root);
             //PF_STOP(2);
         } else if (last == -1) {
             //do a write operation
-            if (bst_insert(key,root, d->id)) {
+            if (bst_insert(key,root)) {
                 d->num_insert++;
                 last=1;
             }
         } else {
             //do a delete operation
-            if (bst_delete(key,root, d->id)) {
+            if (bst_delete(key,root)) {
                 d->num_remove++;
                 last=-1;
             }
@@ -312,7 +312,7 @@ int main(int argc, char* const argv[]) {
     max_key = pow2roundup(max_key)-1;
 
     //initialization of the tree
-    root = bst_initialize(num_threads);
+    root = bst_initialize();
 
     //initialize the data which will be passed to the threads
     if ((data = (thread_data_t *)malloc(num_threads * sizeof(thread_data_t))) == NULL) {
@@ -399,7 +399,7 @@ int main(int argc, char* const argv[]) {
 
     unsigned long operations = 0;
     ticks total_ticks = 0;
-    long reported_total = 2; //the tree contains two initial dummy nodes, INF1 and INF2
+    long reported_total = 0; 
     //report some experiment statistics
     for (i = 0; i < num_threads; i++) {
         printf("Thread %d\n", i);

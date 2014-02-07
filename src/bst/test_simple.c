@@ -35,12 +35,12 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(k,r,i)  bst_search(k,r,i)
-#define DS_ADD(k,r,i)       bst_insert(k,r,i)
-#define DS_REMOVE(k,r,i)    bst_delete(k,r,i)
+#define DS_CONTAINS(k,r)  bst_find(k,r)
+#define DS_ADD(k,r)       bst_insert(k,r)
+#define DS_REMOVE(k,r)    bst_delete(k,r)
 #define DS_SIZE(s)          bst_size(s)
 #define DS_NEW()           bst_initialize()
-#define DS_LOCAL(i)         bst_init_local(i)
+#define DS_LOCAL()         bst_init_local()
 
 #define DS_TYPE             node_t
 #define DS_NODE             node_t
@@ -193,7 +193,7 @@ test(void* thread)
   phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();
-  DS_LOCAL(td->id);
+  DS_LOCAL();
 
   DS_TYPE* set = td->set;
 
@@ -244,7 +244,7 @@ test(void* thread)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(key,set,ID) == false)
+      if(DS_ADD(key,set) == false)
 	{
 	  i--;
 	}
@@ -270,7 +270,7 @@ test(void* thread)
 	{
       bool_t res;
 	  START_TS(1);
-	  res = DS_ADD(key,set,ID);
+	  res = DS_ADD(key,set);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -284,7 +284,7 @@ test(void* thread)
 	{
 	  int removed;
 	  START_TS(2);
-	  removed = DS_REMOVE(key,set,ID);
+	  removed = DS_REMOVE(key,set);
 	  END_TS(2, my_removing_count);
 	  if(removed != 0) 
 	    {
@@ -297,9 +297,9 @@ test(void* thread)
       else
 	{ 
 	  START_TS(0);
-	  search_res = DS_CONTAINS(key, set, ID);
+	  search_res = DS_CONTAINS(key, set);
 	  END_TS(0, my_getting_count);
-	  if(search_res) 
+	  if(search_res!=NULL) 
 	    {
 	      ADD_DUR(my_getting_succ);
 	      my_getting_count_succ++;
