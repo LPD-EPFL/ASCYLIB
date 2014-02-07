@@ -59,6 +59,7 @@ size_t pf_vals_num = 8;
 size_t put, put_explicit = false;
 double update_rate, put_rate, get_rate;
 
+size_t size_after = 0;
 int seed = 0;
 __thread unsigned long * seeds;
 uint32_t rand_max;
@@ -251,7 +252,7 @@ test(void* thread)
   while (stop == 0) 
     {
       c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
-      key = c & rand_max;
+      key = (c & rand_max) + rand_min;
 
       if (unlikely(c <= scale_put))
 	{
@@ -301,8 +302,11 @@ test(void* thread)
 
   if (!ID)
     {
-      printf("#AFTER  size is: %zu\n", (size_t) DS_SIZE(set));
+      size_after = DS_SIZE(set);
+      printf("#AFTER  size is: %zu\n", size_after);
     }
+
+  barrier_cross(&barrier);
 
 #if defined(COMPUTE_LATENCY)
   putting_succ[ID] += my_putting_succ;
@@ -334,12 +338,10 @@ test(void* thread)
 #endif
 
   /* SSPFDTERM(); */
-  barrier_cross(&barrier_global);
 #if GC == 1
   ssmem_term();
   free(alloc);
 #endif
-  barrier_cross(&barrier_global);
 
   pthread_exit(NULL);
 }
@@ -492,8 +494,6 @@ main(int argc, char **argv)
       put_rate = update_rate / 2;
     }
 
-
-
   get_rate = 1 - update_rate;
 
   /* printf("num_threads = %u\n", num_threads); */
@@ -569,10 +569,6 @@ main(int argc, char **argv)
   gettimeofday(&end, NULL);
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
-  barrier_cross(&barrier_global);
-  int UNUSED size_after = DS_SIZE(set);
-  barrier_cross(&barrier_global);
-
   for(t = 0; t < num_threads; t++) 
     {
       rc = pthread_join(threads[t], &status);
@@ -628,7 +624,11 @@ main(int argc, char **argv)
 #define LLU long long unsigned int
 
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
-  assert(size_after == (initial + pr));
+  if (size_after != (initial + pr))
+    {
+      printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
+      assert(size_after == (initial + pr));
+    }
 
   printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success", "succ %", "total %", "effective %");
   uint64_t total = putting_count_total + getting_count_total + removing_count_total;
