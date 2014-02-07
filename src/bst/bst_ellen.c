@@ -1,5 +1,7 @@
 #include "bst_ellen.h"
 
+__thread search_result_t * last_result;
+
 node_t* bst_initialize(int num_proc){
     node_t* root;
     node_t* i1;

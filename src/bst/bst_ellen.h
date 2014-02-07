@@ -89,6 +89,8 @@ typedef ALIGNED(64) struct search_result_t {
 #endif
 } search_result_t;
 
+extern __thread search_result_t * last_result;
+
 void bst_cas_child(node_t* parent, node_t* old, node_t* new);
 
 void bst_help(update_t u);
