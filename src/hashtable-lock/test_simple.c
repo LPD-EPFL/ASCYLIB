@@ -49,8 +49,8 @@
 
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
-size_t update = DEFAULT_UPDATE;
 size_t load_factor = DEFAULT_LOAD;
+size_t update = DEFAULT_UPDATE;
 size_t num_threads = DEFAULT_NB_THREADS; 
 size_t duration = DEFAULT_DURATION;
 int transactional = DEFAULT_LOCKTYPE;
@@ -209,7 +209,12 @@ test(void* thread)
 #endif
     
   seeds = seed_rand();
-    
+#if GC == 1
+  alloc = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
+  assert(alloc != NULL);
+  ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, ID);
+#endif
+
   uint64_t key;
   int c = 0;
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
@@ -330,6 +335,11 @@ test(void* thread)
 #endif
 
   /* SSPFDTERM(); */
+  barrier_cross(&barrier_global);
+#if GC == 1
+  ssmem_term();
+  free(alloc);
+#endif
 
   pthread_exit(NULL);
 }
@@ -568,6 +578,9 @@ main(int argc, char **argv)
   gettimeofday(&end, NULL);
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
+  int UNUSED size_after = DS_SIZE(set);
+  barrier_cross(&barrier_global);
+
   for(t = 0; t < num_threads; t++) 
     {
       rc = pthread_join(threads[t], &status);
@@ -619,12 +632,10 @@ main(int argc, char **argv)
   long unsigned rem_fal = (removing_count_total - removing_count_total_succ) ? removing_fal_total / (removing_count_total - removing_count_total_succ) : 0;
   printf("%-7zu %-8lu %-8lu %-8lu %-8lu %-8lu %-8lu\n", num_threads, get_suc, get_fal, put_suc, put_fal, rem_suc, rem_fal);
 #endif
-
     
 #define LLU long long unsigned int
 
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
-  int UNUSED size_after = DS_SIZE(set);
   assert(size_after == (initial + pr));
 
   printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success", "succ %", "total %", "effective %");

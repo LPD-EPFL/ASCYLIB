@@ -28,85 +28,96 @@
  * Lock the first two elements (locking each before getting the copy of the element)
  * then unlock previous, keep ownership of the current, and lock next in a loop.
  */
-int lockc_delete(intset_l_t *set, val_t val) {
-	node_l_t *curr, *next;
-	int found;
+int
+lockc_delete(intset_l_t *set, val_t val) 
+{
+  node_l_t *curr, *next;
+  int found;
 	
-	GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
-	LOCK(ND_GET_LOCK(set->head));
-	curr = set->head;
-	LOCK(ND_GET_LOCK(curr->next));
-	next = curr->next;
+  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  LOCK(ND_GET_LOCK(set->head));
+  curr = set->head;
+  LOCK(ND_GET_LOCK(curr->next));
+  next = curr->next;
 	
-	while (next->val < val) {
-	  UNLOCK(ND_GET_LOCK(curr));
-		curr = next;
-		LOCK(ND_GET_LOCK(next->next));
-		next = next->next;
-	}
-	found = (val == next->val);
-	if (found) {
-	  curr->next = next->next;
-	  UNLOCK(ND_GET_LOCK(next));
-	  node_delete_l(next);
-	  UNLOCK(ND_GET_LOCK(curr));
-	} else {
-	  UNLOCK(ND_GET_LOCK(curr));
-	  UNLOCK(ND_GET_LOCK(next));
-	}  
-	GL_UNLOCK(set->lock);
+  while (next->val < val) 
+    {
+      UNLOCK(ND_GET_LOCK(curr));
+      curr = next;
+      LOCK(ND_GET_LOCK(next->next));
+      next = next->next;
+    }
+  found = (val == next->val);
+  if (found) 
+    {
+      curr->next = next->next;
+      UNLOCK(ND_GET_LOCK(next));
+      node_delete_l(next);
+      UNLOCK(ND_GET_LOCK(curr));
+    } 
+  else 
+    {
+      UNLOCK(ND_GET_LOCK(curr));
+      UNLOCK(ND_GET_LOCK(next));
+    }  
+  GL_UNLOCK(set->lock);
 
-	return found;
+  return found;
 }
 
-int lockc_find(intset_l_t *set, val_t val) {
-	node_l_t *curr, *next; 
-	int found;
+int
+lockc_find(intset_l_t *set, val_t val) 
+{
+  node_l_t *curr, *next; 
+  int found;
 	
-	GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
-	LOCK(ND_GET_LOCK(set->head));
-	curr = set->head;
-	LOCK(ND_GET_LOCK(curr->next));
-	next = curr->next;
+  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  LOCK(ND_GET_LOCK(set->head));
+  curr = set->head;
+  LOCK(ND_GET_LOCK(curr->next));
+  next = curr->next;
 	
-	while (next->val < val) {
-		UNLOCK(ND_GET_LOCK(curr));
-		curr = next;
-		LOCK(ND_GET_LOCK(next->next));
-		next = curr->next;
-	}	
-	found = (val == next->val);
-	GL_UNLOCK(set->lock);
-	UNLOCK(ND_GET_LOCK(curr));
-	UNLOCK(ND_GET_LOCK(next));
-	return found;
+  while (next->val < val) 
+    {
+      UNLOCK(ND_GET_LOCK(curr));
+      curr = next;
+      LOCK(ND_GET_LOCK(next->next));
+      next = curr->next;
+    }	
+  found = (val == next->val);
+  GL_UNLOCK(set->lock);
+  UNLOCK(ND_GET_LOCK(curr));
+  UNLOCK(ND_GET_LOCK(next));
+  return found;
 }
 
-int lockc_insert(intset_l_t *set, val_t val) {
-	node_l_t *curr, *next, *newnode;
-	int found;
+int
+lockc_insert(intset_l_t *set, val_t val) 
+{
+  node_l_t *curr, *next, *newnode;
+  int found;
 	
-	GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
-	LOCK(ND_GET_LOCK(set->head));
-	curr = set->head;
-	LOCK(ND_GET_LOCK(curr->next));
-	next = curr->next;
+  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  LOCK(ND_GET_LOCK(set->head));
+  curr = set->head;
+  LOCK(ND_GET_LOCK(curr->next));
+  next = curr->next;
 	
-	while (next->val < val) {
-		
-		UNLOCK(ND_GET_LOCK(curr));
-		curr = next;
-		LOCK(ND_GET_LOCK(next->next));
-		next = curr->next;
-		
-	}
-	found = (val == next->val);
-	if (!found) {
-		newnode =  new_node_l(val, next, 0);
-		curr->next = newnode;
-	}
-	GL_UNLOCK(set->lock);
-	UNLOCK(ND_GET_LOCK(curr));
-	UNLOCK(ND_GET_LOCK(next));
-	return !found;
+  while (next->val < val) 
+    {
+      UNLOCK(ND_GET_LOCK(curr));
+      curr = next;
+      LOCK(ND_GET_LOCK(next->next));
+      next = curr->next;
+    }
+  found = (val == next->val);
+  if (!found) 
+    {
+      newnode =  new_node_l(val, next, 1);
+      curr->next = newnode;
+    }
+  GL_UNLOCK(set->lock);
+  UNLOCK(ND_GET_LOCK(curr));
+  UNLOCK(ND_GET_LOCK(next));
+  return !found;
 }

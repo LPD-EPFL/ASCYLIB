@@ -24,21 +24,35 @@
 #include "intset.h"
 #include "utils.h"
 
+__thread ssmem_allocator_t* alloc;
+
 node_l_t*
-new_node_l(val_t val, node_l_t *next, int transactional)
+new_node_l(val_t val, node_l_t* next, int transactional)
 {
-  volatile node_l_t *node_l;
-  
-  node_l = (volatile node_l_t *) ssalloc(sizeof(node_l_t));
-  if (node_l == NULL)
+  volatile node_l_t *node;
+#if GC == 1
+  if (transactional)		/* for initialization AND the coupling algorithm */
     {
-      perror("malloc");
+      node = (volatile node_l_t *) ssalloc(sizeof(node_l_t));
+    }
+  else
+    {
+      node = (volatile node_l_t *) ssmem_alloc(alloc, sizeof(node_l_t));
+    }
+
+  if (node == NULL) 
+    {
+      perror("malloc @ new_node");
       exit(1);
     }
-  node_l->val = val;
-  node_l->next = next;
+#else
+  node = (volatile node_l_t *) ssalloc(sizeof(node_l_t));
+#endif
   
-  INIT_LOCK(ND_GET_LOCK(node_l));
+  node->val = val;
+  node->next = next;
+
+  INIT_LOCK(ND_GET_LOCK(node));
 
 #if defined(__tile__)
   /* on tilera you may have store reordering causing the pointer to a new node
@@ -46,9 +60,7 @@ new_node_l(val_t val, node_l_t *next, int transactional)
   MEM_BARRIER;
 #endif	/* __tile__ */
 
-  /* _mm_mfence(); */
-
-  return (node_l_t*) node_l;
+  return (node_l_t*) node;
 }
 
 intset_l_t *set_new_l()
@@ -56,15 +68,16 @@ intset_l_t *set_new_l()
   intset_l_t *set;
   node_l_t *min, *max;
 
-  /* if ((set = (intset_l_t *)malloc(sizeof(intset_l_t))) == NULL)  */
   if ((set = (intset_l_t *)ssalloc(sizeof(intset_l_t))) == NULL) 
     {
       perror("malloc");
       exit(1);
     }
 
-  max = new_node_l(VAL_MAX, NULL, 0);
-  min = new_node_l(VAL_MIN, max, 0);
+  ssalloc_align_alloc(0);
+  max = new_node_l(VAL_MAX, NULL, 1);
+  ssalloc_align_alloc(0);
+  min = new_node_l(VAL_MIN, max, 1);
   set->head = min;
 
   ssalloc_align_alloc(0);
@@ -87,8 +100,10 @@ void
 node_delete_l(node_l_t *node) 
 {
   DESTROY_LOCK(&node->lock);
-  /* free(node); */
+#if GC == 1
   ssfree(node);
+#endif
+  /* free(node); */
 }
 
 void set_delete_l(intset_l_t *set)
@@ -100,7 +115,7 @@ void set_delete_l(intset_l_t *set)
     next = (node_l_t*) get_unmarked_ref((uintptr_t) node->next);
     DESTROY_LOCK(&node->lock);
     /* free(node); */
-    ssfree(node);
+    ssfree(node);		/* TODO : fix with ssmem */
     node = next;
   }
   ssfree(set);
