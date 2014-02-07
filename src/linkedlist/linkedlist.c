@@ -26,14 +26,15 @@ new_node(val_t val, node_t *next, int transactional)
       node = (volatile node_t *) ssmem_alloc(alloc, sizeof(node_t));
     }
 
+#else
+  node = (volatile node_t *) ssalloc(sizeof(node_t));
+#endif
+
   if (node == NULL) 
     {
       perror("malloc @ new_node");
       exit(1);
     }
-#else
-      node = (volatile node_t *) ssalloc(sizeof(node_t));
-#endif
 
   node->val = val;
   node->next = next;
@@ -41,12 +42,13 @@ new_node(val_t val, node_t *next, int transactional)
   return (node_t*) node;
 }
 
-intset_t *set_new()
+intset_t* 
+set_new()
 {
   intset_t *set;
   node_t *min, *max;
 	
-  if ((set = (intset_t *)ssalloc(sizeof(intset_t))) == NULL)
+  if ((set = (intset_t*)ssalloc(sizeof(intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);
@@ -78,17 +80,18 @@ void set_delete(intset_t *set)
   free(set);
 }
 
-int set_size(intset_t *set)
+int
+set_size(intset_t *set)
 {
   int size = 0;
   node_t *node;
 
   /* We have at least 2 elements */
   node = set->head->next;
-  while (node->next != NULL) {
-    size++;
-    node = node->next;
-  }
-
+  while (node->next != NULL) 
+    {
+      size++;
+      node = node->next;
+    }
   return size;
 }
