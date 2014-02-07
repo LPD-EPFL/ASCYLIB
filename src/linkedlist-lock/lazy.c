@@ -115,10 +115,6 @@ parse_insert(intset_l_t *set, val_t val)
  * Logically remove an element by setting a mark bit to 1 
  * before removing it physically.
  *
- * NB. it is not safe to free the element after physical deletion as a 
- * pre-empted find operation may currently be parsing the element.
- * TODO: must implement a stop-the-world garbage collector to correctly 
- * free the memory.
  */
 int
 parse_delete(intset_l_t *set, val_t val)
@@ -143,6 +139,9 @@ parse_delete(intset_l_t *set, val_t val)
       node_l_t* c_nxt = curr->next;
       set_mark((uintptr_t*) &curr->next);
       pred->next = c_nxt;
+#if GC == 1
+      ssmem_free(alloc, curr);
+#endif
     }
   GL_UNLOCK(set->lock);
   UNLOCK(ND_GET_LOCK(curr));

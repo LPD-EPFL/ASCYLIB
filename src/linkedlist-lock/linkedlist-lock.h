@@ -38,6 +38,8 @@
 #include <atomic_ops.h>
 #include "lock_if.h"
 
+#include "ssmem.h"
+
 #define DEFAULT_DURATION                1000
 #define DEFAULT_INITIAL                 1024
 #define DEFAULT_NB_THREADS              1
@@ -56,6 +58,7 @@
 #define ATOMIC_CAS_MB_NOBAR(a, e, v)    (AO_compare_and_swap((volatile AO_t *)(a), (AO_t)(e), (AO_t)(v)))
 
 static volatile int stop;
+extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   transactional
 
