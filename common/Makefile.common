@@ -47,6 +47,8 @@ else
   LIBAO_INC = $(ROOT)/src/atomic_ops
 endif
 
+LIBSSMEM = $(ROOT)/external
+
 ifndef STM
   LOCK          ?= MUTEX
 endif
@@ -269,10 +271,10 @@ endif
 CFLAGS += -D_REENTRANT
 CFLAGS += -Wall
 CFLAGS += -fno-strict-aliasing
-CFLAGS += -I$(LIBAO_INC) -I$(ROOT)/include
+CFLAGS += -I$(LIBAO_INC) -I$(ROOT)/include -I$(LIBSSMEM)/include
 
-#LDFLAGS += -L$(LIBAO)/lib -latomic_ops 
 LDFLAGS += -lpthread -lrt -lm
+LDFLAGS += -L$(LIBSSMEM)/lib -lssmem
 
 ifdef STM
   ifneq ($(STM), SEQUENTIAL)
@@ -283,11 +285,24 @@ ifdef STM
   endif
 endif
 
+######################
+# compilation settings
+######################
+
 TEST_FILE = test_simple.c
 ifeq ($(TEST),old)
 	TEST_FILE = test.c
+	CFLAGS += -DGC=0
+else
+	ifeq ($(GC),0)
+		CFLAGS += -DGC=0
+	else
+		CFLAGS += -DGC=1
+	endif
 endif
 
 ifeq ($(LATENCY),1)
 	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS
 endif
+
+

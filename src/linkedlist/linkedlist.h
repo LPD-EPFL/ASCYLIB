@@ -25,7 +25,7 @@
 #include "tm.h"
 #include "measurements.h"
 #include "ssalloc.h"
-
+#include "ssmem.h"
 
 #ifdef DEBUG
 #define IO_FLUSH                        fflush(NULL)
@@ -44,6 +44,7 @@
 #define STR(s)                          #s
 
 static volatile int stop;
+extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   4
 

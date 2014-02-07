@@ -10,27 +10,30 @@
 
 #include "linkedlist.h"
 
+__thread ssmem_allocator_t* alloc;
+
 node_t*
 new_node(val_t val, node_t *next, int transactional)
 {
   volatile node_t *node;
+#if GC == 1
+  if (unlikely(transactional))
+    {
+      node = (volatile node_t *) ssalloc(sizeof(node_t));
+    }
+  else
+    {
+      node = (volatile node_t *) ssmem_alloc(alloc, sizeof(node_t));
+    }
 
-  /* if (transactional)  */
-  /*   { */
-  /*     node = (volatile node_t *)MALLOC(sizeof(node_t)); */
-  /*     perror("transactional call?\n"); */
-  /*     /\* node = (node_t *) ssalloc(sizeof(node_t)); *\/ */
-  /*   }  */
-  /* else  */
-  /*   { */
-  /* node = (node_t *)malloc(sizeof(node_t)); */
-  node = (volatile node_t *) ssalloc(sizeof(node_t));
-  /* } */
-
-  if (node == NULL) {
-    perror("malloc");
-    exit(1);
-  }
+  if (node == NULL) 
+    {
+      perror("malloc @ new_node");
+      exit(1);
+    }
+#else
+      node = (volatile node_t *) ssalloc(sizeof(node_t));
+#endif
 
   node->val = val;
   node->next = next;
@@ -43,11 +46,6 @@ intset_t *set_new()
   intset_t *set;
   node_t *min, *max;
 	
-  /* if ((set = (intset_t *)malloc(sizeof(intset_t))) == NULL)*/
-  /* if ((set = (intset_t *)ssalloc(64)) == NULL) */
-    /* if ((set = (intset_t *)ssalloc_alloc(1, 64)) == NULL) */
-  /* if ((set = (intset_t *)ssalloc_alloc(1, sizeof(intset_t))) == NULL) */
-  /* if ((set = (intset_t *)memalign(64, 64)) == NULL) */
   if ((set = (intset_t *)ssalloc(sizeof(intset_t))) == NULL)
     {
       perror("malloc");
@@ -58,8 +56,8 @@ intset_t *set_new()
 #define CL_OFF(x)((uintptr_t) (x) % 64)
   /* printf("* set @ %p (%lu / %lu )\n", set, CL_NUM(set), CL_OFF(set)); */
 
-  max = new_node(VAL_MAX, NULL, 0);
-  min = new_node(VAL_MIN, max, 0);
+  max = new_node(VAL_MAX, NULL, 1);
+  min = new_node(VAL_MIN, max, 1);
   set->head = min;
 
   ssalloc_align_alloc(0);

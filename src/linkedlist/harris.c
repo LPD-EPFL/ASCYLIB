@@ -123,6 +123,9 @@ harris_search(intset_t *set, val_t val, node_t **left_node)
       /* Remove one or more marked nodes */
       if (ATOMIC_CAS_MB(&(*left_node)->next, left_node_next, right_node)) 
 	{
+#if GC == 1
+	  ssmem_free(alloc, (void*) get_unmarked_ref((long) left_node_next));
+#endif
 	  if (!(right_node->next && is_marked_ref((long) right_node->next)))
 	    {
 	      return right_node;
@@ -199,9 +202,12 @@ harris_delete(intset_t *set, val_t val)
     } 
   while(1);
 
-  if (!ATOMIC_CAS_MB(&left_node->next, right_node, right_node_next))
+  if (likely(ATOMIC_CAS_MB(&left_node->next, right_node, right_node_next)))
     {
-      right_node = harris_search(set, right_node->val, &left_node);
+#if GC == 1
+      ssmem_free(alloc, (void*) get_unmarked_ref((long) right_node));
+#endif
+      ;
     }
   return 1;
 }
