@@ -9,6 +9,8 @@ PROF = $(ROOT)/src
 
 all:	main
 
+LIST_IMPL = harris
+
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
 
@@ -19,7 +21,7 @@ linkedlist.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist.o linkedlist.c
 
 harris.o: linkedlist.h linkedlist.o
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/harris.o harris.c
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/harris.o $(LIST_IMPL).c
 
 intset.o: linkedlist.h harris.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/intset.o intset.c
@@ -27,7 +29,7 @@ intset.o: linkedlist.h harris.h
 test.o: linkedlist.h harris.h intset.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
-main: measurements.o ssalloc.o linkedlist.o harris.o intset.o test.o $(TMILB)
+main: measurements.o ssalloc.o linkedlist.o harris.o harris.o intset.o test.o $(TMILB)
 	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/linkedlist.o $(BUILDIR)/harris.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:

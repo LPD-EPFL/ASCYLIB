@@ -26,36 +26,42 @@
 
 #include "hashtable.h"
 
-void ht_delete(ht_intset_t *set) {
+void ht_delete(ht_intset_t *set) 
+{
   node_t *node, *next;
   int i;
   
-  for (i=0; i < *maxhtlength; i++) {
-    node = set->buckets[i]->head;
-    while (node != NULL) {
-      next = node->next;
-      free(node);
-      node = next;
+  for (i=0; i < *maxhtlength; i++) 
+    {
+      node = set->buckets[i]->head;
+      while (node != NULL) 
+	{
+	  next = node->next;
+	  free(node);
+	  node = next;
+	}
+      free(set->buckets[i]);
     }
-    free(set->buckets[i]);
-  }
   free(set->buckets);
   free(set);
 }
 
-int ht_size(ht_intset_t *set) {
+int
+ht_size(ht_intset_t *set) 
+{
   int size = 0;
   node_t *node;
   int i;
 	
-  for (i=0; i < *maxhtlength; i++) {
-    node = set->buckets[i]->head->next;
-    while (node->next) {
-      size++;
-      node = node->next;
+  for (i=0; i < *maxhtlength; i++) 
+    {
+      node = set->buckets[i]->head->next;
+      while (node->next != NULL) 
+	{
+	  size++;
+	  node = node->next;
+	}
     }
-		
-  }
   return size;
 }
 
