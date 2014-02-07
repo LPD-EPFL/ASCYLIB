@@ -1,0 +1,8 @@
+You may pass the following settings to `make`:
+    * VERSION=DEBUG : compile with O0 and debug flags
+    * GC=0 or GC=1 : disable/enable GC (default is 1)
+    * TEST=old : use the old test.c file (disables GC)
+    * LATENCY=1 : enable per operation latency measurements
+
+Example:
+	`make` VERSION=DEBUG GC=0
