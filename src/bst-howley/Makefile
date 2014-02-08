@@ -27,8 +27,11 @@ bst_howley_test_scalability.o: bst_howley.h
 correctness: measurements.o ssalloc.o  bst_howley.o bst_howley_test.o 
 	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_howley.o  $(BUILDIR)/bst_howley_test.o -o $(BINS) $(LDFLAGS)
 
-main: measurements.o ssalloc.o  bst_howley.o bst_howley_test_scalability.o 
-	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_howley.o  $(BUILDIR)/bst_howley_test_scalability.o -o $(BINS) $(LDFLAGS)
+test.o: bst_howley.h
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
+
+main: measurements.o ssalloc.o  bst_howley.o test.o 
+	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_howley.o  $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
 	-rm -f $(BINS)
