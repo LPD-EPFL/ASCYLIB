@@ -280,7 +280,6 @@ test(void* thread)
       else if(unlikely(c <= scale_rem))
 	{
 	  int removed;
-      bool_t res;
 	  START_TS(2);
 	  removed = DS_REMOVE(key,set);
 	  END_TS(2, my_removing_count);
@@ -294,6 +293,7 @@ test(void* thread)
 	}
       else
 	{ 
+        bool_t res;
 	  START_TS(0);
 	  res = DS_CONTAINS(key, set);
 	  END_TS(0, my_getting_count);

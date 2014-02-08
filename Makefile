@@ -1,6 +1,6 @@
 .PHONY:	all
 
-BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque src/bst src/noise/
+BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/
 LBENCHS = src/linkedlist-lock src/hashtable-lock src/skiplist-lock src/bst-lock2
 LFBENCHS = src/linkedlist src/hashtable src/skiplist src/bst src/bst-howley
 NOISE = src/noise
@@ -46,6 +46,8 @@ clean:
 	$(MAKE) -C src/skiplist-lock clean
 	$(MAKE) -C src/sftree clean
 	$(MAKE) -C src/bst clean
+	$(MAKE) -C src/bst-howley clean
+	$(MAKE) -C src/bst-lock2 clean
 	$(MAKE) -C src/deque clean
 	$(MAKE) -C src/noise clean
 	rm -rf build
