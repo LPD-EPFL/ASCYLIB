@@ -207,3 +207,18 @@ harris_delete(intset_t *the_list, val_t val)
   return SUCCESS;
 }
 
+int
+set_size(intset_t *set)
+{
+  int size = 0;
+  node_t *node;
+
+  /* We have at least 2 elements */
+  node = get_unmarked_ref(set->head->next);
+  while (get_unmarked_ref(node->next) != NULL) 
+    {
+      if (!is_marked_ref(node->next)) size++;
+      node = get_unmarked_ref(node->next);
+    }
+  return size;
+}

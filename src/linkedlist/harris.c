@@ -220,7 +220,7 @@ set_size(intset_t *set)
 
   /* We have at least 2 elements */
   node = get_unmarked_ref(set->head->next);
-  while (node->next != NULL) 
+  while (get_unmarked_ref(node->next) != NULL)
     {
       if (!is_marked_ref(node->next)) size++;
       node = get_unmarked_ref(node->next);
