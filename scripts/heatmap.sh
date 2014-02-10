@@ -82,12 +82,12 @@ do
 
     prog=$prog1;
     thr1=$thr1a;
-    thr=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val}  | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
+    thr=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val}  | grep "Mops" | cut -d' ' -f2);
 
     prog=$prog2;
     thr1=$thr1b;
 
-    thrt2=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val} | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
+    thrt2=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val} | grep "Mops" | cut -d' ' -f2);
 
     ratio=$(echo "100* $thrt2/$thr" | bc -l);
     
