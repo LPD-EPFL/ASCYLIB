@@ -80,18 +80,4 @@ void set_delete(intset_t *set)
   free(set);
 }
 
-int
-set_size(intset_t *set)
-{
-  int size = 0;
-  node_t *node;
 
-  /* We have at least 2 elements */
-  node = set->head->next;
-  while (node->next != NULL) 
-    {
-      size++;
-      node = node->next;
-    }
-  return size;
-}

@@ -69,4 +69,3 @@ typedef ALIGNED(64) struct intset
 node_t *new_node(val_t val, node_t *next, int transactional);
 intset_t *set_new();
 void set_delete(intset_t *set);
-int set_size(intset_t *set);

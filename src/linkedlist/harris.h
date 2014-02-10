@@ -40,3 +40,4 @@ node_t *harris_search(intset_t *set, val_t val, node_t **left_node);
 int harris_find(intset_t *set, val_t val);
 int harris_insert(intset_t *set, val_t val);
 int harris_delete(intset_t *set, val_t val);
+int set_size(intset_t *set);
