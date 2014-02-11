@@ -425,14 +425,6 @@ main(int argc, char **argv)
 		 "        Percentage of snapshot transactions (default=" XSTR(DEFAULT_SNAPSHOT) ")\n"
 		 "  -l , --load-factor <int>\n"
 		 "        Ratio of keys over buckets (default=" XSTR(DEFAULT_LOAD) ")\n"
-		 "  -x, --elasticity (default=4)\n"
-		 "        Use elastic transactions\n"
-		 "        0 = non-protected,\n"
-		 "        1 = normal transaction,\n"
-		 "        2 = read elastic-tx,\n"
-		 "        3 = read/add elastic-tx,\n"
-		 "        4 = read/add/rem elastic-tx,\n"
-		 "        5 = elastic-tx w/ optimized move.\n"
 		 );
 	  exit(0);
 	case 'v':

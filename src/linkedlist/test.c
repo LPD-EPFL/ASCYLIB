@@ -62,7 +62,7 @@ void barrier_cross(barrier_t *b)
 
 typedef ALIGNED(64) struct thread_data 
 {
-  val_t first;
+  skey_t first;
   long range;
   int update;
   int alternate;
@@ -102,7 +102,7 @@ test(void *data)
   PF_MSG(3, "search");
 
   int unext, last = -1; 
-  val_t val = 0;
+  skey_t val = 0;
 	
   thread_data_t *d = (thread_data_t *)data;
 	
@@ -137,7 +137,7 @@ test(void *data)
 	} else { // remove
 				
 	  if (d->alternate) { // alternate mode (default)
-	    if (set_remove(d->set, last, TRANSACTIONAL)) {
+	    if (set_remove(d->set, last)) {
 	      d->nb_removed++;
 	    } 
 	    last = -1;
@@ -145,7 +145,7 @@ test(void *data)
 	    /* Random computation only in non-alternated cases */
 	    val = rand_range_re(&d->seed, d->range);
 	    /* Remove one random value */
-	    if (set_remove(d->set, val, TRANSACTIONAL)) {
+	    if (set_remove(d->set, val)) {
 	      d->nb_removed++;
 	      /* Repeat until successful, to avoid size variations */
 	      last = -1;
@@ -175,7 +175,7 @@ test(void *data)
 	  }
 	}	else val = rand_range_re(&d->seed, d->range);
 			
-	if (set_contains(d->set, val, TRANSACTIONAL)) 
+	if (set_contains(d->set, val)) 
 	  d->nb_found++;
 	d->nb_contains++;
 	
@@ -206,9 +206,7 @@ test(void *data)
   return NULL;
 }
 
-/*void catcher(int sig) {
-  printf("CAUGHT SIGNAL %d\n", sig);
-  }*/
+int test_verbose = 0;
 
 int
 main(int argc, char **argv) 
@@ -221,6 +219,7 @@ main(int argc, char **argv)
     {
       // These options don't set a flag
       {"help",                      no_argument,       NULL, 'h'},
+      {"verbose",                   no_argument,       NULL, 'v'},
       {"duration",                  required_argument, NULL, 'd'},
       {"initial-size",              required_argument, NULL, 'i'},
       {"num-threads",               required_argument, NULL, 'n'},
@@ -234,8 +233,8 @@ main(int argc, char **argv)
 	
   intset_t *set;
   int i, c, size;
-  val_t last = 0; 
-  val_t val = 0;
+  skey_t last = 0; 
+  skey_t val = 0;
   unsigned long reads, effreads, updates, effupds, aborts, aborts_locked_read, 
     aborts_locked_write, aborts_validate_read, aborts_validate_write, 
     aborts_validate_commit, aborts_invalid_memory, aborts_double_write, 
@@ -257,7 +256,7 @@ main(int argc, char **argv)
 	
   while(1) {
     i = 0;
-    c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:x:l:", long_options, &i);
+    c = getopt_long(argc, argv, "hvAf:d:i:n:r:s:u:x:l:", long_options, &i);
 		
     if(c == -1)
       break;
@@ -295,6 +294,9 @@ main(int argc, char **argv)
 	     "        Percentage of update transactions (default=" XSTR(DEFAULT_UPDATE) ")\n"
 	     );
       exit(0);
+    case 'v':
+      test_verbose = 1;
+      break;
     case 'A':
       alternate = 1;
       break;
@@ -387,7 +389,7 @@ main(int argc, char **argv)
       while (i < initial) 
 	{
 	  val = rand_range(range);
-	  if (set_add(set, val, 0)) 
+	  if (set_add(set, val, val)) 
 	    {
 	      last = val;
 	      if (i == ten_perc_nxt)
@@ -404,7 +406,7 @@ main(int argc, char **argv)
     {
       for (i = initial; i > 0; i--)
 	{
-	  set_add(set, i, 0);
+	  set_add(set, i, val);
 	}
     }
   printf("\n");
@@ -500,13 +502,16 @@ main(int argc, char **argv)
   max_retries = 0;
   for (i = 0; i < nb_threads; i++) 
     {
-      printf("Thread %d\n", i);
-      printf("  #add        : %lu\n", data[i].nb_add);
-      printf("    #added    : %lu\n", data[i].nb_added);
-      printf("  #remove     : %lu\n", data[i].nb_remove);
-      printf("    #removed  : %lu\n", data[i].nb_removed);
-      printf("  #contains   : %lu\n", data[i].nb_contains);
-      printf("    #found    : %lu\n", data[i].nb_found);
+      if (test_verbose)
+	{
+	  printf("Thread %d\n", i);
+	  printf("  #add        : %lu\n", data[i].nb_add);
+	  printf("    #added    : %lu\n", data[i].nb_added);
+	  printf("  #remove     : %lu\n", data[i].nb_remove);
+	  printf("    #removed  : %lu\n", data[i].nb_removed);
+	  printf("  #contains   : %lu\n", data[i].nb_contains);
+	  printf("    #found    : %lu\n", data[i].nb_found);
+	}
       aborts += data[i].nb_aborts;
       aborts_locked_read += data[i].nb_aborts_locked_read;
       aborts_locked_write += data[i].nb_aborts_locked_write;
