@@ -304,11 +304,19 @@ ifeq ($(TEST),old)
 	TEST_FILE = test.c
 	CFLAGS += -DGC=0
 else
-	ifeq ($(GC),0)
-		CFLAGS += -DGC=0
-	else
+
+	ifeq ($(TEST),correct)
+		TEST_FILE=test_correct.c
 		CFLAGS += -DGC=1
+
+	else
+		ifeq ($(GC),0)
+			CFLAGS += -DGC=0
+		else
+			CFLAGS += -DGC=1
+		endif
 	endif
+
 endif
 
 ifeq ($(LATENCY),1)
