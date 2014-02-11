@@ -124,8 +124,16 @@ harris_search(intset_t *set, skey_t key, node_t **left_node)
       if (ATOMIC_CAS_MB(&(*left_node)->next, left_node_next, right_node)) 
 	{
 #if GC == 1
-	  ssmem_free(alloc, (void*) get_unmarked_ref((long) left_node_next));
+	  node_t* cur = left_node_next;
+	  do 
+	    {
+	      node_t* free = cur;
+	      cur = (node_t*) get_unmarked_ref((long) cur->next);
+	      ssmem_free(alloc, free);
+	    }
+	  while (cur != right_node);
 #endif
+
 	  if (!(right_node->next && is_marked_ref((long) right_node->next)))
 	    {
 	      return right_node;
