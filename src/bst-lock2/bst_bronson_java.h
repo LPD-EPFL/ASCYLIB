@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "ssalloc.h"
 #include "lock_if.h"
+#include "common.h"
 
 #define FOUND 1
 #define NOT_FOUND 2
@@ -34,17 +35,14 @@ typedef uint8_t bool_t;
 typedef uint8_t result_t;
 typedef uint8_t function_t;
 
-typedef uint32_t bst_key_t;
-typedef bool_t bst_value_t;
-
 typedef ALIGNED(64) union node_t node_t;
 
 union node_t {
 	
 	struct {
 		volatile int height; 
-		volatile bst_key_t key; 
-		volatile bst_value_t value; 
+		volatile skey_t key; 
+		volatile sval_t value; 
 		volatile uint64_t version; 
 		
 		volatile node_t* parent; 
@@ -58,9 +56,9 @@ union node_t {
 
 // bst interface functions
 volatile node_t* bst_initialize();
-bool_t bst_contains(bst_key_t k, volatile node_t* root);
-bool_t bst_add(bst_key_t k, volatile node_t* root);
-bool_t bst_remove(bst_key_t k, volatile node_t* root);
+bool_t bst_contains(skey_t k, volatile node_t* root);
+bool_t bst_add(skey_t k, volatile node_t* root);
+bool_t bst_remove(skey_t k, volatile node_t* root);
 
 // bst private functions
 void wait_until_not_changing(volatile node_t* node);
@@ -89,17 +87,17 @@ volatile node_t* rotate_left_over_right_nl(volatile node_t* n_parent, volatile n
 
 void set_child(volatile node_t* parent, volatile node_t* child, bool_t is_right);
 
-result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node);
+result_t attempt_node_update(function_t func, sval_t expected, sval_t new_value, volatile node_t* parent, volatile node_t* node);
 
-result_t attempt_update(bst_key_t key, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v);
+result_t attempt_update(skey_t key, function_t func, sval_t expected, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v);
 
-volatile node_t* new_node(int height, bst_key_t key, uint64_t version, bst_value_t value, volatile node_t* parent, volatile node_t* left, volatile node_t* right);
+volatile node_t* new_node(int height, skey_t key, uint64_t version, sval_t value, volatile node_t* parent, volatile node_t* left, volatile node_t* right);
 
-bool_t attempt_insert_into_empty(bst_key_t key, bst_value_t value, volatile node_t* holder);
+bool_t attempt_insert_into_empty(skey_t key, sval_t value, volatile node_t* holder);
 
-result_t update_under_root(bst_key_t k, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* holder);
+result_t update_under_root(skey_t k, function_t func, sval_t expected, sval_t new_value, volatile node_t* holder);
 
-result_t attempt_get(bst_key_t k, volatile node_t* node, bool_t is_right, uint64_t node_v);
+result_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t node_v);
 
 void bst_print(volatile node_t* node);
 

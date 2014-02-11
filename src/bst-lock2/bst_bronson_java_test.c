@@ -95,13 +95,13 @@ void *test(void *data) {
     barrier_cross(d->barrier);
 
 	int i;
-	bst_value_t* val = (bst_value_t*)malloc(sizeof(bst_value_t));
-	bst_value_t* added;
+	sval_t* val = (sval_t*)malloc(sizeof(sval_t));
+	sval_t* added;
 
 	for ( i = 1; i <= op_count; i++){
 
 		*val = d->id*op_count+i;
-        // bst_value_t val = d->id*op_count+i;
+        // sval_t val = d->id*op_count+i;
 		// fprintf(stderr, "[%d] before add\n", pthread_self());
 		added = bst_put(i, val, root);
 		// fprintf(stderr, "[%d] Added %d\n", pthread_self(), i);

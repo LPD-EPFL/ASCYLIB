@@ -41,8 +41,6 @@
 typedef uint8_t leaf_t;
 typedef uint8_t bool_t;
 
-typedef skey_t skey_t;
-
 #define INF2 (KEY_MAX + 1)
 #define INF1 (KEY_MAX)
 #define MAX_KEY KEY_MAX //MAX_KEY should be of the form 2^n-1 for increased random key generation performance
@@ -73,6 +71,7 @@ union info_t {
 
 struct node_t {
     skey_t key;
+    sval_t value;
     update_t update;
     node_t* left;
     node_t* right;
@@ -100,11 +99,11 @@ void bst_help_marked(info_t* op);
 
 bool_t bst_help_delete(info_t* op);
 
-bool_t bst_delete(skey_t key, node_t* root);
+sval_t bst_delete(skey_t key, node_t* root);
 
 void bst_help_insert(info_t * op);
 
-bool_t bst_insert(skey_t key, node_t* root);
+bool_t bst_insert(skey_t key, sval_t value, node_t* root);
 
 node_t* bst_find(skey_t key, node_t* root);
 

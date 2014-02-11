@@ -23,12 +23,12 @@ node_t* bst_initialize() {
 }
 
 
-bst_value_t* bst_get(bst_key_t k, node_t* root){
+sval_t* bst_get(skey_t k, node_t* root){
 	// printf("bst_get\n");
 	return bst_attempt_get(k, root, TRUE, 0);
 }
 
-bst_value_t* bst_attempt_get(bst_key_t k, node_t* node, bool_t is_right, bst_version_t node_v){
+sval_t* bst_attempt_get(skey_t k, node_t* node, bool_t is_right, bst_version_t node_v){
 	// printf("bst_attempt_get\n");
 
 	while(TRUE){
@@ -57,7 +57,7 @@ bst_value_t* bst_attempt_get(bst_key_t k, node_t* node, bool_t is_right, bst_ver
 				return RETRY;
 			}
 
-			bst_value_t* p = bst_attempt_get(k, child, next_is_right, ch_v);
+			sval_t* p = bst_attempt_get(k, child, next_is_right, ch_v);
 			if (p != RETRY) {
 				return p;
 			}
@@ -65,16 +65,16 @@ bst_value_t* bst_attempt_get(bst_key_t k, node_t* node, bool_t is_right, bst_ver
 	}
 }
 
-bst_value_t* bst_put(bst_key_t k, bst_value_t* v, node_t* root){
+sval_t* bst_put(skey_t k, sval_t* v, node_t* root){
 	// printf("bst_put\n");
 
 	return bst_attempt_put(k, v, root, TRUE, 0);
 }
 
-bst_value_t* bst_attempt_put(bst_key_t k, bst_value_t* v, node_t* node, bool_t is_right, bst_version_t node_v){
+sval_t* bst_attempt_put(skey_t k, sval_t* v, node_t* node, bool_t is_right, bst_version_t node_v){
 	// printf("[%d] bst_attempt_put\n", pthread_self());
 
-	bst_value_t* p = RETRY;
+	sval_t* p = RETRY;
 	do{
 
 		node_t* child = CHILD(node, is_right);
@@ -112,7 +112,7 @@ bst_value_t* bst_attempt_put(bst_key_t k, bst_value_t* v, node_t* node, bool_t i
 	return p;
 }
 
-bst_value_t* bst_attempt_insert(bst_key_t k, bst_value_t* v, node_t* node, bool_t is_right, bst_version_t node_v){
+sval_t* bst_attempt_insert(skey_t k, sval_t* v, node_t* node, bool_t is_right, bst_version_t node_v){
 	// printf("[%d] bst_attempt_insert\n", pthread_self());
 
 
@@ -148,7 +148,7 @@ bst_value_t* bst_attempt_insert(bst_key_t k, bst_value_t* v, node_t* node, bool_
 
 }
 
-bst_value_t* bst_attempt_update(node_t* node, bst_value_t* v){
+sval_t* bst_attempt_update(node_t* node, sval_t* v){
 	// printf("[%d] bst_attempt_update\n", pthread_self());
 	
 	LOCK(&(node->lock));
@@ -156,23 +156,23 @@ bst_value_t* bst_attempt_update(node_t* node, bst_value_t* v){
 		UNLOCK(&(node->lock));
 		return RETRY;
 	}
-	bst_value_t* prev = node->value;
+	sval_t* prev = node->value;
 	node->value = v;
 	UNLOCK(&(node->lock));
 	return prev;
 	
 }
 
-bst_value_t* bst_remove(bst_key_t k, node_t* root){
+sval_t* bst_remove(skey_t k, node_t* root){
 	// printf("bst_remove\n");
 
 	return bst_attempt_remove(k, root, TRUE, 0);
 }
 
-bst_value_t* bst_attempt_remove(bst_key_t k, node_t* node, bool_t is_right, bst_version_t node_v){
+sval_t* bst_attempt_remove(skey_t k, node_t* node, bool_t is_right, bst_version_t node_v){
 	// printf("bst_attempt_remove\n");
 
-	bst_value_t* p = RETRY;
+	sval_t* p = RETRY;
 	do{
 
 		node_t* child = CHILD(node, is_right);
@@ -212,14 +212,14 @@ bool_t can_unlink(node_t* node){
 	return node->left == NULL || node->right == NULL;
 }
 
-bst_value_t* bst_attempt_remove_node(node_t* par, node_t* n){
+sval_t* bst_attempt_remove_node(node_t* par, node_t* n){
 	// printf("bst_attempt_remove_node\n");
 
 	if (n->value == NULL) {
 		return NULL;
 	}
 
-	bst_value_t* prev;
+	sval_t* prev;
 	if (!can_unlink(n)) {
 		LOCK(&(n->lock));
 

@@ -36,7 +36,7 @@
  * ################################################################### */
 
 #define DS_CONTAINS(k,r)  bst_find(k,r)
-#define DS_ADD(k,r)       bst_insert(k,r)
+#define DS_ADD(k,v,r)       bst_insert(k,v,r)
 #define DS_REMOVE(k,r)    bst_delete(k,r)
 #define DS_SIZE(s)          bst_size(s)
 #define DS_NEW()           bst_initialize()
@@ -236,7 +236,7 @@ test(void* thread)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(key,set) == false)
+      if(DS_ADD(key,key,set) == false)
 	{
 	  i--;
 	}
@@ -262,7 +262,7 @@ test(void* thread)
 	{
       bool_t res;
 	  START_TS(1);
-	  res = DS_ADD(key,set);
+	  res = DS_ADD(key,key, set);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -274,7 +274,7 @@ test(void* thread)
 	} 
       else if(unlikely(c <= scale_rem))
 	{
-	  int removed;
+	  sval_t removed;
 	  START_TS(2);
 	  removed = DS_REMOVE(key,set);
 	  END_TS(2, my_removing_count);

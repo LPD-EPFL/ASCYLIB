@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "atomic_ops_if.h"
 #include "ssalloc.h"
+#include "common.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -23,16 +24,16 @@
 #define STATE_OP_FAILED 2
 
 //States for the result of a search operation
-#define FOUND 0
-#define NOT_FOUND_L 1
-#define NOT_FOUND_R 2
-#define ABORT 3
+#define FOUND 0x0
+#define NOT_FOUND_L 0x1
+#define NOT_FOUND_R 0x2
+#define ABORT 0x3
 
-#define INF UINT32_MAX
+#define INF KEY_MAX
 
-typedef uint32_t bst_key_t;
 typedef uint8_t bool_t;
-typedef uint8_t search_res_t;
+
+extern const sval_t val_mask;
 
 typedef ALIGNED(64) union operation_t operation_t;
 typedef ALIGNED(64) struct node_t node_t;
@@ -49,15 +50,16 @@ typedef struct relocate_op_t {
 	int /*volatile*/ state; // initialize to ONGOING every time a relocate operation is created
 	node_t* dest;
 	operation_t* dest_op;
-	bst_key_t remove_key;
-	bst_key_t replace_key;
+	skey_t remove_key;
+	skey_t replace_key;
 	//char padding[32]; 
 
 } relocate_op_t;
 
 
 struct node_t {
-	bst_key_t /*volatile*/ key; 
+	skey_t /*volatile*/ key; 
+    sval_t value;
 	operation_t* /*volatile*/ op;
 	node_t* /*volatile*/ left;
 	node_t* /*volatile*/ right;
@@ -70,17 +72,17 @@ union operation_t {
 };
 
 //BST functions
-bool_t bst_contains(bst_key_t k, node_t* root);
-search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root); 
+bool_t bst_contains(skey_t k, node_t* root);
+sval_t bst_find(skey_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root); 
 //do we need * or ** for node_t? if only the 
 //value pointed to by pred is modified, we need *; if the 
 //place pred points to is modified and we want the modif
 //to live outside the function call, we need **.  
 
 node_t* bst_initialize();
-bool_t bst_add(bst_key_t k, node_t* root);
+bool_t bst_add(skey_t k, node_t* root);
 void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root);
-bool_t bst_remove(bst_key_t k, node_t* root);
+sval_t bst_remove(skey_t k, node_t* root);
 bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root);
 void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* root);
 void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* curr_op, node_t* root );

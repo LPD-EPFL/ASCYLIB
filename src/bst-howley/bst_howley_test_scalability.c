@@ -140,7 +140,7 @@ void *test(void *data)
     seeds = seed_rand();
     rand_max = max_key;
     uint32_t op;
-    bst_key_t key;
+    skey_t key;
     int i;
     int last = -1;
  
