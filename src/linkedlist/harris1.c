@@ -127,7 +127,7 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
       node_t* left_node;
       right_node = list_search(the_list, key, &left_node);
 
-      if (right_node->val == val) 
+      if (right_node->key == key) 
 	{
 	  return 0;
 	}

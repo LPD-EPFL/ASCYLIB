@@ -163,8 +163,8 @@ harris_insert(intset_t *set, skey_t key, sval_t val)
 	
   do 
     {
-      right_node = harris_search(set, val, &left_node);
-      if (right_node->val == val)
+      right_node = harris_search(set, key, &left_node);
+      if (right_node->key == key)
 	return 0;
 
 #warning allocating new node on every iteration
