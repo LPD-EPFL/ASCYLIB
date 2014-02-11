@@ -37,6 +37,7 @@
 
 #include "utils.h"
 #include "ssalloc.h"
+#include "ssmem.h"
 
 #define DEFAULT_DURATION                1000
 #define DEFAULT_INITIAL                 1024
@@ -52,6 +53,7 @@
 #define STR(s)                          #s
 
 extern uint8_t levelmax[64];
+extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   DEFAULT_ELASTICITY
 
