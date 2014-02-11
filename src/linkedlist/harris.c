@@ -158,17 +158,32 @@ harris_find(intset_t *set, skey_t key)
 int
 harris_insert(intset_t *set, skey_t key, sval_t val) 
 {
-  node_t *newnode, *right_node, *left_node;
+  node_t *newnode = NULL, *right_node, *left_node;
   left_node = set->head;
 	
   do 
     {
       right_node = harris_search(set, key, &left_node);
       if (right_node->key == key)
-	return 0;
+	{
+#if GC == 1
+	  if (unlikely(newnode != NULL))
+	    {
+	      ssmem_free(alloc, new_node);
+	    }
+#endif
+	  return 0;
+	}
 
-#warning allocating new node on every iteration
-      newnode = new_node(key, val, right_node, 0);
+      if (likely(newnode == NULL))
+	{
+	  newnode = new_node(key, val, right_node, 0);
+	}
+      else
+	{
+	  newnode->next = right_node;
+	}
+
       if (ATOMIC_CAS_MB(&left_node->next, right_node, newnode))
 	return 1;
     } 
