@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "ssalloc.h"
 #include "lock_if.h"
+#include "common.h"
 
 #define FOUND 1
 #define NOT_FOUND 2
