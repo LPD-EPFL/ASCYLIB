@@ -1,4 +1,5 @@
 #include "bst_howley.h"
+const sval_t val_mask = ~(0x3);
 
 
 node_t* bst_initialize() {
@@ -23,13 +24,14 @@ bool_t bst_contains(skey_t k, node_t* root){
 	node_t* curr;
 	operation_t* pred_op;
 	operation_t* curr_op;
-
-	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root) == FOUND;
+    sval_t res = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
+    if (res & val_mask) return res;
+    return 0;
 }
 
-search_res_t bst_find(skey_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
+sval_t bst_find(skey_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
 
-	search_res_t result;
+	sval_t result;
 	skey_t curr_key;
 	node_t* next;
 	node_t* last_right;
@@ -76,12 +78,12 @@ retry:
 			last_right = *curr;
 			last_right_op = *curr_op;
 		} else{
-			result = FOUND;
+			result = (*curr)->value;
 			break;
 		}
 	}
 	
-	if ((result != FOUND) && (last_right_op != last_right->op)) {
+	if ((!(result & val_mask)) && (last_right_op != last_right->op)) {
 		goto retry;
 	}
 
@@ -100,12 +102,12 @@ bool_t bst_add(skey_t k, node_t* root){
 	operation_t* pred_op;
 	operation_t* curr_op;
 	operation_t* cas_op;
-	search_res_t result;
+	sval_t  result;
 
 	while(TRUE) {
 
 		result = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
-		if (result == FOUND) {
+		if (result & val_mask) {
 			return FALSE;
 		}
 
@@ -149,7 +151,7 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
 
-bool_t bst_remove(skey_t k, node_t* root){
+sval_t bst_remove(skey_t k, node_t* root){
 
 	node_t* pred;
 	node_t* curr;
@@ -160,15 +162,15 @@ bool_t bst_remove(skey_t k, node_t* root){
 	operation_t* reloc_op;
 
 	while(TRUE) {
-
-		if (bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root) != FOUND) {
-			return FALSE;
+        sval_t res = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
+		if (!(res & val_mask)) {
+			return 0;
 		}
 
 		if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
 			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
 				bst_help_marked(pred, pred_op, curr, root);
-				return TRUE;
+				return res;
 			}
 		} else { // node has two children
 
@@ -187,7 +189,7 @@ bool_t bst_remove(skey_t k, node_t* root){
 			MEM_BARRIER;
 			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
 				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
-					return TRUE;
+					return res;
 				}
 			}
 		}

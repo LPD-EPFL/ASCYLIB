@@ -101,7 +101,7 @@ bool_t bst_remove(skey_t key, volatile node_t* root) {
     return update_under_root(key, UPDATE_IF_PRESENT, TRUE, FALSE, root) == FOUND;
 }
 
-result_t update_under_root(skey_t key, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* holder) {
+result_t update_under_root(skey_t key, function_t func, sval_t expected, sval_t new_value, volatile node_t* holder) {
 
 	while(TRUE){
 
@@ -131,7 +131,7 @@ result_t update_under_root(skey_t key, function_t func, bst_value_t expected, bs
     }
 }
 
-bool_t attempt_insert_into_empty(skey_t key, bst_value_t value, volatile node_t* holder){
+bool_t attempt_insert_into_empty(skey_t key, sval_t value, volatile node_t* holder){
 
     skey_t UNUSED holder_key = holder->key;
 
@@ -153,7 +153,7 @@ bool_t attempt_insert_into_empty(skey_t key, bst_value_t value, volatile node_t*
     }
 }
 
- volatile node_t* new_node(int height, skey_t key, uint64_t version, bst_value_t value, volatile node_t* parent,   volatile node_t* left, volatile node_t* right) {
+ volatile node_t* new_node(int height, skey_t key, uint64_t version, sval_t value, volatile node_t* parent,   volatile node_t* left, volatile node_t* right) {
 
 	volatile node_t* node = (node_t*) ssalloc(sizeof(node_t));
 
@@ -169,7 +169,7 @@ bool_t attempt_insert_into_empty(skey_t key, bst_value_t value, volatile node_t*
     return node;
 }
 
-result_t attempt_update(skey_t key, function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v) {
+result_t attempt_update(skey_t key, function_t func, sval_t expected, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v) {
 
 	int cmp = key - node->key;
    
@@ -264,7 +264,7 @@ result_t attempt_update(skey_t key, function_t func, bst_value_t expected, bst_v
     }
 }
 
-result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t new_value, volatile node_t* parent, volatile node_t* node) {
+result_t attempt_node_update(function_t func, sval_t expected, sval_t new_value, volatile node_t* parent, volatile node_t* node) {
 
 
 	if(!new_value){
@@ -276,7 +276,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
 
     if(!new_value && (node->left == NULL || node->right == NULL)){
         
-        bst_value_t prev;
+        sval_t prev;
         volatile node_t* damaged;
 
         {
@@ -347,7 +347,7 @@ result_t attempt_node_update(function_t func, bst_value_t expected, bst_value_t 
             return RETRY;
         }
 
-        bst_value_t prev = node->value;
+        sval_t prev = node->value;
         if(!SHOULD_UPDATE(func, prev)){
 			// releaseAll();
 			UNLOCK(node_lock);
