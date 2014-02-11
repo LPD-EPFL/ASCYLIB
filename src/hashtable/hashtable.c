@@ -50,17 +50,11 @@ int
 ht_size(ht_intset_t *set) 
 {
   int size = 0;
-  node_t *node;
   int i;
 	
-  for (i=0; i < *maxhtlength; i++) 
+  for (i = 0; i < *maxhtlength; i++) 
     {
-      node = set->buckets[i]->head->next;
-      while (node->next != NULL) 
-	{
-	  size++;
-	  node = node->next;
-	}
+      size += set_size(set->buckets[i]);
     }
   return size;
 }

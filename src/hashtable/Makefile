@@ -10,7 +10,7 @@ PROF = $(ROOT)/src
 
 all:	main
 
-LIST_IMPL = harris
+LIST_IMPL = harris1
 
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
