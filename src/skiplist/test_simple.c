@@ -35,7 +35,7 @@
  * ################################################################### */
 
 #define DS_CONTAINS(s,k,t)  sl_contains(s, k, t)
-#define DS_ADD(s,k,t)       sl_add(s, k, t)
+#define DS_ADD(s,k,t)       sl_add(s, k, k, t)
 #define DS_REMOVE(s,k,t)    sl_remove(s, k, t)
 #define DS_SIZE(s)          sl_set_size(s)
 #define DS_NEW()            sl_set_new()
@@ -512,7 +512,7 @@ main(int argc, char **argv)
     
   stop = 0;
     
-  *levelmax = floor_log_2((unsigned int) initial);
+  levelmax = floor_log_2((unsigned int) initial);
 
   ssalloc_align();
   DS_TYPE* set = DS_NEW();

@@ -27,6 +27,6 @@
 #include "skiplist.h"
 #include "ssalloc.h"
 
-int fraser_find(sl_intset_t *set, val_t val);
-int fraser_remove(sl_intset_t *set, val_t val);
-int fraser_insert(sl_intset_t *set, val_t v);
+int fraser_find(sl_intset_t *set, skey_t key);
+int fraser_remove(sl_intset_t *set, skey_t key);
+int fraser_insert(sl_intset_t *set, skey_t key, sval_t val);

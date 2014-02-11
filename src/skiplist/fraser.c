@@ -26,7 +26,7 @@
 
 #include "fraser.h"
 
-extern ALIGNED(CACHE_LINE_SIZE) uint8_t levelmax[64];
+extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 inline int
 is_marked(uintptr_t i)
@@ -47,14 +47,14 @@ set_mark(uintptr_t i)
 }
 
 void
-fraser_search(sl_intset_t *set, val_t val, sl_node_t **left_list, sl_node_t **right_list)
+fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **right_list)
 {
   int i;
   sl_node_t *left, *left_next, *right, *right_next;
 
  retry:
   left = set->head;
-  for (i = *levelmax - 1; i >= 0; i--)
+  for (i = levelmax - 1; i >= 0; i--)
     {
       left_next = left->next[i];
       if (is_marked((uintptr_t)left_next))
@@ -75,7 +75,7 @@ fraser_search(sl_intset_t *set, val_t val, sl_node_t **left_list, sl_node_t **ri
 	      right = (sl_node_t*)unset_mark((uintptr_t)right_next);
 	    }
 
-	  if (right->val >= val)
+	  if (right->key >= key)
 	    {
 	      break;
 	    }
@@ -100,14 +100,14 @@ fraser_search(sl_intset_t *set, val_t val, sl_node_t **left_list, sl_node_t **ri
 }
 
 int 
-fraser_find(sl_intset_t *set, val_t val) 
+fraser_find(sl_intset_t *set, skey_t key)
 {
   sl_node_t **succs;
   int result;
 
-  succs = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
-  fraser_search(set, val, NULL, succs);
-  result = (succs[0]->val == val && !succs[0]->deleted);
+  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
+  fraser_search(set, key, NULL, succs);
+  result = (succs[0]->key == key && !succs[0]->deleted);
   ssfree(succs);
   return result;
 }
@@ -133,14 +133,14 @@ mark_node_ptrs(sl_node_t *n)
 }
 
 int
-fraser_remove(sl_intset_t *set, val_t val)
+fraser_remove(sl_intset_t *set, skey_t key)
 {
   sl_node_t **succs;
   int result;
 
-  succs = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
-  fraser_search(set, val, NULL, succs);
-  result = (succs[0]->val == val);
+  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
+  fraser_search(set, key, NULL, succs);
+  result = (succs[0]->key == key);
   if (result == 0)
     {
       goto end;
@@ -162,7 +162,7 @@ fraser_remove(sl_intset_t *set, val_t val)
       ssmem_free(alloc, succs[0]);
 #endif
       /* MEM_BARRIER; */
-      fraser_search(set, val, NULL, NULL);
+      fraser_search(set, key, NULL, NULL);
     }
   else
     {
@@ -176,20 +176,20 @@ fraser_remove(sl_intset_t *set, val_t val)
 }
 
 int
-fraser_insert(sl_intset_t *set, val_t v) 
+fraser_insert(sl_intset_t *set, skey_t key, sval_t val) 
 {
   sl_node_t *new, *new_next, *pred, *succ, **succs, **preds;
   int i;
   int result = 0;
 
-  new = sl_new_simple_node(v, get_rand_level(), 0);
-  preds = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
+  new = sl_new_simple_node(key, val, get_rand_level(), 0);
+  preds = (sl_node_t**) ssalloc(levelmax * sizeof(sl_node_t *));
+  succs = (sl_node_t**) ssalloc(levelmax * sizeof(sl_node_t *));
 
  retry: 	
-  fraser_search(set, v, preds, succs);
+  fraser_search(set, key, preds, succs);
   /* Update the value field of an existing node */
-  if (succs[0]->val == v) 
+  if (succs[0]->key == key) 
     {				/* Value already in list */
       if (succs[0]->deleted)
 	{		   /* Value is deleted: remove it and retry */
@@ -216,7 +216,7 @@ fraser_insert(sl_intset_t *set, val_t v)
       goto retry;
     }
 
- for (i = 1; i < new->toplevel; i++) 
+  for (i = 1; i < new->toplevel; i++) 
     {
       while (1) 
 	{
@@ -232,22 +232,22 @@ fraser_insert(sl_intset_t *set, val_t v)
 	      (!ATOMIC_CAS_MB(&new->next[i], unset_mark((uintptr_t)new_next), succ)))
 	    break; /* Give up if pointer is marked */
 	  /* Check for old reference to a k node */
-	  if (succ->val == v)
-	    succ = (sl_node_t *)unset_mark((uintptr_t)succ->next);
+	  if (succ->key == key)
+	    {
+	      succ = (sl_node_t *)unset_mark((uintptr_t)succ->next);
+	    }
 	  /* We retry the search if the CAS fails */
 	  if (ATOMIC_CAS_MB(&pred->next[i], succ, new))
 	    break;
 
 	  /* MEM_BARRIER; */
-	  fraser_search(set, v, preds, succs);
+	  fraser_search(set, key, preds, succs);
 	}
     }
 
  success:
   result = 1;
  end:
-  /* free(preds); */
-  /* free(succs); */
   ssfree(preds);
   ssfree(succs);
 

@@ -23,21 +23,21 @@
 
 #include "skiplist.h"	
 
-ALIGNED(64) uint8_t levelmax[64];
+unsigned int levelmax;
 __thread ssmem_allocator_t* alloc;
 
 int
 get_rand_level()
 {
   int i, level = 1;
-  for (i = 0; i < *levelmax - 1; i++)
+  for (i = 0; i < levelmax - 1; i++)
     {
       if ((rand_range(100)-1) < 50)
 	level++;
       else
 	break;
     }
-  /* 1 <= level <= *levelmax */
+  /* 1 <= level <= levelmax */
   return level;
 }
 
@@ -57,15 +57,15 @@ floor_log_2(unsigned int n)
  * Create a new node without setting its next fields. 
  */
 sl_node_t*
-sl_new_simple_node(val_t val, int toplevel, int transactional)
+sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
 {
   sl_node_t *node;
 
 #if GC == 1
   if (unlikely(transactional))
     {
-      /* use *levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
-      size_t ns = sizeof(sl_node_t) + *levelmax * sizeof(sl_node_t *);
+      /* use levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
+      size_t ns = sizeof(sl_node_t) + levelmax * sizeof(sl_node_t *);
       size_t ns_rm = ns % 64;
       if (ns_rm)
 	{
@@ -75,7 +75,7 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
     }
   else 
     {
-      size_t ns = sizeof(sl_node_t) + *levelmax * sizeof(sl_node_t *);
+      size_t ns = sizeof(sl_node_t) + levelmax * sizeof(sl_node_t *);
 #  if defined(DO_PAD)
       size_t ns_rm = ns & 63;
       if (ns_rm)
@@ -93,8 +93,8 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
 	  ns += 64 - ns_rm;
 	}
 #  endif
-      /* use *levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
-      size_t ns = sizeof(sl_node_t) + *levelmax * sizeof(sl_node_t *);
+      /* use levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
+      size_t ns = sizeof(sl_node_t) + levelmax * sizeof(sl_node_t *);
       size_t ns_rm = ns % 64;
       if (ns_rm)
 	{
@@ -109,6 +109,7 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
       exit(1);
     }
 
+  node->key = key;
   node->val = val;
   node->toplevel = toplevel;
   node->deleted = 0;
@@ -125,15 +126,17 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
  * If next=NULL, then this create a tail node. 
  */
 sl_node_t*
-sl_new_node(val_t val, sl_node_t *next, int toplevel, int transactional)
+sl_new_node(skey_t key, sval_t val, sl_node_t *next, int toplevel, int transactional)
 {
   volatile sl_node_t *node;
   int i;
 
-  node = sl_new_simple_node(val, toplevel, transactional);
+  node = sl_new_simple_node(key, val, toplevel, transactional);
 
-  for (i = 0; i < *levelmax; i++)
-    node->next[i] = next;
+  for (i = 0; i < levelmax; i++)
+    {
+      node->next[i] = next;
+    }
 	
   MEM_BARRIER;
 
@@ -157,9 +160,7 @@ sl_set_new()
   sl_intset_t *set;
   sl_node_t *min, *max;
 	
-  /* if ((set = (sl_intset_t *)malloc(sizeof(sl_intset_t))) == NULL) */
   if ((set = (sl_intset_t *)ssalloc_alloc(1, sizeof(sl_intset_t))) == NULL)
-  /* if ((set = (sl_intset_t *)ssalloc_alloc(0, sizeof(sl_intset_t))) == NULL) */
     {
       perror("malloc");
       exit(1);
@@ -167,8 +168,8 @@ sl_set_new()
 
   ssalloc_align_alloc(1);
 
-  max = sl_new_node(VAL_MAX, NULL, *levelmax, 1);
-  min = sl_new_node(VAL_MIN, max, *levelmax, 1);
+  max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
+  min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
   set->head = min;
   return set;
 }

@@ -23,6 +23,6 @@
 
 #include "fraser.h"
 
-int sl_contains(sl_intset_t *set, val_t val, int transactional);
-int sl_add(sl_intset_t *set, val_t val, int transactional);
-int sl_remove(sl_intset_t *set, val_t val, int transactional);
+int sl_contains(sl_intset_t *set, skey_t key, int transactional);
+int sl_add(sl_intset_t *set, skey_t key, sval_t val, int transactional);
+int sl_remove(sl_intset_t *set, skey_t key, int transactional);
