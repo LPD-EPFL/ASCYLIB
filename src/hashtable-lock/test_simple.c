@@ -35,7 +35,7 @@
  * ################################################################### */
 
 #define DS_CONTAINS(s,k,t)  ht_contains(s, k, t)
-#define DS_ADD(s,k,t)       ht_add(s, k, t)
+#define DS_ADD(s,k,t)       ht_add(s, k, k, t)
 #define DS_REMOVE(s,k,t)    ht_remove(s, k, t)
 #define DS_SIZE(s)          ht_size(s)
 #define DS_NEW()            ht_new()
@@ -336,6 +336,7 @@ test(void* thread)
 
   /* SSPFDTERM(); */
   barrier_cross(&barrier_global);
+  barrier_cross(&barrier_global);
 #if GC == 1
   ssmem_term();
   free(alloc);
@@ -578,6 +579,7 @@ main(int argc, char **argv)
   gettimeofday(&end, NULL);
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
+  barrier_cross(&barrier_global);
   int UNUSED size_after = DS_SIZE(set);
   barrier_cross(&barrier_global);
 

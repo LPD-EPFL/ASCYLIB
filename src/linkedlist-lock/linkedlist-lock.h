@@ -38,37 +38,25 @@
 #include <atomic_ops.h>
 #include "lock_if.h"
 
+#include "common.h"
+#include "utils.h"
+#include "measurements.h"
+#include "ssalloc.h"
 #include "ssmem.h"
 
-#define DEFAULT_DURATION                1000
-#define DEFAULT_INITIAL                 1024
-#define DEFAULT_NB_THREADS              1
-#define DEFAULT_RANGE                   (2 * DEFAULT_INITIAL)
-#define DEFAULT_SEED                    0
-#define DEFAULT_UPDATE                  20
-#define DEFAULT_LOCKTYPE						  	1
-#define DEFAULT_ALTERNATE								0
-#define DEFAULT_EFFECTIVE								1
-
-#define XSTR(s)                         STR(s)
-#define STR(s)                          #s
-
-#define ATOMIC_CAS_MB_FBAR(a, e, v)     (AO_compare_and_swap_full((volatile AO_t *)(a), (AO_t)(e), (AO_t)(v)))
-
-#define ATOMIC_CAS_MB_NOBAR(a, e, v)    (AO_compare_and_swap((volatile AO_t *)(a), (AO_t)(e), (AO_t)(v)))
+#define DEFAULT_LOCKTYPE	  	1
+#define DEFAULT_ALTERNATE		0
+#define DEFAULT_EFFECTIVE		1
 
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   transactional
 
-typedef intptr_t val_t;
-#define VAL_MIN                         INT_MIN
-#define VAL_MAX                         INT_MAX
-
-typedef ALIGNED(64) struct node_l
+typedef ALIGNED(CACHE_LINE_SIZE) struct node_l
 {
-  val_t val;
+  skey_t key;
+  sval_t val;
   struct node_l *next;
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;
@@ -76,7 +64,7 @@ typedef ALIGNED(64) struct node_l
   /* char padding[40]; */
 } node_l_t;
 
-typedef ALIGNED(64) struct intset_l 
+typedef ALIGNED(CACHE_LINE_SIZE) struct intset_l 
 {
   node_l_t* head;
 #if defined(LL_GLOBAL_LOCK)
@@ -85,10 +73,10 @@ typedef ALIGNED(64) struct intset_l
 #endif
 } intset_l_t;
 
-node_l_t *new_node_l(val_t val, node_l_t *next, int transactional);
-intset_l_t *set_new_l();
-void set_delete_l(intset_l_t *set);
-int set_size_l(intset_l_t *set);
-void node_delete_l(node_l_t *node);
+node_l_t* new_node_l(skey_t key, sval_t val, node_l_t* next, int transactional);
+intset_l_t* set_new_l();
+void set_delete_l(intset_l_t* set);
+int set_size_l(intset_l_t* set);
+void node_delete_l(node_l_t* node);
 
 #endif	/* _H_LINKEDLIST_LOCK_ */

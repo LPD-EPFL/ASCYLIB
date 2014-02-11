@@ -35,7 +35,7 @@
  * ################################################################### */
 
 #define DS_CONTAINS(s,k,t)  set_contains_l(s, k, t)
-#define DS_ADD(s,k,t)       set_add_l(s, k, t)
+#define DS_ADD(s,k,t)       set_add_l(s, k, k, t)
 #define DS_REMOVE(s,k,t)    set_remove_l(s, k, t)
 #define DS_SIZE(s)          set_size_l(s)
 #define DS_NEW()            set_new_l()
@@ -499,8 +499,6 @@ main(int argc, char **argv)
     {
       put_rate = update_rate / 2;
     }
-
-
 
   get_rate = 1 - update_rate;
 

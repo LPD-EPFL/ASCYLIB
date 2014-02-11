@@ -29,7 +29,7 @@
  * then unlock previous, keep ownership of the current, and lock next in a loop.
  */
 int
-lockc_delete(intset_l_t *set, val_t val) 
+lockc_delete(intset_l_t *set, skey_t key)
 {
   node_l_t *curr, *next;
   int found;
@@ -40,14 +40,14 @@ lockc_delete(intset_l_t *set, val_t val)
   LOCK(ND_GET_LOCK(curr->next));
   next = curr->next;
 	
-  while (next->val < val) 
+  while (next->key < key) 
     {
       UNLOCK(ND_GET_LOCK(curr));
       curr = next;
       LOCK(ND_GET_LOCK(next->next));
       next = next->next;
     }
-  found = (val == next->val);
+  found = (key == next->key);
   if (found) 
     {
       curr->next = next->next;
@@ -66,7 +66,7 @@ lockc_delete(intset_l_t *set, val_t val)
 }
 
 int
-lockc_find(intset_l_t *set, val_t val) 
+lockc_find(intset_l_t *set, skey_t key) 
 {
   node_l_t *curr, *next; 
   int found;
@@ -77,14 +77,14 @@ lockc_find(intset_l_t *set, val_t val)
   LOCK(ND_GET_LOCK(curr->next));
   next = curr->next;
 	
-  while (next->val < val) 
+  while (next->key < key) 
     {
       UNLOCK(ND_GET_LOCK(curr));
       curr = next;
       LOCK(ND_GET_LOCK(next->next));
       next = curr->next;
     }	
-  found = (val == next->val);
+  found = (key == next->key);
   GL_UNLOCK(set->lock);
   UNLOCK(ND_GET_LOCK(curr));
   UNLOCK(ND_GET_LOCK(next));
@@ -92,7 +92,7 @@ lockc_find(intset_l_t *set, val_t val)
 }
 
 int
-lockc_insert(intset_l_t *set, val_t val) 
+lockc_insert(intset_l_t *set, skey_t key, sval_t val) 
 {
   node_l_t *curr, *next, *newnode;
   int found;
@@ -103,17 +103,17 @@ lockc_insert(intset_l_t *set, val_t val)
   LOCK(ND_GET_LOCK(curr->next));
   next = curr->next;
 	
-  while (next->val < val) 
+  while (next->key < key) 
     {
       UNLOCK(ND_GET_LOCK(curr));
       curr = next;
       LOCK(ND_GET_LOCK(next->next));
       next = curr->next;
     }
-  found = (val == next->val);
+  found = (key == next->key);
   if (!found) 
     {
-      newnode =  new_node_l(val, next, 1);
+      newnode =  new_node_l(key, val, next, 1);
       curr->next = newnode;
     }
   GL_UNLOCK(set->lock);

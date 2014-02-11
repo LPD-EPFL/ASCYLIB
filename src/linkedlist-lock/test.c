@@ -64,7 +64,7 @@ void barrier_cross(barrier_t *b)
 
 typedef ALIGNED(64) struct thread_data 
 {
-  val_t first;
+  skey_t first;
   long range;
   int update;
   int unit_tx;
@@ -102,7 +102,7 @@ test(void *data)
   PF_MSG(2, "free");
 
   int unext, last = -1; 
-  val_t val = 0;
+  skey_t val = 0;
 	
   thread_data_t *d = (thread_data_t *)data;
   int transactional = d->unit_tx;
@@ -136,7 +136,7 @@ test(void *data)
 	if (last < 0) { // add
 					
 	  val = rand_range_re(&d->seed, d->range);
-	  if (set_add_l(d->set, val, TRANSACTIONAL)) {
+	  if (set_add_l(d->set, val, val, TRANSACTIONAL)) {
 	    d->nb_added++;
 	    last = val;
 	  } 				
@@ -234,8 +234,8 @@ main(int argc, char **argv)
 	
   intset_l_t *set;
   int i, c, size;
-  val_t last = 0; 
-  val_t val = 0;
+  skey_t last = 0; 
+  skey_t val = 0;
   unsigned long reads, effreads, updates, effupds;
 #if defined(STM)
   unsigned long aborts, aborts_locked_read, aborts_locked_write,
@@ -252,7 +252,7 @@ main(int argc, char **argv)
   int initial = DEFAULT_INITIAL;
   int nb_threads = DEFAULT_NB_THREADS;
   long range = DEFAULT_RANGE;
-  int seed = DEFAULT_SEED;
+  int seed = 0;
   int update = DEFAULT_UPDATE;
   int unit_tx = DEFAULT_LOCKTYPE;
   int alternate = DEFAULT_ALTERNATE;
@@ -405,7 +405,7 @@ main(int argc, char **argv)
       while (i < initial) 
 	{
 	  val = rand_range(range);
-	  if (set_add_l(set, val, 0)) 
+	  if (set_add_l(set, val, val, 0)) 
 	    {
 	      if (i == ten_perc_nxt)
 		{
@@ -421,7 +421,7 @@ main(int argc, char **argv)
     {
       for (i = initial; i > 0; i--)
 	{
-	  set_add_l(set, i, 0);
+	  set_add_l(set, i, i, 0);
 	}
     }
   printf("\n");

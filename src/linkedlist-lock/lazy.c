@@ -71,26 +71,26 @@ parse_validate(node_l_t* pred, node_l_t* curr)
 }
 
 int
-parse_find(intset_l_t *set, val_t val)
+parse_find(intset_l_t *set, skey_t key)
 {
   node_l_t *curr;
   curr = set->head;
-  while (curr->val < val)
+  while (curr->key < key)
     {
       curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
     }
-  return ((curr->val == val) && !is_marked_ref((uintptr_t) curr->next));
+  return ((curr->key == key) && !is_marked_ref((uintptr_t) curr->next));
 }
 
 int
-parse_insert(intset_l_t *set, val_t val)
+parse_insert(intset_l_t *set, skey_t key, sval_t val)
 {
   node_l_t *curr, *pred, *newnode;
   int result;
 	
   pred = set->head;
   curr = (node_l_t*) get_unmarked_ref((uintptr_t) pred->next);
-  while (curr->val < val) 
+  while (curr->key < key) 
     {
       pred = curr;
       curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
@@ -99,10 +99,10 @@ parse_insert(intset_l_t *set, val_t val)
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(pred));
   LOCK(ND_GET_LOCK(curr));
-  result = (parse_validate(pred, curr) && (curr->val != val));
+  result = (parse_validate(pred, curr) && (curr->key != key));
   if (result) 
     {
-      newnode = new_node_l(val, curr, 0);
+      newnode = new_node_l(key, val, curr, 0);
       pred->next = newnode;
     } 
   GL_UNLOCK(set->lock);
@@ -117,14 +117,14 @@ parse_insert(intset_l_t *set, val_t val)
  *
  */
 int
-parse_delete(intset_l_t *set, val_t val)
+parse_delete(intset_l_t *set, skey_t key)
 {
   node_l_t *pred, *curr;
   int result;
 	
   pred = set->head;
   curr = (node_l_t*) get_unmarked_ref((uintptr_t) pred->next);
-  while (curr->val < val)
+  while (curr->key < key)
     {
       pred = curr;
       curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
@@ -133,7 +133,7 @@ parse_delete(intset_l_t *set, val_t val)
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(pred));
   LOCK(ND_GET_LOCK(curr));
-  result = (parse_validate(pred, curr) && (val == curr->val));
+  result = (parse_validate(pred, curr) && (key == curr->key));
   if (result)
     {
       node_l_t* c_nxt = curr->next;
