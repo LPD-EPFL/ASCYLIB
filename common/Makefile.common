@@ -19,7 +19,7 @@ CC ?= gcc
 ifeq ($(VERSION),DEBUG)
      CFLAGS	+= -g -DDEBUG -O0
 else
-     CFLAGS	+= -O3 -DNDEBUG 
+     CFLAGS	+= -O3
 endif
 
 # Compile with global lock
