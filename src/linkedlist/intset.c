@@ -70,9 +70,9 @@ set_add(intset_t *set, skey_t key, skey_t val)
   IO_FLUSH;
 #endif
 #ifdef SEQUENTIAL /* Unprotected */
-      result = set_seq_add(set, key, val);
+  result = set_seq_add(set, key, val);
 #elif defined LOCKFREE
-      result = harris_insert(set, key, val);
+  result = harris_insert(set, key, val);
 #endif
   return result;
 }

@@ -77,7 +77,7 @@ void barrier_cross(barrier_t *b)
 
 typedef ALIGNED(64) struct thread_data 
 {
-  val_t first;
+  skey_t first;
   long range;
   int update;
   int move;
@@ -96,15 +96,6 @@ typedef ALIGNED(64) struct thread_data
   unsigned long nb_snapshot;
   unsigned long nb_snapshoted;	/* end: added for HashTables */
   unsigned long nb_found;
-  unsigned long nb_aborts;
-  unsigned long nb_aborts_locked_read;
-  unsigned long nb_aborts_locked_write;
-  unsigned long nb_aborts_validate_read;
-  unsigned long nb_aborts_validate_write;
-  unsigned long nb_aborts_validate_commit;
-  unsigned long nb_aborts_invalid_memory;
-  unsigned long nb_aborts_double_write;
-  unsigned long max_retries;
   unsigned int seed;
   ht_intset_t *set;
   barrier_t *barrier;
@@ -122,7 +113,7 @@ void
   PF_MSG(2, "free");
 
   int val2, numtx, r, last = -1;
-  val_t val = 0;
+  skey_t key = 0;
   int unext = 0 , mnext = 0, cnext = 1;
 	
   thread_data_t *d = (thread_data_t *)data;
@@ -144,10 +135,10 @@ void
 	    
 	if (mnext) { // move
 	      
-	  if (last == -1) val = rand_range_re(&d->seed, d->range);
-	  else val = last;
+	  if (last == -1) key = rand_range_re(&d->seed, d->range);
+	  else key = last;
 	  val2 = rand_range_re(&d->seed, d->range);
-	  if (ht_move(d->set, val, val2, TRANSACTIONAL)) {
+	  if (ht_move(d->set, key, val2, TRANSACTIONAL)) {
 	    d->nb_moved++;
 	    last = -1;
 	  }
@@ -155,25 +146,25 @@ void
 	      
 	} else if (last < 0) { // add
 	      
-	  val = rand_range_re(&d->seed, d->range);
-	  if (ht_add(d->set, val, TRANSACTIONAL)) {
+	  key = rand_range_re(&d->seed, d->range);
+	  if (ht_add(d->set, key, TRANSACTIONAL)) {
 	    d->nb_added++;
-	    last = val;
+	    last = key;
 	  }
 	  d->nb_add++;
 	      
 	} else { // remove
 	      
 	  if (d->alternate) { // alternate mode
-	    if (ht_remove(d->set, last, TRANSACTIONAL)) {
+	    if (ht_remove(d->set, last)) {
 	      d->nb_removed++;
 	      last = -1;
 	    }
 	  } else {
 	    /* Random computation only in non-alternated cases */
-	    val = rand_range_re(&d->seed, d->range);
+	    key = rand_range_re(&d->seed, d->range);
 	    /* Remove one random value */
-	    if (ht_remove(d->set, val, TRANSACTIONAL)) {
+	    if (ht_remove(d->set, key)) {
 	      d->nb_removed++;
 	      /* Repeat until successful, to avoid size variations */
 	      last = -1;
@@ -189,23 +180,23 @@ void
 	  if (d->alternate) {
 	    if (d->update == 0) {
 	      if (last < 0) {
-		val = d->first;
-		last = val;
+		key = d->first;
+		last = key;
 	      } else { // last >= 0
-		val = rand_range_re(&d->seed, d->range);
+		key = rand_range_re(&d->seed, d->range);
 		last = -1;
 	      }
 	    } else { // update != 0
 	      if (last < 0) {
-		val = rand_range_re(&d->seed, d->range);
-		//last = val;
+		key = rand_range_re(&d->seed, d->range);
+		//last = key;
 	      } else {
-		val = last;
+		key = last;
 	      }
 	    }
-	  }	else val = rand_range_re(&d->seed, d->range);
+	  }	else key = rand_range_re(&d->seed, d->range);
 				
-	  if (ht_contains(d->set, val, TRANSACTIONAL))
+	  if (ht_contains(d->set, key))
 	    d->nb_found++;
 	  d->nb_contains++;
 	} else { // snapshot
@@ -271,14 +262,14 @@ void *test2(void *data)
 	} else {
 	  if (d->alternate) {
 	    /* Remove last value */
-	    if (ht_remove(d->set, last, TRANSACTIONAL))  
+	    if (ht_remove(d->set, last))  
 	      d->nb_removed++;
 	    d->nb_remove++;
 	    flag = 1;
 	  } else {
 	    /* Random computation only in non-alternated cases */
 	    newval = rand_range_re(&d->seed, d->range);
-	    if (ht_remove(d->set, newval, TRANSACTIONAL)) {  
+	    if (ht_remove(d->set, newval)) {  
 	      d->nb_removed++;
 	      /* Repeat until successful, to avoid size variations */
 	      flag = 1;
@@ -298,7 +289,7 @@ void *test2(void *data)
       if (val >= d->update + d->snapshot) { /* read-only without snapshot */
 	/* Look for random value */
 	val = rand_range_re(&d->seed, d->range);
-	if (ht_contains(d->set, val, TRANSACTIONAL))
+	if (ht_contains(d->set, val))
 	  d->nb_found++;
 	d->nb_contains++;
       } else { /* snapshot */
@@ -320,11 +311,11 @@ void print_set(intset_t *set) {
 	curr = set->head;
 	tmp = curr;
 	do {
-		printf(" - v%d", (int) curr->val);
+		printf(" - v%d", (int) curr->key);
 		tmp = curr;
 		curr = tmp->next;
-	} while (curr->val != VAL_MAX);
-	printf(" - v%d", (int) curr->val);
+	} while (curr->key != KEY_MAX);
+	printf(" - v%d", (int) curr->key);
 	printf("\n");
 }
 
@@ -363,13 +354,10 @@ main(int argc, char **argv)
 	
   ht_intset_t *set;
   int i, c, size;
-  val_t last = 0; 
-  val_t val = 0;
-  unsigned long reads, effreads, updates, effupds, moves, moved, snapshots, 
-    snapshoted, aborts, aborts_locked_read, aborts_locked_write, 
-    aborts_validate_read, aborts_validate_write, aborts_validate_commit, 
-    aborts_invalid_memory, aborts_double_write,
-    max_retries, failures_because_contention;
+  skey_t last = 0; 
+  skey_t key = 0;
+  unsigned long reads, effreads, updates, effupds, moves, moved, snapshots, snapshoted;
+
   thread_data_t *data;
   pthread_t *threads;
   pthread_attr_t attr;
@@ -566,12 +554,19 @@ main(int argc, char **argv)
   i = 0;
   while (i < initial) 
     {
-      val = rand_range(range);
-      if (ht_add(set, val, 0)) {
-	last = val;
-	i++;			
-      }
+      key = rand_range(range);
+      if (ht_add(set, key, key)) 
+	{
+	  last = key;
+	  i++;			
+	}
     }
+
+  if (test_verbose)
+    {
+      printf("Added %d entries to set\n", initial);
+    }
+
   size = ht_size(set);
   if (test_verbose)
     {
@@ -608,15 +603,6 @@ main(int argc, char **argv)
       data[i].nb_snapshoted = 0;
       data[i].nb_contains = 0;
       data[i].nb_found = 0;
-      data[i].nb_aborts = 0;
-      data[i].nb_aborts_locked_read = 0;
-      data[i].nb_aborts_locked_write = 0;
-      data[i].nb_aborts_validate_read = 0;
-      data[i].nb_aborts_validate_write = 0;
-      data[i].nb_aborts_validate_commit = 0;
-      data[i].nb_aborts_invalid_memory = 0;
-      data[i].nb_aborts_double_write = 0;
-      data[i].max_retries = 0;
       data[i].seed = rand();
       data[i].set = set;
       data[i].barrier = &barrier;
@@ -660,15 +646,6 @@ main(int argc, char **argv)
   }
 
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
-  aborts = 0;
-  aborts_locked_read = 0;
-  aborts_locked_write = 0;
-  aborts_validate_read = 0;
-  aborts_validate_write = 0;
-  aborts_validate_commit = 0;
-  aborts_invalid_memory = 0;
-  aborts_double_write = 0;
-  failures_because_contention = 0;
   reads = 0;
   effreads = 0;
   updates = 0;
@@ -677,7 +654,6 @@ main(int argc, char **argv)
   moved = 0;
   snapshots = 0;
   snapshoted = 0;
-  max_retries = 0;
   for (i = 0; i < nb_threads; i++) 
     {
       if (test_verbose)
@@ -693,26 +669,7 @@ main(int argc, char **argv)
 	  printf("  #moved      : %lu\n", data[i].nb_moved);
 	  printf("  #snapshot   : %lu\n", data[i].nb_snapshot);
 	  printf("  #snapshoted : %lu\n", data[i].nb_snapshoted);
-	  printf("  #aborts     : %lu\n", data[i].nb_aborts);
-	  printf("    #lock-r   : %lu\n", data[i].nb_aborts_locked_read);
-	  printf("    #lock-w   : %lu\n", data[i].nb_aborts_locked_write);
-	  printf("    #val-r    : %lu\n", data[i].nb_aborts_validate_read);
-	  printf("    #val-w    : %lu\n", data[i].nb_aborts_validate_write);
-	  printf("    #val-c    : %lu\n", data[i].nb_aborts_validate_commit);
-	  printf("    #inv-mem  : %lu\n", data[i].nb_aborts_invalid_memory);
-	  printf("    #dup-w  : %lu\n", data[i].nb_aborts_double_write);
-	  printf("    #failures : %lu\n", data[i].failures_because_contention);
-	  printf("  Max retries : %lu\n", data[i].max_retries);
 	}
-      aborts += data[i].nb_aborts;
-      aborts_locked_read += data[i].nb_aborts_locked_read;
-      aborts_locked_write += data[i].nb_aborts_locked_write;
-      aborts_validate_read += data[i].nb_aborts_validate_read;
-      aborts_validate_write += data[i].nb_aborts_validate_write;
-      aborts_validate_commit += data[i].nb_aborts_validate_commit;
-      aborts_invalid_memory += data[i].nb_aborts_invalid_memory;
-      aborts_double_write += data[i].nb_aborts_double_write;
-      failures_because_contention += data[i].failures_because_contention;
       reads += data[i].nb_contains;
       effreads += data[i].nb_contains + 
 	(data[i].nb_add - data[i].nb_added) + 
@@ -726,8 +683,6 @@ main(int argc, char **argv)
       snapshots += data[i].nb_snapshot;
       snapshoted += data[i].nb_snapshoted;
       size += data[i].nb_added - data[i].nb_removed;
-      if (max_retries < data[i].max_retries)
-	max_retries = data[i].max_retries;
     }
   printf("Set size      : %d (expected: %d)\n", ht_size(set), size);
   printf("Duration      : %d (ms)\n", duration);
@@ -754,16 +709,6 @@ main(int argc, char **argv)
       printf("  #moved      : %lu (%f / s)\n", moved, moved * 1000.0 / duration);
       printf("#snapshot txs : %lu (%f / s)\n", snapshots, snapshots * 1000.0 / duration);
       printf("  #snapshoted : %lu (%f / s)\n", snapshoted, snapshoted * 1000.0 / duration);
-      /* printf("#aborts       : %lu (%f / s)\n", aborts, aborts * 1000.0 / duration); */
-      /* printf("  #lock-r     : %lu (%f / s)\n", aborts_locked_read, aborts_locked_read * 1000.0 / duration); */
-      /* printf("  #lock-w     : %lu (%f / s)\n", aborts_locked_write, aborts_locked_write * 1000.0 / duration); */
-      /* printf("  #val-r      : %lu (%f / s)\n", aborts_validate_read, aborts_validate_read * 1000.0 / duration); */
-      /* printf("  #val-w      : %lu (%f / s)\n", aborts_validate_write, aborts_validate_write * 1000.0 / duration); */
-      /* printf("  #val-c      : %lu (%f / s)\n", aborts_validate_commit, aborts_validate_commit * 1000.0 / duration); */
-      /* printf("  #inv-mem    : %lu (%f / s)\n", aborts_invalid_memory, aborts_invalid_memory * 1000.0 / duration); */
-      /* printf("  #dup-w      : %lu (%f / s)\n", aborts_double_write, aborts_double_write * 1000.0 / duration); */
-      /* printf("  #failures   : %lu\n",  failures_because_contention); */
-      /* printf("Max retries   : %lu\n", max_retries); */
     }	
   // Delete set 
   /* ht_delete(set); */
