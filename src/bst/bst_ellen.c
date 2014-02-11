@@ -57,13 +57,14 @@ node_t* bst_find(skey_t key, node_t* root) {
     return NULL;
 }
 
-bool_t bst_insert(skey_t key, node_t* root) {
+bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
     node_t * new_internal;
     node_t *new_sibling;
 
     node_t * new_node = (node_t*) ssalloc(sizeof(node_t));
     new_node->leaf = TRUE;
     new_node->key=key;
+    new_node->value=value;
     new_node->update=NULL;
     
     update_t result;
@@ -117,17 +118,19 @@ void bst_help_insert(info_t * op) {
     CAS_PTR(&(op->iinfo.p->update),FLAG(op,STATE_IFLAG),FLAG(op,STATE_CLEAN));
 }
 
-bool_t bst_delete(skey_t key, node_t* root) {
+sval_t bst_delete(skey_t key, node_t* root) {
     update_t result;
     info_t* op;
+    sval_t found_value; 
 
     search_result_t* search_result;
 
     while (1) {
         search_result = bst_search(key,root); 
         if (search_result->l->key!=key) {
-            return FALSE;
+            return 0;
         }
+        found_value = search_result->l->value;
         if (GETFLAG(search_result->gpupdate)!=STATE_CLEAN) {
             bst_help(search_result->gpupdate);
         } else if (GETFLAG(search_result->pupdate)!=STATE_CLEAN){
@@ -142,7 +145,7 @@ bool_t bst_delete(skey_t key, node_t* root) {
             result = CAS_PTR(&(search_result->gp->update),search_result->gpupdate,FLAG(op,STATE_DFLAG));
             if (result == search_result->gpupdate) {
                 if (bst_help_delete(op)==TRUE) {
-                    return TRUE;
+                    return found_value;
                 }
             } else {
                 bst_help(result);
