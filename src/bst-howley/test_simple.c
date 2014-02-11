@@ -36,7 +36,7 @@
  * ################################################################### */
 
 #define DS_CONTAINS(k,r)  bst_contains(k,r)
-#define DS_ADD(k,r)       bst_add(k,r)
+#define DS_ADD(k,r)       bst_add(k,k,r)
 #define DS_REMOVE(k,r)    bst_remove(k,r)
 #define DS_SIZE(s)          bst_size(s)
 #define DS_NEW()           bst_initialize()

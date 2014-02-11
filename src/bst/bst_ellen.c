@@ -67,6 +67,7 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
     new_node->value=value;
     new_node->update=NULL;
     
+    asm volatile("" ::: "memory");
     update_t result;
 
     info_t* op;
@@ -83,6 +84,7 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
             new_sibling = (node_t*) ssalloc(sizeof(node_t));
             new_sibling->leaf = TRUE;
             new_sibling->key = search_result->l->key;
+            new_sibling->value = search_result->l->value;
             new_sibling->update=NULL;
 
             new_internal = (node_t*) ssalloc(sizeof(node_t));
@@ -130,7 +132,7 @@ sval_t bst_delete(skey_t key, node_t* root) {
         if (search_result->l->key!=key) {
             return 0;
         }
-        found_value = search_result->l->value;
+        found_value=search_result->l->value;
         if (GETFLAG(search_result->gpupdate)!=STATE_CLEAN) {
             bst_help(search_result->gpupdate);
         } else if (GETFLAG(search_result->pupdate)!=STATE_CLEAN){

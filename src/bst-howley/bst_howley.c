@@ -18,7 +18,7 @@ node_t* bst_initialize() {
 }
 
 
-bool_t bst_contains(skey_t k, node_t* root){
+sval_t bst_contains(skey_t k, node_t* root){
 	
 	node_t* pred;
 	node_t* curr;
@@ -94,7 +94,7 @@ retry:
 	return result;
 } 
   
-bool_t bst_add(skey_t k, node_t* root){
+bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 
 	node_t* pred;
 	node_t* curr;
@@ -113,6 +113,7 @@ bool_t bst_add(skey_t k, node_t* root){
 
 		new_node = (node_t*) ssalloc(sizeof(node_t));
 		new_node->key = k;
+		new_node->value = v;
 		new_node->op = NULL;
 		new_node->left = NULL;
 		new_node->right = NULL;
