@@ -99,15 +99,18 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
     }
 }
 
-int 
+sval_t
 fraser_find(sl_intset_t *set, skey_t key)
 {
   sl_node_t **succs;
-  int result;
+  sval_t result = 0;
 
   succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
   fraser_search(set, key, NULL, succs);
-  result = (succs[0]->key == key && !succs[0]->deleted);
+  if (succs[0]->key == key && !succs[0]->deleted)
+    {
+      result = succs[0]->val;
+    }
   ssfree(succs);
   return result;
 }
@@ -132,23 +135,21 @@ mark_node_ptrs(sl_node_t *n)
     }
 }
 
-int
+sval_t
 fraser_remove(sl_intset_t *set, skey_t key)
 {
   sl_node_t **succs;
-  int result;
+  sval_t result = 0;
 
   succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
   fraser_search(set, key, NULL, succs);
-  result = (succs[0]->key == key);
-  if (result == 0)
+  if (succs[0]->key != key)
     {
       goto end;
     }
   /* 1. Node is logically deleted when the deleted field is not 0 */
   if (succs[0]->deleted)
     {
-      result = 0;
       goto end;
     }
 
@@ -158,15 +159,12 @@ fraser_remove(sl_intset_t *set, skey_t key)
       /* 2. Mark forward pointers, then search will remove the node */
       mark_node_ptrs(succs[0]);
 
+      result = succs[0]->val;
 #if GC == 1
       ssmem_free(alloc, succs[0]);
 #endif
       /* MEM_BARRIER; */
       fraser_search(set, key, NULL, NULL);
-    }
-  else
-    {
-      result = 0;
     }
 
  end:
