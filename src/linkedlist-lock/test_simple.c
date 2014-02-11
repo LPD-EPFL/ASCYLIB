@@ -336,6 +336,7 @@ test(void* thread)
 
   /* SSPFDTERM(); */
   barrier_cross(&barrier_global);
+  barrier_cross(&barrier_global);
 #if GC == 1
   ssmem_term();
   free(alloc);
@@ -576,6 +577,7 @@ main(int argc, char **argv)
   gettimeofday(&end, NULL);
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
+  barrier_cross(&barrier_global);
   int UNUSED size_after = DS_SIZE(set);
   barrier_cross(&barrier_global);
 
