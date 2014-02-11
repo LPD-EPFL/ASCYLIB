@@ -27,16 +27,14 @@
 sval_t
 set_contains_l(intset_l_t* set, skey_t key, int transactional)
 {
-  int r = 0;
   if (transactional == 2) 
     {
-      r = parse_find(set, key);
+      return parse_find(set, key);
     }
   else 
     {
-      r =  lockc_find(set, key);
+      return lockc_find(set, key);
     }
-  return r;
 }
 
 int
