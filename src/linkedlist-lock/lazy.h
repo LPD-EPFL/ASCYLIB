@@ -38,8 +38,8 @@ extern inline uintptr_t get_marked_ref(uintptr_t w);
 
 /* linked list accesses */
 extern int parse_validate(node_l_t* pred, node_l_t* curr);
-int parse_find(intset_l_t* set, skey_t key);
+sval_t parse_find(intset_l_t* set, skey_t key);
 int parse_insert(intset_l_t* set, skey_t key, sval_t val);
-int parse_delete(intset_l_t* set, skey_t key);
+sval_t parse_delete(intset_l_t* set, skey_t key);
 
 #endif	/* _H_LAZY_ */

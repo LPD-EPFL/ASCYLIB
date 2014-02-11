@@ -23,6 +23,6 @@
 
 #include "linkedlist-lock.h"
 
-int lockc_delete(intset_l_t* set, skey_t key);
-int lockc_find(intset_l_t* set, skey_t key);
+sval_t lockc_delete(intset_l_t* set, skey_t key);
+sval_t lockc_find(intset_l_t* set, skey_t key);
 int lockc_insert(intset_l_t* set, skey_t key, sval_t val);

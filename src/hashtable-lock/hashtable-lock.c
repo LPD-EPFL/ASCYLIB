@@ -111,7 +111,7 @@ ht_new()
   return set;
 }
 
-int
+sval_t
 ht_contains(ht_intset_t *set, skey_t key, int transactional) 
 {
   int addr = key % maxhtlength;
@@ -125,8 +125,8 @@ ht_add(ht_intset_t *set, skey_t key, sval_t val, int transactional)
   return set_add_l(set->buckets[addr], key, val, transactional);
 }
 
-int
- ht_remove(ht_intset_t *set, skey_t key, int transactional) 
+sval_t
+ht_remove(ht_intset_t *set, skey_t key, int transactional) 
 {
   int addr = key % maxhtlength;
   return set_remove_l(set->buckets[addr], key, transactional);

@@ -28,11 +28,11 @@
  * Lock the first two elements (locking each before getting the copy of the element)
  * then unlock previous, keep ownership of the current, and lock next in a loop.
  */
-int
+sval_t
 lockc_delete(intset_l_t *set, skey_t key)
 {
   node_l_t *curr, *next;
-  int found;
+  sval_t res = 0;
 	
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
@@ -47,9 +47,10 @@ lockc_delete(intset_l_t *set, skey_t key)
       LOCK(ND_GET_LOCK(next->next));
       next = next->next;
     }
-  found = (key == next->key);
-  if (found) 
+
+  if (key == next->key)
     {
+      res = next->val;
       curr->next = next->next;
       UNLOCK(ND_GET_LOCK(next));
       node_delete_l(next);
@@ -62,14 +63,14 @@ lockc_delete(intset_l_t *set, skey_t key)
     }  
   GL_UNLOCK(set->lock);
 
-  return found;
+  return res;
 }
 
-int
+sval_t
 lockc_find(intset_l_t *set, skey_t key) 
 {
   node_l_t *curr, *next; 
-  int found;
+  sval_t res = 0;
 	
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
@@ -84,11 +85,14 @@ lockc_find(intset_l_t *set, skey_t key)
       LOCK(ND_GET_LOCK(next->next));
       next = curr->next;
     }	
-  found = (key == next->key);
+  if (key == next->key)
+    {
+      res = next->val;
+    }
   GL_UNLOCK(set->lock);
   UNLOCK(ND_GET_LOCK(curr));
   UNLOCK(ND_GET_LOCK(next));
-  return found;
+  return res;
 }
 
 int

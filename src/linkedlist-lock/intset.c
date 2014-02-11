@@ -24,8 +24,8 @@
 #include "lazy.h"
 #include "utils.h"
 
-int
-set_contains_l(intset_l_t *set, skey_t key, int transactional)
+sval_t
+set_contains_l(intset_l_t* set, skey_t key, int transactional)
 {
   int r = 0;
   if (transactional == 2) 
@@ -40,7 +40,7 @@ set_contains_l(intset_l_t *set, skey_t key, int transactional)
 }
 
 int
-set_add_l(intset_l_t *set, skey_t key, sval_t val, int transactional)
+set_add_l(intset_l_t* set, skey_t key, sval_t val, int transactional)
 {  
   if (transactional == 2) 
     {
@@ -52,8 +52,8 @@ set_add_l(intset_l_t *set, skey_t key, sval_t val, int transactional)
     }
 }
 
-int
-set_remove_l(intset_l_t *set, skey_t key, int transactional)
+sval_t
+set_remove_l(intset_l_t* set, skey_t key, int transactional)
 {
   if (transactional == 2) 
     {

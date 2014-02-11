@@ -52,9 +52,9 @@ void ht_delete(ht_intset_t *set);
 int ht_size(ht_intset_t *set);
 int floor_log_2(unsigned int n);
 ht_intset_t *ht_new();
-int ht_contains(ht_intset_t* set, skey_t key, int transactional);
+sval_t ht_contains(ht_intset_t* set, skey_t key, int transactional);
 int ht_add(ht_intset_t* set, skey_t key, sval_t val, int transactional);
-int ht_remove(ht_intset_t* set, skey_t key, int transactional);
+sval_t ht_remove(ht_intset_t* set, skey_t key, int transactional);
 
 /* 
  * Move an element in the hashtable (from one linked-list to another)
