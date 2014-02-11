@@ -7,6 +7,9 @@
 typedef intptr_t skey_t;
 typedef intptr_t sval_t;
 
+#define KEY_MIN                         INT_MIN
+#define KEY_MAX                         INT_MAX
+
 #define DEFAULT_DURATION                1000
 #define DEFAULT_INITIAL                 1024
 #define DEFAULT_NB_THREADS              1
