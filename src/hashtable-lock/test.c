@@ -70,7 +70,7 @@ void barrier_cross(barrier_t *b)
 
 typedef ALIGNED(64) struct thread_data 
 {
-  val_t first;
+  skey_t first;
   long range;
   int update;
   int move;
@@ -117,7 +117,7 @@ test(void *data)
   PF_MSG(2, "free");
 
   int val2, numtx, r, last = -1;
-  val_t val = 0;
+  skey_t val = 0;
   int unext, mnext, cnext;
 	
   thread_data_t *d = (thread_data_t *)data;
@@ -175,7 +175,7 @@ test(void *data)
 	} else if (last < 0) { // add
 				
 	  val = rand_range_re(&d->seed, d->range);
-	  if (ht_add(d->set, val, TRANSACTIONAL)) {
+	  if (ht_add(d->set, val, val, TRANSACTIONAL)) {
 	    d->nb_added++;
 	    last = val;
 	  } 				
@@ -258,6 +258,8 @@ test(void *data)
   return NULL;
 }
 
+int test_verbose = 0;
+
 int 
 main(int argc, char **argv)
 {
@@ -273,6 +275,7 @@ main(int argc, char **argv)
   struct option long_options[] = {
     // These options don't set a flag
     {"help",                      no_argument,       NULL, 'h'},
+    {"verbose",                   no_argument,       NULL, 'v'},
     {"alternate",                 no_argument,       NULL, 'A'},
     {"effective",                 required_argument, NULL, 'f'},
     {"duration",                  required_argument, NULL, 'd'},
@@ -289,8 +292,8 @@ main(int argc, char **argv)
 	
   ht_intset_t *set;
   int i, c, size;
-  val_t last = 0; 
-  val_t val = 0;
+  skey_t last = 0; 
+  skey_t val = 0;
   unsigned long reads, effreads, updates, effupds, moves, moved, snapshots, 
     snapshoted, aborts, aborts_locked_read, aborts_locked_write,
     aborts_validate_read, aborts_validate_write, aborts_validate_commit,
@@ -305,7 +308,7 @@ main(int argc, char **argv)
   int initial = DEFAULT_INITIAL;
   int nb_threads = DEFAULT_NB_THREADS;
   long range = DEFAULT_RANGE;
-  int seed = DEFAULT_SEED;
+  int seed = 0;
   int update = DEFAULT_UPDATE;
   int load_factor = DEFAULT_LOAD;
   int move = DEFAULT_MOVE;
@@ -318,7 +321,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:x:", long_options, &i);
+      c = getopt_long(argc, argv, "hvAf:d:i:n:r:s:u:m:a:l:x:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -373,6 +376,9 @@ main(int argc, char **argv)
 	       "        6 = harris lock-free\n"
 	       );
 	exit(0);
+      case 'v':
+	test_verbose = 1;
+	break;
       case 'A':
 	alternate = 1;
 	break;
@@ -448,14 +454,16 @@ main(int argc, char **argv)
   timeout.tv_sec = duration / 1000;
   timeout.tv_nsec = (duration % 1000) * 1000000;
 	
-  if ((data = (thread_data_t *)malloc(nb_threads * sizeof(thread_data_t))) == NULL) {
-    perror("malloc");
-    exit(1);
-  }
-  if ((threads = (pthread_t *)malloc(nb_threads * sizeof(pthread_t))) == NULL) {
-    perror("malloc");
-    exit(1);
-  }
+  if ((data = (thread_data_t *)malloc(nb_threads * sizeof(thread_data_t))) == NULL) 
+    {
+      perror("malloc");
+      exit(1);
+    }
+  if ((threads = (pthread_t *)malloc(nb_threads * sizeof(pthread_t))) == NULL) 
+    {
+      perror("malloc");
+      exit(1);
+    }
 	
   if (seed == 0)
     srand((int)time(0));
@@ -472,13 +480,15 @@ main(int argc, char **argv)
   printf("Adding %d entries to set\n", initial);
   i = 0;
   //maxhtlength = (int) (initial / load_factor);
-  while (i < initial) {
-    val = (rand() % range) + 1;
-    if (ht_add(set, val, 0)) {
-      last = val;
-      i++;
+  while (i < initial) 
+    {
+      val = (rand() % range) + 1;
+      if (ht_add(set, val, val, 0)) 
+	{
+	  last = val;
+	  i++;
+	}
     }
-  }
   size = ht_size(set);
   printf("Set size     : %d\n", size);
   printf("Bucket amount: %d\n", maxhtlength);
@@ -574,51 +584,41 @@ main(int argc, char **argv)
   snapshots = 0;
   snapshoted = 0;
   max_retries = 0;
-  for (i = 0; i < nb_threads; i++) {
-    printf("Thread %d\n", i);
-    printf("  #add        : %lu\n", data[i].nb_add);
-    printf("    #added    : %lu\n", data[i].nb_added);
-    printf("  #remove     : %lu\n", data[i].nb_remove);
-    printf("    #removed  : %lu\n", data[i].nb_removed);
-    printf("  #contains   : %lu\n", data[i].nb_contains);
-    printf("    #found    : %lu\n", data[i].nb_found);
-#if defined(STM)
-    printf("  #move       : %lu\n", data[i].nb_move);
-    printf("  #moved      : %lu\n", data[i].nb_moved);
-    printf("  #snapshot   : %lu\n", data[i].nb_snapshot);
-    printf("  #snapshoted : %lu\n", data[i].nb_snapshoted);
-    printf("  #aborts     : %lu\n", data[i].nb_aborts);
-    printf("    #lock-r   : %lu\n", data[i].nb_aborts_locked_read);
-    printf("    #lock-w   : %lu\n", data[i].nb_aborts_locked_write);
-    printf("    #val-r    : %lu\n", data[i].nb_aborts_validate_read);
-    printf("    #val-w    : %lu\n", data[i].nb_aborts_validate_write);
-    printf("    #val-c    : %lu\n", data[i].nb_aborts_validate_commit);
-    printf("    #inv-mem  : %lu\n", data[i].nb_aborts_invalid_memory);
-    printf("  Max retries : %lu\n", data[i].max_retries);
-#endif
-    aborts += data[i].nb_aborts;
-    aborts_locked_read += data[i].nb_aborts_locked_read;
-    aborts_locked_write += data[i].nb_aborts_locked_write;
-    aborts_validate_read += data[i].nb_aborts_validate_read;
-    aborts_validate_write += data[i].nb_aborts_validate_write;
-    aborts_validate_commit += data[i].nb_aborts_validate_commit;
-    aborts_invalid_memory += data[i].nb_aborts_invalid_memory;
-    reads += data[i].nb_contains;
-    effreads += data[i].nb_contains + 
-      (data[i].nb_add - data[i].nb_added) + 
-      (data[i].nb_remove - data[i].nb_removed) + 
-      (data[i].nb_move - data[i].nb_moved) +
-      data[i].nb_snapshoted;
-    updates += (data[i].nb_add + data[i].nb_remove);
-    effupds += data[i].nb_removed + data[i].nb_added + data[i].nb_moved; 
-    moves += data[i].nb_move;
-    moved += data[i].nb_moved;
-    snapshots += data[i].nb_snapshot;
-    snapshoted += data[i].nb_snapshoted;
-    size += data[i].nb_added - data[i].nb_removed;
-    if (max_retries < data[i].max_retries)
-      max_retries = data[i].max_retries;
-  }
+  for (i = 0; i < nb_threads; i++)
+    {
+      if (test_verbose)
+	{
+	  printf("Thread %d\n", i);
+	  printf("  #add        : %lu\n", data[i].nb_add);
+	  printf("    #added    : %lu\n", data[i].nb_added);
+	  printf("  #remove     : %lu\n", data[i].nb_remove);
+	  printf("    #removed  : %lu\n", data[i].nb_removed);
+	  printf("  #contains   : %lu\n", data[i].nb_contains);
+	  printf("    #found    : %lu\n", data[i].nb_found);
+	}
+      aborts += data[i].nb_aborts;
+      aborts_locked_read += data[i].nb_aborts_locked_read;
+      aborts_locked_write += data[i].nb_aborts_locked_write;
+      aborts_validate_read += data[i].nb_aborts_validate_read;
+      aborts_validate_write += data[i].nb_aborts_validate_write;
+      aborts_validate_commit += data[i].nb_aborts_validate_commit;
+      aborts_invalid_memory += data[i].nb_aborts_invalid_memory;
+      reads += data[i].nb_contains;
+      effreads += data[i].nb_contains + 
+	(data[i].nb_add - data[i].nb_added) + 
+	(data[i].nb_remove - data[i].nb_removed) + 
+	(data[i].nb_move - data[i].nb_moved) +
+	data[i].nb_snapshoted;
+      updates += (data[i].nb_add + data[i].nb_remove);
+      effupds += data[i].nb_removed + data[i].nb_added + data[i].nb_moved; 
+      moves += data[i].nb_move;
+      moved += data[i].nb_moved;
+      snapshots += data[i].nb_snapshot;
+      snapshoted += data[i].nb_snapshoted;
+      size += data[i].nb_added - data[i].nb_removed;
+      if (max_retries < data[i].max_retries)
+	max_retries = data[i].max_retries;
+    }
   printf("Set size      : %d (expected: %d)\n", ht_size(set), size);
   printf("Duration      : %d (ms)\n", duration);
   printf("#txs          : %lu (%f / s)\n", reads + updates + moves + snapshots , (reads + updates + moves + snapshots) * 1000.0 / duration);
@@ -638,20 +638,6 @@ main(int argc, char **argv)
 	   duration);
   } else printf("%lu (%f / s)\n", updates, updates * 1000.0 / duration);
 	
-#if defined(STM)
-  printf("#move txs     : %lu (%f / s)\n", moves, moves * 1000.0 / duration);
-  printf("  #moved      : %lu (%f / s)\n", moved, moved * 1000.0 / duration);
-  printf("#snapshot txs : %lu (%f / s)\n", snapshots, snapshots * 1000.0 / duration);
-  printf("  #snapshoted : %lu (%f / s)\n", snapshoted, snapshoted * 1000.0 / duration);
-  printf("#aborts       : %lu (%f / s)\n", aborts, aborts * 1000.0 / duration);
-  printf("  #lock-r     : %lu (%f / s)\n", aborts_locked_read, aborts_locked_read * 1000.0 / duration);
-  printf("  #lock-w     : %lu (%f / s)\n", aborts_locked_write, aborts_locked_write * 1000.0 / duration);
-  printf("  #val-r      : %lu (%f / s)\n", aborts_validate_read, aborts_validate_read * 1000.0 / duration);
-  printf("  #val-w      : %lu (%f / s)\n", aborts_validate_write, aborts_validate_write * 1000.0 / duration);
-  printf("  #val-c      : %lu (%f / s)\n", aborts_validate_commit, aborts_validate_commit * 1000.0 / duration);
-  printf("  #inv-mem    : %lu (%f / s)\n", aborts_invalid_memory, aborts_invalid_memory * 1000.0 / duration);
-  printf("Max retries   : %lu\n", max_retries);
-#endif	
   /* Delete set */
   ht_delete(set);
 	

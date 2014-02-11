@@ -13,7 +13,7 @@
 __thread ssmem_allocator_t* alloc;
 
 node_t*
-new_node(val_t val, node_t *next, int transactional)
+new_node(skey_t key, sval_t val, node_t *next, int transactional)
 {
   volatile node_t *node;
 #if GC == 1
@@ -36,6 +36,7 @@ new_node(val_t val, node_t *next, int transactional)
       exit(1);
     }
 
+  node->key = key;
   node->val = val;
   node->next = next;
 
@@ -58,8 +59,8 @@ set_new()
 #define CL_OFF(x)((uintptr_t) (x) % 64)
   /* printf("* set @ %p (%lu / %lu )\n", set, CL_NUM(set), CL_OFF(set)); */
 
-  max = new_node(VAL_MAX, NULL, 1);
-  min = new_node(VAL_MIN, max, 1);
+  max = new_node(KEY_MAX, 0, NULL, 1);
+  min = new_node(KEY_MIN, 0, max, 1);
   set->head = min;
 
   ssalloc_align_alloc(0);

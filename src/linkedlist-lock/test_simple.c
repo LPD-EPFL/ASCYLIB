@@ -35,7 +35,7 @@
  * ################################################################### */
 
 #define DS_CONTAINS(s,k,t)  set_contains_l(s, k, t)
-#define DS_ADD(s,k,t)       set_add_l(s, k, t)
+#define DS_ADD(s,k,t)       set_add_l(s, k, k, t)
 #define DS_REMOVE(s,k,t)    set_remove_l(s, k, t)
 #define DS_SIZE(s)          set_size_l(s)
 #define DS_NEW()            set_new_l()
@@ -252,7 +252,7 @@ test(void* thread)
   while (stop == 0) 
     {
       c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
-      key = c & rand_max;
+      key = (c & rand_max) + rand_min;
 
       if (unlikely(c <= scale_put))
 	{
@@ -335,6 +335,7 @@ test(void* thread)
 #endif
 
   /* SSPFDTERM(); */
+  barrier_cross(&barrier_global);
   barrier_cross(&barrier_global);
 #if GC == 1
   ssmem_term();
@@ -499,8 +500,6 @@ main(int argc, char **argv)
       put_rate = update_rate / 2;
     }
 
-
-
   get_rate = 1 - update_rate;
 
   /* printf("num_threads = %u\n", num_threads); */
@@ -576,6 +575,7 @@ main(int argc, char **argv)
   gettimeofday(&end, NULL);
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
+  barrier_cross(&barrier_global);
   int UNUSED size_after = DS_SIZE(set);
   barrier_cross(&barrier_global);
 

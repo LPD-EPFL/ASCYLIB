@@ -27,7 +27,7 @@
 __thread ssmem_allocator_t* alloc;
 
 node_l_t*
-new_node_l(val_t val, node_l_t* next, int transactional)
+new_node_l(skey_t key, sval_t val, node_l_t* next, int transactional)
 {
   volatile node_l_t *node;
 #if GC == 1
@@ -39,16 +39,17 @@ new_node_l(val_t val, node_l_t* next, int transactional)
     {
       node = (volatile node_l_t *) ssmem_alloc(alloc, sizeof(node_l_t));
     }
-
+#else
+  node = (volatile node_l_t *) ssalloc(sizeof(node_l_t));
+#endif
+  
   if (node == NULL) 
     {
       perror("malloc @ new_node");
       exit(1);
     }
-#else
-  node = (volatile node_l_t *) ssalloc(sizeof(node_l_t));
-#endif
-  
+
+  node->key = key;
   node->val = val;
   node->next = next;
 
@@ -74,10 +75,10 @@ intset_l_t *set_new_l()
       exit(1);
     }
 
-  ssalloc_align_alloc(0);
-  max = new_node_l(VAL_MAX, NULL, 1);
-  ssalloc_align_alloc(0);
-  min = new_node_l(VAL_MIN, max, 1);
+  /* ssalloc_align_alloc(0); */
+  max = new_node_l(KEY_MAX, 0, NULL, 1);
+  /* ssalloc_align_alloc(0); */
+  min = new_node_l(KEY_MIN, 0, max, 1);
   set->head = min;
 
   ssalloc_align_alloc(0);
@@ -103,7 +104,6 @@ node_delete_l(node_l_t *node)
 #if GC == 1
   ssfree(node);
 #endif
-  /* free(node); */
 }
 
 void set_delete_l(intset_l_t *set)

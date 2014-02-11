@@ -35,7 +35,7 @@
 #include <atomic_ops.h>
 #include "atomic_ops_if.h"
 
-#include "tm.h"
+#include "utils.h"
 #include "ssalloc.h"
 
 #define DEFAULT_DURATION                1000

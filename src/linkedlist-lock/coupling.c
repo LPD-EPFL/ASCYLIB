@@ -28,11 +28,11 @@
  * Lock the first two elements (locking each before getting the copy of the element)
  * then unlock previous, keep ownership of the current, and lock next in a loop.
  */
-int
-lockc_delete(intset_l_t *set, val_t val) 
+sval_t
+lockc_delete(intset_l_t *set, skey_t key)
 {
   node_l_t *curr, *next;
-  int found;
+  sval_t res = 0;
 	
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
@@ -40,16 +40,17 @@ lockc_delete(intset_l_t *set, val_t val)
   LOCK(ND_GET_LOCK(curr->next));
   next = curr->next;
 	
-  while (next->val < val) 
+  while (next->key < key) 
     {
       UNLOCK(ND_GET_LOCK(curr));
       curr = next;
       LOCK(ND_GET_LOCK(next->next));
       next = next->next;
     }
-  found = (val == next->val);
-  if (found) 
+
+  if (key == next->key)
     {
+      res = next->val;
       curr->next = next->next;
       UNLOCK(ND_GET_LOCK(next));
       node_delete_l(next);
@@ -62,14 +63,14 @@ lockc_delete(intset_l_t *set, val_t val)
     }  
   GL_UNLOCK(set->lock);
 
-  return found;
+  return res;
 }
 
-int
-lockc_find(intset_l_t *set, val_t val) 
+sval_t
+lockc_find(intset_l_t *set, skey_t key) 
 {
   node_l_t *curr, *next; 
-  int found;
+  sval_t res = 0;
 	
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
@@ -77,22 +78,25 @@ lockc_find(intset_l_t *set, val_t val)
   LOCK(ND_GET_LOCK(curr->next));
   next = curr->next;
 	
-  while (next->val < val) 
+  while (next->key < key) 
     {
       UNLOCK(ND_GET_LOCK(curr));
       curr = next;
       LOCK(ND_GET_LOCK(next->next));
       next = curr->next;
     }	
-  found = (val == next->val);
+  if (key == next->key)
+    {
+      res = next->val;
+    }
   GL_UNLOCK(set->lock);
   UNLOCK(ND_GET_LOCK(curr));
   UNLOCK(ND_GET_LOCK(next));
-  return found;
+  return res;
 }
 
 int
-lockc_insert(intset_l_t *set, val_t val) 
+lockc_insert(intset_l_t *set, skey_t key, sval_t val) 
 {
   node_l_t *curr, *next, *newnode;
   int found;
@@ -103,17 +107,17 @@ lockc_insert(intset_l_t *set, val_t val)
   LOCK(ND_GET_LOCK(curr->next));
   next = curr->next;
 	
-  while (next->val < val) 
+  while (next->key < key) 
     {
       UNLOCK(ND_GET_LOCK(curr));
       curr = next;
       LOCK(ND_GET_LOCK(next->next));
       next = curr->next;
     }
-  found = (val == next->val);
+  found = (key == next->key);
   if (!found) 
     {
-      newnode =  new_node_l(val, next, 1);
+      newnode =  new_node_l(key, val, next, 1);
       curr->next = newnode;
     }
   GL_UNLOCK(set->lock);

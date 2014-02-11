@@ -246,7 +246,7 @@ test(void* thread)
   while (stop == 0) 
     {
       c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
-      key = c & rand_max;
+      key = (c & rand_max) + rand_min;
 
       if (unlikely(c <= scale_put))
 	{

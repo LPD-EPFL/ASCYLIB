@@ -62,7 +62,7 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
 
   if (transactional)
     {
-      node = (sl_node_t *)MALLOC(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *));
+      node = (sl_node_t *)malloc(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *));
     }
   else 
     {

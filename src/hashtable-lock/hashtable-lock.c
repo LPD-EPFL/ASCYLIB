@@ -42,7 +42,7 @@ ht_delete(ht_intset_t *set)
 	{
 	  next = node->next;
 	  /* free(node); */
-	  ssfree(node);
+	  ssfree(node);		/* TODO: fix with ssmem */
 	  node = next;
 	}
       ssfree(set->buckets[i]);
@@ -50,31 +50,35 @@ ht_delete(ht_intset_t *set)
   free(set);
 }
 
-int ht_size(ht_intset_t *set) {
-	int size = 0;
-	node_l_t *node;
-	int i;
+int
+ht_size(ht_intset_t *set) 
+{
+  int size = 0;
+  node_l_t *node;
+  int i;
 	
-	for (i=0; i < maxhtlength; i++) {
-		node = set->buckets[i]->head->next;
-		while (node->next) {
-			size++;
-			node = node->next;
-		}
+  for (i=0; i < maxhtlength; i++) 
+    {
+      node = set->buckets[i]->head->next;
+      while (node->next) 
+	{
+	  size++;
+	  node = node->next;
 	}
-	return size;
+    }
+  return size;
 }
 
-int floor_log_2(unsigned int n) {
-	int pos = 0;
-	printf("n result = %d\n", n);
-	if (n >= 1<<16) { n >>= 16; pos += 16; }
-	if (n >= 1<< 8) { n >>=  8; pos +=  8; }
-	if (n >= 1<< 4) { n >>=  4; pos +=  4; }
-	if (n >= 1<< 2) { n >>=  2; pos +=  2; }
-	if (n >= 1<< 1) {           pos +=  1; }
-	printf("floor result = %d\n", pos);
-	return ((n == 0) ? (-1) : pos);
+int
+floor_log_2(unsigned int n) 
+{
+  int pos = 0;
+  if (n >= 1<<16) { n >>= 16; pos += 16; }
+  if (n >= 1<< 8) { n >>=  8; pos +=  8; }
+  if (n >= 1<< 4) { n >>=  4; pos +=  4; }
+  if (n >= 1<< 2) { n >>=  2; pos +=  2; }
+  if (n >= 1<< 1) {           pos +=  1; }
+  return ((n == 0) ? (-1) : pos);
 }
 
 ht_intset_t*
@@ -85,7 +89,6 @@ ht_new()
   ht_intset_t *set;
   int i;
 	
-  /* if ((set = (ht_intset_t *)malloc(sizeof(ht_intset_t))) == NULL)  */
   if ((set = (ht_intset_t *)ssalloc_alloc(1, sizeof(ht_intset_t))) == NULL)
     {
       perror("malloc");
@@ -108,96 +111,91 @@ ht_new()
   return set;
 }
 
-int ht_contains(ht_intset_t *set, int val, int transactional) {
-	int addr;
-	
-	/* Get key */
-	addr = val % maxhtlength;
-	return set_contains_l(set->buckets[addr], val, transactional);
+sval_t
+ht_contains(ht_intset_t *set, skey_t key, int transactional) 
+{
+  int addr = key % maxhtlength;
+  return set_contains_l(set->buckets[addr], key, transactional);
 }
 
-int ht_add(ht_intset_t *set, int val, int transactional) {
-	int addr, result;
-	
-	/* Get key */
-	addr = val % maxhtlength;
-	result = set_add_l(set->buckets[addr], val, transactional);
-	return result;
+int
+ht_add(ht_intset_t *set, skey_t key, sval_t val, int transactional) 
+{
+  int addr = key % maxhtlength;
+  return set_add_l(set->buckets[addr], key, val, transactional);
 }
 
-int ht_remove(ht_intset_t *set, int val, int transactional) {
-	int addr, result;
-	
-	/* Get key */
-	addr = val % maxhtlength;
-	result = set_remove_l(set->buckets[addr], val, transactional);
-	
-	return result;
+sval_t
+ht_remove(ht_intset_t *set, skey_t key, int transactional) 
+{
+  int addr = key % maxhtlength;
+  return set_remove_l(set->buckets[addr], key, transactional);
 }
-
 
 /* 
  * Move an element in the hashtable (from one linked-list to another)
  */
-int ht_move(ht_intset_t *set, int val1, int val2, int transactional) {
-	node_l_t *pred1, *curr1, *curr2, *pred2, *newnode;
-	int addr1, addr2, result = 0;
+int
+ht_move(ht_intset_t *set, int val1, int val2, int transactional) 
+{
+  node_l_t *pred1, *curr1, *curr2, *pred2, *newnode;
+  int addr1, addr2, result = 0;
 	
 #ifdef DEBUG
-	printf("++> ht_move(%d, %d)\n", (int) val1, (int) val2);
-	IO_FLUSH;
+  printf("++> ht_move(%d, %d)\n", (int) val1, (int) val2);
+  IO_FLUSH;
 #endif
 	
-	if (val1 == val2) return 0;
+  if (val1 == val2) return 0;
 	
-	// records pred and succ of val1
-	addr1 = val1 % maxhtlength;
-	pred1 = set->buckets[addr1]->head;
-	curr1 = pred1->next;
-	while (curr1->val < val1) {
-		pred1 = curr1;
-		curr1 = curr1->next;
-	}
-	// records pred and succ of val2 
-	addr2 = val2 % maxhtlength;
-	pred2 = set->buckets[addr2]->head;
-	curr2 = pred2->next;
-	while (curr2->val < val2) {
-		pred2 = curr2;
-		curr2 = curr2->next;
-	}
-	// unnecessary move
-	if (pred1->val == pred2->val || curr1->val == pred2->val || 
-		curr2->val == pred1->val || curr1->val == curr2->val) 
-		return 0;
-	// acquire locks in order
-	if (addr1 < addr2 || (addr1 == addr2 && val1 < val2)) {
-		LOCK(ND_GET_LOCK(pred1));
-		LOCK(ND_GET_LOCK(curr1));
-		LOCK(ND_GET_LOCK(pred2));
-		LOCK(ND_GET_LOCK(curr2));
-	} else {
-		LOCK(ND_GET_LOCK(pred2));
-		LOCK(ND_GET_LOCK(curr2));
-		LOCK(ND_GET_LOCK(pred1));
-		LOCK(ND_GET_LOCK(curr1));
-	}
-	// remove val1 and insert val2 
-	result = (parse_validate(pred1, curr1) && (val1 == curr1->val) &&
-			  parse_validate(pred2, curr2) && (curr2->val != val2));
-	if (result) {
-		set_mark((uintptr_t*) &curr1->next);
-		pred1->next = curr1->next;
-		newnode = new_node_l(val2, curr2, 0);
-		pred2->next = newnode;
-	}
-	// release locks in order
-	UNLOCK(ND_GET_LOCK(pred2));
-	UNLOCK(ND_GET_LOCK(pred1));
-	UNLOCK(ND_GET_LOCK(curr2));
-	UNLOCK(ND_GET_LOCK(curr1));
+  // records pred and succ of val1
+  addr1 = val1 % maxhtlength;
+  pred1 = set->buckets[addr1]->head;
+  curr1 = pred1->next;
+  while (curr1->val < val1) {
+    pred1 = curr1;
+    curr1 = curr1->next;
+  }
+  // records pred and succ of val2 
+  addr2 = val2 % maxhtlength;
+  pred2 = set->buckets[addr2]->head;
+  curr2 = pred2->next;
+  while (curr2->val < val2) {
+    pred2 = curr2;
+    curr2 = curr2->next;
+  }
+  // unnecessary move
+  if (pred1->val == pred2->val || curr1->val == pred2->val || 
+      curr2->val == pred1->val || curr1->val == curr2->val) 
+    return 0;
+  // acquire locks in order
+  if (addr1 < addr2 || (addr1 == addr2 && val1 < val2)) {
+    LOCK(ND_GET_LOCK(pred1));
+    LOCK(ND_GET_LOCK(curr1));
+    LOCK(ND_GET_LOCK(pred2));
+    LOCK(ND_GET_LOCK(curr2));
+  } else {
+    LOCK(ND_GET_LOCK(pred2));
+    LOCK(ND_GET_LOCK(curr2));
+    LOCK(ND_GET_LOCK(pred1));
+    LOCK(ND_GET_LOCK(curr1));
+  }
+  // remove val1 and insert val2 
+  result = (parse_validate(pred1, curr1) && (val1 == curr1->val) &&
+	    parse_validate(pred2, curr2) && (curr2->val != val2));
+  if (result) {
+    set_mark((uintptr_t*) &curr1->next);
+    pred1->next = curr1->next;
+    newnode = new_node_l(val2, val2, curr2, 0);
+    pred2->next = newnode;
+  }
+  // release locks in order
+  UNLOCK(ND_GET_LOCK(pred2));
+  UNLOCK(ND_GET_LOCK(pred1));
+  UNLOCK(ND_GET_LOCK(curr2));
+  UNLOCK(ND_GET_LOCK(curr1));
 		
-	return result;
+  return result;
 }
 
 /* 
