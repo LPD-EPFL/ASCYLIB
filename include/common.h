@@ -1,5 +1,6 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
+#include <limits.h>
 
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
@@ -8,7 +9,7 @@ typedef intptr_t skey_t;
 typedef intptr_t sval_t;
 
 #define KEY_MIN                         INT_MIN
-#define KEY_MAX                         INT_MAX
+#define KEY_MAX                         (INT_MAX - 1)
 
 #define DEFAULT_DURATION                1000
 #define DEFAULT_INITIAL                 1024
