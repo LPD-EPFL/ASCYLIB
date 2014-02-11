@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
+#include "common.h"
 #include "atomic_ops_if.h"
 #include "ssalloc.h"
 
@@ -40,11 +41,11 @@
 typedef uint8_t leaf_t;
 typedef uint8_t bool_t;
 
-typedef uint64_t bst_key_t;
+typedef skey_t skey_t;
 
-#define INF2 UINT32_MAX
-#define INF1 (UINT32_MAX-1)
-#define MAX_KEY 4294967295 //MAX_KEY should be of the form 2^n-1 for increased random key generation performance
+#define INF2 (KEY_MAX + 1)
+#define INF1 (KEY_MAX)
+#define MAX_KEY KEY_MAX //MAX_KEY should be of the form 2^n-1 for increased random key generation performance
 
 typedef ALIGNED(64) struct node_t node_t;
 typedef union info_t info_t;
@@ -71,7 +72,7 @@ union info_t {
 
 
 struct node_t {
-    bst_key_t key;
+    skey_t key;
     update_t update;
     node_t* left;
     node_t* right;
@@ -99,15 +100,15 @@ void bst_help_marked(info_t* op);
 
 bool_t bst_help_delete(info_t* op);
 
-bool_t bst_delete(bst_key_t key, node_t* root);
+bool_t bst_delete(skey_t key, node_t* root);
 
 void bst_help_insert(info_t * op);
 
-bool_t bst_insert(bst_key_t key, node_t* root);
+bool_t bst_insert(skey_t key, node_t* root);
 
-node_t* bst_find(bst_key_t key, node_t* root);
+node_t* bst_find(skey_t key, node_t* root);
 
-search_result_t* bst_search(bst_key_t key, node_t* root);
+search_result_t* bst_search(skey_t key, node_t* root);
 
 node_t* bst_initialize();
 

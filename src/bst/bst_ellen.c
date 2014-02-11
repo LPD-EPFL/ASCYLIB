@@ -30,7 +30,7 @@ void bst_init_local(){
     last_result = (search_result_t*) malloc(sizeof(search_result_t));
 }
 
-search_result_t* bst_search(bst_key_t key, node_t* root) {
+search_result_t* bst_search(skey_t key, node_t* root) {
     search_result_t * result = last_result;
 
     result->l = root;
@@ -49,7 +49,7 @@ search_result_t* bst_search(bst_key_t key, node_t* root) {
 }
 
 
-node_t* bst_find(bst_key_t key, node_t* root) {
+node_t* bst_find(skey_t key, node_t* root) {
     search_result_t * result = bst_search(key,root);
     if (result->l->key == key) {
         return result->l;
@@ -57,7 +57,7 @@ node_t* bst_find(bst_key_t key, node_t* root) {
     return NULL;
 }
 
-bool_t bst_insert(bst_key_t key, node_t* root) {
+bool_t bst_insert(skey_t key, node_t* root) {
     node_t * new_internal;
     node_t *new_sibling;
 
@@ -117,7 +117,7 @@ void bst_help_insert(info_t * op) {
     CAS_PTR(&(op->iinfo.p->update),FLAG(op,STATE_IFLAG),FLAG(op,STATE_CLEAN));
 }
 
-bool_t bst_delete(bst_key_t key, node_t* root) {
+bool_t bst_delete(skey_t key, node_t* root) {
     update_t result;
     info_t* op;
 
