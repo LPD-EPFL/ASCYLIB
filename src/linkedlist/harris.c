@@ -227,4 +227,4 @@ set_size(intset_t *set)
     }
   return size;
 }
-<
+
