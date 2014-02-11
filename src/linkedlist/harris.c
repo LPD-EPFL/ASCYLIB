@@ -216,7 +216,7 @@ int
 set_size(intset_t *set)
 {
   int size = 0;
-  node_t *node;
+  node_t* node;
 
   /* We have at least 2 elements */
   node = (node_t*) get_unmarked_ref((long) set->head->next);
@@ -227,3 +227,4 @@ set_size(intset_t *set)
     }
   return size;
 }
+<
