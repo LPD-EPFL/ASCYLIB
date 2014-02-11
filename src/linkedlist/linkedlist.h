@@ -22,7 +22,7 @@
 #include "atomic_ops_if.h"
 
 #include "common.h"
-#include "tm.h"
+#include "utils.h"
 #include "measurements.h"
 #include "ssalloc.h"
 #include "ssmem.h"
