@@ -121,7 +121,7 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
 {
   node_t* cas_result;
   node_t* right_node;
-  volatile node_t* node_to_add = NULL;
+  node_t* node_to_add = NULL;
 
   do
     {
@@ -130,6 +130,12 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
 
       if (right_node->key == key) 
 	{
+#if GC == 1
+	  if (unlikely(node_to_add != NULL))
+	    {
+	      ssmem_free(alloc, node_to_add);
+	    }
+#endif
 	  return 0;
 	}
 
