@@ -109,7 +109,7 @@ inline int sl_seq_add(sl_intset_t *set, val_t val) {
 	node = node->next[0];
 	if ((result = (node->val != val)) == 1) {
 		l = get_rand_level();
-		node = sl_new_simple_node(val, l, 0);
+		node = sl_new_simple_node(val, l, 1);
 		for (i = 0; i < l; i++) {
 			node->next[i] = succs[i];
 			preds[i]->next[i] = node;
@@ -129,68 +129,9 @@ int sl_add(sl_intset_t *set, val_t val, int transactional)
   } else {
 
 #ifdef SEQUENTIAL
-		
 	result = sl_seq_add(set, val);
-		
-#elif defined STM
-	
-	int i, l;
-	sl_node_t *node, *next;
-	sl_node_t *preds[MAXLEVEL];
-	val_t v;  
-	
-	if (transactional > 2) {
-
-	  TX_START(EL);
-	  v = VAL_MIN;
-	  node = set->head;
-	  for (i = node->toplevel-1; i >= 0; i--) {
-	    next = (sl_node_t *)TX_LOAD(&node->next[i]);
-	    while ((v = TX_LOAD(&next->val)) < val) {
-	      node = next;
-	      next = (sl_node_t *)TX_LOAD(&node->next[i]);
-	    }
-	    preds[i] = node;
-	  }
-	  if ((result = (v != val)) == 1) {
-	    l = get_rand_level();
-	    node = sl_new_simple_node(val, l, transactional);
-	    for (i = 0; i < l; i++) {
-	      node->next[i] = (sl_node_t *)TX_LOAD(&preds[i]->next[i]);	
-	      TX_STORE(&preds[i]->next[i], node);
-	    }
-	  }
-	  TX_END;
-
-	} else {
-
-	  TX_START(NL);
-	  v = VAL_MIN;
-	  node = set->head;
-	  for (i = node->toplevel-1; i >= 0; i--) {
-	    next = (sl_node_t *)TX_LOAD(&node->next[i]);
-	    while ((v = TX_LOAD(&next->val)) < val) {
-	      node = next;
-	      next = (sl_node_t *)TX_LOAD(&node->next[i]);
-	    }
-	    preds[i] = node;
-	  }
-	  if ((result = (v != val)) == 1) {
-	    l = get_rand_level();
-	    node = sl_new_simple_node(val, l, transactional);
-	    for (i = 0; i < l; i++) {
-	      node->next[i] = (sl_node_t *)TX_LOAD(&preds[i]->next[i]);	
-	      TX_STORE(&preds[i]->next[i], node);
-	    }
-	  }
-	  TX_END;
-	
-	}
-	
 #elif defined LOCKFREE /* fraser lock-free */
-	
 	result = fraser_insert(set, val);
-
 #endif
 		
   }
@@ -225,67 +166,8 @@ int sl_remove(sl_intset_t *set, val_t val, int transactional)
 		sl_delete_node(next); 
 	}
 
-#elif defined STM
-	
-	int i;
-	sl_node_t *node, *next = NULL;
-	sl_node_t *preds[MAXLEVEL], *succs[MAXLEVEL];
-	val_t v;  
-	
-	if (transactional > 3) {
-
-	  TX_START(EL);
-	  v = VAL_MIN;
-	  node = set->head;
-	  for (i = node->toplevel-1; i >= 0; i--) {
-	    next = (sl_node_t *)TX_LOAD(&node->next[i]);
-	    while ((v = TX_LOAD(&next->val)) < val) {
-	      node = next;
-	      next = (sl_node_t *)TX_LOAD(&node->next[i]);
-	    }
-	    preds[i] = node;
-	    succs[i] = next;
-	  }
-	  if ((result = (next->val == val))) {
-	    for (i = 0; i < set->head->toplevel; i++) {
-	      if (succs[i]->val == val) {
-		TX_STORE(&preds[i]->next[i], (sl_node_t *)TX_LOAD(&succs[i]->next[i])); 
-	      }
-	    }
-	    FREE(next, sizeof(sl_node_t) + next->toplevel * sizeof(sl_node_t *));
-	  }
-	  TX_END;
-
-	} else {
-
-	  TX_START(NL);
-	  v = VAL_MIN;
-	  node = set->head;
-	  for (i = node->toplevel-1; i >= 0; i--) {
-	    next = (sl_node_t *)TX_LOAD(&node->next[i]);
-	    while ((v = TX_LOAD(&next->val)) < val) {
-	      node = next;
-	      next = (sl_node_t *)TX_LOAD(&node->next[i]);
-	    }
-	    preds[i] = node;
-	    succs[i] = next;
-	  }
-	  if ((result = (next->val == val))) {
-	    for (i = 0; i < set->head->toplevel; i++) {
-	      if (succs[i]->val == val) {
-		TX_STORE(&preds[i]->next[i], (sl_node_t *)TX_LOAD(&succs[i]->next[i])); 
-	      }
-	    }
-	    FREE(next, sizeof(sl_node_t) + next->toplevel * sizeof(sl_node_t *));
-	  }
-	  TX_END;
-
-	}
-	
 #elif defined LOCKFREE
-	
 	result = fraser_remove(set, val);
-
 #endif
 	
 	return result;

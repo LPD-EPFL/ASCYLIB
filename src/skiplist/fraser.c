@@ -26,7 +26,7 @@
 
 #include "fraser.h"
 
-extern ALIGNED(64) uint8_t levelmax[64];
+extern ALIGNED(CACHE_LINE_SIZE) uint8_t levelmax[64];
 
 inline int
 is_marked(uintptr_t i)
@@ -46,7 +46,7 @@ set_mark(uintptr_t i)
   return (i | (uintptr_t)0x01);
 }
 
-inline void
+void
 fraser_search(sl_intset_t *set, val_t val, sl_node_t **left_list, sl_node_t **right_list)
 {
   int i;
@@ -58,7 +58,9 @@ fraser_search(sl_intset_t *set, val_t val, sl_node_t **left_list, sl_node_t **ri
     {
       left_next = left->next[i];
       if (is_marked((uintptr_t)left_next))
-	goto retry;
+	{
+	  goto retry;
+	}
       /* Find unmarked node pair at this level */
       for (right = left_next; ; right = right_next)
 	{
@@ -67,22 +69,33 @@ fraser_search(sl_intset_t *set, val_t val, sl_node_t **left_list, sl_node_t **ri
 	    {
 	      right_next = right->next[i];
 	      if (!is_marked((uintptr_t)right_next))
-		break;
+		{
+		  break;
+		}
 	      right = (sl_node_t*)unset_mark((uintptr_t)right_next);
 	    }
+
 	  if (right->val >= val)
-	    break;
+	    {
+	      break;
+	    }
 	  left = right; 
 	  left_next = right_next;
 	}
       /* Ensure left and right nodes are adjacent */
-      if ((left_next != right) && 
-	  (!ATOMIC_CAS_MB(&left->next[i], left_next, right)))
-	goto retry;
+      if ((left_next != right) && (!ATOMIC_CAS_MB(&left->next[i], left_next, right)))
+	{
+	  goto retry;
+	}
+
       if (left_list != NULL)
-	left_list[i] = left;
+	{
+	  left_list[i] = left;
+	}
       if (right_list != NULL)	
-	right_list[i] = right;
+	{
+	  right_list[i] = right;
+	}
     }
 }
 
@@ -92,11 +105,9 @@ fraser_find(sl_intset_t *set, val_t val)
   sl_node_t **succs;
   int result;
 
-  /* succs = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
   succs = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
   fraser_search(set, val, NULL, succs);
   result = (succs[0]->val == val && !succs[0]->deleted);
-  /* free(succs); */
   ssfree(succs);
   return result;
 }
@@ -107,7 +118,7 @@ mark_node_ptrs(sl_node_t *n)
   int i;
   sl_node_t *n_next;
 	
-  for (i=n->toplevel-1; i>=0; i--)
+  for (i = n->toplevel - 1; i >= 0; i--)
     {
       do
       	{
@@ -116,7 +127,8 @@ mark_node_ptrs(sl_node_t *n)
       	    {
       	      break;
       	    }
-      	} while (!ATOMIC_CAS_MB(&n->next[i], n_next, set_mark((uintptr_t)n_next)));
+      	} 
+      while (!ATOMIC_CAS_MB(&n->next[i], n_next, set_mark((uintptr_t)n_next)));
     }
 }
 
@@ -126,12 +138,13 @@ fraser_remove(sl_intset_t *set, val_t val)
   sl_node_t **succs;
   int result;
 
-  /* succs = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
   succs = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
   fraser_search(set, val, NULL, succs);
   result = (succs[0]->val == val);
   if (result == 0)
-    goto end;
+    {
+      goto end;
+    }
   /* 1. Node is logically deleted when the deleted field is not 0 */
   if (succs[0]->deleted)
     {
@@ -145,16 +158,18 @@ fraser_remove(sl_intset_t *set, val_t val)
       /* 2. Mark forward pointers, then search will remove the node */
       mark_node_ptrs(succs[0]);
 
+#if GC == 1
+      ssmem_free(alloc, succs[0]);
+#endif
       /* MEM_BARRIER; */
-
       fraser_search(set, val, NULL, NULL);
     }
   else
     {
       result = 0;
-    }  
+    }
+
  end:
-  /* free(succs); */
   ssfree(succs);
 
   return result;
@@ -168,8 +183,6 @@ fraser_insert(sl_intset_t *set, val_t v)
   int result = 0;
 
   new = sl_new_simple_node(v, get_rand_level(), 0);
-  /* preds = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
-  /* succs = (sl_node_t **)malloc(*levelmax * sizeof(sl_node_t *)); */
   preds = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
   succs = (sl_node_t **)ssalloc(*levelmax * sizeof(sl_node_t *));
 
@@ -193,8 +206,9 @@ fraser_insert(sl_intset_t *set, val_t v)
       new->next[i] = succs[i];
     }
 
+#if defined(__tile__)
   MEM_BARRIER;
-
+#endif
 
   /* Node is visible once inserted at lowest level */
   if (!ATOMIC_CAS_MB(&preds[0]->next[0], succs[0], new))

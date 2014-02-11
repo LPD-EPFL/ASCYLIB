@@ -24,6 +24,7 @@
 #include "skiplist.h"	
 
 ALIGNED(64) uint8_t levelmax[64];
+__thread ssmem_allocator_t* alloc;
 
 int
 get_rand_level()
@@ -60,15 +61,9 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
 {
   sl_node_t *node;
 
-  if (transactional)
+#if GC == 1
+  if (unlikely(transactional))
     {
-      node = (sl_node_t *)malloc(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *));
-    }
-  else 
-    {
-      /* node = (sl_node_t *)malloc(sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *)); */
-      /* node = (sl_node_t *)ssalloc_alloc(1, sizeof(sl_node_t) + toplevel * sizeof(sl_node_t *)); */
-
       /* use *levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
       size_t ns = sizeof(sl_node_t) + *levelmax * sizeof(sl_node_t *);
       size_t ns_rm = ns % 64;
@@ -78,6 +73,35 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
 	}
       node = (sl_node_t *)ssalloc_alloc(1, ns);
     }
+  else 
+    {
+      size_t ns = sizeof(sl_node_t) + *levelmax * sizeof(sl_node_t *);
+#  if defined(DO_PAD)
+      size_t ns_rm = ns & 63;
+      if (ns_rm)
+	{
+	  ns += 64 - ns_rm;
+	}
+#  endif
+      node = (sl_node_t*) ssmem_alloc(alloc, ns);
+    }
+#else
+#  if defined(DO_PAD)
+      size_t ns_rm = ns & 63;
+      if (ns_rm)
+	{
+	  ns += 64 - ns_rm;
+	}
+#  endif
+      /* use *levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
+      size_t ns = sizeof(sl_node_t) + *levelmax * sizeof(sl_node_t *);
+      size_t ns_rm = ns % 64;
+      if (ns_rm)
+	{
+	  ns += 64 - ns_rm;
+	}
+      node = (sl_node_t *)ssalloc_alloc(1, ns);
+#endif
 
   if (node == NULL)
     {
@@ -89,7 +113,9 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
   node->toplevel = toplevel;
   node->deleted = 0;
 
+#if defined(__tile__)
   MEM_BARRIER;
+#endif
 
   return node;
 }
@@ -118,7 +144,11 @@ void
 sl_delete_node(sl_node_t *n)
 {
   /* free(n); */
+#if GC == 1
+  ssmem_free(alloc, n);
+#else
   ssfree_alloc(1, n);
+#endif
 }
 
 sl_intset_t*
@@ -137,8 +167,8 @@ sl_set_new()
 
   ssalloc_align_alloc(1);
 
-  max = sl_new_node(VAL_MAX, NULL, *levelmax, 0);
-  min = sl_new_node(VAL_MIN, max, *levelmax, 0);
+  max = sl_new_node(VAL_MAX, NULL, *levelmax, 1);
+  min = sl_new_node(VAL_MIN, max, *levelmax, 1);
   set->head = min;
   return set;
 }
