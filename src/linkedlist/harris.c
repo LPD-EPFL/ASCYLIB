@@ -219,11 +219,11 @@ set_size(intset_t *set)
   node_t *node;
 
   /* We have at least 2 elements */
-  node = get_unmarked_ref(set->head->next);
-  while (get_unmarked_ref(node->next) != NULL)
+  node = (node_t*) get_unmarked_ref((long) set->head->next);
+  while ((node_t*) get_unmarked_ref((long) node->next) != NULL)
     {
-      if (!is_marked_ref(node->next)) size++;
-      node = get_unmarked_ref(node->next);
+      if (!is_marked_ref((long) node->next)) size++;
+      node = (node_t*) get_unmarked_ref((long) node->next);
     }
   return size;
 }
