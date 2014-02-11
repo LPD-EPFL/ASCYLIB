@@ -72,7 +72,7 @@ union operation_t {
 };
 
 //BST functions
-bool_t bst_contains(skey_t k, node_t* root);
+sval_t bst_contains(skey_t k, node_t* root);
 sval_t bst_find(skey_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root); 
 //do we need * or ** for node_t? if only the 
 //value pointed to by pred is modified, we need *; if the 
@@ -80,7 +80,7 @@ sval_t bst_find(skey_t k, node_t** pred, operation_t** pred_op, node_t** curr, o
 //to live outside the function call, we need **.  
 
 node_t* bst_initialize();
-bool_t bst_add(skey_t k, node_t* root);
+bool_t bst_add(skey_t k, sval_t v, node_t* root);
 void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root);
 sval_t bst_remove(skey_t k, node_t* root);
 bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root);
