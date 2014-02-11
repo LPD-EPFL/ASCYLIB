@@ -17,7 +17,7 @@ node_t* bst_initialize() {
 }
 
 
-bool_t bst_contains(bst_key_t k, node_t* root){
+bool_t bst_contains(skey_t k, node_t* root){
 	
 	node_t* pred;
 	node_t* curr;
@@ -27,10 +27,10 @@ bool_t bst_contains(bst_key_t k, node_t* root){
 	return bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root) == FOUND;
 }
 
-search_res_t bst_find(bst_key_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
+search_res_t bst_find(skey_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
 
 	search_res_t result;
-	bst_key_t curr_key;
+	skey_t curr_key;
 	node_t* next;
 	node_t* last_right;
 	operation_t* last_right_op;
@@ -92,7 +92,7 @@ retry:
 	return result;
 } 
   
-bool_t bst_add(bst_key_t k, node_t* root){
+bool_t bst_add(skey_t k, node_t* root){
 
 	node_t* pred;
 	node_t* curr;
@@ -149,7 +149,7 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
 
-bool_t bst_remove(bst_key_t k, node_t* root){
+bool_t bst_remove(skey_t k, node_t* root){
 
 	node_t* pred;
 	node_t* curr;

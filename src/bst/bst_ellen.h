@@ -41,8 +41,6 @@
 typedef uint8_t leaf_t;
 typedef uint8_t bool_t;
 
-typedef skey_t skey_t;
-
 #define INF2 (KEY_MAX + 1)
 #define INF1 (KEY_MAX)
 #define MAX_KEY KEY_MAX //MAX_KEY should be of the form 2^n-1 for increased random key generation performance

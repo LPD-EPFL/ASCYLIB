@@ -23,7 +23,7 @@ node_t* bst_initialize(int num_proc) {
 	 // fprintf(stderr, "root address: %p, key address %p, left node addr: %p, right node addr: %p, op addr: %p\n", (unsigned long)root, &(root->key), &(root->left), &(root->right), &(root->op)
 	 // );
 
-	 // fprintf(stderr, "sizes in bytes: int = %d, bst_key_t = %d, operation_t* = %d, node_t* = %d, node_t = %d, bool_t = %d, child_cas_op_t = %d, relocate_op_t = %d, operation_t = %d, search_res_t = %d \n", sizeof(int), sizeof(bst_key_t), sizeof(operation_t*), sizeof(node_t*), sizeof(node_t), sizeof(bool_t), sizeof(child_cas_op_t), sizeof(relocate_op_t), sizeof(operation_t), sizeof(search_res_t));
+	 // fprintf(stderr, "sizes in bytes: int = %d, skey_t = %d, operation_t* = %d, node_t* = %d, node_t = %d, bool_t = %d, child_cas_op_t = %d, relocate_op_t = %d, operation_t = %d, search_res_t = %d \n", sizeof(int), sizeof(skey_t), sizeof(operation_t*), sizeof(node_t*), sizeof(node_t), sizeof(bool_t), sizeof(child_cas_op_t), sizeof(relocate_op_t), sizeof(operation_t), sizeof(search_res_t));
 
 
 	return root;
@@ -34,7 +34,7 @@ void bst_init_local(int id){
 }
 
 
-bool_t bst_contains(bst_key_t k, node_t* root, int id){
+bool_t bst_contains(skey_t k, node_t* root, int id){
 	
 	//fprintf(stderr, "bst contains\n");
 
@@ -49,12 +49,12 @@ bool_t bst_contains(bst_key_t k, node_t* root, int id){
 	// return TRUE;
 }
 
-bst_search_result_t* bst_find(bst_key_t k, node_t* aux_root, node_t* root, int id){
+bst_search_result_t* bst_find(skey_t k, node_t* aux_root, node_t* root, int id){
 	//fprintf(stderr, "bst find\n");
 	bst_search_result_t* my_result = my_search_result[id];
 
 	// search_res_t result;
-	bst_key_t curr_key;
+	skey_t curr_key;
 	node_t* next;
 	node_t* last_right;
 	operation_t* last_right_op;
@@ -122,7 +122,7 @@ retry:
 	return my_result;
 } 
   
-bool_t bst_add(bst_key_t k, node_t* root, int id){
+bool_t bst_add(skey_t k, node_t* root, int id){
 	//fprintf(stderr, "bst add\n");
 	// node_t* pred;
 	// node_t* curr;
@@ -188,7 +188,7 @@ void bst_help_child_cas(operation_t* op, node_t* dest/*, node_t* root*/){
 	CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
 
-bool_t bst_remove(bst_key_t k, node_t* root, int id){
+bool_t bst_remove(skey_t k, node_t* root, int id){
 	//fprintf(stderr, "bst remove\n");
 	// node_t* pred;
 	// node_t* curr;

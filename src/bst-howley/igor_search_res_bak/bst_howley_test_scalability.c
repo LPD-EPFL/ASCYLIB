@@ -135,7 +135,7 @@ void *test(void *data)
     seeds = seed_rand();
     rand_max = max_key;
     uint32_t op;
-    bst_key_t key;
+    skey_t key;
     int i;
     int last = -1;
 
@@ -390,7 +390,7 @@ int main(int argc, char* const argv[]) {
     }
 
     // seeds = seed_rand();
-    // bst_key_t key;
+    // skey_t key;
     // for (i=0;i<max_key/2;++i) {
     //     key = my_random(&seeds[0],&seeds[1],&seeds[2]) & max_key;
     //     //we make sure the insert was effective (as opposed to just updating an existing entry)

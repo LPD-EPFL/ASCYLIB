@@ -31,7 +31,7 @@
 #define INF UINT32_MAX
 //TODO min key; max key values
 
-typedef uint32_t bst_key_t;
+typedef uint32_t skey_t;
 typedef uint8_t bool_t;
 
 typedef /*ALIGNED(64)*/ union operation_t operation_t;
@@ -46,8 +46,8 @@ typedef struct child_cas_op_t {
 
 typedef struct relocate_op_t {
 	/*ALIGNED(64)*/ int state; //TODO initialize to ONGOING
-	/*ALIGNED(64)*/ bst_key_t remove_key;
-	/*ALIGNED(64)*/ bst_key_t replace_key; 
+	/*ALIGNED(64)*/ skey_t remove_key;
+	/*ALIGNED(64)*/ skey_t replace_key; 
 	/*ALIGNED(64)*/ node_t* dest;
 	/*ALIGNED(64)*/ operation_t* dest_op;
 
@@ -55,7 +55,7 @@ typedef struct relocate_op_t {
 
 
 struct node_t {
-	/*ALIGNED(64)*/ bst_key_t key; //volatile? (for all variables)
+	/*ALIGNED(64)*/ skey_t key; //volatile? (for all variables)
 	/*ALIGNED(64)*/ operation_t* op;
 	/*ALIGNED(64)*/ node_t* left;
 	/*ALIGNED(64)*/ node_t* right;
@@ -79,10 +79,10 @@ bst_search_result_t** my_search_result;
 //BST functions
 node_t* bst_initialize(int num_proc);
 void bst_init_local(int id);
-bool_t bst_contains(bst_key_t k, node_t* root, int id);
-bst_search_result_t* bst_find(bst_key_t k, node_t* aux_root, node_t* root, int id); 
-bool_t bst_add(bst_key_t k, node_t* root, int id);
-bool_t bst_remove(bst_key_t k, node_t* root, int id);
+bool_t bst_contains(skey_t k, node_t* root, int id);
+bst_search_result_t* bst_find(skey_t k, node_t* aux_root, node_t* root, int id); 
+bool_t bst_add(skey_t k, node_t* root, int id);
+bool_t bst_remove(skey_t k, node_t* root, int id);
 
 void bst_help_child_cas(operation_t* op, node_t* dest);
 bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr);
