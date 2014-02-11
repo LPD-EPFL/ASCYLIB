@@ -195,22 +195,26 @@ harris_insert(intset_t *set, skey_t key, sval_t val)
  * or does nothing (if the value is already present).
  * The deletion is logical and consists of setting the node mark bit to 1.
  */
-int
+sval_t
 harris_delete(intset_t *set, skey_t key)
 {
   node_t *right_node, *right_node_next, *left_node;
   left_node = set->head;
+  sval_t ret = 0;
 	
   do 
     {
       right_node = harris_search(set, key, &left_node);
       if (right_node->key != key)
-	return 0;
+	{
+	  return 0;
+	}
       right_node_next = right_node->next;
       if (!is_marked_ref((long) right_node_next))
 	{
 	  if (ATOMIC_CAS_MB(&right_node->next, right_node_next, get_marked_ref((long) right_node_next)))
 	    {
+	      ret = right_node->val;
 	      break;
 	    }
 	}
@@ -225,8 +229,7 @@ harris_delete(intset_t *set, skey_t key)
       ;
     }
 
-#warning need to return the previous value in order to garbage collect
-  return 1;
+  return ret;
 }
 
 int

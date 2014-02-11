@@ -11,5 +11,5 @@
 
 int set_contains(intset_t *set, skey_t key);
 int set_add(intset_t *set, skey_t key, skey_t val);
-int set_remove(intset_t *set, skey_t key);
+sval_t set_remove(intset_t *set, skey_t key);
 

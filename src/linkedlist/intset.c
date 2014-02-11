@@ -77,10 +77,10 @@ set_add(intset_t *set, skey_t key, skey_t val)
   return result;
 }
 
-int
+sval_t
 set_remove(intset_t *set, skey_t key)
 {
-  int result = 0;
+  sval_t result = 0;
 	
 #ifdef DEBUG_PRINT
   printf("++> set_remove(%d)\n", (int)val);

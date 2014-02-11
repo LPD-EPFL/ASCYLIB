@@ -152,7 +152,7 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
  * or does nothing (if the value is already present).
  * The deletion is logical and consists of setting the node mark bit to 1.
  */
-int 
+sval_t
 harris_delete(intset_t *the_list, skey_t key)
 {
   node_t* cas_result;
@@ -175,10 +175,12 @@ harris_delete(intset_t *the_list, skey_t key)
       cas_result = CAS_PTR(&right_node->next, (node_t*)unmarked_ref, (node_t*)marked_ref);
     } 
   while(cas_result != (node_t*)unmarked_ref);
+
+  sval_t ret = right_node->val;
+
   physical_delete_right(left_node, right_node);
 
-  return 1;
-#warning need to return the previous value in order to garbage collect
+  return ret;
 }
 
 int
