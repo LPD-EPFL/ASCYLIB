@@ -24,9 +24,9 @@
 
 #include "hashtable.h"
 
-int ht_contains(ht_intset_t* set, skey_t key);
+sval_t ht_contains(ht_intset_t* set, skey_t key);
 int ht_add(ht_intset_t* set, skey_t key, sval_t val);
-int ht_remove(ht_intset_t* set, skey_t key);
+sval_t ht_remove(ht_intset_t* set, skey_t key);
 
 /* 
  * Move an element from one bucket to another.
