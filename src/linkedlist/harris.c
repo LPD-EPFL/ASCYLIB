@@ -79,7 +79,7 @@ get_marked_ref(long w)
  * from the list, yet not garbage collected.
  */
 node_t*
-harris_search(intset_t *set, val_t val, node_t **left_node) 
+harris_search(intset_t *set, skey_t key, node_t **left_node) 
 {
   node_t *left_node_next, *right_node;
   left_node_next = set->head;
@@ -104,7 +104,7 @@ harris_search(intset_t *set, val_t val, node_t **left_node)
 	    }
 	  t_next = t->next;
 	} 
-      while (is_marked_ref((long) t_next) || (t->val < val));
+      while (is_marked_ref((long) t_next) || (t->key < key));
       right_node = t;
 		
       /* Check that nodes are adjacent */
@@ -139,13 +139,13 @@ harris_search(intset_t *set, val_t val, node_t **left_node)
  * harris_find returns whether there is a node in the list owning value val.
  */
 int
-harris_find(intset_t *set, val_t val) 
+harris_find(intset_t *set, skey_t key) 
 {
   node_t *right_node, *left_node;
   left_node = set->head;
 	
-  right_node = harris_search(set, val, &left_node);
-  if ((!right_node->next) || right_node->val != val)
+  right_node = harris_search(set, key, &left_node);
+  if ((!right_node->next) || right_node->key != key)
     return 0;
   else 
     return 1;
@@ -156,7 +156,7 @@ harris_find(intset_t *set, val_t val)
  * (if the value was absent) or does nothing (if the value is already present).
  */
 int
-harris_insert(intset_t *set, val_t val) 
+harris_insert(intset_t *set, skey_t key, sval_t val) 
 {
   node_t *newnode, *right_node, *left_node;
   left_node = set->head;
@@ -166,9 +166,9 @@ harris_insert(intset_t *set, val_t val)
       right_node = harris_search(set, val, &left_node);
       if (right_node->val == val)
 	return 0;
-      newnode = new_node(val, right_node, 0);
-      /* mem-bar between node creation and insertion */
-      AO_nop_full(); 
+
+#warning allocating new node on every iteration
+      newnode = new_node(key, val, right_node, 0);
       if (ATOMIC_CAS_MB(&left_node->next, right_node, newnode))
 	return 1;
     } 
@@ -181,15 +181,15 @@ harris_insert(intset_t *set, val_t val)
  * The deletion is logical and consists of setting the node mark bit to 1.
  */
 int
-harris_delete(intset_t *set, val_t val) 
+harris_delete(intset_t *set, skey_t key)
 {
   node_t *right_node, *right_node_next, *left_node;
   left_node = set->head;
 	
   do 
     {
-      right_node = harris_search(set, val, &left_node);
-      if (right_node->val != val)
+      right_node = harris_search(set, key, &left_node);
+      if (right_node->key != key)
 	return 0;
       right_node_next = right_node->next;
       if (!is_marked_ref((long) right_node_next))
@@ -209,6 +209,8 @@ harris_delete(intset_t *set, val_t val)
 #endif
       ;
     }
+
+#warning need to return the previous value in order to garbage collect
   return 1;
 }
 

@@ -24,15 +24,15 @@
 
 #include "hashtable.h"
 
-int ht_contains(ht_intset_t *set, int val, int transactional);
-int ht_add(ht_intset_t *set, int val, int transactional);
-int ht_remove(ht_intset_t *set, int val, int transactional);
+int ht_contains(ht_intset_t* set, skey_t key);
+int ht_add(ht_intset_t* set, skey_t key, sval_t val);
+int ht_remove(ht_intset_t* set, skey_t key);
 
 /* 
  * Move an element from one bucket to another.
  * It is equivalent to changing the key associated with some value.
  */
-int ht_move(ht_intset_t *set, int val1, int val2, int transactional);
+int ht_move(ht_intset_t* set, int val1, int val2, int transactional);
 
 /*
  * Atomic snapshot of the hash table.
@@ -42,4 +42,4 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional);
  * elastic transactions in combination with the move operation, however, normal transactions
  * compose with elastic transactions.
  */
-int ht_snapshot(ht_intset_t *set, int transactional);
+int ht_snapshot(ht_intset_t* set, int transactional);

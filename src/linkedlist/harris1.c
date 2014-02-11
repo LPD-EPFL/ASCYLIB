@@ -72,11 +72,11 @@ physical_delete_right(node_t* left_node, node_t* right_node)
  * from the list, yet not garbage collected.
  */
 static inline node_t* 
-list_search(intset_t* set, val_t val, node_t** left_node_ptr) 
+list_search(intset_t* set, skey_t key, node_t** left_node_ptr) 
 {
   node_t* left_node = set->head;
   node_t* right_node = set->head->next;
-  while((right_node->val < val || is_marked_ref((long)right_node->next))) 
+  while((right_node->key < key || is_marked_ref((long)right_node->next))) 
     {
       if (is_marked_ref((long)right_node->next)) 
 	{
@@ -96,14 +96,14 @@ list_search(intset_t* set, val_t val, node_t** left_node_ptr)
  * returns a value different from 0 if there is a node in the list owning value val.
  */
 int
-harris_find(intset_t* the_list, val_t val)
+harris_find(intset_t* the_list, skey_t key)
 {
   node_t* node = the_list->head->next;
-  while((node->val < val || is_marked_ref((long)node->next))) 
+  while((node->key < key || is_marked_ref((long)node->next))) 
     {
       node = (node_t*)get_unmarked_ref((long)node->next);
     }
-  if (node->val == val) 
+  if (node->key == key) 
     {
       return 1;
     }
@@ -116,7 +116,7 @@ harris_find(intset_t* the_list, val_t val)
  * (if the value was absent) or does nothing (if the value is already present).
  */
 int
-harris_insert(intset_t *the_list, val_t val)
+harris_insert(intset_t *the_list, skey_t key, sval_t val)
 {
   node_t* cas_result;
   node_t* right_node;
@@ -125,7 +125,7 @@ harris_insert(intset_t *the_list, val_t val)
   do
     {
       node_t* left_node;
-      right_node = list_search(the_list, val, &left_node);
+      right_node = list_search(the_list, key, &left_node);
 
       if (right_node->val == val) 
 	{
@@ -134,7 +134,7 @@ harris_insert(intset_t *the_list, val_t val)
 
       if (likely(node_to_add == NULL))
 	{
-	  node_to_add = new_node(val, right_node, 0);
+	  node_to_add = new_node(key, val, right_node, 0);
 	}
       else
 	{
@@ -153,7 +153,7 @@ harris_insert(intset_t *the_list, val_t val)
  * The deletion is logical and consists of setting the node mark bit to 1.
  */
 int 
-harris_delete(intset_t *the_list, val_t val)
+harris_delete(intset_t *the_list, skey_t key)
 {
   node_t* cas_result;
   long unmarked_ref;
@@ -162,9 +162,9 @@ harris_delete(intset_t *the_list, val_t val)
   
   do
     {
-      right_node = list_search(the_list, val, &left_node);
+      right_node = list_search(the_list, key, &left_node);
 
-      if (right_node->val != val)
+      if (right_node->key != key)
 	{
 	  return 0;
 	}
@@ -173,10 +173,12 @@ harris_delete(intset_t *the_list, val_t val)
       unmarked_ref = get_unmarked_ref((long)right_node->next);
       long marked_ref = get_marked_ref(unmarked_ref);
       cas_result = CAS_PTR(&right_node->next, (node_t*)unmarked_ref, (node_t*)marked_ref);
-    } while(cas_result != (node_t*)unmarked_ref);
+    } 
+  while(cas_result != (node_t*)unmarked_ref);
   physical_delete_right(left_node, right_node);
 
   return 1;
+#warning need to return the previous value in order to garbage collect
 }
 
 int

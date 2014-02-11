@@ -34,14 +34,14 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k,t)  set_contains(s, k, t)
-#define DS_ADD(s,k,t)       set_add(s, k, t)
-#define DS_REMOVE(s,k,t)    set_remove(s, k, t)
-#define DS_SIZE(s)          set_size(s)
-#define DS_NEW()            set_new()
+#define DS_CONTAINS(s,k)  set_contains(s, k)
+#define DS_ADD(s,k)       set_add(s, k, k)
+#define DS_REMOVE(s,k)    set_remove(s, k)
+#define DS_SIZE(s)        set_size(s)
+#define DS_NEW()          set_new()
 
-#define DS_TYPE             intset_t
-#define DS_NODE             node_t
+#define DS_TYPE           intset_t
+#define DS_NODE           node_t
 
 /* ################################################################### *
  * GLOBALS
@@ -232,7 +232,7 @@ test(void* thread)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(set, key, TRANSACTIONAL) == false)
+      if(DS_ADD(set, key) == false)
 	{
 	  i--;
 	}
@@ -258,7 +258,7 @@ test(void* thread)
 	{
 	  int res;
 	  START_TS(1);
-	  res = DS_ADD(set, key, TRANSACTIONAL);
+	  res = DS_ADD(set, key);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -272,7 +272,7 @@ test(void* thread)
 	{
 	  int removed;
 	  START_TS(2);
-	  removed = DS_REMOVE(set, key, TRANSACTIONAL);
+	  removed = DS_REMOVE(set, key);
 	  END_TS(2, my_removing_count);
 	  if(removed != 0) 
 	    {
@@ -286,7 +286,7 @@ test(void* thread)
 	{ 
 	  int res;
 	  START_TS(0);
-	  res = DS_CONTAINS(set, key, TRANSACTIONAL);
+	  res = DS_CONTAINS(set, key);
 	  END_TS(0, my_getting_count);
 	  if(res != 0) 
 	    {

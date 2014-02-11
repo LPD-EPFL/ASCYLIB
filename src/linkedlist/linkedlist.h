@@ -21,7 +21,7 @@
 #include <atomic_ops.h>
 #include "atomic_ops_if.h"
 
-
+#include "common.h"
 #include "tm.h"
 #include "measurements.h"
 #include "ssalloc.h"
@@ -32,40 +32,29 @@
 /* Note: stdio is thread-safe */
 #endif
 
-#define DEFAULT_DURATION                1000
-#define DEFAULT_INITIAL                 1024
-#define DEFAULT_NB_THREADS              1
-#define DEFAULT_RANGE                   (2 * DEFAULT_INITIAL)
-#define DEFAULT_UPDATE                  20
 #define DEFAULT_ALTERNATE		0
 #define DEFAULT_EFFECTIVE		1
-
-#define XSTR(s)                         STR(s)
-#define STR(s)                          #s
 
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   4
 
-typedef intptr_t val_t;
-#define VAL_MIN                         INT_MIN
-#define VAL_MAX                         INT_MAX
-
-typedef ALIGNED(64) struct node 
+typedef ALIGNED(CACHE_LINE_SIZE) struct node 
 {
-  val_t val;
-  struct node *next;
+  sval_t key;
+  sval_t val;
+  struct node* next;
 #if defined(DO_PAD)
-  uint8_t padding[64 - 16];
+  uint8_t padding[CACHE_LINE_SIZE - sizeof(val_t) - sizeof(key_t)];
 #endif
 } node_t;
 
-typedef ALIGNED(64) struct intset 
+typedef ALIGNED(CACHE_LINE_SIZE) struct intset 
 {
   node_t *head;
 } intset_t;
 
-node_t *new_node(val_t val, node_t *next, int transactional);
+node_t *new_node(skey_t key, sval_t val, node_t *next, int transactional);
 intset_t *set_new();
 void set_delete(intset_t *set);
