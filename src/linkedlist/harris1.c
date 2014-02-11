@@ -95,7 +95,7 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
 /*
  * returns a value different from 0 if there is a node in the list owning value val.
  */
-int
+sval_t
 harris_find(intset_t* the_list, skey_t key)
 {
   node_t* node = the_list->head->next;
@@ -103,9 +103,10 @@ harris_find(intset_t* the_list, skey_t key)
     {
       node = (node_t*)get_unmarked_ref((long)node->next);
     }
+
   if (node->key == key) 
     {
-      return 1;
+      return node->val;
     }
   return 0;
 }

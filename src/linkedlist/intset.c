@@ -11,10 +11,10 @@
 
 #include "intset.h"
 
-int
+sval_t
 set_contains(intset_t *set, skey_t key)
 {
-  int result;
+  sval_t result;
 	
 #ifdef DEBUG_PRINT
   printf("++> set_contains(%d)\n", (int)val);
@@ -31,7 +31,7 @@ set_contains(intset_t *set, skey_t key)
       prev = next;
       next = prev->next;
     }
-  result = (next->key == key);
+  result = (next->key == key) ? next->val : 0;
 #elif defined LOCKFREE			
   result = harris_find(set, key);
 #endif	
@@ -96,7 +96,7 @@ set_remove(intset_t *set, skey_t key)
       prev = next;
       next = prev->next;
     }
-  result = (next->key == key);
+  result = (next->key == key) ? next->val : 0;
   if (result) 
     {
       prev->next = next->next;

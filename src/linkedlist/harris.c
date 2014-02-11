@@ -138,17 +138,21 @@ harris_search(intset_t *set, skey_t key, node_t **left_node)
 /*
  * harris_find returns whether there is a node in the list owning value val.
  */
-int
+sval_t
 harris_find(intset_t *set, skey_t key) 
 {
   node_t *right_node, *left_node;
   left_node = set->head;
 	
   right_node = harris_search(set, key, &left_node);
-  if ((!right_node->next) || right_node->key != key)
-    return 0;
+  if ((right_node->next == NULL) || right_node->key != key)
+    {
+      return 0;
+    }
   else 
-    return 1;
+    {
+      return right_node->val;
+    }
 }
 
 /*
@@ -169,7 +173,7 @@ harris_insert(intset_t *set, skey_t key, sval_t val)
 #if GC == 1
 	  if (unlikely(newnode != NULL))
 	    {
-	      ssmem_free(alloc, new_node);
+	      ssmem_free(alloc, newnode);
 	    }
 #endif
 	  return 0;
