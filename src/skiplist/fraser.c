@@ -28,6 +28,8 @@
 
 extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
+#define FRASER_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
+
 inline int
 is_marked(uintptr_t i)
 {
@@ -65,14 +67,11 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
       for (right = left_next; ; right = right_next)
 	{
 	  /* Skip a sequence of marked nodes */
-	  while(1)
+	  right_next = right->next[i];
+	  while (unlikely(is_marked((uintptr_t)right_next)))
 	    {
-	      right_next = right->next[i];
-	      if (!is_marked((uintptr_t)right_next))
-		{
-		  break;
-		}
 	      right = (sl_node_t*)unset_mark((uintptr_t)right_next);
+	      right_next = right->next[i];
 	    }
 
 	  if (right->key >= key)
@@ -102,16 +101,15 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
 sval_t
 fraser_find(sl_intset_t *set, skey_t key)
 {
-  sl_node_t **succs;
+  /* sl_node_t **succs; */
+  sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
 
-  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
   fraser_search(set, key, NULL, succs);
   if (succs[0]->key == key && !succs[0]->deleted)
     {
       result = succs[0]->val;
     }
-  ssfree(succs);
   return result;
 }
 
@@ -138,10 +136,10 @@ mark_node_ptrs(sl_node_t *n)
 sval_t
 fraser_remove(sl_intset_t *set, skey_t key)
 {
-  sl_node_t **succs;
+  /* sl_node_t **succs; */
+  sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
 
-  succs = (sl_node_t **)ssalloc(levelmax * sizeof(sl_node_t *));
   fraser_search(set, key, NULL, succs);
   if (succs[0]->key != key)
     {
@@ -168,22 +166,19 @@ fraser_remove(sl_intset_t *set, skey_t key)
     }
 
  end:
-  ssfree(succs);
-
   return result;
 }
 
 int
 fraser_insert(sl_intset_t *set, skey_t key, sval_t val) 
 {
-  sl_node_t *new, *new_next, *pred, *succ, **succs, **preds;
+  sl_node_t *new, *new_next, *pred, *succ;
+  /* sl_new_node **succs, **preds; */
+  sl_node_t *succs[FRASER_MAX_MAX_LEVEL], *preds[FRASER_MAX_MAX_LEVEL];
   int i;
   int result = 0;
 
   new = sl_new_simple_node(key, val, get_rand_level(), 0);
-  preds = (sl_node_t**) ssalloc(levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t**) ssalloc(levelmax * sizeof(sl_node_t *));
-
  retry: 	
   fraser_search(set, key, preds, succs);
   /* Update the value field of an existing node */
@@ -246,10 +241,6 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
  success:
   result = 1;
  end:
-  ssfree(preds);
-  ssfree(succs);
-
-
   return result;
 }
 
