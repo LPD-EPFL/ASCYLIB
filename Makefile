@@ -65,4 +65,3 @@ $(LFBENCHS):
 
 $(NOISE):
 	$(MAKE) -C $@ $(TARGET)
-

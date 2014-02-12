@@ -268,14 +268,18 @@ void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* cur
 	}
 }
 
-unsigned long bst_size(node_t* node) {
+unsigned long bst_size_rec(node_t* node) {
 	if (ISNULL(node)) {
 		return 0;
 	} else if (GETFLAG(node->op) != STATE_OP_MARK) {
-		return 1 + bst_size(node->right) + bst_size(node->left);
+		return 1 + bst_size_rec(node->right) + bst_size_rec(node->left);
 	} else {
-		return bst_size(node->right) + bst_size(node->left);
+		return bst_size_rec(node->right) + bst_size_rec(node->left);
 	}
+}
+
+unsigned long bst_size(node_t* node) {
+    return bst_size_rec(node) - 1; //do not count the root
 }
 
 void bst_print(node_t* node){
