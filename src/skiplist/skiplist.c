@@ -26,18 +26,19 @@
 unsigned int levelmax;
 __thread ssmem_allocator_t* alloc;
 
-int
+inline int
 get_rand_level()
 {
   int i, level = 1;
   for (i = 0; i < levelmax - 1; i++)
     {
       if ((rand_range(100)-1) < 50)
-	level++;
+  	level++;
       else
-	break;
+  	break;
     }
   /* 1 <= level <= levelmax */
+
   return level;
 }
 
