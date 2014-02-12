@@ -47,8 +47,6 @@ extern __thread ssmem_allocator_t* alloc;
 
 extern unsigned int levelmax;
 
-#define TRANSACTIONAL                   DEFAULT_ELASTICITY
-
 typedef ALIGNED(64) struct sl_node
 {
   skey_t key;

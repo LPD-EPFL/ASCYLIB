@@ -277,7 +277,7 @@ is_power_of_two (unsigned int x)
 #  define CACHE_LINE_SIZE 64
 #  define NOP_DURATION 2	/* have not actually measured it! */
 
-#  define USE_HYPERTRHEADS 1	/* use first all the hyperthreads of one socket if set */
+#  define USE_HYPERTRHEADS 0	/* use first all the hyperthreads of one socket if set */
 
 #  if USE_HYPERTRHEADS == 1
   static uint8_t UNUSED the_cores[] = 

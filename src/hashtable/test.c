@@ -118,8 +118,6 @@ void
 	
   thread_data_t *d = (thread_data_t *)data;
 	
-  /* Create transaction */
-  TM_THREAD_ENTER(d->id);
   set_cpu(the_cores[d->id]);
   ssalloc_init();
   PF_CORRECTION;
@@ -223,9 +221,6 @@ void
     }
 
 
-  /* Free transaction */
-  TM_THREAD_EXIT();
-
   PF_PRINT;
 	
   return NULL;
@@ -237,8 +232,6 @@ void *test2(void *data)
   int val, newval, last, flag = 1;
   thread_data_t *d = (thread_data_t *)data;
 	
-  /* Create transaction */
-  TM_THREAD_ENTER(d->id);
   set_cpu(the_cores[d->id]);
   /* Wait on barrier */
   barrier_cross(d->barrier);
@@ -300,8 +293,6 @@ void *test2(void *data)
     }
   }
 	
-  /* Free transaction */
-  TM_THREAD_EXIT();
   return NULL;
 }
 
@@ -535,7 +526,6 @@ main(int argc, char **argv)
     {
       printf("Initializing STM\n");
     }	
-  TM_STARTUP();
 	
   // Populate set 
   if (test_verbose)
@@ -704,9 +694,6 @@ main(int argc, char **argv)
     }	
   // Delete set 
   /* ht_delete(set); */
-	
-  // Cleanup STM 
-  TM_SHUTDOWN();
 	
   free(threads);
   free(data);

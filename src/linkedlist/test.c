@@ -106,8 +106,6 @@ test(void *data)
 	
   thread_data_t *d = (thread_data_t *)data;
 	
-  /* Create transaction */
-  TM_THREAD_ENTER(d->id);
   set_cpu(the_cores[d->id]);
   /* Wait on barrier */
   ssalloc_init();
@@ -189,10 +187,7 @@ test(void *data)
 	unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
       }
     }
-  /* Free transaction */
-  TM_THREAD_EXIT();
-	
- 
+
   uint8_t t;
   for (t = 0; t < d->nb_threads; t++)
     {
@@ -374,9 +369,6 @@ main(int argc, char **argv)
   /* Init STM */
   printf("Initializing STM\n");
 	
-  TM_STARTUP();
-	
-
   size_t ten_perc = initial / 10, tens = 1;
   size_t ten_perc_nxt = ten_perc;
 
@@ -554,9 +546,6 @@ main(int argc, char **argv)
 	
   /* Delete set */
   /* set_delete(set); */
-	
-  /* Cleanup STM */
-  TM_SHUTDOWN();
 	
   free(threads);
   free(data);

@@ -23,7 +23,7 @@
 
 #include "intset.h"
 
-extern ALIGNED(64) uint8_t levelmax[64];
+extern ALIGNED(64) unsigned int levelmax;
 __thread unsigned long* seeds;
 
 ALIGNED(64) uint8_t running[64];
@@ -61,7 +61,7 @@ void barrier_cross(barrier_t *b)
 
 typedef ALIGNED(64) struct thread_data 
 {
-  val_t first;
+  skey_t first;
   long range;
   int update;
   int unit_tx;
@@ -94,7 +94,7 @@ void print_skiplist(sl_intset_t *set)
 {
   sl_node_t *curr;
   int i, j;
-  int arr[*levelmax];
+  int arr[levelmax];
 	
   for (i=0; i< sizeof arr/sizeof arr[0]; i++) arr[i] = 0;
 	
@@ -108,7 +108,7 @@ void print_skiplist(sl_intset_t *set)
     printf("\n");
     curr = curr->next[0];
   } while (curr); 
-  for (j=0; j<*levelmax; j++)
+  for (j=0; j<levelmax; j++)
     printf("%d nodes of level %d\n", arr[j], j);
 }
 
@@ -117,12 +117,10 @@ void*
 test(void *data) 
 {
   int unext, last = -1; 
-  val_t val = 0;
+  skey_t val = 0;
 	
   thread_data_t *d = (thread_data_t *)data;
 	
-  /* Create transaction */
-  TM_THREAD_ENTER(d->id);
   set_cpu(the_cores[d->id]);
   /* Wait on barrier */
   ssalloc_init();
@@ -143,7 +141,7 @@ test(void *data)
 	if (last < 0) { // add
 				
 	  val = rand_range_re(&d->seed, d->range);
-	  if (sl_add(d->set, val, TRANSACTIONAL)) {
+	  if (sl_add(d->set, val, val)) {
 	    d->nb_added++;
 	    last = val;
 	  } 				
@@ -152,7 +150,7 @@ test(void *data)
 	} else { // remove
 				
 	  if (d->alternate) { // alternate mode (default)
-	    if (sl_remove(d->set, last, TRANSACTIONAL)) {
+	    if (sl_remove(d->set, last)) {
 	      d->nb_removed++;
 	    } 
 	    last = -1;
@@ -160,7 +158,7 @@ test(void *data)
 	    /* Random computation only in non-alternated cases */
 	    val = rand_range_re(&d->seed, d->range);
 	    /* Remove one random value */
-	    if (sl_remove(d->set, val, TRANSACTIONAL)) {
+	    if (sl_remove(d->set, val)) {
 	      d->nb_removed++;
 	      /* Repeat until successful, to avoid size variations */
 	      last = -1;
@@ -191,7 +189,7 @@ test(void *data)
 	}	else val = rand_range_re(&d->seed, d->range);
 			
 	PF_START(2);
-	if (sl_contains(d->set, val, TRANSACTIONAL)) 
+	if (sl_contains(d->set, val)) 
 	  d->nb_found++;
 	PF_STOP(2);	
 	d->nb_contains++;
@@ -205,9 +203,6 @@ test(void *data)
 	unext = (rand_range_re(&d->seed, 100) - 1 < d->update);
       }
     }
-	
-  /* Free transaction */
-  TM_THREAD_EXIT();
 	
   PF_PRINT;
 
@@ -242,8 +237,8 @@ main(int argc, char **argv)
 	
   sl_intset_t *set;
   int i, c, size;
-  val_t last = 0; 
-  val_t val = 0;
+  skey_t last = 0; 
+  skey_t val = 0;
   unsigned long reads, effreads, updates, effupds, aborts, aborts_locked_read, aborts_locked_write,
     aborts_validate_read, aborts_validate_write, aborts_validate_commit,
     aborts_invalid_memory, aborts_double_write, max_retries, failures_because_contention;
@@ -257,7 +252,7 @@ main(int argc, char **argv)
   int initial = DEFAULT_INITIAL;
   int nb_threads = DEFAULT_NB_THREADS;
   long range = DEFAULT_RANGE;
-  int seed = DEFAULT_SEED;
+  int seed = 0;
   int update = DEFAULT_UPDATE;
   int unit_tx = DEFAULT_ELASTICITY;
   int alternate = DEFAULT_ALTERNATE;
@@ -394,17 +389,12 @@ main(int argc, char **argv)
   else
     srand(seed);
 	
-  *levelmax = floor_log_2((unsigned int) initial);
+  levelmax = floor_log_2((unsigned int) initial);
   set = sl_set_new();
 
   /* stop = 0; */
   *running = 1;
 
-  // Init STM 
-  printf("Initializing STM\n");
-	
-  TM_STARTUP();
-	
   // Populate set 
   printf("Adding %d entries to set\n", initial);
   i = 0;
@@ -412,7 +402,7 @@ main(int argc, char **argv)
   while (i < initial) 
     {
       val = rand_range_re(NULL, range);
-      if (sl_add(set, val, 0)) 
+      if (sl_add(set, val, val)) 
 	{
 	  last = val;
 	  i++;
@@ -420,7 +410,7 @@ main(int argc, char **argv)
     }
   size = sl_set_size(set);
   printf("Set size     : %d\n", size);
-  printf("Level max    : %d\n", *levelmax);
+  printf("Level max    : %d\n", levelmax);
 	
   // Access set from all threads 
   barrier_init(&barrier, nb_threads + 1);
@@ -585,9 +575,6 @@ main(int argc, char **argv)
 	
   // Delete set 
   sl_set_delete(set);
-	
-  // Cleanup STM 
-  TM_SHUTDOWN();
 	
   free(threads);
   free(data);

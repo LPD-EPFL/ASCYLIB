@@ -26,7 +26,7 @@
 #define MAXLEVEL    32
 
 sval_t
-sl_contains(sl_intset_t *set, skey_t key, int transactional)
+sl_contains(sl_intset_t *set, skey_t key)
 {
   sval_t result = 0;
 	
@@ -36,15 +36,17 @@ sl_contains(sl_intset_t *set, skey_t key, int transactional)
   sl_node_t *node, *next;
 	
   node = set->head;
-  for (i = node->toplevel-1; i >= 0; i--) {
-    next = node->next[i];
-    while (next->val < val) {
-      node = next;
+  for (i = node->toplevel-1; i >= 0; i--) 
+    {
       next = node->next[i];
+      while (next->key < key) 
+	{
+	  node = next;
+	  next = node->next[i];
+	}
     }
-  }
   node = node->next[0];
-  result = (node->val == val);
+  result = (node->key == key);
 		
 #elif defined LOCKFREE /* fraser lock-free */
   result = fraser_find(set, key);
@@ -61,17 +63,19 @@ sl_seq_add(sl_intset_t *set, skey_t key, sval_t val)
   sl_node_t *preds[MAXLEVEL], *succs[MAXLEVEL];
 	
   node = set->head;
-  for (i = node->toplevel-1; i >= 0; i--) {
-    next = node->next[i];
-    while (next->val < val) {
-      node = next;
+  for (i = node->toplevel-1; i >= 0; i--) 
+    {
       next = node->next[i];
+      while (next->key < key) 
+	{
+	  node = next;
+	  next = node->next[i];
+	}
+      preds[i] = node;
+      succs[i] = node->next[i];
     }
-    preds[i] = node;
-    succs[i] = node->next[i];
-  }
   node = node->next[0];
-  if ((result = (node->val != val)) == 1)
+  if ((result = (node->key != key)) == 1)
     {
       l = get_rand_level();
       node = sl_new_simple_node(key, val, l, 1);
@@ -85,33 +89,23 @@ sl_seq_add(sl_intset_t *set, skey_t key, sval_t val)
 }
 
 int
-sl_add(sl_intset_t *set, skey_t key, sval_t val, int transactional)
+sl_add(sl_intset_t *set, skey_t key, sval_t val)
 {
   int result = 0;
-	
-  if (!transactional) 
-    {
-      result = sl_seq_add(set, key, val);
-    } 
-  else 
-    {
 #ifdef SEQUENTIAL
-      result = sl_seq_add(set, key, val);
+  result = sl_seq_add(set, key, val);
 #elif defined LOCKFREE /* fraser lock-free */
-      result = fraser_insert(set, key, val);
+  result = fraser_insert(set, key, val);
 #endif
-    }
-	
   return result;
 }
 
 sval_t
-sl_remove(sl_intset_t *set, skey_t key, int transactional)
+sl_remove(sl_intset_t *set, skey_t key)
 {
   sval_t result = 0;
 	
 #ifdef SEQUENTIAL
-	
   int i;
   sl_node_t *node, *next = NULL;
   sl_node_t *preds[MAXLEVEL], *succs[MAXLEVEL];
@@ -120,7 +114,7 @@ sl_remove(sl_intset_t *set, skey_t key, int transactional)
   for (i = node->toplevel-1; i >= 0; i--) 
     {
       next = node->next[i];
-      while (next->val < val) 
+      while (next->key < key) 
 	{
 	  node = next;
 	  next = node->next[i];
@@ -128,10 +122,10 @@ sl_remove(sl_intset_t *set, skey_t key, int transactional)
       preds[i] = node;
       succs[i] = node->next[i];
     }
-  if ((result = (next->val == val)) == 1) 
+  if ((result = (next->key == key)) == 1) 
     {
       for (i = 0; i < set->head->toplevel; i++) 
-	if (succs[i]->val == val)
+	if (succs[i]->key == key)
 	  preds[i]->next[i] = succs[i]->next[i];
       sl_delete_node(next); 
     }
