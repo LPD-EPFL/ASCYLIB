@@ -117,7 +117,7 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
 void bst_help_insert(info_t * op) {
     bst_cas_child(op->iinfo.p,op->iinfo.l,op->iinfo.new_internal);
     //iinfo_t* cl = (iinfo_t*) UNFLAG(op);
-    CAS_PTR(&(op->iinfo.p->update),FLAG(op,STATE_IFLAG),FLAG(op,STATE_CLEAN));
+    void* UNUSED dummy = CAS_PTR(&(op->iinfo.p->update),FLAG(op,STATE_IFLAG),FLAG(op,STATE_CLEAN));
 }
 
 sval_t bst_delete(skey_t key, node_t* root) {
@@ -164,7 +164,7 @@ bool_t bst_help_delete(info_t* op) {
         return TRUE;
     } else {
         bst_help(result);
-        CAS_PTR(&(op->dinfo.gp->update), FLAG(op,STATE_DFLAG), FLAG(op,STATE_CLEAN));
+        void* UNUSED dummy = CAS_PTR(&(op->dinfo.gp->update), FLAG(op,STATE_DFLAG), FLAG(op,STATE_CLEAN));
         return FALSE;
     }
 }
@@ -178,7 +178,7 @@ void bst_help_marked(info_t* op) {
         other = op->dinfo.p->right; 
     }
     bst_cas_child(op->dinfo.gp,op->dinfo.p,other);
-    CAS_PTR(&(op->dinfo.gp->update), FLAG(op,STATE_DFLAG),FLAG(op,STATE_CLEAN));
+    void* UNUSED dummy = CAS_PTR(&(op->dinfo.gp->update), FLAG(op,STATE_DFLAG),FLAG(op,STATE_CLEAN));
 }
 
 void bst_help(update_t u){
@@ -193,9 +193,9 @@ void bst_help(update_t u){
 
 void bst_cas_child(node_t* parent, node_t* old, node_t* new){
     if (new->key < parent->key) {
-        CAS_PTR(&(parent->left),old,new);
+      void* UNUSED dummy = CAS_PTR(&(parent->left),old,new);
     } else {
-        CAS_PTR(&(parent->right),old,new);
+      void* UNUSED dummy = CAS_PTR(&(parent->right),old,new);
     }
 }
 

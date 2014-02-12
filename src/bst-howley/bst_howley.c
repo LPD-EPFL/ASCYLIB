@@ -148,8 +148,8 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	} else {
 		address = &(dest->right);
 	}
-	CAS_PTR(address, op->child_cas_op.expected, op->child_cas_op.update);
-	CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
+	void* UNUSED dummy0 = CAS_PTR(address, op->child_cas_op.expected, op->child_cas_op.update);
+	void* UNUSED dummy1 = CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
 
 sval_t bst_remove(skey_t k, node_t* root){
@@ -216,9 +216,9 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 
 	if (seen_state == STATE_OP_SUCCESSFUL) {
 
-		CAS_PTR(&(op->relocate_op.dest->key), op->relocate_op.remove_key, op->relocate_op.replace_key);
-		CAS_PTR(&(op->relocate_op.dest->value), op->relocate_op.remove_value, op->relocate_op.replace_value);
-		CAS_PTR(&(op->relocate_op.dest->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, STATE_OP_NONE));
+		skey_t UNUSED dummy0 = CAS_PTR(&(op->relocate_op.dest->key), op->relocate_op.remove_key, op->relocate_op.replace_key);
+		skey_t UNUSED dummy1 = CAS_PTR(&(op->relocate_op.dest->value), op->relocate_op.remove_value, op->relocate_op.replace_value);
+		void* UNUSED dummy2 = CAS_PTR(&(op->relocate_op.dest->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, STATE_OP_NONE));
 	}
 
 	bool_t result = (seen_state == STATE_OP_SUCCESSFUL);
@@ -226,7 +226,7 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 		return result;
 	}
 
-	CAS_PTR(&(curr->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, result ? STATE_OP_MARK : STATE_OP_NONE));
+	void* UNUSED dummy = CAS_PTR(&(curr->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, result ? STATE_OP_MARK : STATE_OP_NONE));
 	if (result) {
 		if (op->relocate_op.dest == pred) {
 			pred_op = (operation_t *)FLAG(op, STATE_OP_NONE);

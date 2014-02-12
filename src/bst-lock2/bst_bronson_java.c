@@ -932,7 +932,7 @@ void bst_print(volatile node_t* node) {
     }
 
     if (node->value == TRUE) {
-        printf("%d, ", node->key);
+      printf("%lu, ", (long unsigned) node->key);
     }
 
     printf("Left \n");
