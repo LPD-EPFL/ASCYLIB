@@ -157,6 +157,7 @@ sval_t bst_remove(skey_t k, node_t* root){
 	node_t* pred;
 	node_t* curr;
 	node_t* replace;
+    sval_t val;
 	operation_t* pred_op;
 	operation_t* curr_op;
 	operation_t* replace_op;
@@ -174,18 +175,19 @@ sval_t bst_remove(skey_t k, node_t* root){
 				return res;
 			}
 		} else { // node has two children
-
-			if ((bst_find(k, &pred, &pred_op, &replace, &replace_op, curr, root) == ABORT) || (curr->op != curr_op)) {
+			val = bst_find(k, &pred, &pred_op, &replace, &replace_op, curr, root);
+			if ((val == ABORT) || (curr->op != curr_op)) {
 				continue;
 			} 
-
 
 			reloc_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 			reloc_op->relocate_op.state = STATE_OP_ONGOING;
 			reloc_op->relocate_op.dest = curr;
 			reloc_op->relocate_op.dest_op = curr_op;
 			reloc_op->relocate_op.remove_key = k;
+			reloc_op->relocate_op.remove_value = res;
 			reloc_op->relocate_op.replace_key = replace->key;
+			reloc_op->relocate_op.replace_value = replace->value;
 
 			MEM_BARRIER;
 			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
@@ -215,6 +217,7 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 	if (seen_state == STATE_OP_SUCCESSFUL) {
 
 		CAS_PTR(&(op->relocate_op.dest->key), op->relocate_op.remove_key, op->relocate_op.replace_key);
+		CAS_PTR(&(op->relocate_op.dest->value), op->relocate_op.remove_value, op->relocate_op.replace_value);
 		CAS_PTR(&(op->relocate_op.dest->op), FLAG(op, STATE_OP_RELOCATE), FLAG(op, STATE_OP_NONE));
 	}
 

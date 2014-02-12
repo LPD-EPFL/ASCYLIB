@@ -51,7 +51,9 @@ typedef struct relocate_op_t {
 	node_t* dest;
 	operation_t* dest_op;
 	skey_t remove_key;
+	sval_t remove_value;
 	skey_t replace_key;
+	sval_t replace_value;
 	//char padding[32]; 
 
 } relocate_op_t;
