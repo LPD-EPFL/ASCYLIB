@@ -72,7 +72,7 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
 	{
 	  ns += 64 - ns_rm;
 	}
-      node = (sl_node_t*)ssalloc_alloc(1, ns);
+      node = (sl_node_t*)ssalloc(ns);
     }
   else 
     {
@@ -96,7 +96,7 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
 	  ns += 64 - ns_rm;
 	}
     }
-  node = (sl_node_t*)ssalloc_alloc(1, ns);
+  node = (sl_node_t*)ssalloc(ns);
 #endif
 
   node->val = val;
@@ -145,13 +145,13 @@ sl_set_new()
   sl_intset_t *set;
   sl_node_t *min, *max;
 	
-  if ((set = (sl_intset_t *)ssalloc_alloc(1, sizeof(sl_intset_t))) == NULL)
+  if ((set = (sl_intset_t *)ssalloc(sizeof(sl_intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);
     }
 
-  ssalloc_align_alloc(1);
+  ssalloc_align_alloc(0);
   /* set = (sl_intset_t *)xmalloc(sizeof(sl_intset_t)); */
   max = sl_new_node(VAL_MAX, NULL, levelmax, 1);
   min = sl_new_node(VAL_MIN, max, levelmax, 1);
@@ -160,15 +160,15 @@ sl_set_new()
   set->head = min;
 
 #if defined(LL_GLOBAL_LOCK)
-  ssalloc_align_alloc(1);
-  set->lock = (volatile ptlock_t*) ssalloc_alloc(1, sizeof(ptlock_t));
+  ssalloc_align_alloc(0);
+  set->lock = (volatile ptlock_t*) ssalloc(sizeof(ptlock_t));
   if (set->lock == NULL)
     {
       perror("malloc");
       exit(1);
     }
   GL_INIT_LOCK(set->lock);
-  ssalloc_align_alloc(1);
+  ssalloc_align_alloc(0);
 #endif
 
   return set;
@@ -187,9 +187,9 @@ sl_set_delete(sl_intset_t *set)
       node = next;
     }
 #if defined(LL_GLOBAL_LOCK)
-  ssfree_alloc(1, (ptlock_t*) set->lock);
+  ssfree((void*) set->lock);
 #endif
-  ssfree_alloc(1, set);
+  ssfree((void*) set);
 }
 
 int sl_set_size(sl_intset_t *set)

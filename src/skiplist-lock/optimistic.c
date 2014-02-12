@@ -32,27 +32,12 @@
 unsigned int levelmax;
 
 #define MAX_BACKOFF 131071
+#define HERLIHY_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
 
-inline int ok_to_delete(sl_node_t *node, int found)
+inline int 
+ok_to_delete(sl_node_t *node, int found)
 {
   return (node->fullylinked && ((node->toplevel-1) == found) && !node->marked);
-}
-
-inline void*
-xmalloc2(size_t size)
-{
-  void *p = ssalloc(size);
-  if (p == NULL) {
-    perror("malloc");
-    exit(1);
-  }
-  return p;
-}
-
-inline void
-xfree(void* mem)
-{
-  ssfree(mem);
 }
 
 /*
@@ -97,15 +82,10 @@ optimistic_search(sl_intset_t *set, val_t val, sl_node_t **preds, sl_node_t **su
 int
 optimistic_find(sl_intset_t *set, val_t val)
 { 
-  sl_node_t **succs, **preds;
+  sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
   int result, found;
-	
-  preds = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
   found = optimistic_search(set, val, preds, succs, 1);
   result = (found != -1 && succs[found]->fullylinked && !succs[found]->marked);
-  xfree(preds);
-  xfree(succs);
   return result;
 }
 
@@ -140,14 +120,11 @@ unlock_levels(sl_intset_t* set, sl_node_t **nodes, int highestlevel, int j)
 int
 optimistic_insert(sl_intset_t *set, val_t val)
 {
-  sl_node_t **preds, **succs;
+  sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t  *node_found, *prev_pred, *new_node;
   sl_node_t *pred, *succ;
   int toplevel, highest_locked, i, valid, found;
   unsigned int backoff;
-
-  preds = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
 
   toplevel = get_rand_level();
   backoff = 1;
@@ -164,13 +141,10 @@ optimistic_insert(sl_intset_t *set, val_t val)
 		{
 		  PAUSE;
 		}
-	      xfree(preds);
-	      xfree(succs);
 	      return 0;
 	    }
 	  continue;
 	}
-
 
       GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
       highest_locked = -1;
@@ -223,8 +197,6 @@ optimistic_insert(sl_intset_t *set, val_t val)
 
       unlock_levels(set, preds, highest_locked, 12);
       /* Freeing the previously allocated memory */
-      xfree(preds);
-      xfree(succs);
       return 1;
     }
 }
@@ -238,14 +210,12 @@ optimistic_insert(sl_intset_t *set, val_t val)
 int
 optimistic_delete(sl_intset_t *set, val_t val)
 {
-  sl_node_t **preds, **succs;
+  sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t *node_todel, *prev_pred; 
   sl_node_t *pred, *succ;
   int is_marked, toplevel, highest_locked, i, valid, found;	
   unsigned int backoff;
 
-  preds = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
-  succs = (sl_node_t **)xmalloc2(levelmax * sizeof(sl_node_t *));
   node_todel = NULL;
   is_marked = 0;
   toplevel = -1;
@@ -270,8 +240,6 @@ optimistic_delete(sl_intset_t *set, val_t val)
 		{
 		  GL_UNLOCK(set->lock);
 		  UNLOCK(ND_GET_LOCK(node_todel));
-		  xfree(preds);
-		  xfree(succs);
 		  return 0;
 		}
 
@@ -321,15 +289,11 @@ optimistic_delete(sl_intset_t *set, val_t val)
 	  UNLOCK(ND_GET_LOCK(node_todel));
 	  unlock_levels(set, preds, highest_locked, 22);
 	  /* Freeing the previously allocated memory */
-	  xfree(preds);
-	  xfree(succs);
 	  return 1;
 	}
       else
 	{
 	  /* Freeing the previously allocated memory */
-	  xfree(preds);
-	  xfree(succs);
 	  return 0;
 	}
     }
