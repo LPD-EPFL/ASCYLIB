@@ -71,7 +71,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
 	{
 	  ns += 64 - ns_rm;
 	}
-      node = (sl_node_t *)ssalloc_alloc(1, ns);
+      node = (sl_node_t *)ssalloc(ns);
     }
   else 
     {
@@ -100,7 +100,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
 	{
 	  ns += 64 - ns_rm;
 	}
-      node = (sl_node_t *)ssalloc_alloc(1, ns);
+      node = (sl_node_t *)ssalloc(ns);
 #endif
 
   if (node == NULL)
@@ -150,7 +150,7 @@ sl_delete_node(sl_node_t *n)
 #if GC == 1
   ssmem_free(alloc, n);
 #else
-  ssfree_alloc(1, n);
+  ssfree(n);
 #endif
 }
 
@@ -160,13 +160,13 @@ sl_set_new()
   sl_intset_t *set;
   sl_node_t *min, *max;
 	
-  if ((set = (sl_intset_t *)ssalloc_alloc(1, sizeof(sl_intset_t))) == NULL)
+  if ((set = (sl_intset_t *)ssalloc(sizeof(sl_intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);
     }
 
-  ssalloc_align_alloc(1);
+  ssalloc_align_alloc(0);
 
   max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
   min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
@@ -186,7 +186,7 @@ sl_set_delete(sl_intset_t *set)
       sl_delete_node(node);
       node = next;
     }
-  ssfree_alloc(1, set);
+  ssfree(set);
 }
 
 int
