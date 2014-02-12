@@ -79,13 +79,17 @@ optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **s
  * memory at right places to avoid the use of a stop-the-world garbage 
  * collector. 
  */
-int
+sval_t
 optimistic_find(sl_intset_t *set, skey_t key)
 { 
   sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
-  int result, found;
+  int found;
+  sval_t result = 0;
   found = optimistic_search(set, key, preds, succs, 1);
-  result = (found != -1 && succs[found]->fullylinked && !succs[found]->marked);
+  if ((found != -1 && succs[found]->fullylinked && !succs[found]->marked))
+    {
+      result = succs[found]->val;
+    }
   return result;
 }
 
@@ -207,7 +211,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
  * than calling the Java compareTo method of the Comparable interface 
  * (cf. p132 of SIROCCO'07 proceedings).
  */
-int
+sval_t
 optimistic_delete(sl_intset_t *set, skey_t key)
 {
   sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
@@ -282,6 +286,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 	      preds[i]->next[i] = node_todel->next[i];
 	    }
 
+	  sval_t val = node_todel->val;
 #if GC == 1
 	  ssmem_free(alloc, node_todel);
 #endif
@@ -289,7 +294,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 	  UNLOCK(ND_GET_LOCK(node_todel));
 	  unlock_levels(set, preds, highest_locked, 22);
 	  /* Freeing the previously allocated memory */
-	  return 1;
+	  return val;
 	}
       else
 	{

@@ -23,7 +23,7 @@
 
 #include "intset.h"
 
-inline int
+inline sval_t
 sl_contains(sl_intset_t *set, skey_t key)
 {
   return optimistic_find(set, key);
@@ -35,8 +35,8 @@ sl_add(sl_intset_t *set, skey_t key, sval_t val)
   return optimistic_insert(set, key, val);
 }
 
-inline int
+inline sval_t
 sl_remove(sl_intset_t *set, skey_t key)
 {
-	return optimistic_delete(set, key);
+  return optimistic_delete(set, key);
 }
