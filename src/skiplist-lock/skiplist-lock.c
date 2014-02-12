@@ -161,16 +161,18 @@ sl_set_delete(sl_intset_t *set)
 
 int sl_set_size(sl_intset_t *set)
 {
-	int size = -1;
-	sl_node_t *node;
+  int size = 0;
+  sl_node_t *node;
 	
-	/* We have at least 2 elements */
-	node = set->head->next[0];
-	while (node->next[0] != NULL) {
-		if (node->fullylinked && !node->marked)
-			size++;
-		node = node->next[0];
+  /* We have at least 2 elements */
+  node = set->head->next[0];
+  while (node->next[0] != NULL) 
+    {
+      if (node->fullylinked && !node->marked)
+	{
+	  size++;
 	}
-	
-	return size;
+      node = node->next[0];
+    }
+  return size;
 }
