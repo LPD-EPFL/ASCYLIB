@@ -45,8 +45,8 @@ ok_to_delete(sl_node_t *node, int found)
  * original paper. A fast parameter has been added to speed-up the search 
  * so that the function quits as soon as the searched element is found.
  */
-inline val_t
-optimistic_search(sl_intset_t *set, val_t val, sl_node_t **preds, sl_node_t **succs, int fast)
+inline int
+optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **succs, int fast)
 {
   int found, i;
   sl_node_t *pred, *curr;
@@ -57,7 +57,7 @@ optimistic_search(sl_intset_t *set, val_t val, sl_node_t **preds, sl_node_t **su
   for (i = (pred->toplevel - 1); i >= 0; i--)
     {
       curr = pred->next[i];
-      while (val > curr->val)
+      while (key > curr->key)
 	{
 	  pred = curr;
 	  curr = pred->next[i];
@@ -65,7 +65,7 @@ optimistic_search(sl_intset_t *set, val_t val, sl_node_t **preds, sl_node_t **su
       if (preds != NULL) 
 	preds[i] = pred;
       succs[i] = curr;
-      if (found == -1 && val == curr->val)
+      if (found == -1 && key == curr->key)
 	{
 	  found = i;
 	}
@@ -80,11 +80,11 @@ optimistic_search(sl_intset_t *set, val_t val, sl_node_t **preds, sl_node_t **su
  * collector. 
  */
 int
-optimistic_find(sl_intset_t *set, val_t val)
+optimistic_find(sl_intset_t *set, skey_t key)
 { 
   sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
   int result, found;
-  found = optimistic_search(set, val, preds, succs, 1);
+  found = optimistic_search(set, key, preds, succs, 1);
   result = (found != -1 && succs[found]->fullylinked && !succs[found]->marked);
   return result;
 }
@@ -118,7 +118,7 @@ unlock_levels(sl_intset_t* set, sl_node_t **nodes, int highestlevel, int j)
  * Unlocking and freeing the memory are done at the right places.
  */
 int
-optimistic_insert(sl_intset_t *set, val_t val)
+optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 {
   sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t  *node_found, *prev_pred, *new_node;
@@ -131,7 +131,7 @@ optimistic_insert(sl_intset_t *set, val_t val)
 	
   while (1) 
     {
-      found = optimistic_search(set, val, preds, succs, 1);
+      found = optimistic_search(set, key, preds, succs, 1);
       if (found != -1)
 	{
 	  node_found = succs[found];
@@ -177,7 +177,7 @@ optimistic_insert(sl_intset_t *set, val_t val)
 	  continue;
 	}
 		
-      new_node = sl_new_simple_node(val, toplevel, 0);
+      new_node = sl_new_simple_node(key, val, toplevel, 0);
 
       for (i = 0; i < toplevel; i++)
 	{
@@ -208,7 +208,7 @@ optimistic_insert(sl_intset_t *set, val_t val)
  * (cf. p132 of SIROCCO'07 proceedings).
  */
 int
-optimistic_delete(sl_intset_t *set, val_t val)
+optimistic_delete(sl_intset_t *set, skey_t key)
 {
   sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t *node_todel, *prev_pred; 
@@ -223,7 +223,7 @@ optimistic_delete(sl_intset_t *set, val_t val)
 	
   while(1)
     {
-      found = optimistic_search(set, val, preds, succs, 1);
+      found = optimistic_search(set, key, preds, succs, 1);
       /* If not marked and ok to delete, then mark it */
       if (is_marked || (found != -1 && ok_to_delete(succs[found], found)))
 	{	

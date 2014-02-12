@@ -58,7 +58,7 @@ floor_log_2(unsigned int n)
  * Create a new node without setting its next fields. 
  */
 sl_node_t*
-sl_new_simple_node(val_t val, int toplevel, int transactional)
+sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
 {
   sl_node_t* node;
 	
@@ -99,6 +99,7 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
   node = (sl_node_t*)ssalloc(ns);
 #endif
 
+  node->key = key;
   node->val = val;
   node->toplevel = toplevel;
   node->marked = 0;
@@ -117,12 +118,12 @@ sl_new_simple_node(val_t val, int toplevel, int transactional)
  * If next=NULL, then this create a tail node. 
  */
 sl_node_t*
-sl_new_node(val_t val, sl_node_t *next, int toplevel, int transactional)
+sl_new_node(skey_t key, sval_t val, sl_node_t *next, int toplevel, int transactional)
 {
   sl_node_t *node;
   int i;
 	
-  node = sl_new_simple_node(val, toplevel, transactional);
+  node = sl_new_simple_node(key, val, toplevel, transactional);
 	
   for (i = 0; i < toplevel; i++)
     node->next[i] = next;
@@ -152,9 +153,8 @@ sl_set_new()
     }
 
   ssalloc_align_alloc(0);
-  /* set = (sl_intset_t *)xmalloc(sizeof(sl_intset_t)); */
-  max = sl_new_node(VAL_MAX, NULL, levelmax, 1);
-  min = sl_new_node(VAL_MIN, max, levelmax, 1);
+  max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
+  min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
   max->fullylinked = 1;
   min->fullylinked = 1;
   set->head = min;

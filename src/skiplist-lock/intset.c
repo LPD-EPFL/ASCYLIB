@@ -23,17 +23,20 @@
 
 #include "intset.h"
 
-int sl_contains(sl_intset_t *set, val_t val, int transactional)
+inline int
+sl_contains(sl_intset_t *set, skey_t key)
 {
-	return optimistic_find(set, val);
+  return optimistic_find(set, key);
 }
 
-int sl_add(sl_intset_t *set, val_t val, int transactional)
+inline int
+sl_add(sl_intset_t *set, skey_t key, sval_t val)
 {  
-	return optimistic_insert(set, val);
+  return optimistic_insert(set, key, val);
 }
 
-int sl_remove(sl_intset_t *set, val_t val, int transactional)
+inline int
+sl_remove(sl_intset_t *set, skey_t key)
 {
-	return optimistic_delete(set, val);
+	return optimistic_delete(set, key);
 }
