@@ -87,6 +87,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
       node = (sl_node_t*) ssmem_alloc(alloc, ns);
     }
 #else
+#  warning weird code ...
 #  if defined(DO_PAD)
       size_t ns_rm = ns & 63;
       if (ns_rm)

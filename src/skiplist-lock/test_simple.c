@@ -59,6 +59,7 @@ size_t pf_vals_num = 8;
 size_t put, put_explicit = false;
 double update_rate, put_rate, get_rate;
 
+size_t size_after = 0;
 int seed = 0;
 __thread unsigned long * seeds;
 uint32_t rand_max;
@@ -208,6 +209,11 @@ test(void* thread)
 #endif
     
   seeds = seed_rand();
+#if GC == 1
+  alloc = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
+  assert(alloc != NULL);
+  ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, ID);
+#endif
     
   uint64_t key;
   int c = 0;
@@ -296,8 +302,11 @@ test(void* thread)
 
   if (!ID)
     {
-      printf("#AFTER  size is: %zu\n", (size_t) DS_SIZE(set));
+      size_after = DS_SIZE(set);
+      printf("#AFTER  size is: %zu\n", size_after);
     }
+
+  barrier_cross(&barrier);
 
 #if defined(COMPUTE_LATENCY)
   putting_succ[ID] += my_putting_succ;
@@ -329,6 +338,10 @@ test(void* thread)
 #endif
 
   /* SSPFDTERM(); */
+#if GC == 1
+  ssmem_term();
+  free(alloc);
+#endif
 
   pthread_exit(NULL);
 }
@@ -481,8 +494,6 @@ main(int argc, char **argv)
       put_rate = update_rate / 2;
     }
 
-
-
   get_rate = 1 - update_rate;
 
   /* printf("num_threads = %u\n", num_threads); */
@@ -611,13 +622,15 @@ main(int argc, char **argv)
   long unsigned rem_fal = (removing_count_total - removing_count_total_succ) ? removing_fal_total / (removing_count_total - removing_count_total_succ) : 0;
   printf("%-7zu %-8lu %-8lu %-8lu %-8lu %-8lu %-8lu\n", num_threads, get_suc, get_fal, put_suc, put_fal, rem_suc, rem_fal);
 #endif
-
     
 #define LLU long long unsigned int
 
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
-  int UNUSED size_after = DS_SIZE(set);
-  assert(size_after == (initial + pr));
+  if (size_after != (initial + pr))
+    {
+      printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
+      assert(size_after == (initial + pr));
+    }
 
   printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success", "succ %", "total %", "effective %");
   uint64_t total = putting_count_total + getting_count_total + removing_count_total;

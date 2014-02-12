@@ -33,7 +33,6 @@ unsigned int levelmax;
 
 #define MAX_BACKOFF 131071
 
-
 inline int ok_to_delete(sl_node_t *node, int found)
 {
   return (node->fullylinked && ((node->toplevel-1) == found) && !node->marked);
@@ -153,82 +152,81 @@ optimistic_insert(sl_intset_t *set, val_t val)
   toplevel = get_rand_level();
   backoff = 1;
 	
-  while (1) {
-    found = optimistic_search(set, val, preds, succs, 1);
-    if (found != -1)
-      {
-	node_found = succs[found];
-	if (!node_found->marked)
-	  {
-	    while (!node_found->fullylinked)
-	      {
-		PAUSE;
-	      }
-	    xfree(preds);
-	    xfree(succs);
-	    return 0;
-	  }
-	continue;
-      }
+  while (1) 
+    {
+      found = optimistic_search(set, val, preds, succs, 1);
+      if (found != -1)
+	{
+	  node_found = succs[found];
+	  if (!node_found->marked)
+	    {
+	      while (!node_found->fullylinked)
+		{
+		  PAUSE;
+		}
+	      xfree(preds);
+	      xfree(succs);
+	      return 0;
+	    }
+	  continue;
+	}
 
 
-    GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
-    highest_locked = -1;
-    prev_pred = NULL;
-    valid = 1;
-    for (i = 0; valid && (i < toplevel); i++)
-      {
-	pred = preds[i];
-	succ = succs[i];
-	if (pred != prev_pred)
-	  {
-	    LOCK(ND_GET_LOCK(pred));
-	    highest_locked = i;
-	    prev_pred = pred;
-	  }	
+      GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+      highest_locked = -1;
+      prev_pred = NULL;
+      valid = 1;
+      for (i = 0; valid && (i < toplevel); i++)
+	{
+	  pred = preds[i];
+	  succ = succs[i];
+	  if (pred != prev_pred)
+	    {
+	      LOCK(ND_GET_LOCK(pred));
+	      highest_locked = i;
+	      prev_pred = pred;
+	    }	
 			
-	valid = (!pred->marked && !succ->marked && 
-		 ((volatile sl_node_t*) pred->next[i] == 
-		  (volatile sl_node_t*) succ));
-      }
+	  valid = (!pred->marked && !succ->marked && 
+		   ((volatile sl_node_t*) pred->next[i] == 
+		    (volatile sl_node_t*) succ));
+	}
 	
-    if (!valid) 
-      {			 /* Unlock the predecessors before leaving */ 
-	unlock_levels(set, preds, highest_locked, 11); /* unlocks the global-lock in the GL case */
-	if (backoff > 5000) 
-	  {
-	    /* timeout.tv_sec = 0; //backoff / 5000; */
-	    /* timeout.tv_nsec = (backoff % 5000) * 1000000; */
-	    nop_rep(backoff & MAX_BACKOFF);
-	    /* nop_rep(backoff); */
-	    /* nanosleep(&timeout, NULL); */
-	  }
-	backoff <<= 1;
-	continue;
-      }
+      if (!valid) 
+	{			 /* Unlock the predecessors before leaving */ 
+	  unlock_levels(set, preds, highest_locked, 11); /* unlocks the global-lock in the GL case */
+	  if (backoff > 5000) 
+	    {
+	      nop_rep(backoff & MAX_BACKOFF);
+	    }
+	  backoff <<= 1;
+	  continue;
+	}
 		
-    new_node = sl_new_simple_node(val, toplevel, 2);
+      new_node = sl_new_simple_node(val, toplevel, 0);
 
-    for (i = 0; i < toplevel; i++)
-      {
-	new_node->next[i] = succs[i];
-      }
+      for (i = 0; i < toplevel; i++)
+	{
+	  new_node->next[i] = succs[i];
+	}
 
-    MEM_BARRIER;
+#if defined(__tile__)
+      MEM_BARRIER;
+#endif
 
-    for (i = 0; i < toplevel; i++)
-      {
-	preds[i]->next[i] = new_node;
-      }
+      for (i = 0; i < toplevel; i++)
+	{
+	  preds[i]->next[i] = new_node;
+	}
 		
-    new_node->fullylinked = 1;
+      new_node->fullylinked = 1;
 
-    unlock_levels(set, preds, highest_locked, 12);
-    /* Freeing the previously allocated memory */
-    xfree(preds);
-    xfree(succs);
-    return 1;
-  }
+      unlock_levels(set, preds, highest_locked, 12);
+      /* Freeing the previously allocated memory */
+      xfree(preds);
+      xfree(succs);
+      return 1;
+    }
 }
 
 /*
@@ -305,11 +303,7 @@ optimistic_delete(sl_intset_t *set, val_t val)
 	      unlock_levels(set, preds, highest_locked, 21);
 	      if (backoff > 5000) 
 		{
-		  /* timeout.tv_sec = 0; //backoff / 5000; */
-		  /* timeout.tv_nsec = (backoff % 5000) * 1000000; */
 		  nop_rep(backoff & MAX_BACKOFF);
-		  /* nop_rep(backoff); */
-		  /* nanosleep(&timeout, NULL); */
 		}
 	      backoff <<= 1;
 	      continue;
@@ -319,6 +313,10 @@ optimistic_delete(sl_intset_t *set, val_t val)
 	    {
 	      preds[i]->next[i] = node_todel->next[i];
 	    }
+
+#if GC == 1
+	  ssmem_free(alloc, node_todel);
+#endif
 
 	  UNLOCK(ND_GET_LOCK(node_todel));
 	  unlock_levels(set, preds, highest_locked, 22);

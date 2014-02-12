@@ -34,6 +34,7 @@
 
 #include <atomic_ops.h>
 #include "lock_if.h"
+#include "ssmem.h"
 
 #define DEFAULT_DURATION                1000
 #define DEFAULT_INITIAL                 1024
@@ -49,6 +50,8 @@
 #define STR(s)                          #s
 
 extern unsigned int global_seed;
+extern __thread ssmem_allocator_t* alloc;
+
 /* Skip list level */
 #ifdef TLS
 extern __thread unsigned int *rng_seed;
