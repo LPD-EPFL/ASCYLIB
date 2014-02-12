@@ -67,14 +67,11 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
       for (right = left_next; ; right = right_next)
 	{
 	  /* Skip a sequence of marked nodes */
-	  while(1)
+	  right_next = right->next[i];
+	  while (unlikely(is_marked((uintptr_t)right_next)))
 	    {
-	      right_next = right->next[i];
-	      if (!is_marked((uintptr_t)right_next))
-		{
-		  break;
-		}
 	      right = (sl_node_t*)unset_mark((uintptr_t)right_next);
+	      right_next = right->next[i];
 	    }
 
 	  if (right->key >= key)
