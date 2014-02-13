@@ -202,7 +202,7 @@ is_power_of_two (unsigned int x)
 #  define CORES_PER_SOCKET 6
 #  define CACHE_LINE_SIZE 64
 #  define NOP_DURATION 2
-  static uint8_t  the_cores[] = {
+  static uint8_t  UNUSED the_cores[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 
     8, 9, 10, 11, 12, 13, 14, 15, 
     16, 17, 18, 19, 20, 21, 22, 23, 

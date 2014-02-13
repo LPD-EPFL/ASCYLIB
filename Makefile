@@ -40,6 +40,7 @@ clean:
 	$(MAKE) -C src/linkedlist clean	
 	$(MAKE) -C src/skiplist clean
 	$(MAKE) -C src/hashtable clean
+	$(MAKE) -C src/hashtable_bst clean
 	$(MAKE) -C src/rbtree clean
 	$(MAKE) -C src/linkedlist-lock clean
 	$(MAKE) -C src/hashtable-lock clean
