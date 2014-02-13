@@ -311,9 +311,9 @@ test(void* thread)
       else if(unlikely(c <= scale_rem))
 	{
 	  int removed;
+	  struct cds_lfht_iter iter;
 	  START_TS(2);
 	  rcu_read_lock();
-	  struct cds_lfht_iter iter;
 	  DS_CONTAINS(set, key, iter);
 	  removed = DS_REMOVE(set, iter.node);
 	  rcu_read_unlock();
@@ -337,9 +337,9 @@ test(void* thread)
       else
 	{ 
 	  int res;
+	  struct cds_lfht_iter iter;
 	  START_TS(0);
 	  rcu_read_lock();
-	  struct cds_lfht_iter iter;
 	  DS_CONTAINS(set, key, iter);
 	  res = (iter.node != NULL);
 	  rcu_read_unlock();
