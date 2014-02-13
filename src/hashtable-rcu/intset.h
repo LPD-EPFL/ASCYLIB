@@ -65,8 +65,11 @@ cds_lfht_size(cds_lfht_t* ht)
 /* mem management **************************************************************/
 /*******************************************************************************/
 #define USE_RCU_GC 0
+#define RCU_WAIT() rcu_barrier();
+/* #define RCU_WAIT() synchronize_rcu(); */
 
-extern __thread ssmem_allocator_t* alloc;
+
+extern __thread ssmem_allocator_t *alloc, *alloc_data;
 
 static inline void
 node_init(node_t** node)
@@ -82,12 +85,25 @@ node_init(node_t** node)
 }
 
 static inline void
+value_init(size_t** val, size_t size)
+{
+  if (*val == NULL)
+    {
+#if GC == 1 && USE_RCU_GC != 1
+      *val = (size_t*) ssmem_alloc(alloc_data, size);
+#else
+      *val = (size_t*) ssalloc_alloc(1, size);
+#endif
+    }
+}
+
+static inline void
 node_free(struct cds_lfht_node* ht_node)
 {
   UNUSED node_t* node = caa_container_of(ht_node, node_t, node);
 #if GC == 1
 #if USE_RCU_GC == 1
-  rcu_barrier();  /* synchronize_rcu(); */
+  RCU_WAIT();
   ssfree(node);
 #else
   ssmem_free(alloc, node);
@@ -95,5 +111,17 @@ node_free(struct cds_lfht_node* ht_node)
 #endif
 }
 
+static inline void
+value_free(size_t* val)
+{
+#if GC == 1
+#if USE_RCU_GC == 1
+  RCU_WAIT();
+  ssfree_alloc(1, val);
+#else
+  ssmem_free(alloc_data, val);
+#endif
+#endif
+}
 
 #define DEFAULT_LOAD 1
