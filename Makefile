@@ -1,8 +1,8 @@
 .PHONY:	all
 
-BENCHS = src/sftree src/linkedlist src/hashtable src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/
+BENCHS = src/sftree src/linkedlist src/hashtable src/hashtable-rcu src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/
 LBENCHS = src/linkedlist-lock src/hashtable-lock src/skiplist-lock src/bst-lock2
-LFBENCHS = src/linkedlist src/hashtable src/skiplist src/bst src/bst-howley
+LFBENCHS = src/linkedlist src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley
 NOISE = src/noise
 
 .PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE)
