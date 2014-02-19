@@ -384,8 +384,6 @@ test(void* thread)
   free(alloc);
 #endif
 
-  printf("there there\n");
-
   pthread_exit(NULL);
 }
 
