@@ -261,7 +261,7 @@ uint8_t oldval;
 /* #define ATOMIC_FETCH_AND_INC_FULL(a)    (AO_fetch_and_add1_full((volatile AO_t *)(a))) */
 
 #define ATOMIC_CAS_MB(a, e, v)          CAS_U64_bool((volatile AO_t *) (a),(AO_t) (e), (AO_t) (v))
-#define ATOMIC_FETCH_AND_INC_FULL(a)    FAI_U64((volatile AO_t *) (a))
+#define ATOMIC_FETCH_AND_INC_FULL(a)    FAI_U32(a)
 
 /* end -- generic code */
 
