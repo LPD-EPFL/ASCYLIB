@@ -4,6 +4,7 @@ You may pass the following settings to `make`:
     * TEST=old : use the old test.c file (disables GC)
     * TEST=correct : use the test_correct.c file (enables GC)
     * LATENCY=1 : enable per operation latency measurements
+    * GRANULARITY=GLOBAL_LOCK (or G=GL) for global lock
 
 Example:
 	`make` VERSION=DEBUG GC=0
