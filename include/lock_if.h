@@ -26,22 +26,22 @@ typedef pthread_spinlock_t ptlock_t;
 #  define GL_LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
 #  define GL_UNLOCK(lock)				pthread_spin_unlock((pthread_spinlock_t *) lock)
 #elif defined(TAS)			/* TAS */
-typedef uint32_t ptlock_t;
-#  define INIT_LOCK(lock)				tas_init((volatile uint32_t*) lock)
+typedef volatile uint64_t ptlock_t;
+#  define INIT_LOCK(lock)				tas_init(lock)
 #  define DESTROY_LOCK(lock)			
-#  define LOCK(lock)					tas_lock((volatile uint32_t*) lock)
-#  define UNLOCK(lock)					tas_unlock((volatile uint32_t*) lock)
+#  define LOCK(lock)					tas_lock(lock)
+#  define UNLOCK(lock)					tas_unlock(lock)
 /* GLOBAL lock */
-#  define GL_INIT_LOCK(lock)				tas_init((volatile uint32_t*) lock)
+#  define GL_INIT_LOCK(lock)				tas_init(lock)
 #  define GL_DESTROY_LOCK(lock)			
-#  define GL_LOCK(lock)					tas_lock((volatile uint32_t*) lock)
-#  define GL_UNLOCK(lock)              			tas_unlock((volatile uint32_t*) lock)
+#  define GL_LOCK(lock)					tas_lock(lock)
+#  define GL_UNLOCK(lock)              			tas_unlock(lock)
 
 #  define TAS_FREE 0
 #  define TAS_LCKD 1
 
 static inline void
-tas_init(volatile uint32_t* l)
+tas_init(ptlock_t* l)
 {
   *l = TAS_FREE;
 #if defined(__tile__)
@@ -50,9 +50,9 @@ tas_init(volatile uint32_t* l)
 }
 
 static inline uint32_t
-tas_lock(volatile uint32_t* l)
+tas_lock(ptlock_t* l)
 {
-  while (CAS_U32(l, TAS_FREE, TAS_LCKD) == TAS_LCKD)
+  while (CAS_U64(l, TAS_FREE, TAS_LCKD) == TAS_LCKD)
     {
       PAUSE;
     }
@@ -60,10 +60,12 @@ tas_lock(volatile uint32_t* l)
 }
 
 static inline uint32_t
-tas_unlock(volatile uint32_t* l)
+tas_unlock(ptlock_t* l)
 {
-  MEM_BARRIER;
   *l = TAS_FREE;
+#if defined(__tile__)
+  MEM_BARRIER;
+#endif
   return 0;
 }
 
@@ -91,7 +93,9 @@ static inline void
 ticket_init(volatile ptlock_t* l)
 {
   l->ticket = l->curr = 0;
+#if defined(__tile__)
   MEM_BARRIER;
+#endif
 }
 
 #define TICKET_BASE_WAIT 512
