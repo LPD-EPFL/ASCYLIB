@@ -384,6 +384,8 @@ test(void* thread)
   free(alloc);
 #endif
 
+  printf("there there\n");
+
   pthread_exit(NULL);
 }
 
@@ -696,8 +698,6 @@ main(int argc, char **argv)
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
-    
-  pthread_exit(NULL);
     
   return 0;
 }
