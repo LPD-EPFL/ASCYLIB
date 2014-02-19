@@ -200,7 +200,7 @@ ifeq ($(PC_NAME), parsasrv1.epfl.ch)
 endif
 
 ifeq ($(PC_NAME), lpd48core)
-    CFLAGS += -DOPTERON -DPLATFORM_MCORE -DOPTERON_OPTIMIZE
+    CFLAGS += -DOPTERON -DPLATFORM_MCORE 
     PLATFORM_NUMA = 1
 endif
 ifeq ($(PC_NAME), lpdxeon2680)
