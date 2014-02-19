@@ -27,11 +27,11 @@
 __thread ssmem_allocator_t* alloc;
 
 node_l_t*
-new_node_l(skey_t key, sval_t val, node_l_t* next, int transactional)
+new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
 {
   volatile node_l_t *node;
 #if GC == 1
-  if (transactional)		/* for initialization AND the coupling algorithm */
+  if (initializing)		/* for initialization AND the coupling algorithm */
     {
       node = (volatile node_l_t *) ssalloc(sizeof(node_l_t));
     }

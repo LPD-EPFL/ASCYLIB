@@ -55,6 +55,6 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct intset
   node_t *head;
 } intset_t;
 
-node_t *new_node(skey_t key, sval_t val, node_t *next, int transactional);
+node_t *new_node(skey_t key, sval_t val, node_t *next, int initializing);
 intset_t *set_new();
 void set_delete(intset_t *set);

@@ -53,7 +53,7 @@ size_t load_factor = DEFAULT_LOAD;
 size_t update = DEFAULT_UPDATE;
 size_t num_threads = DEFAULT_NB_THREADS; 
 size_t duration = DEFAULT_DURATION;
-int transactional = DEFAULT_LOCKTYPE;
+int algo_type = DEFAULT_LOCKTYPE;
 
 size_t print_vals_num = 100; 
 size_t pf_vals_num = 8;
@@ -233,7 +233,7 @@ test(void* thread)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(set, key, TRANSACTIONAL) == false)
+      if(DS_ADD(set, key, ALGO_TYPE) == false)
 	{
 	  i--;
 	}
@@ -259,7 +259,7 @@ test(void* thread)
 	{
 	  int res;
 	  START_TS(1);
-	  res = DS_ADD(set, key, TRANSACTIONAL);
+	  res = DS_ADD(set, key, ALGO_TYPE);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -273,7 +273,7 @@ test(void* thread)
 	{
 	  int removed;
 	  START_TS(2);
-	  removed = DS_REMOVE(set, key, TRANSACTIONAL);
+	  removed = DS_REMOVE(set, key, ALGO_TYPE);
 	  END_TS(2, my_removing_count);
 	  if(removed != 0) 
 	    {
@@ -287,7 +287,7 @@ test(void* thread)
 	{ 
 	  int res;
 	  START_TS(0);
-	  res = DS_CONTAINS(set, key, TRANSACTIONAL);
+	  res = DS_CONTAINS(set, key, ALGO_TYPE);
 	  END_TS(0, my_getting_count);
 	  if(res != 0) 
 	    {
@@ -446,7 +446,7 @@ main(int argc, char **argv)
 	  /*   num_buckets_param = atoi(optarg); */
 	  /*   break; */
 	case 'x':
-	  transactional = atoi(optarg);
+	  algo_type = atoi(optarg);
 	  break;
 	case 'v':
 	  print_vals_num = atoi(optarg);
@@ -475,7 +475,7 @@ main(int argc, char **argv)
     }
 
   printf("## Initial: %zu / Range: %zu / %s / Load factor: %zu\n", initial, range, 
-	 (transactional == 1) ? "handover-hand locks" : "lazy locks", load_factor);
+	 (algo_type == 1) ? "handover-hand locks" : "lazy locks", load_factor);
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;

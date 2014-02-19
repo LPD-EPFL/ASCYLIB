@@ -13,11 +13,11 @@
 __thread ssmem_allocator_t* alloc;
 
 node_t*
-new_node(skey_t key, sval_t val, node_t *next, int transactional)
+new_node(skey_t key, sval_t val, node_t *next, int initializing)
 {
   volatile node_t *node;
 #if GC == 1
-  if (unlikely(transactional))
+  if (unlikely(initializing))
     {
       node = (volatile node_t *) ssalloc(sizeof(node_t));
     }

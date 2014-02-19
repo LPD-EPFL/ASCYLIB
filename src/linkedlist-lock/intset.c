@@ -25,9 +25,9 @@
 #include "utils.h"
 
 sval_t
-set_contains_l(intset_l_t* set, skey_t key, int transactional)
+set_contains_l(intset_l_t* set, skey_t key, int algo_type)
 {
-  if (transactional == 2) 
+  if (algo_type == 2) 
     {
       return parse_find(set, key);
     }
@@ -38,9 +38,9 @@ set_contains_l(intset_l_t* set, skey_t key, int transactional)
 }
 
 int
-set_add_l(intset_l_t* set, skey_t key, sval_t val, int transactional)
+set_add_l(intset_l_t* set, skey_t key, sval_t val, int algo_type)
 {  
-  if (transactional == 2) 
+  if (algo_type == 2) 
     {
       return parse_insert(set, key, val);
     }
@@ -51,9 +51,9 @@ set_add_l(intset_l_t* set, skey_t key, sval_t val, int transactional)
 }
 
 sval_t
-set_remove_l(intset_l_t* set, skey_t key, int transactional)
+set_remove_l(intset_l_t* set, skey_t key, int algo_type)
 {
-  if (transactional == 2) 
+  if (algo_type == 2) 
     {
       return parse_delete(set, key);
     }

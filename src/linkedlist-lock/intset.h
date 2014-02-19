@@ -23,6 +23,6 @@
 
 #include "lazy.h"
 
-sval_t set_contains_l(intset_l_t *set, skey_t key, int transactional);
-int set_add_l(intset_l_t *set, skey_t key, sval_t val, int transactional);
-sval_t set_remove_l(intset_l_t *set, skey_t key, int transactional);
+sval_t set_contains_l(intset_l_t *set, skey_t key, int algo_type);
+int set_add_l(intset_l_t *set, skey_t key, sval_t val, int algo_type);
+sval_t set_remove_l(intset_l_t *set, skey_t key, int algo_type);

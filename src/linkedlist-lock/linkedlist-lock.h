@@ -51,7 +51,7 @@
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
-#define TRANSACTIONAL                   transactional
+#define ALGO_TYPE                   algo_type
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct node_l
 {
@@ -73,7 +73,7 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct intset_l
 #endif
 } intset_l_t;
 
-node_l_t* new_node_l(skey_t key, sval_t val, node_l_t* next, int transactional);
+node_l_t* new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing);
 intset_l_t* set_new_l();
 void set_delete_l(intset_l_t* set);
 int set_size_l(intset_l_t* set);
