@@ -2,7 +2,7 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS  = $(BINDIR)/lb-ht 
+BINS  = $(BINDIR)/lb-ht$(BIN_SUFFIX)
 LLREP = $(ROOT)/src/linkedlist-lock
 PROF = $(ROOT)/src
 

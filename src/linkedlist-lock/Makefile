@@ -2,7 +2,7 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS = $(BINDIR)/lb-ll
+BINS = $(BINDIR)/lb-ll$(BIN_SUFFIX)
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
