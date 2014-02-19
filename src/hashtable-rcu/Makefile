@@ -3,7 +3,6 @@ ROOT = ../..
 include $(ROOT)/common/Makefile.common
 
 BINS  = $(BINDIR)/lf-ht_rcu
-LLREP = $(ROOT)/src/linkedlist-lock
 PROF = $(ROOT)/src
 
 URCU_PATH = /home/trigonak/code/urcu

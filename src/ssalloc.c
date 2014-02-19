@@ -15,7 +15,7 @@
 #include "measurements.h"
 
 #if !defined(SSALLOC_USE_MALLOC)
-static __thread void* ssalloc_app_mem[SSALLOC_NUM_ALLOCATORS];
+static __thread uintptr_t ssalloc_app_mem[SSALLOC_NUM_ALLOCATORS];
 static __thread size_t alloc_next[SSALLOC_NUM_ALLOCATORS] = {0};
 static __thread void* ssalloc_free_list[SSALLOC_NUM_ALLOCATORS][256] = {{0}};
 static __thread uint8_t ssalloc_free_cur[SSALLOC_NUM_ALLOCATORS] = {0};
@@ -26,7 +26,7 @@ void
 ssalloc_set(void* mem)
 {
 #if !defined(SSALLOC_USE_MALLOC)
-  ssalloc_app_mem[0] = mem;
+  ssalloc_app_mem[0] = (uintptr_t) mem;
 #endif
 }
 
@@ -37,8 +37,8 @@ ssalloc_init()
   int i;
   for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
     {
-      ssalloc_app_mem[i] = (void*) memalign(64, SSALLOC_SIZE);
-      assert(ssalloc_app_mem[i] != NULL);
+      ssalloc_app_mem[i] = (uintptr_t) memalign(64, SSALLOC_SIZE);
+      assert((void*) ssalloc_app_mem[i] != NULL);
     }
 #endif
 }
@@ -105,7 +105,7 @@ ssalloc_alloc(unsigned int allocator, size_t size)
     }
   else
     {
-      ret = ssalloc_app_mem[allocator] + alloc_next[allocator];
+      ret = (void*) (ssalloc_app_mem[allocator] + alloc_next[allocator]);
       alloc_next[allocator] += size;
       if (alloc_next[allocator] > SSALLOC_SIZE)
 	{
