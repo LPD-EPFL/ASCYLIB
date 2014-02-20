@@ -325,6 +325,8 @@ ifeq ($(LATENCY),1)
 	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS
 endif
 
-ifeq ($(INIT),one)
+ifeq ($(INIT),all)
+	CFLAGS += -DINITIALIZE_FROM_ONE=0
+else
 	CFLAGS += -DINITIALIZE_FROM_ONE=1
 endif
