@@ -25,5 +25,5 @@ echo '#  ht';
 echo '#  sl';
 ./scripts/heatmap.sh ./bin/lb-sl ./bin/lf-sl u c -i${initial} -r${range} -d$duration | tee data/${unm}_sl_heatmap_uc_${initial}.csv
 echo '#  bst';
-./scripts/heatmap.sh ./bin/lb-bst2 ./bin/lf-bst-howley u c -i${initial} -r${range} -d$duration | tee data/${unm}_bst_heatmap_uc_${initial}.cs
+./scripts/heatmap.sh ./bin/lb-bst2 ./bin/lf-bst-howley u c -i${initial} -r${range} -d$duration | tee data/${unm}_bst_heatmap_uc_${initial}.csv
 done
