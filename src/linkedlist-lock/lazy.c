@@ -29,7 +29,6 @@
 inline int
 is_marked_ref(uintptr_t i) 
 {
-  /* if (r) { printf("is_marked_ref(%p) = %d\n", i, r); } */
   return (int) (i & 0x1L);
 }
 
@@ -103,6 +102,11 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
       curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
     }
 
+  if (!is_marked_ref((uintptr_t) curr->next) && curr->key == key)
+    {
+      return false;
+    }
+
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(pred));
   LOCK(ND_GET_LOCK(curr));
@@ -134,6 +138,11 @@ parse_delete(intset_l_t *set, skey_t key)
     {
       pred = curr;
       curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
+    }
+
+  if (!is_marked_ref((uintptr_t) curr->next) && key != key)
+    {
+      return false;
     }
 
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */

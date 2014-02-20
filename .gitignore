@@ -1,4 +1,5 @@
 *~
+/.#COMPILE
 /.gitignore~
 /any.sh
 /bin
@@ -12,3 +13,4 @@
 /noise.o
 /plots
 /runcrash
+
