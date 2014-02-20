@@ -54,6 +54,7 @@ size_t update = DEFAULT_UPDATE;
 size_t num_threads = DEFAULT_NB_THREADS; 
 size_t duration = DEFAULT_DURATION;
 int algo_type = DEFAULT_LOCKTYPE;
+int test_verbose = 0;
 
 size_t print_vals_num = 100; 
 size_t pf_vals_num = 8;
@@ -67,7 +68,6 @@ uint32_t rand_max;
 #define rand_min 1
 
 static volatile int stop;
-__thread uint32_t phys_id;
 
 volatile ticks *putting_succ;
 volatile ticks *putting_fail;
@@ -180,7 +180,7 @@ test(void* thread)
 {
   thread_data_t* td = (thread_data_t*) thread;
   uint8_t ID = td->id;
-  phys_id = the_cores[ID];
+  int phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();
 
@@ -228,7 +228,11 @@ test(void* thread)
     {
       num_elems_thread++;
     }
-    
+
+#if INITIALIZE_FROM_ONE == 1
+  num_elems_thread = (ID == 0) * initial;
+#endif
+
   for(i = 0; i < num_elems_thread; i++) 
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
@@ -357,13 +361,14 @@ main(int argc, char **argv)
   struct option long_options[] = {
     // These options don't set a flag
     {"help",                      no_argument,       NULL, 'h'},
+    {"verbose",                   no_argument,       NULL, 'v'},
     {"duration",                  required_argument, NULL, 'd'},
     {"initial-size",              required_argument, NULL, 'i'},
     {"num-threads",               required_argument, NULL, 'n'},
     {"range",                     required_argument, NULL, 'r'},
     {"update-rate",               required_argument, NULL, 'u'},
     {"num-buckets",               required_argument, NULL, 'b'},
-    {"print-vals",                required_argument, NULL, 'v'},
+    {"print-vals",                required_argument, NULL, 'a'},
     {"vals-pf",                   required_argument, NULL, 'f'},
     {NULL, 0, NULL, 0}
   };
@@ -372,7 +377,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:x:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:vf:x:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -395,6 +400,8 @@ main(int argc, char **argv)
 		 "Options:\n"
 		 "  -h, --help\n"
 		 "        Print this message\n"
+		 "  -v, --verbose\n"
+		 "        Be verbose\n"
 		 "  -d, --duration <int>\n"
 		 "        Test duration in milliseconds\n"
 		 "  -i, --initial-size <int>\n"
@@ -409,7 +416,7 @@ main(int argc, char **argv)
 		 "        Percentage of put update transactions (should be less than percentage of updates)\n"
 		 "  -b, --num-buckets <int>\n"
 		 "        Number of initial buckets (stronger than -l)\n"
-		 "  -v, --print-vals <int>\n"
+		 "  -a, --print-vals <int>\n"
 		 "        When using detailed profiling, how many values to print.\n"
 		 "  -f, --val-pf <int>\n"
 		 "        When using detailed profiling, how many values to keep track of.\n"
@@ -421,6 +428,9 @@ main(int argc, char **argv)
 	  exit(0);
 	case 'd':
 	  duration = atoi(optarg);
+	  break;
+	case 'v':
+	  test_verbose = 1;
 	  break;
 	case 'i':
 	  initial = atoi(optarg);
@@ -447,7 +457,7 @@ main(int argc, char **argv)
 	case 'x':
 	  algo_type = atoi(optarg);
 	  break;
-	case 'v':
+	case 'a':
 	  print_vals_num = atoi(optarg);
 	  break;
 	case 'f':
@@ -605,6 +615,12 @@ main(int argc, char **argv)
     
   for(t=0; t < num_threads; t++) 
     {
+      if (test_verbose)
+	{
+	  printf("Thrd: %3lu : srch: %10zu (%10zu) / insr: %10zu (%10zu) / rems: %10zu (%10zu)\n",
+		 t, getting_count[t], getting_count_succ[t], putting_count[t], putting_count_succ[t],
+		 removing_count[t], removing_count_succ[t]);
+	}
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];
