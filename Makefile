@@ -36,6 +36,9 @@ lockfree:
 noise:
 	$(MAKE) $(NOISE)
 
+tbb:
+	$(MAKE) "LOCK=TAS" src/hashtable-tbb
+
 clean:
 	$(MAKE) -C src/linkedlist clean	
 	$(MAKE) -C src/skiplist clean
