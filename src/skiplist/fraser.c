@@ -59,7 +59,7 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
   for (i = levelmax - 1; i >= 0; i--)
     {
       left_next = left->next[i];
-      if (is_marked((uintptr_t)left_next))
+      if (unlikely(is_marked((uintptr_t)left_next)))
 	{
 	  goto retry;
 	}
