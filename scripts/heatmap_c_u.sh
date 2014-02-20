@@ -1,7 +1,7 @@
 #!/bin/bash
-INIT=one GRANULARITY=GLOBAL_LOCK make tas
-INIT=one make tas
-INIT=one make lockfree
+INIT=one GRANULARITY=GLOBAL_LOCK make -k tas
+INIT=one make -k tas
+INIT=one make -k lockfree
 
 inits="256 1024 2048 8129 65536"
 
