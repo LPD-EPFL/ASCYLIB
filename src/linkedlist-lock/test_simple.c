@@ -231,11 +231,23 @@ test(void* thread)
 
 #if INITIALIZE_FROM_ONE == 1
   num_elems_thread = (ID == 0) * initial;
+  key = range;
 #endif
 
   for(i = 0; i < num_elems_thread; i++) 
     {
+#if INITIALIZE_FROM_ONE == 1
+      if (initial > 10000)
+	{
+	  key--;
+	}
+      else
+	{
+	  key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
+	}
+#else
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
+#endif
       
       if(DS_ADD(set, key, ALGO_TYPE) == false)
 	{
@@ -483,7 +495,6 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
-  printf("## Test correctness \n");
   printf("## Initial: %zu / Range: %zu / %s\n", initial, range, (algo_type == 1) ? "handover-hand locks" : "lazy locks");
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
