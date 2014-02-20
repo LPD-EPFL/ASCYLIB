@@ -30,7 +30,7 @@ ticks getticks_correction_calc()
 void
 prints_ticks_stats(int start, int end)
 {
-  uint32_t i, mpoints = 0, have_output = 0;
+  int32_t i, mpoints = 0, have_output = 0;
   unsigned long long tsamples = 0;
   ticks tticks = 0;
 

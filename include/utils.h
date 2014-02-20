@@ -320,13 +320,11 @@ is_power_of_two (unsigned int x)
 
 
   /* PLATFORM specific -------------------------------------------------------------------- */
-#if defined(OPTERON)
+#if defined(__x86_64__)
 #  define PREFETCHW(x)		     asm volatile("prefetchw %0" :: "m" (*(unsigned long *)x))
 #elif defined(__sparc__)
 #  define PREFETCHW(x)		
 #elif defined(XEON)
-#  define PREFETCHW(x)		
-#elif defined(LPDXEON)
 #  define PREFETCHW(x)		
 #else
 #  define PREFETCHW(x)		
