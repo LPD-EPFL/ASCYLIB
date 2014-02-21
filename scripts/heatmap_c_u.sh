@@ -15,7 +15,7 @@ then
     INIT=one $MAKE -k lockfree
 fi
 
-inits="256 1024 2048 8129 65536"
+inits="256 1024 2048 8192 65536"
 duration=2000;
 
 for initial in ${inits}

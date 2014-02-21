@@ -1,7 +1,7 @@
 #!/bin/bash
 
 structures="ll ht sl bst";
-unames="maglite lpd48core lpdxeon2680 parsasrv1.epfl.ch diassrv8"
+unames="maglite lpd48core lpdxeon2680 parsasrv1.epfl.ch diassrv8 lpdpc4 ol-collab1"
 inits="256 1024 2048 8129 8192 65536"
 
 
