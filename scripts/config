@@ -23,6 +23,9 @@ then
 elif [ $unm = "lpdxeon2680" ];
 then
 	max_cores=40;
+elif [ $unm = "ol-collab1" ];
+then
+	max_cores=256;
 else
 	max_cores=48;
 fi;
@@ -48,6 +51,9 @@ then
     elif [ $unm = "lpdxeon2680" ];
     then
 	cores=$(seq 10 10 40);
+    elif [ $unm = "ol-collab1" ];
+    then
+	cores=$(seq 32 32 256);
     else
 	cores=$(seq 6 6 48);
     fi;

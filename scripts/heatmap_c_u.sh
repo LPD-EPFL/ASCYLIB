@@ -1,10 +1,18 @@
 #!/bin/bash
 
+MAKE=make
+
+unm=$(uname -n);
+if [ $unm = "ol-collab1" ];
+then
+    MAKE=gmake
+fi;
+
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
-    INIT=one GRANULARITY=GLOBAL_LOCK make -k tas
-    INIT=one make -k tas
-    INIT=one make -k lockfree
+    INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k tas
+    INIT=one $MAKE -k tas
+    INIT=one $MAKE -k lockfree
 fi
 
 inits="256 1024 2048 8129 65536"
