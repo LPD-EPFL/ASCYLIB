@@ -11,12 +11,12 @@ do
     do
 
 	data=./data/${unm}_ll_heatmap_uc_${initial}.csv;
-	[ -f $data ] && R -f ./scripts/heatmap.r --args $data ./$plots_folder/${unm}_ll_heatmap_uc_${initial}.pdf "Linked list, lf/lb, $unm, $initial initial" "Cores" "Update ratio"
+	[ -f $data ] && R -f ./scripts/heatmap2.r --args $data ./$plots_folder/${unm}_ll_heatmap_uc_${initial}.pdf "Linked list, lf/lb, $unm, $initial initial" "Cores" "Update ratio"
 	data=./data/${unm}_ht_heatmap_uc_${initial}.csv;
-	[ -f $data ] && R -f ./scripts/heatmap.r --args $data ./$plots_folder/${unm}_ht_heatmap_uc_${initial}.pdf "Hash table, lf/lb, $unm, $initial initial" "Cores" "Update ratio"
+	[ -f $data ] && R -f ./scripts/heatmap2.r --args $data ./$plots_folder/${unm}_ht_heatmap_uc_${initial}.pdf "Hash table, lf/lb, $unm, $initial initial" "Cores" "Update ratio"
 	data=./data/${unm}_sl_heatmap_uc_${initial}.csv;
-	[ -f $data ] && R -f ./scripts/heatmap.r --args $data ./$plots_folder/${unm}_sl_heatmap_uc_${initial}.pdf "Skip list, lf/lb, $unm, $initial initial" "Cores" "Update ratio"
+	[ -f $data ] && R -f ./scripts/heatmap2.r --args $data ./$plots_folder/${unm}_sl_heatmap_uc_${initial}.pdf "Skip list, lf/lb, $unm, $initial initial" "Cores" "Update ratio"
 	data=./data/${unm}_bst_heatmap_uc_${initial}.csv;
-	[ -f $data ] && R -f ./scripts/heatmap.r --args $data ./$plots_folder/${unm}_bst_heatmap_uc_${initial}.pdf "BST, lf/lb, $unm, $initial initial" "Cores" "Update ratio"
+	[ -f $data ] && R -f ./scripts/heatmap2.r --args $data ./$plots_folder/${unm}_bst_heatmap_uc_${initial}.pdf "BST, lf/lb, $unm, $initial initial" "Cores" "Update ratio"
     done
 done
