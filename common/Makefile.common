@@ -11,7 +11,8 @@ TL2DIR		?= SET_TL2_PATH
 XBDIR 		?= SET_XBOOST_PATH
 
 # Compiler
-SOLARIS_CC 	?= /opt/csw/bin/gcc
+SOLARIS_CC1 	?= /opt/csw/bin/gcc
+SOLARIS_CC2 	?= /usr/sfw/bin/gcc
 TILERA_CC	?= tile-gcc
 CC ?= gcc
 
@@ -54,95 +55,13 @@ LIBSSMEM = $(ROOT)/external
 ifndef STM
   LOCK          ?= MUTEX
 endif
-ifeq ($(STM),ESTM)
-  CFLAGS	+= -DSTM -DESTM
-  STMDIR        = $(ESTMDIR)
-  LIBDIR	= $(STMDIR)/lib
-  SRCDIR 	= $(STMDIR)/src
-  INCDIR 	= $(STMDIR)/include
-  TM		= stm
-  ELASTICITY 	?= 1
-endif
-ifeq ($(STM),TINY100)
-  CFLAGS	+= -DSTM -DTINY100
-  STMDIR	= $(TINY100DIR)
-  LIBDIR	= $(STMDIR)/lib
-  SRCDIR 	= $(STMDIR)/src
-  INCDIR 	= $(STMDIR)/include
-  TM		= stm
-endif
-ifeq ($(STM),TINY10B)
-  CFLAGS	+= -DSTM -DTINY10B
-  STMDIR	= $(TINY10BDIR)
-  LIBDIR	= $(STMDIR)/lib
-  SRCDIR 	= $(STMDIR)/src
-  INCDIR 	= $(STMDIR)/include
-  TM		= stm
-endif
-ifeq ($(STM),TINY099)
-  CFLAGS	+= -DSTM -DTINY099
-  STMDIR	= $(TINYSTMDIR)
-  LIBDIR	= $(STMDIR)/lib
-  SRCDIR 	= $(STMDIR)/src
-  INCDIR 	= $(STMDIR)/include
-  TM		= stm
-endif
-ifeq ($(STM),TINY098)
-  CFLAGS	+= -DSTM -DTINY098
-  STMDIR	= $(TINY098DIR)
-  LIBDIR 	= $(STMDIR)/lib
-  SRCDIR 	= $(STMDIR)/src
-  INCDIR 	= $(STMDIR)/include
-  TM		= stm
-endif
-ifeq ($(STM),TL2)
-  CFLAGS	+= -DSTM -DTL2
-  STMDIR        = $(TL2DIR)
-  LIBDIR 	= $(STMDIR)
-  SRCDIR 	= $(STMDIR)
-  INCDIR 	= $(STMDIR)
-  TM		= tl2
-endif
-ifeq ($(STM),XB)
-  CFLAGS	+= -DSTM -DTL2 -DXBOOST -DLIST_NO_DUPLICATES -DMAP_USE_RBTREE
-  STMDIR        = $(XBDIR)
-  LIBDIR 	= $(STMDIR)
-  SRCDIR 	= $(STMDIR)
-  INCDIR 	= $(STMDIR)
-  TM		= tl2_xb
-endif
-ifeq ($(STM),AXB)
-  CFLAGS	+= -DSTM -DTL2 -DXBOOST_AGG -DLIST_NO_DUPLICATES -DMAP_USE_RBTREE
-  STMDIR        = $(XBDIR)
-  LIBDIR 	= $(STMDIR)
-  SRCDIR 	= $(STMDIR)
-  INCDIR 	= $(STMDIR)
-  TM		= tl2_axb
-endif
-ifeq ($(STM),AXBS)
-  CFLAGS	+= -DSTM -DTL2 -DXBOOST_AGG_STEAL -DLIST_NO_DUPLICATES -DMAP_USE_RBTREE
-  STMDIR        = $(XBDIR)
-  LIBDIR 	= $(STMDIR)
-  SRCDIR 	= $(STMDIR)
-  INCDIR 	= $(STMDIR)
-  TM		= tl2_axbs
-endif
-ifeq ($(STM),WLPDSTM)
-  CFLAGS	+= -DSTM -DWLPDSTM
-  STMDIR	= $(WLPDSTMDIR)
-  LIBDIR	= $(STMDIR)/lib
-  SRCDIR 	= $(STMDIR)/src
-  INCDIR 	= $(STMDIR)/include
-  TM		= wlpdstm
-endif
+
 ifeq ($(STM),SEQUENTIAL)
   CFLAGS	+= -DSEQUENTIAL
 endif
 ifeq ($(STM),LOCKFREE)
   CFLAGS	+= -DLOCKFREE
 endif
-
-TMLIB 		= $(LIBDIR)/lib$(TM).a
 
 #############################
 # Platform dependent settings
@@ -174,7 +93,7 @@ endif
 
 ifeq ($(OS_NAME), SunOS)
     OS = Solaris
-    CC = $(SOLARIS_CC)
+    CC = $(SOLARIS_CC1)
     DEFINES += -DTLS
 endif
 
@@ -221,6 +140,16 @@ endif
 ifeq ($(PC_NAME), diassrv8)
     CFLAGS += -DXEON -DPLATFORM_MCORE
     PLATFORM_NUMA = 1
+endif
+
+ifeq ($(PC_NAME), maglite)
+    CC = $(SOLARIS_CC1)
+    CFLAGS += -DMAGLITE
+endif
+
+ifeq ($(PC_NAME), ol-collab1)
+    CC = $(SOLARIS_CC2)
+    CFLAGS += -DT44
 endif
 
 ifeq ($(PC_NAME), trigonak-laptop)

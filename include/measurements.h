@@ -22,8 +22,10 @@ extern "C" {
 #    define REF_SPEED_GHZ           2.8
 #  elif defined(SCC)
 #    define REF_SPEED_GHZ           0.533
-#  elif defined(__sparc__)
+#  elif defined(MAGLITE)
 #    define REF_SPEED_GHZ           1.2
+#  elif defined(T44)
+#    define REF_SPEED_GHZ           2.998
 #  elif defined(__tilepro__)
 #    define REF_SPEED_GHZ           0.7
 #  elif defined(__tilegx__)

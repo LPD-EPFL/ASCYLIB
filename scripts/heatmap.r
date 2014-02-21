@@ -7,7 +7,8 @@ args <- commandArgs()
 print(args[7])
 ll <- read.csv(args[5],sep=",",check.names=FALSE)
 row.names(ll) <- ll[,1]
-ll <- ll[,2:12]
+nc <-ncol(ll)
+ll <- ll[,2:nc]
 ll_matrix <- data.matrix(ll)
 col = brewer.pal(11,"RdYlGn")
 col2 = brewer.pal(ncol(ll_matrix),"RdYlGn")
