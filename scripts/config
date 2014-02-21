@@ -20,6 +20,9 @@ then
 elif [ $unm = "lpdpc34" ];
 then
 	max_cores=8;
+elif [ $unm = "lpdpc4" ];
+then
+	max_cores=8;
 elif [ $unm = "lpdxeon2680" ];
 then
 	max_cores=40;
@@ -43,6 +46,9 @@ then
     then
 	cores=$(seq 10 10 80);
     elif [ $unm = "lpdpc34" ];
+    then
+	cores=$(seq 2 1 8);
+    elif [ $unm = "lpdpc4" ];
     then
 	cores=$(seq 2 1 8);
     elif [ $unm = "lpdxeon2680" ];

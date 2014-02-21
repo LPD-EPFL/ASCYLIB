@@ -213,6 +213,10 @@ ifeq ($(PC_NAME), lpdpc34)
     PLATFORM_NUMA = 0
 endif
 
+ifeq ($(PC_NAME), lpdpc4)
+    CFLAGS += -DLPDPC4
+    PLATFORM_NUMA = 0
+endif
 
 ifeq ($(PC_NAME), diassrv8)
     CFLAGS += -DXEON -DPLATFORM_MCORE

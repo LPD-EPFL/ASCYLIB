@@ -30,6 +30,8 @@ extern "C" {
 #    define REF_SPEED_GHZ           1.2
 #  elif defined(LAPTOP) | defined(IGORLAPTOPLINUX) | defined(OANALAPTOPLINUX)
 #    define REF_SPEED_GHZ           2.4
+#  elif defined(LPDPC4)
+#    define REF_SPEED_GHZ           3.5
 #  else
 #    error "Need to set REF_SPEED_GHZ for the platform"
 #  endif

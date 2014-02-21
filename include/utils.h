@@ -212,7 +212,7 @@ is_power_of_two (unsigned int x)
   };
 #endif	/*  */
 
-#if defined(HASWELL) || defined(IGORLAPTOPLINUX)
+#if defined(HASWELL) || defined(IGORLAPTOPLINUX) || defined(LPDPC4)
 #  define NUMBER_OF_SOCKETS 1
 #  define CORES_PER_SOCKET 8
 #  define CACHE_LINE_SIZE 64
