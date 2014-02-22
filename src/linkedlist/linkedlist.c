@@ -16,6 +16,7 @@ node_t*
 new_node(skey_t key, sval_t val, node_t *next, int initializing)
 {
   volatile node_t *node;
+
 #if GC == 1
   if (unlikely(initializing))
     {
@@ -39,7 +40,6 @@ new_node(skey_t key, sval_t val, node_t *next, int initializing)
   node->key = key;
   node->val = val;
   node->next = next;
-
   return (node_t*) node;
 }
 
