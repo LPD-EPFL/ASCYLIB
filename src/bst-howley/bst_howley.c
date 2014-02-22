@@ -149,6 +149,9 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 		address = &(dest->right);
 	}
 	void* UNUSED dummy0 = CAS_PTR(address, op->child_cas_op.expected, op->child_cas_op.update);
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
 	void* UNUSED dummy1 = CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
 
@@ -248,12 +251,14 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 	} else {
 		new_ref = curr->left;
 	}
-
 	operation_t* cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
 	cas_op->child_cas_op.is_left = (curr == pred->left);
 	cas_op->child_cas_op.expected = curr;
 	cas_op->child_cas_op.update = new_ref;
 
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
 	if (CAS_PTR(&(pred->op), pred_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == pred_op) {
 		bst_help_child_cas(cas_op, pred, root);
 	}
