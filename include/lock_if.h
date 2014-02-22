@@ -64,10 +64,10 @@ tas_lock(ptlock_t* l)
 static inline uint32_t
 tas_unlock(ptlock_t* l)
 {
-  *l = TAS_FREE;
 #if defined(__tile__)
   MEM_BARRIER;
 #endif
+  *l = TAS_FREE;
   return 0;
 }
 
