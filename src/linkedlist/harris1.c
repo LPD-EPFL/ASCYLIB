@@ -127,7 +127,6 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
     {
       node_t* left_node;
       right_node = list_search(the_list, key, &left_node);
-
       if (right_node->key == key) 
 	{
 #if GC == 1
@@ -147,6 +146,9 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
 	{
 	  node_to_add->next = right_node;
 	}
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
       // Try to swing left_node's unmarked next pointer to a new node
       cas_result = CAS_PTR(&left_node->next, right_node, node_to_add);
     } while(cas_result != right_node);
