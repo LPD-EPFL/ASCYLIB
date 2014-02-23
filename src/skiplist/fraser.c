@@ -30,24 +30,6 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 #define FRASER_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
 
-inline int
-is_marked(uintptr_t i)
-{
-  return (int)(i & (uintptr_t)0x01);
-}
-
-inline uintptr_t
-unset_mark(uintptr_t i)
-{
-  return (i & ~(uintptr_t)0x01);
-}
-
-inline uintptr_t
-set_mark(uintptr_t i)
-{
-  return (i | (uintptr_t)0x01);
-}
-
 void
 fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **right_list)
 {
@@ -98,17 +80,43 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
     }
 }
 
+static sl_node_t* 
+fraser_left_search(sl_intset_t *set, skey_t key)
+{
+  sl_node_t* left = NULL;
+  sl_node_t* left_prev;
+  
+  left_prev = set->head;
+  int lvl;  
+  for (lvl = levelmax - 1; lvl >= 0; lvl--)
+    {
+      left = GET_UNMARKED(left_prev->next[lvl]);
+      while(left->key < key || IS_MARKED(left->next[lvl]))
+      	{
+      	  if (!IS_MARKED(left->next[lvl]))
+      	    {
+      	      left_prev = left;
+      	    }
+      	  left = GET_UNMARKED(left->next[lvl]);
+      	}
+
+      if (unlikely(left->key == key))
+	{
+	  break;
+	}
+    }
+  return left;
+}
+
+
 sval_t
 fraser_find(sl_intset_t *set, skey_t key)
 {
-  /* sl_node_t **succs; */
-  sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
-
-  fraser_search(set, key, NULL, succs);
-  if (succs[0]->key == key && !succs[0]->deleted)
+  sl_node_t* left = fraser_left_search(set, key);
+  if (left->key == key && !left->deleted)
     {
-      result = succs[0]->val;
+      result = left->val;
     }
   return result;
 }
@@ -136,7 +144,6 @@ mark_node_ptrs(sl_node_t *n)
 sval_t
 fraser_remove(sl_intset_t *set, skey_t key)
 {
-  /* sl_node_t **succs; */
   sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
 
@@ -158,11 +165,10 @@ fraser_remove(sl_intset_t *set, skey_t key)
       mark_node_ptrs(succs[0]);
 
       result = succs[0]->val;
+      fraser_search(set, key, NULL, NULL);
 #if GC == 1
       ssmem_free(alloc, succs[0]);
 #endif
-      /* MEM_BARRIER; */
-      fraser_search(set, key, NULL, NULL);
     }
 
  end:
@@ -217,13 +223,16 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  succ = succs[i];
 	  /* Update the forward pointer if it is stale */
 	  new_next = new->next[i];
-	  if (is_marked((uintptr_t) new_next))
+
+	  if (unlikely(new->deleted))
 	    {
 	      goto success;
 	    }
 	  if ((new_next != succ) && 
 	      (!ATOMIC_CAS_MB(&new->next[i], unset_mark((uintptr_t)new_next), succ)))
-	    break; /* Give up if pointer is marked */
+	    {
+	      break; /* Give up if pointer is marked */
+	    }
 	  /* Check for old reference to a k node */
 	  if (succ->key == key)
 	    {
