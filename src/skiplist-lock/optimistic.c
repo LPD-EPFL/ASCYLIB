@@ -73,6 +73,33 @@ optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **s
   return found;
 }
 
+inline sl_node_t*
+optimistic_left_search(sl_intset_t *set, skey_t key)
+{
+  int i;
+  sl_node_t *pred, *curr, *nd = NULL;
+	
+  pred = set->head;
+	
+  for (i = (pred->toplevel - 1); i >= 0; i--)
+    {
+      curr = pred->next[i];
+      while (key > curr->key)
+	{
+	  pred = curr;
+	  curr = pred->next[i];
+	}
+
+      if (key == curr->key)
+	{
+	  nd = curr;
+	  break;
+	}
+    }
+
+  return nd;
+}
+
 /*
  * Function optimistic_find corresponds to the contains method of the original 
  * paper. In contrast with the original version, it allocates and frees the 
@@ -82,13 +109,11 @@ optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **s
 sval_t
 optimistic_find(sl_intset_t *set, skey_t key)
 { 
-  sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
-  int found;
   sval_t result = 0;
-  found = optimistic_search(set, key, preds, succs, 1);
-  if ((found != -1 && succs[found]->fullylinked && !succs[found]->marked))
+  sl_node_t* nd = optimistic_left_search(set, key);
+  if (nd != NULL && !nd->marked && nd->fullylinked)
     {
-      result = succs[found]->val;
+      result = nd->val;
     }
   return result;
 }
