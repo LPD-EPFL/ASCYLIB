@@ -1,6 +1,6 @@
 #!/bin/bash
 unames="maglite lpd48core lpdxeon2680 parsasrv1.epfl.ch diassrv8 lpdpc4 ol-collab1"
-inits="256 1024 2048 8129 8192 65536"
+inits="256 1024 2048 8192 65536"
 
 plots_folder=plots
 [ -d foo ] || mkdir $plots_folder;

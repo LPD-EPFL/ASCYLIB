@@ -63,6 +63,36 @@ then
     else
 	cores=$(seq 6 6 48);
     fi;
+elif [ "$cores" = "socketandone" ];
+then
+    if [ $unm = "maglite" ];
+    then
+	cores_init=$(seq 8 8 64);
+	cores="1 ${cores_init}";
+    elif [ $unm = "parsasrv1.epfl.ch" ];
+    then
+	cores_init=$(seq 6 6 36);
+	cores="1 ${cores_init}";
+    elif [ $unm = "diassrv8" ];
+    then
+	cores_init=$(seq 10 10 80);
+	cores="1 ${cores_init}";
+    elif [ $unm = "lpdpc34" ];
+    then
+	cores_init=$(seq 2 1 8);
+	cores="1 ${cores_init}";
+    elif [ $unm = "lpdxeon2680" ];
+    then
+	cores_init=$(seq 10 10 40);
+	cores="1 ${cores_init}";
+    elif [ $unm = "ol-collab1" ];
+    then
+	cores_init=$(seq 32 32 256);
+	cores="1 ${cores_init}";
+    else
+	cores_init=$(seq 6 6 48);
+	cores="1 ${cores_init}";
+    fi;
 elif [ "$cores" = "insocket" ];
 then
     if [ $unm = "maglite" ];
