@@ -289,14 +289,14 @@ main(int argc, char **argv)
   struct option long_options[] = {
     // These options don't set a flag
     {"help",                      no_argument,       NULL, 'h'},
-    {"verbose",                   no_argument,       NULL, 'v'},
+    {"verbose",                   no_argument,       NULL, 'e'},
     {"duration",                  required_argument, NULL, 'd'},
     {"initial-size",              required_argument, NULL, 'i'},
     {"num-threads",               required_argument, NULL, 'n'},
     {"range",                     required_argument, NULL, 'r'},
     {"update-rate",               required_argument, NULL, 'u'},
     {"num-buckets",               required_argument, NULL, 'b'},
-    {"print-vals",                required_argument, NULL, 'a'},
+    {"print-vals",                required_argument, NULL, 'v'},
     {"vals-pf",                   required_argument, NULL, 'f'},
     {NULL, 0, NULL, 0}
   };
@@ -305,7 +305,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:e:l:p:b:vf:x:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:el:p:b:v:f:x:", long_options, &i);
 		
       if(c == -1)
 	break;
