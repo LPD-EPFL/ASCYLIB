@@ -123,7 +123,7 @@ optimistic_find(sl_intset_t *set, skey_t key)
  * functions.
  */ 
 inline void
-unlock_levels(sl_intset_t* set, sl_node_t **nodes, int highestlevel, int j)
+unlock_levels(sl_intset_t* set, sl_node_t **nodes, int highestlevel)
 {
 
 #if defined(LL_GLOBAL_LOCK)
@@ -197,7 +197,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 	
       if (!valid) 
 	{			 /* Unlock the predecessors before leaving */ 
-	  unlock_levels(set, preds, highest_locked, 11); /* unlocks the global-lock in the GL case */
+	  unlock_levels(set, preds, highest_locked); /* unlocks the global-lock in the GL case */
 	  if (backoff > 5000) 
 	    {
 	      nop_rep(backoff & MAX_BACKOFF);
@@ -224,8 +224,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 		
       new_node->fullylinked = 1;
 
-      unlock_levels(set, preds, highest_locked, 12);
-      /* Freeing the previously allocated memory */
+      unlock_levels(set, preds, highest_locked);
       return 1;
     }
 }
@@ -260,7 +259,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 	  if (!is_marked)
 	    {
 	      node_todel = succs[found];
-				
+
 	      LOCK(ND_GET_LOCK(node_todel));
 	      toplevel = node_todel->toplevel;
 	      /* Unless it has been marked meanwhile */
@@ -297,7 +296,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 
 	  if (!valid)
 	    {	
-	      unlock_levels(set, preds, highest_locked, 21);
+	      unlock_levels(set, preds, highest_locked);
 	      if (backoff > 5000) 
 		{
 		  nop_rep(backoff & MAX_BACKOFF);
@@ -317,13 +316,11 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 #endif
 
 	  UNLOCK(ND_GET_LOCK(node_todel));
-	  unlock_levels(set, preds, highest_locked, 22);
-	  /* Freeing the previously allocated memory */
+	  unlock_levels(set, preds, highest_locked);
 	  return val;
 	}
       else
 	{
-	  /* Freeing the previously allocated memory */
 	  return 0;
 	}
     }
