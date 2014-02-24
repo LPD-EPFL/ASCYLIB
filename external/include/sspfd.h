@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define SSPFD_DO_TIMINGS 1
+/* #define SSPFD_DO_TIMINGS 1 */
 
 #if SSPFD_DO_TIMINGS != 1	/* empty macros when not benchmarkings */
 /* 
@@ -280,6 +280,7 @@ extern __thread volatile ticks sspfd_correction;
       {								\
 	printf("%ld,", (long int) sspfd_store[store][_i]);	\
       }								\
+    printf("\n");						\
   }
 
 #endif /* !SSPFD_DO_TIMINGS */

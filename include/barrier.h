@@ -39,4 +39,16 @@ barrier_cross(barrier_t *b)
   pthread_mutex_unlock(&b->mutex);
 }
 
+#define EXEC_IN_DEC_ID_ORDER(id, nthr)		\
+  { int __i;					\
+  for (__i = nthr - 1; __i >= 0; __i--)		\
+    {						\
+  if (id == __i)				\
+    {
+
+#define EXEC_IN_DEC_ID_ORDER_END(barrier)	\
+  }						\
+    barrier_cross(barrier);			\
+    }}
+
 #endif	/* _BARRIER_H_ */

@@ -288,7 +288,11 @@ test(void* thread)
   getting_count_succ[ID] += my_getting_count_succ;
   removing_count_succ[ID]+= my_removing_count_succ;
 
-  print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
+  EXEC_IN_DEC_ID_ORDER(ID, num_threads)
+    {
+      print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
+    }
+  EXEC_IN_DEC_ID_ORDER_END(&barrier);
 
   SSPFDTERM();
 #if GC == 1

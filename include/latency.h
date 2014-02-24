@@ -2,11 +2,15 @@
 #define _LATENCY_H_
 
 #if defined(USE_SSPFD)
-#  include "sspfd.h"
 #  define PFD_TYPE 1
+#  define SSPFD_DO_TIMINGS 1
 #else
 #  define PFD_TYPE 0
+#  define SSPFD_NUM_ENTRIES 0
+#  undef SSPFD_DO_TIMINGS
+#  define SSPFD_DO_TIMINGS 0
 #endif
+#include "sspfd.h"
 
 #if !defined(COMPUTE_LATENCY)
 #  define START_TS(s)
