@@ -56,9 +56,9 @@ union node_t {
 
 // bst interface functions
 volatile node_t* bst_initialize();
-bool_t bst_contains(skey_t k, volatile node_t* root);
-bool_t bst_add(skey_t k, volatile node_t* root);
-bool_t bst_remove(skey_t k, volatile node_t* root);
+sval_t bst_contains(skey_t k, volatile node_t* root);
+bool_t bst_add(skey_t k, sval_t v, volatile node_t* root);
+sval_t bst_remove(skey_t k, volatile node_t* root);
 
 // bst private functions
 void wait_until_not_changing(volatile node_t* node);
@@ -87,17 +87,17 @@ volatile node_t* rotate_left_over_right_nl(volatile node_t* n_parent, volatile n
 
 void set_child(volatile node_t* parent, volatile node_t* child, bool_t is_right);
 
-result_t attempt_node_update(function_t func, sval_t expected, sval_t new_value, volatile node_t* parent, volatile node_t* node);
+sval_t attempt_node_update(function_t func, sval_t new_value, volatile node_t* parent, volatile node_t* node);
 
-result_t attempt_update(skey_t key, function_t func, sval_t expected, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v);
+sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v);
 
 volatile node_t* new_node(int height, skey_t key, uint64_t version, sval_t value, volatile node_t* parent, volatile node_t* left, volatile node_t* right);
 
 bool_t attempt_insert_into_empty(skey_t key, sval_t value, volatile node_t* holder);
 
-result_t update_under_root(skey_t k, function_t func, sval_t expected, sval_t new_value, volatile node_t* holder);
+sval_t update_under_root(skey_t k, function_t func, sval_t new_value, volatile node_t* holder);
 
-result_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t node_v);
+sval_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t node_v);
 
 void bst_print(volatile node_t* node);
 
@@ -134,16 +134,16 @@ static inline bool_t IS_SHRINKING_OR_UNLINKED(volatile uint64_t ovl){
 	return (bool_t)((ovl & 3) != 0L);
 }
 
-static inline bool_t SHOULD_UPDATE(function_t func, bool_t prev) {
+static inline bool_t SHOULD_UPDATE(function_t func, sval_t prev) {
 
-	return func == UPDATE_IF_ABSENT ? !prev : prev;
+	return func == UPDATE_IF_ABSENT ? prev == 0 : prev != 0;
 }
 
-static inline result_t UPDATE_RESULT(function_t func) {
+static inline result_t UPDATE_RESULT(function_t func, sval_t prev) {
 
-	return func == UPDATE_IF_ABSENT ? NOT_FOUND : FOUND;
+	return func == UPDATE_IF_ABSENT ? NOT_FOUND : prev;
 }
 
-static inline result_t NO_UPDATE_RESULT(function_t func){
-    return func == UPDATE_IF_ABSENT ? FOUND : NOT_FOUND;
+static inline result_t NO_UPDATE_RESULT(function_t func, sval_t prev){
+    return func == UPDATE_IF_ABSENT ? prev : NOT_FOUND;
 }

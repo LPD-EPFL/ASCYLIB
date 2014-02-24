@@ -9,7 +9,7 @@ volatile node_t* bst_initialize() {
 	// assign minimum key to the root, actual tree will be 
 	// the right subtree of the root
 	root->key = 0;
-	root->value = FALSE; 
+	root->value = 0;  
 	root->left = NULL;
 	root->right = NULL;
 	root->height = 0;
@@ -20,7 +20,9 @@ volatile node_t* bst_initialize() {
 	return root;
 }
 
-bool_t bst_contains(skey_t key, volatile node_t* root) {
+// When the function returns 0, it means that the node was not found
+// (similarly to Howley)
+sval_t bst_contains(skey_t key, volatile node_t* root) {
 	while(TRUE) {
 		volatile node_t* right = root->right;
 
@@ -39,16 +41,22 @@ bool_t bst_contains(skey_t key, volatile node_t* root) {
                 wait_until_not_changing(right);
             } else if(right == root->right){
             	// if right_cmp < 0, we should go left, otherwise right
-                result_t vo = attempt_get(key, right, (right_cmp < 0 ? FALSE : TRUE), ovl);
+                sval_t vo = attempt_get(key, right, (right_cmp < 0 ? FALSE : TRUE), ovl);
+                //CHANGE
                 if (vo != RETRY) {
-                    return vo == FOUND;
+                    //return vo == FOUND;
+                    if (vo != NOT_FOUND) {
+                        return vo;
+                    } else { 
+                        return 0;
+                    }
                 }
             }
         }
     }
 }
 
-result_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t node_v) {
+sval_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t node_v) {
 
 	while(TRUE){
         volatile node_t* child = CHILD(node, is_right);
@@ -64,7 +72,9 @@ result_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t 
 
             if(child_cmp == 0){
             	//Verify that it's a value node
-                return child->value ? FOUND : NOT_FOUND;
+                //CHANGE
+                //TODO: Leave NOT_FOUND or change to 0?
+                return child->value ? child->value : NOT_FOUND;
             }
 
             uint64_t child_ovl = child->version;
@@ -84,8 +94,9 @@ result_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t 
                   return RETRY;
                 }
 
-                result_t result = attempt_get(k, child, (child_cmp < 0 ? FALSE : TRUE), child_ovl);
+                sval_t result = attempt_get(k, child, (child_cmp < 0 ? FALSE : TRUE), child_ovl);
                 if(result != RETRY){
+                    //CHANGE (leave like this)
                     return result;
                 }
             }
@@ -93,27 +104,30 @@ result_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t 
     }
 }
 
-bool_t bst_add(skey_t key, volatile node_t* root) {
-	return update_under_root(key, UPDATE_IF_ABSENT, FALSE, TRUE, root) == NOT_FOUND;
+bool_t bst_add(skey_t key, sval_t v, volatile node_t* root) {
+	//If something is already present at that particular key, the new value will not be added.
+    sval_t res = update_under_root(key, UPDATE_IF_ABSENT, v, root);
+    return res == NOT_FOUND || res == 0;
 }
 
-bool_t bst_remove(skey_t key, volatile node_t* root) {
-    return update_under_root(key, UPDATE_IF_PRESENT, TRUE, FALSE, root) == FOUND;
+sval_t bst_remove(skey_t key, volatile node_t* root) {
+    sval_t res =  update_under_root(key, UPDATE_IF_PRESENT, 0, root);
+    return res == NOT_FOUND ? 0 : res;
 }
 
-result_t update_under_root(skey_t key, function_t func, sval_t expected, sval_t new_value, volatile node_t* holder) {
+sval_t update_under_root(skey_t key, function_t func, sval_t new_value, volatile node_t* holder) {
 
 	while(TRUE){
 
         volatile node_t* right = holder->right;
 
         if(right == NULL){
-            if(!SHOULD_UPDATE(func, FALSE)){
-                return NO_UPDATE_RESULT(func);
+            if(!SHOULD_UPDATE(func, 0)){
+                return NO_UPDATE_RESULT(func, 0);
             }
 
-            if(!new_value || attempt_insert_into_empty(key, new_value, holder)){
-                return UPDATE_RESULT(func);
+            if(new_value == 0 || attempt_insert_into_empty(key, new_value, holder)){
+                return UPDATE_RESULT(func, 0);
             }
         } else {
             uint64_t ovl = right->version;
@@ -122,9 +136,9 @@ result_t update_under_root(skey_t key, function_t func, sval_t expected, sval_t 
             if(IS_SHRINKING_OR_UNLINKED(ovl)){
                 wait_until_not_changing(right);
             } else if(right == holder->right){
-                result_t vo = attempt_update(key, func, expected, new_value, holder, right, ovl);
+                sval_t vo = attempt_update(key, func, new_value, holder, right, ovl);
                 if(vo != RETRY){
-                    return vo;   
+                    return vo == NOT_FOUND ? 0 : vo;   
                 }
             }
         }
@@ -169,12 +183,12 @@ bool_t attempt_insert_into_empty(skey_t key, sval_t value, volatile node_t* hold
     return node;
 }
 
-result_t attempt_update(skey_t key, function_t func, sval_t expected, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v) {
+sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v) {
 
 	int cmp = key - node->key;
    
     if(cmp == 0){
-        result_t res = attempt_node_update(func, expected, new_value, parent, node);
+        sval_t res = attempt_node_update(func, new_value, parent, node);
         return res;
     }
 
@@ -191,7 +205,7 @@ result_t attempt_update(skey_t key, function_t func, sval_t expected, sval_t new
 
         if(child == NULL){
 
-            if(!new_value){
+            if(new_value == 0){
                 
                 return NOT_FOUND;
             } else {
@@ -215,11 +229,11 @@ result_t attempt_update(skey_t key, function_t func, sval_t expected, sval_t new
                         success = FALSE;
                         damaged = NULL;
                     } else {
-                        if(!SHOULD_UPDATE(func, FALSE)){
+                        if(!SHOULD_UPDATE(func, 0)){
                             // releaseAll();
                             UNLOCK(node_lock);
                             
-                            return NO_UPDATE_RESULT(func);
+                            return NO_UPDATE_RESULT(func, 0);
                         }
 
                         volatile node_t* new_child = new_node(1, key, 0, TRUE, node, NULL, NULL);
@@ -236,7 +250,7 @@ result_t attempt_update(skey_t key, function_t func, sval_t expected, sval_t new
                 if(success){
                     fix_height_and_rebalance(damaged);
                     
-                    return UPDATE_RESULT(func);
+                    return UPDATE_RESULT(func, 0);
                 }
             }
 
@@ -254,27 +268,26 @@ result_t attempt_update(skey_t key, function_t func, sval_t expected, sval_t new
                     return RETRY;
                 }
 
-                result_t vo = attempt_update(key, func, expected, new_value, node, child, child_v);
+                result_t vo = attempt_update(key, func, new_value, node, child, child_v);
                 if(vo != RETRY){
-                    
-                    return vo;
+                    return vo == NOT_FOUND ? 0 : vo;   
                 }
             }
         }
     }
 }
 
-result_t attempt_node_update(function_t func, sval_t expected, sval_t new_value, volatile node_t* parent, volatile node_t* node) {
+sval_t attempt_node_update(function_t func, sval_t new_value, volatile node_t* parent, volatile node_t* node) {
 
 
-	if(!new_value){
-        if(!node->value){
+	if(new_value == 0){
+        if(node->value == 0){
             
             return NOT_FOUND;
         }
     }
 
-    if(!new_value && (node->left == NULL || node->right == NULL)){
+    if(new_value == 0 && (node->left == NULL || node->right == NULL)){
         
         sval_t prev;
         volatile node_t* damaged;
@@ -305,14 +318,14 @@ result_t attempt_node_update(function_t func, sval_t expected, sval_t new_value,
                     // releaseAll();
                     UNLOCK(node_lock);
                     UNLOCK(parent_lock);
-                    return NO_UPDATE_RESULT(func);
+                    return NO_UPDATE_RESULT(func, prev);
                 }
 
-                if(!prev){
+                if(prev == 0){
                     // releaseAll();
                     UNLOCK(node_lock);
                     UNLOCK(parent_lock);
-                    return UPDATE_RESULT(func);
+                    return UPDATE_RESULT(func, prev);
                 }
 
                 if(!attempt_unlink_nl(parent, node)){
@@ -333,7 +346,7 @@ result_t attempt_node_update(function_t func, sval_t expected, sval_t new_value,
 
         fix_height_and_rebalance(damaged);
         
-        return UPDATE_RESULT(func);
+        return UPDATE_RESULT(func, prev);
     } else {
         // publish(node);
         // scoped_lock lock(node->lock);
@@ -351,10 +364,10 @@ result_t attempt_node_update(function_t func, sval_t expected, sval_t new_value,
         if(!SHOULD_UPDATE(func, prev)){
 			// releaseAll();
 			UNLOCK(node_lock);
-            return NO_UPDATE_RESULT(func);
+            return NO_UPDATE_RESULT(func, prev);
         }
 
-        if(!new_value && (node->left == NULL || node->right == NULL)){
+        if(new_value == 0 && (node->left == NULL || node->right == NULL)){
             // releaseAll();
             UNLOCK(node_lock);
             return RETRY;
@@ -364,7 +377,7 @@ result_t attempt_node_update(function_t func, sval_t expected, sval_t new_value,
         
         // releaseAll();
         UNLOCK(node_lock);
-        return UPDATE_RESULT(func);
+        return UPDATE_RESULT(func, prev);
     }
 }
 
@@ -419,7 +432,7 @@ bool_t attempt_unlink_nl(volatile node_t* parent, volatile node_t* node) {
     }
 
     node->version = UNLINKED_OVL;
-    node->value = FALSE;
+    node->value = 0;
 
     // hazard.releaseNode(node);
     return TRUE;
@@ -430,7 +443,7 @@ int node_conditon(volatile node_t* node) {
 	volatile node_t* nl = node->left;
     volatile node_t* nr = node->right;
 
-    if((nl == NULL || nr == NULL) && !node->value){
+    if((nl == NULL || nr == NULL) && node->value == 0){
         
         return UNLINK_REQUIRED;
     }
@@ -523,7 +536,7 @@ volatile node_t* rebalance_nl(volatile node_t* n_parent, volatile node_t* n){
 	volatile node_t* nl = n->left;
     volatile node_t* nr = n->right;
 
-    if((nl == NULL || nr == NULL) && !n->value){
+    if((nl == NULL || nr == NULL) && n->value == 0){
         if(attempt_unlink_nl(n_parent, n)){
             return fix_height_nl(n_parent);
         } else {
@@ -593,7 +606,7 @@ volatile node_t* rebalance_to_right_nl(volatile node_t* n_parent, volatile node_
                     int b = hll0 - hlrl;
 
                     // CHANGED: Java and C++ implementations differ
-                    if(b >= -1 && b <= 1 && !((hll0 == 0 || hlrl == 0) && !nl->value)){
+                    if(b >= -1 && b <= 1 && !((hll0 == 0 || hlrl == 0) && nl->value == 0)){
                     	volatile node_t* res = rotate_right_over_left_nl(n_parent, n, nl, hr0, hll0, nlr, hlrl);
                         UNLOCK(nlr_lock);
                         UNLOCK(nl_lock);
@@ -655,7 +668,7 @@ volatile node_t* rebalance_to_left_nl(volatile node_t* n_parent, volatile node_t
                     int hrlr = HEIGHT(nrl->right);
                     int b = hrr0 - hrlr;
                     // CHANGED
-                    if(b >= -1 && b <= 1 && !((hrr0 == 0 || hrlr == 0) && !nr->value)){
+                    if(b >= -1 && b <= 1 && !((hrr0 == 0 || hrlr == 0) && nr->value == 0)){
                     	volatile node_t* res = rotate_left_over_right_nl(n_parent, n, hl0, nr, nrl, hrr0, hrlr);
 
                         UNLOCK(nrl_lock);
@@ -708,7 +721,7 @@ volatile node_t* rotate_right_nl(volatile node_t* n_parent, volatile node_t* n, 
     }
 
     // CHANGED 
-    if ((nlr == NULL || hr == 0) && !n->value) {
+    if ((nlr == NULL || hr == 0) && n->value == 0) {
             return n;
     }
 
@@ -718,7 +731,7 @@ volatile node_t* rotate_right_nl(volatile node_t* n_parent, volatile node_t* n, 
     }
 
     // CHANGED
-    if (hll == 0 && !nl->value) {
+    if (hll == 0 && nl->value == 0) {
             return nl;
     }
 
@@ -758,7 +771,7 @@ volatile node_t* rotate_left_nl(volatile node_t* n_parent, volatile node_t* n, i
     }
 
     // CHANGED
-    if ((nrl == NULL || hl == 0) && !n->value) {
+    if ((nrl == NULL || hl == 0) && n->value == 0) {
             return n;
     }
 
@@ -768,7 +781,7 @@ volatile node_t* rotate_left_nl(volatile node_t* n_parent, volatile node_t* n, i
     }
 
     // CHANGED
-    if (hrr == 0 && !nr->value) {
+    if (hrr == 0 && nr->value == 0) {
         return nr;
     }
 
@@ -827,7 +840,7 @@ volatile node_t* rotate_right_over_left_nl(volatile node_t* n_parent, volatile n
         return n;
     }
 
-    if ((nlrr == NULL || hr == 0) && !n->value) {
+    if ((nlrr == NULL || hr == 0) && n->value == 0) {
         // repair involves splicing out n and maybe more rotations
         return n;
     }
@@ -892,7 +905,7 @@ volatile node_t* rotate_left_over_right_nl(volatile node_t* n_parent, volatile n
     }
 
     // CHANGED
-    if ((nrll == NULL || hl == 0) && !n->value) {
+    if ((nrll == NULL || hl == 0) && n->value == 0) {
         return n;
     }
 
@@ -917,7 +930,7 @@ void set_child(volatile node_t* parent, volatile node_t* child, bool_t is_right)
 uint64_t bst_size(volatile node_t* node) {
 	if (node == NULL || node->version == UNLINKED_OVL) {
 		return 0;
-	} else if (!node->value) {
+	} else if (node->value == 0) {
 		return bst_size(node->left) + bst_size(node->right);
 	} else {
 		return 1 + bst_size(node->left) + bst_size(node->right);
@@ -931,7 +944,7 @@ void bst_print(volatile node_t* node) {
         return;
     }
 
-    if (node->value == TRUE) {
+    if (node->value != 0) {
       printf("%lu, ", (long unsigned) node->key);
     }
 
