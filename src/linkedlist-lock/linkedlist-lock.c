@@ -52,6 +52,7 @@ new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
   node->key = key;
   node->val = val;
   node->next = next;
+  node->marked = 0;
 
   INIT_LOCK(ND_GET_LOCK(node));
 
@@ -111,13 +112,14 @@ void set_delete_l(intset_l_t *set)
   node_l_t *node, *next;
 
   node = set->head;
-  while (node != NULL) {
-    next = (node_l_t*) get_unmarked_ref((uintptr_t) node->next);
-    DESTROY_LOCK(&node->lock);
-    /* free(node); */
-    ssfree(node);		/* TODO : fix with ssmem */
-    node = next;
-  }
+  while (node != NULL) 
+    {
+      next = node->next;
+      DESTROY_LOCK(&node->lock);
+      /* free(node); */
+      ssfree(node);		/* TODO : fix with ssmem */
+      node = next;
+    }
   ssfree(set);
 }
 
@@ -127,11 +129,11 @@ int set_size_l(intset_l_t *set)
   node_l_t *node;
 
   /* We have at least 2 elements */
-  node = (node_l_t*) get_unmarked_ref((uintptr_t) set->head->next);
+  node = set->head->next;
   while (node->next != NULL) 
     {
       size++;
-      node = (node_l_t*) get_unmarked_ref((uintptr_t) node->next);
+      node = node->next;
     }
 
   return size;

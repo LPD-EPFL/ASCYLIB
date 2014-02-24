@@ -58,6 +58,7 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct node_l
   skey_t key;
   sval_t val;
   struct node_l *next;
+  uint8_t marked;
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;
   #endif

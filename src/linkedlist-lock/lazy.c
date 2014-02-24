@@ -26,38 +26,6 @@
 
 #include "lazy.h"
 
-inline int
-is_marked_ref(uintptr_t i) 
-{
-  return (int) (i & 0x1L);
-}
-
-inline uintptr_t
-unset_mark(uintptr_t* i) 
-{
-  *i &= ~0x1L;
-  return *i;
-}
-
-inline uintptr_t
-set_mark(uintptr_t* i)
-{
-  *i |= 0x1L;
-  return *i;
-}
-
-inline uintptr_t
-get_unmarked_ref(uintptr_t w) 
-{
-  return w & ~0x1L;
-}
-
-inline uintptr_t
-get_marked_ref(uintptr_t w) 
-{
-  return w | 0x1L;
-}
-
 /*
  * Checking that both curr and pred are both unmarked and that pred's next pointer
  * points to curr to verify that the entries are adjacent and present in the list.
@@ -65,17 +33,16 @@ get_marked_ref(uintptr_t w)
 inline int
 parse_validate(node_l_t* pred, node_l_t* curr) 
 {
-  /* FIX: checking pred twice :: return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr)); */
-  return (!is_marked_ref((uintptr_t) pred->next) && !is_marked_ref((uintptr_t) curr->next) && (pred->next == curr));
+  return (!pred->marked && !curr->marked && (pred->next == curr));
 }
 
 sval_t
 parse_find(intset_l_t *set, skey_t key)
 {
   node_l_t* curr = set->head;
-  while (curr->key < key || is_marked_ref((uintptr_t) curr->next))
+  while (curr->key < key || curr->marked)
     {
-      curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
+      curr = curr->next;
     }
 
   sval_t res = 0;
@@ -96,14 +63,14 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
   do
     {
       pred = set->head;
-      curr = (node_l_t*) get_unmarked_ref((uintptr_t) pred->next);
+      curr = pred->next;
       while (curr->key < key) 
 	{
 	  pred = curr;
-	  curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
+	  curr = curr->next;
 	}
 
-      if (curr->key == key && !is_marked_ref((uintptr_t) curr->next))
+      if (curr->key == key && !curr->marked)
 	{
 	  return false;
 	}
@@ -143,14 +110,14 @@ parse_delete(intset_l_t *set, skey_t key)
   do
     {
       pred = set->head;
-      curr = (node_l_t*) get_unmarked_ref((uintptr_t) pred->next);
+      curr = pred->next;
       while (curr->key < key)
 	{
 	  pred = curr;
-	  curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
+	  curr = curr->next;
 	}
 
-      if (key != key && !is_marked_ref((uintptr_t) curr->next))
+      if (key != key && !curr->marked)
 	{
 	  return false;
 	}
@@ -166,7 +133,7 @@ parse_delete(intset_l_t *set, skey_t key)
 	    {
 	      result = curr->val;
 	      node_l_t* c_nxt = curr->next;
-	      set_mark((uintptr_t*) &curr->next);
+	      curr->marked = 1;
 	      pred->next = c_nxt;
 #if GC == 1
 	      ssmem_free(alloc, curr);
