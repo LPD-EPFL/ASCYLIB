@@ -32,7 +32,7 @@ get_rand_level()
   int i, level = 1;
   for (i = 0; i < levelmax - 1; i++)
     {
-      if ((rand_range(100)-1) < 50)
+      if ((rand_range(101)) < 50)
   	level++;
       else
   	break;

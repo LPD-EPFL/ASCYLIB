@@ -230,7 +230,6 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
   int i;
   int result = 0;
 
-  new = sl_new_simple_node(key, val, get_rand_level(), 0);
  retry: 	
   fraser_search_no_cleanup(set, key, preds, succs);
   /* Update the value field of an existing node */
@@ -242,9 +241,11 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  goto retry;
 	}
       result = 0;
-      sl_delete_node(new);
       goto end;
     }
+
+
+  new = sl_new_simple_node(key, val, get_rand_level(), 0);
 
   for (i = 0; i < new->toplevel; i++)
     {
@@ -258,6 +259,7 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
   /* Node is visible once inserted at lowest level */
   if (!ATOMIC_CAS_MB(&preds[0]->next[0], succs[0], new))
     {
+      sl_delete_node(new);
       goto retry;
     }
 
@@ -282,13 +284,12 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  /* Check for old reference to a k node */
 	  if (succ->key == key)
 	    {
-	      succ = (sl_node_t *)unset_mark((uintptr_t)succ->next);
+	      succ = GET_UNMARKED(succ->next);
 	    }
 	  /* We retry the search if the CAS fails */
 	  if (ATOMIC_CAS_MB(&pred->next[i], succ, new))
 	    break;
 
-	  /* MEM_BARRIER; */
 	  fraser_search(set, key, preds, succs);
 	}
     }
