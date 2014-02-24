@@ -2,6 +2,12 @@
 
 structures="ll ht sl bst";
 unames="maglite lpd48core lpdxeon2680 parsasrv1.epfl.ch diassrv8 lpdpc4 ol-collab1"
+unames="maglite lpd48core lpdxeon2680 parsasrv1.epfl.ch diassrv8 lpdpc4 ol-collab1"
+if [ $# -ge 1 ];
+then
+    unames="$@";
+    echo "**Creating plots for: $unames";
+fi;
 inits="256 1024 2048 8192 65536"
 
 
@@ -12,6 +18,7 @@ cd $plots_folder;
 for unm in $unames
 do
     any_pdf=0;
+    any_pdf_scal=0;
     for structure in $structures;
     do
 	pdfs=$(ls -1 ${unm}_${structure}_heatmap_uc_*.pdf | sort -V);
@@ -46,7 +53,4 @@ do
 
 done
 
-    # for initial in ${inits}
-    # do
-
-    # done
+echo "**Created  plots for: $unames";
