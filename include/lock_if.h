@@ -28,7 +28,7 @@ typedef pthread_spinlock_t ptlock_t;
 #  define GL_LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
 #  define GL_UNLOCK(lock)				pthread_spin_unlock((pthread_spinlock_t *) lock)
 #elif defined(TAS)			/* TAS */
-typedef volatile uint64_t ptlock_t;
+typedef volatile uint32_t ptlock_t;
 #  define INIT_LOCK(lock)				tas_init(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					tas_lock(lock)
@@ -54,7 +54,7 @@ tas_init(ptlock_t* l)
 static inline uint32_t
 tas_lock(ptlock_t* l)
 {
-  while (CAS_U64(l, TAS_FREE, TAS_LCKD) == TAS_LCKD)
+  while (CAS_U32(l, TAS_FREE, TAS_LCKD) == TAS_LCKD)
     {
       PAUSE;
     }

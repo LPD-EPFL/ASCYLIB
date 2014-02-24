@@ -51,9 +51,9 @@ typedef ALIGNED(64) struct sl_node
 {
   skey_t key;
   sval_t val; 
-  int toplevel;
-  volatile int marked;
-  volatile int fullylinked;
+  uint32_t toplevel;
+  volatile uint32_t marked;
+  volatile uint32_t fullylinked;
 #if !defined(LL_GLOBAL_LOCK)
   ptlock_t lock;
 #endif
