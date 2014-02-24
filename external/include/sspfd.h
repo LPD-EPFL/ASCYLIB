@@ -57,10 +57,22 @@
 #  define SSPFDI(store) 
 
 /* 
+ * only if sspfd_get_id() == id, start measurement (i.e., take start timestamp at this point) 
+ * for store `store`,
+ */
+#  define SSPFDI_ID(store, id) 
+
+/* 
  * stop measuring (i.e., take stop timestamp at this point) for store `store` and store the duration
  * since `SSPFDI(store)` in entry `entry`.
  */
 #  define SSPFDO(store, entry) 
+
+/* 
+ * if sspfd_get_id() == id, stop measuring (i.e., take stop timestamp at this point) for store `store` 
+ * and store the duration since `SSPFDI(store)` in entry `entry`.
+ */
+#  define SSPFDO_ID(store, entry) 
 
 /* 
  * generate statistics and print them for the first `num_vals` values of store `store`.
@@ -211,10 +223,25 @@ extern __thread volatile ticks sspfd_correction;
   asm volatile ("");				\
   _sspfd_s[store] = getticks();
 
+#  define SSPFDI_ID(store, id)			\
+  {						\
+  asm volatile ("");				\
+  if (sspfd_get_id() == id)			\
+    {						\
+      _sspfd_s[store] = getticks();		\
+    }
 
 #  define SSPFDO(store, entry)						\
   asm volatile ("");							\
   sspfd_store[store][entry] =  getticks() - _sspfd_s[store] - sspfd_correction; \
+  }
+
+#  define SSPFDO_ID(store, entry, id)					\
+  asm volatile ("");							\
+  if (sspfd_get_id() == id)						\
+    {									\
+      sspfd_store[store][entry] =  getticks() - _sspfd_s[store] - sspfd_correction; \
+    }									\
   }
 
 #  define SSPFDP(store, num_vals)		\
