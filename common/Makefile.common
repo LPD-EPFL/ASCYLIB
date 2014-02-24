@@ -258,6 +258,11 @@ ifeq ($(LATENCY),1)
 	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS
 endif
 
+ifeq ($(LATENCY),2)
+	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS -DUSE_SSPFD
+	LDFLAGS += -lsspfd -lm
+endif
+
 ifeq ($(INIT),all)
 	CFLAGS += -DINITIALIZE_FROM_ONE=0
 else

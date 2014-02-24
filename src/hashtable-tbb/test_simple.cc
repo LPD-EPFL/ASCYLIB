@@ -26,13 +26,8 @@
 
 #include "intset.h"
 
-#if defined(USE_SSPFD)
-#   include "sspfd.h"
-#endif
-
 using namespace tbb;
 using namespace std;
-
 
 /* ################################################################### *
  * Definition of macros: per data structure
@@ -77,7 +72,7 @@ size_t num_threads = DEFAULT_NB_THREADS;
 size_t duration = DEFAULT_DURATION;
 
 size_t print_vals_num = 100; 
-size_t pf_vals_num = 8;
+size_t pf_vals_num = 1023;
 size_t put, put_explicit = false;
 double update_rate, put_rate, get_rate;
 
@@ -151,44 +146,6 @@ void barrier_cross(barrier_t *b)
   pthread_mutex_unlock(&b->mutex);
 }
 barrier_t barrier, barrier_global;
-
-
-#define PFD_TYPE 0
-
-#if !defined(COMPUTE_LATENCY)
-#  define START_TS(s)
-#  define END_TS(s, i)
-#  define ADD_DUR(tar)
-#  define ADD_DUR_FAIL(tar)
-#  define PF_INIT(s, e, id)
-#elif PFD_TYPE == 0
-#  define START_TS(s)				\
-  {						\
-    asm volatile ("");				\
-    start_acq = getticks();			\
-    asm volatile ("");
-#  define END_TS(s, i)				\
-    asm volatile ("");				\
-    end_acq = getticks();			\
-    asm volatile ("");				\
-    }
-
-#  define ADD_DUR(tar) tar += (end_acq - start_acq - correction)
-#  define ADD_DUR_FAIL(tar)					\
-  else								\
-    {								\
-      ADD_DUR(tar);						\
-    }
-#  define PF_INIT(s, e, id)
-#else
-#  define SSPFD_NUM_ENTRIES  pf_vals_num
-#  define START_TS(s)      SSPFDI(s)
-#  define END_TS(s, i)     SSPFDO(s, i & SSPFD_NUM_ENTRIES)
-
-#  define ADD_DUR(tar) 
-#  define ADD_DUR_FAIL(tar)
-#  define PF_INIT(s, e, id) SSPFDINIT(s, e, id)
-#endif
 
 typedef struct thread_data
 {

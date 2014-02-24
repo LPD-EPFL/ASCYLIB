@@ -26,10 +26,6 @@
 
 #include "intset.h"
 
-#if defined(USE_SSPFD)
-#   include "sspfd.h"
-#endif
-
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
@@ -57,7 +53,7 @@ int algo_type = DEFAULT_LOCKTYPE;
 int test_verbose = 0;
 
 size_t print_vals_num = 100; 
-size_t pf_vals_num = 8;
+size_t pf_vals_num = 1023;
 size_t put, put_explicit = false;
 double update_rate, put_rate, get_rate;
 
@@ -130,44 +126,6 @@ void barrier_cross(barrier_t *b)
   pthread_mutex_unlock(&b->mutex);
 }
 barrier_t barrier, barrier_global;
-
-
-#define PFD_TYPE 0
-
-#if !defined(COMPUTE_LATENCY)
-#  define START_TS(s)
-#  define END_TS(s, i)
-#  define ADD_DUR(tar)
-#  define ADD_DUR_FAIL(tar)
-#  define PF_INIT(s, e, id)
-#elif PFD_TYPE == 0
-#  define START_TS(s)				\
-  {						\
-    asm volatile ("");				\
-    start_acq = getticks();			\
-    asm volatile ("");
-#  define END_TS(s, i)				\
-    asm volatile ("");				\
-    end_acq = getticks();			\
-    asm volatile ("");				\
-    }
-
-#  define ADD_DUR(tar) tar += (end_acq - start_acq - correction)
-#  define ADD_DUR_FAIL(tar)					\
-  else								\
-    {								\
-      ADD_DUR(tar);						\
-    }
-#  define PF_INIT(s, e, id)
-#else
-#  define SSPFD_NUM_ENTRIES  pf_vals_num
-#  define START_TS(s)      SSPFDI(s)
-#  define END_TS(s, i)     SSPFDO(s, i & SSPFD_NUM_ENTRIES)
-
-#  define ADD_DUR(tar) 
-#  define ADD_DUR_FAIL(tar)
-#  define PF_INIT(s, e, id) SSPFDINIT(s, e, id)
-#endif
 
 typedef struct thread_data
 {
@@ -341,20 +299,9 @@ test(void* thread)
   getting_count_succ[ID] += my_getting_count_succ;
   removing_count_succ[ID]+= my_removing_count_succ;
 
-#if (PFD_TYPE == 1) && defined(COMPUTE_LATENCY)
-  if (ID == 0)
-    {
-      printf("get ----------------------------------------------------\n");
-      SSPFDPN(0, SSPFD_NUM_ENTRIES, print_vals_num);
-      printf("put ----------------------------------------------------\n");
-      SSPFDPN(1, SSPFD_NUM_ENTRIES, print_vals_num);
-      printf("rem ----------------------------------------------------\n");
-      SSPFDPN(2, SSPFD_NUM_ENTRIES, print_vals_num);
+  print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
 
-    }
-#endif
-
-  /* SSPFDTERM(); */
+  SSPFDTERM();
 #if GC == 1
   ssmem_term();
   free(alloc);
@@ -389,7 +336,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:vf:x:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:e:l:p:b:vf:x:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -412,7 +359,7 @@ main(int argc, char **argv)
 		 "Options:\n"
 		 "  -h, --help\n"
 		 "        Print this message\n"
-		 "  -v, --verbose\n"
+		 "  -e, --verbose\n"
 		 "        Be verbose\n"
 		 "  -d, --duration <int>\n"
 		 "        Test duration in milliseconds\n"
@@ -428,7 +375,7 @@ main(int argc, char **argv)
 		 "        Percentage of put update transactions (should be less than percentage of updates)\n"
 		 "  -b, --num-buckets <int>\n"
 		 "        Number of initial buckets (stronger than -l)\n"
-		 "  -a, --print-vals <int>\n"
+		 "  -v, --print-vals <int>\n"
 		 "        When using detailed profiling, how many values to print.\n"
 		 "  -f, --val-pf <int>\n"
 		 "        When using detailed profiling, how many values to keep track of.\n"
@@ -441,7 +388,7 @@ main(int argc, char **argv)
 	case 'd':
 	  duration = atoi(optarg);
 	  break;
-	case 'v':
+	case 'e':
 	  test_verbose = 1;
 	  break;
 	case 'i':
@@ -463,13 +410,10 @@ main(int argc, char **argv)
 	case 'l':
 	  load_factor = atoi(optarg);
 	  break;
-	  /* case 'b': */
-	  /*   num_buckets_param = atoi(optarg); */
-	  /*   break; */
 	case 'x':
 	  algo_type = atoi(optarg);
 	  break;
-	case 'a':
+	case 'v':
 	  print_vals_num = atoi(optarg);
 	  break;
 	case 'f':

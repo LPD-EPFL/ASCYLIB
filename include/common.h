@@ -2,6 +2,9 @@
 #define _COMMON_H_
 #include <limits.h>
 
+#include "getticks.h"
+#include "latency.h"
+
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
 

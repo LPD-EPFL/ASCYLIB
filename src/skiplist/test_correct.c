@@ -26,22 +26,18 @@
 
 #include "intset.h"
 
-#if defined(USE_SSPFD)
-#   include "sspfd.h"
-#endif
-
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k,t)  sl_contains(s, k, t)
-#define DS_ADD(s,k,v,t)     sl_add(s, k, (sval_t) v, t)
-#define DS_REMOVE(s,k,t)    sl_remove(s, k, t)
-#define DS_SIZE(s)          sl_set_size(s)
-#define DS_NEW()            sl_set_new()
+#define DS_CONTAINS(s,k)  sl_contains(s, k)
+#define DS_ADD(s,k,v)     sl_add(s, k, (sval_t) v)
+#define DS_REMOVE(s,k)    sl_remove(s, k)
+#define DS_SIZE(s)        sl_set_size(s)
+#define DS_NEW()          sl_set_new()
 
-#define DS_TYPE             sl_intset_t
-#define DS_NODE             sl_node_t
+#define DS_TYPE           sl_intset_t
+#define DS_NODE           sl_node_t
 
 /* ################################################################### *
  * GLOBALS
@@ -55,7 +51,7 @@ size_t num_threads = DEFAULT_NB_THREADS;
 size_t duration = DEFAULT_DURATION;
 
 size_t print_vals_num = 100; 
-size_t pf_vals_num = 8;
+size_t pf_vals_num = 1023;
 size_t put, put_explicit = false;
 double update_rate, put_rate, get_rate;
 
@@ -129,44 +125,6 @@ void barrier_cross(barrier_t *b)
   pthread_mutex_unlock(&b->mutex);
 }
 barrier_t barrier, barrier_global;
-
-
-#define PFD_TYPE 0
-
-#if !defined(COMPUTE_LATENCY)
-#  define START_TS(s)
-#  define END_TS(s, i)
-#  define ADD_DUR(tar)
-#  define ADD_DUR_FAIL(tar)
-#  define PF_INIT(s, e, id)
-#elif PFD_TYPE == 0
-#  define START_TS(s)				\
-  {						\
-    asm volatile ("");				\
-    start_acq = getticks();			\
-    asm volatile ("");
-#  define END_TS(s, i)				\
-    asm volatile ("");				\
-    end_acq = getticks();			\
-    asm volatile ("");				\
-    }
-
-#  define ADD_DUR(tar) tar += (end_acq - start_acq - correction)
-#  define ADD_DUR_FAIL(tar)					\
-  else								\
-    {								\
-      ADD_DUR(tar);						\
-    }
-#  define PF_INIT(s, e, id)
-#else
-#  define SSPFD_NUM_ENTRIES  pf_vals_num
-#  define START_TS(s)      SSPFDI(s)
-#  define END_TS(s, i)     SSPFDO(s, i & SSPFD_NUM_ENTRIES)
-
-#  define ADD_DUR(tar) 
-#  define ADD_DUR_FAIL(tar)
-#  define PF_INIT(s, e, id) SSPFDINIT(s, e, id)
-#endif
 
 typedef struct thread_data
 {
@@ -242,7 +200,7 @@ test(void* thread)
 	}
       val[0] = key;
 
-      if(DS_ADD(set, key, val, TRANSACTIONAL) == false)
+      if(DS_ADD(set, key, val) == false)
 	{
 	  i--;
 	}
@@ -278,7 +236,7 @@ test(void* thread)
 
 	  int res;
 	  START_TS(1);
-	  res = DS_ADD(set, key, val, TRANSACTIONAL);
+	  res = DS_ADD(set, key, val);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -293,7 +251,7 @@ test(void* thread)
 	{
 	  size_t* removed;
 	  START_TS(2);
-	  removed = (size_t*) DS_REMOVE(set, key, TRANSACTIONAL);
+	  removed = (size_t*) DS_REMOVE(set, key);
 	  END_TS(2, my_removing_count);
 	  if(removed != NULL) 
 	    {
@@ -312,7 +270,7 @@ test(void* thread)
 	{ 
 	  size_t* res;
 	  START_TS(0);
-	  res = (size_t*) DS_CONTAINS(set, key, TRANSACTIONAL);
+	  res = (size_t*) DS_CONTAINS(set, key);
 	  END_TS(0, my_getting_count);
 	  if(res != NULL) 
 	    {
@@ -354,20 +312,9 @@ test(void* thread)
   getting_count_succ[ID] += my_getting_count_succ;
   removing_count_succ[ID]+= my_removing_count_succ;
 
-#if (PFD_TYPE == 1) && defined(COMPUTE_LATENCY)
-  if (ID == 0)
-    {
-      printf("get ----------------------------------------------------\n");
-      SSPFDPN(0, SSPFD_NUM_ENTRIES, print_vals_num);
-      printf("put ----------------------------------------------------\n");
-      SSPFDPN(1, SSPFD_NUM_ENTRIES, print_vals_num);
-      printf("rem ----------------------------------------------------\n");
-      SSPFDPN(2, SSPFD_NUM_ENTRIES, print_vals_num);
+  print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
 
-    }
-#endif
-
-  /* SSPFDTERM(); */
+  SSPFDTERM();
 #if GC == 1
   ssmem_term();
   free(alloc);
