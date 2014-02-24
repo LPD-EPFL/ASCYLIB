@@ -4,6 +4,7 @@
 
 #include "getticks.h"
 #include "latency.h"
+#include "barrier.h"
 
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
