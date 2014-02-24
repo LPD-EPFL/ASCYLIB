@@ -4,7 +4,8 @@ You may pass the following settings to `make`:
     * TEST=old : use the old test.c file (disables GC)
     * TEST=correct : use the test_correct.c file (enables GC)
     * LATENCY= 1 : enable per operation latency measurements with getticks
-      	       2 : enable per operation latency measurements with sspfd
+      	       2 : enable per operation latency measurements with sspfd (only id==0 prints results)
+	       3 : enable per operation latency measurements with sspfd (all cores print results)
     * GRANULARITY=GLOBAL_LOCK (or G=GL) for global lock
     * INIT=all : initialize the structure from all threads (default is from one)
 Example:

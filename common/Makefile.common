@@ -263,6 +263,11 @@ ifeq ($(LATENCY),2)
 	LDFLAGS += -lsspfd -lm
 endif
 
+ifeq ($(LATENCY),3)
+	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS -DUSE_SSPFD -DLATENCY_PRINT_ALL_CORES=1
+	LDFLAGS += -lsspfd -lm
+endif
+
 ifeq ($(INIT),all)
 	CFLAGS += -DINITIALIZE_FROM_ONE=0
 else
