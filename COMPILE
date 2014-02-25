@@ -8,5 +8,7 @@ You may pass the following settings to `make`:
 	       3 : enable per operation latency measurements with sspfd (all cores print results)
     * GRANULARITY=GLOBAL_LOCK (or G=GL) for global lock
     * INIT=all : initialize the structure from all threads (default is from one)
+    * LFSL= fraser  : compile with Fraser's lock-free skip list algo
+      	    herlihy : compile with Herlihy's lock-free skip list algo (default)
 Example:
 	`make` VERSION=DEBUG GC=0
