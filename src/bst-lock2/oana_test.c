@@ -29,6 +29,9 @@ int main(int argc, char const *argv[])
 	printf("contains %d %d\n", 30, bst_contains(3, root));
 	bst_print(root);
 
+	printf("%d\n", bst_add(4, 40, root));
+    printf("contains %d %d\n", 40, bst_contains(4, root));
+	bst_print(root);
 
 	printf("%d\n", bst_add(2, 20, root));
     printf("contains %d %d\n", 20, bst_contains(2, root));
