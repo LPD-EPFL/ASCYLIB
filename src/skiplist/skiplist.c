@@ -195,8 +195,10 @@ sl_set_size(sl_intset_t *set)
   node = GET_UNMARKED(set->head->next[0]);
   while (node->next[0] != NULL)
     {
-      if (!node->deleted)
-	size++;
+      if (!IS_MARKED(node->next[0]))
+	{
+	  size++;
+	}
       node = GET_UNMARKED(node->next[0]);
     }
 
