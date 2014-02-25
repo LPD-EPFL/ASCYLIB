@@ -26,6 +26,10 @@
 
 #include "lazy.h"
 
+/********************************************************************************* 
+ * help search functions
+ *********************************************************************************/
+
 static inline node_l_t*
 search_weak_left(intset_l_t* set, skey_t key)
 {
@@ -56,6 +60,7 @@ static inline node_l_t*
 search_strong(intset_l_t* set, skey_t key, node_l_t** right)
 {
   node_l_t* pred = search_weak_left(set, key);
+  GL_LOCK(set->lock);
   LOCK(ND_GET_LOCK(pred));
   node_l_t* succ = pred->next;
   while (unlikely(succ->key < key))
@@ -99,6 +104,7 @@ list_insert(intset_l_t* set, skey_t key, sval_t val)
     }
 
   UNLOCK(ND_GET_LOCK(left));
+  GL_UNLOCK(set->lock);
   return result;
 }
 
@@ -120,5 +126,6 @@ list_delete(intset_l_t* set, skey_t key)
 #endif
     }
   UNLOCK(ND_GET_LOCK(left));
+  GL_UNLOCK(set->lock);
   return result;
 }
