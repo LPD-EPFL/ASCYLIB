@@ -156,6 +156,7 @@ sval_t update_under_root(skey_t key, function_t func, sval_t new_value, volatile
             } else if(right == holder->right){
                 sval_t vo = attempt_update(key, func, new_value, holder, right, ovl);
                 if(vo != RETRY){
+                    printf("Return from update_under root, vo %d\n", vo);
                     return vo == NOT_FOUND ? 0 : vo;   
                 }
             }
@@ -203,6 +204,7 @@ bool_t attempt_insert_into_empty(skey_t key, sval_t value, volatile node_t* hold
 
 sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v) {
 
+    printf("attempt_update: key %d, new_value %d\n", key, new_value);
 	int cmp = key - node->key;
    
     if(cmp == 0){
@@ -254,7 +256,7 @@ sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile no
                             return NO_UPDATE_RESULT(func, 0);
                         }
 
-                        volatile node_t* new_child = new_node(1, key, 0, TRUE, node, NULL, NULL);
+                        volatile node_t* new_child = new_node(1, key, 0, new_value, node, NULL, NULL);
                         set_child(node, new_child, is_right);
 
                         success = TRUE;
