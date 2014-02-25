@@ -273,3 +273,6 @@ ifeq ($(INIT),all)
 else
 	CFLAGS += -DINITIALIZE_FROM_ONE=1
 endif
+
+LFSL=herlihy
+
