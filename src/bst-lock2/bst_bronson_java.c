@@ -23,15 +23,18 @@ volatile node_t* bst_initialize() {
 // When the function returns 0, it means that the node was not found
 // (similarly to Howley)
 sval_t bst_contains(skey_t key, volatile node_t* root) {
-	while(TRUE) {
+	printf("Bst contains (key %d)\n", key);
+    while(TRUE) {
 		volatile node_t* right = root->right;
 
 		if (right == NULL) {
+            printf("ret1: right==NuLL\n");
 			return FALSE;
 		} else {
 			volatile int right_cmp = key - right->key;
 
 			if (right_cmp == 0) {
+                printf("ret2: right_cmp == 0\n");
 				return right->value;
 			}
 
@@ -46,8 +49,10 @@ sval_t bst_contains(skey_t key, volatile node_t* root) {
                 if (vo != RETRY) {
                     //return vo == FOUND;
                     if (vo != NOT_FOUND) {
+                        printf("ret3: vo != NOT_FOUND, vo = %d\n", vo);
                         return vo;
                     } else { 
+                        printf("ret4: vo != NOT_FOUND, vo = %d\n", vo);
                         return 0;
                     }
                 }
@@ -58,11 +63,14 @@ sval_t bst_contains(skey_t key, volatile node_t* root) {
 
 sval_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t node_v) {
 
+    printf("Attempt get: skey %d\n", k);
 	while(TRUE){
         volatile node_t* child = CHILD(node, is_right);
 
         if(child == NULL){
             if(node->version != node_v){
+                printf("ret5: node->version != node_v\n");
+
                 return RETRY;
             }
 
@@ -74,6 +82,8 @@ sval_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t no
             	//Verify that it's a value node
                 //CHANGE
                 //TODO: Leave NOT_FOUND or change to 0?
+                printf("ret6: child_cmp == 0, child->value: %d\n", child->value);
+
                 return child->value ? child->value : NOT_FOUND;
             }
 
@@ -83,20 +93,28 @@ sval_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t no
                 wait_until_not_changing(child);
 
                 if(node->version != node_v){
+                    printf("ret7: node->version != node_v\n");
+
                     return RETRY;
                 }
             } else if(child != CHILD(node, is_right)){
                 if(node->version != node_v){
+                    printf("ret8: node->version != node_v\n");
+
                     return RETRY;
                 }
             } else {
                 if(node->version != node_v){
+                 printf("ret9: node->version != node_v\n");
+  
                   return RETRY;
                 }
 
                 sval_t result = attempt_get(k, child, (child_cmp < 0 ? FALSE : TRUE), child_ovl);
                 if(result != RETRY){
                     //CHANGE (leave like this)
+                    printf("ret10: result %d\n", result);
+
                     return result;
                 }
             }
