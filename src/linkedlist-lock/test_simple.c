@@ -352,6 +352,7 @@ main(int argc, char **argv)
 		 "        Use lock-based algorithm\n"
 		 "        1 = lock-coupling,\n"
 		 "        2 = lazy algorithm\n"
+		 "        3 = Pugh's lazy algorithm\n"
 		 );
 	  exit(0);
 	case 'd':
@@ -408,7 +409,19 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
-  printf("## Initial: %zu / Range: %zu / %s\n", initial, range, (algo_type == 1) ? "handover-hand locks" : "lazy locks");
+  printf("## Initial: %zu / Range: %zu / ", initial, range);
+  switch (algo_type)
+    {
+    case 1:
+      printf("handover-hand locks");
+      break;
+    case 2:
+      printf("lazy locks");
+      break;
+    default:
+      printf("Pugh's lazy locks");
+    }
+  printf("\n");
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;

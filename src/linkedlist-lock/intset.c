@@ -22,6 +22,7 @@
  */
 
 #include "lazy.h"
+#include "pugh.h"
 #include "utils.h"
 
 sval_t
@@ -31,9 +32,13 @@ set_contains_l(intset_l_t* set, skey_t key, int algo_type)
     {
       return parse_find(set, key);
     }
-  else 
+  else if (algo_type == 1)
     {
       return lockc_find(set, key);
+    }
+  else
+    {
+      return list_search(set, key);
     }
 }
 
@@ -44,9 +49,13 @@ set_add_l(intset_l_t* set, skey_t key, sval_t val, int algo_type)
     {
       return parse_insert(set, key, val);
     }
-  else
+  else if (algo_type == 1)
     {
       return lockc_insert(set, key, val);
+    }
+  else
+    {
+      return list_insert(set, key, val);
     }
 }
 
@@ -57,8 +66,12 @@ set_remove_l(intset_l_t* set, skey_t key, int algo_type)
     {
       return parse_delete(set, key);
     }
-  else
+  else if (algo_type == 1)
     {
       return lockc_delete(set, key);
+    }
+  else
+    {
+      return list_delete(set, key);
     }
 }

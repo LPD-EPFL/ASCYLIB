@@ -27,6 +27,9 @@ linkedlist-lock.o:
 lazy.o: linkedlist-lock.h linkedlist-lock.o htlock.o clh.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/lazy.o lazy.c	 
 
+pugh.o: linkedlist-lock.h linkedlist-lock.o htlock.o clh.o
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/pugh.o pugh.c	 
+
 coupling.o: linkedlist-lock.h linkedlist-lock.o clh.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/coupling.o coupling.c
 
@@ -36,8 +39,8 @@ intset.o: linkedlist-lock.h coupling.h lazy.h clh.o
 test.o: linkedlist-lock.h coupling.h lazy.h intset.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
-main: measurements.o ssalloc.o linkedlist-lock.o coupling.o lazy.o intset.o test.o htlock.o clh.o
-	$(CC) $(CFLAGS)l $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/lazy.o $(BUILDIR)/coupling.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS) 
+main: measurements.o ssalloc.o linkedlist-lock.o coupling.o lazy.o pugh.o intset.o test.o htlock.o clh.o
+	$(CC) $(CFLAGS)l $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/linkedlist-lock.o $(BUILDIR)/lazy.o $(BUILDIR)/pugh.o $(BUILDIR)/coupling.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS) 
 
 clean:
 	rm -f $(BINS)
