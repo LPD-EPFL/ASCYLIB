@@ -98,7 +98,6 @@ list_delete(intset_l_t* set, skey_t key)
   sval_t result = 0;
   node_l_t* right;
   node_l_t* left = search_strong(set, key, &right);   /* TODO:: optimize for step-wise strong search!! */
-  assert(left != right);
   if (right->key == key)
     {
       LOCK(ND_GET_LOCK(right));
