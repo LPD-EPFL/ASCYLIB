@@ -529,7 +529,7 @@ void fix_height_and_rebalance(volatile node_t* node) {
             volatile node_t* n_parent = node->parent;
             // publish(n_parent);
             // scoped_lock lock(n_parent->lock);
-            skey_t UNUSED n_parent_key = n_parent->key;
+            //skey_t UNUSED n_parent_key = n_parent->key;
             volatile ptlock_t* n_parent_lock = &n_parent->lock;
             LOCK(n_parent_lock);
 
