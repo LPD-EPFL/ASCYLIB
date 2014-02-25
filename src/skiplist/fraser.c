@@ -80,89 +80,16 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
     }
 }
 
-void
-fraser_search_no_cleanup(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **right_list)
-{
-  int i;
-  sl_node_t *left, *left_next, *right, *right_next;
-
- retry:
-  left = set->head;
-  for (i = levelmax - 1; i >= 0; i--)
-    {
-      left_next = left->next[i];
-      if (unlikely(is_marked((uintptr_t)left_next)))
-	{
-	  goto retry;
-	}
-
-      /* Find unmarked node pair at this level */
-      for (right = left_next; ; right = right_next)
-      	{
-      	  right_next = right->next[i];
-	  if (!IS_MARKED(right_next))
-	    {
-	      if (right->key >= key)
-		{
-		  break;
-		}
-	      left = right;
-	      left_next = right_next;
-	    }
-	  else
-	    {
-	      right_next = GET_UNMARKED(right_next);
-	    }
-      	}
-
-      if (left_list != NULL)
-	{
-	  left_list[i] = left;
-	}
-      if (right_list != NULL)	
-	{
-	  right_list[i] = right;
-	}
-    }
-}
-
-static sl_node_t* 
-fraser_left_search(sl_intset_t *set, skey_t key)
-{
-  sl_node_t* left = NULL;
-  sl_node_t* left_prev;
-  
-  left_prev = set->head;
-  int lvl;  
-  for (lvl = levelmax - 1; lvl >= 0; lvl--)
-    {
-      left = GET_UNMARKED(left_prev->next[lvl]);
-      while(left->key < key || IS_MARKED(left->next[lvl]))
-      	{
-      	  if (!IS_MARKED(left->next[lvl]))
-      	    {
-      	      left_prev = left;
-      	    }
-      	  left = GET_UNMARKED(left->next[lvl]);
-      	}
-
-      if (unlikely(left->key == key))
-	{
-	  break;
-	}
-    }
-  return left;
-}
-
-
 sval_t
 fraser_find(sl_intset_t *set, skey_t key)
 {
+  sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
-  sl_node_t* left = fraser_left_search(set, key);
-  if (left->key == key && !left->deleted)
+
+  fraser_search(set, key, NULL, succs);
+  if (succs[0]->key == key && !succs[0]->deleted)
     {
-      result = left->val;
+      result = succs[0]->val;
     }
   return result;
 }
@@ -190,10 +117,11 @@ mark_node_ptrs(sl_node_t *n)
 sval_t
 fraser_remove(sl_intset_t *set, skey_t key)
 {
+  /* sl_node_t **succs; */
   sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
 
-  fraser_search_no_cleanup(set, key, NULL, succs);
+  fraser_search(set, key, NULL, succs);
   if (succs[0]->key != key)
     {
       goto end;
@@ -211,10 +139,11 @@ fraser_remove(sl_intset_t *set, skey_t key)
       mark_node_ptrs(succs[0]);
 
       result = succs[0]->val;
-      fraser_search(set, key, NULL, NULL);
 #if GC == 1
       ssmem_free(alloc, succs[0]);
 #endif
+      /* MEM_BARRIER; */
+      fraser_search(set, key, NULL, NULL);
     }
 
  end:
@@ -230,8 +159,9 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
   int i;
   int result = 0;
 
+  new = sl_new_simple_node(key, val, get_rand_level(), 0);
  retry: 	
-  fraser_search_no_cleanup(set, key, preds, succs);
+  fraser_search(set, key, preds, succs);
   /* Update the value field of an existing node */
   if (succs[0]->key == key) 
     {				/* Value already in list */
@@ -241,11 +171,9 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  goto retry;
 	}
       result = 0;
+      sl_delete_node(new);
       goto end;
     }
-
-
-  new = sl_new_simple_node(key, val, get_rand_level(), 0);
 
   for (i = 0; i < new->toplevel; i++)
     {
@@ -259,7 +187,6 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
   /* Node is visible once inserted at lowest level */
   if (!ATOMIC_CAS_MB(&preds[0]->next[0], succs[0], new))
     {
-      sl_delete_node(new);
       goto retry;
     }
 
@@ -271,20 +198,17 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  succ = succs[i];
 	  /* Update the forward pointer if it is stale */
 	  new_next = new->next[i];
-
-	  if (unlikely(new->deleted))
+	  if (is_marked((uintptr_t) new_next))
 	    {
 	      goto success;
 	    }
 	  if ((new_next != succ) && 
 	      (!ATOMIC_CAS_MB(&new->next[i], unset_mark((uintptr_t)new_next), succ)))
-	    {
-	      break; /* Give up if pointer is marked */
-	    }
+	    break; /* Give up if pointer is marked */
 	  /* Check for old reference to a k node */
 	  if (succ->key == key)
 	    {
-	      succ = GET_UNMARKED(succ->next);
+	      succ = (sl_node_t *)unset_mark((uintptr_t)succ->next);
 	    }
 	  /* We retry the search if the CAS fails */
 	  if (ATOMIC_CAS_MB(&pred->next[i], succ, new))
