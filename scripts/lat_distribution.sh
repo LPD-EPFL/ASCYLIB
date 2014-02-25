@@ -1,15 +1,12 @@
 #!/bin/bash
 
-initials="256 2048 8192 65536"
-updates="0 20 100"
-the_cores="18"
-
 file_prefix=$1
 shift;
 prog=$1
 shift;
 params=$@
 
+source scripts/lat_distribution.config
 source scripts/lock_exec;
 source scripts/config;
 
@@ -19,7 +16,7 @@ rm ${data_folder}/${file_prefix}*
 for i in $initials; do
     r=$((i*2)) 
 for u in $updates; do
-for c in ${the_cores}; do
+for c in ${max_cores}; do
     out=$(${run_script} $prog $params -i${i} -n${c} -u${u} -r{r});
     if [ $u -ne 0 ]
     then
