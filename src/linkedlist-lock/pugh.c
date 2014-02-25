@@ -27,7 +27,7 @@
 #include "lazy.h"
 
 static inline node_l_t*
-search_weak(intset_l_t* set, skey_t key, node_l_t** right)
+search_weak_left(intset_l_t* set, skey_t key)
 {
   node_l_t* pred = set->head;
   node_l_t* succ = pred->next;
@@ -37,14 +37,25 @@ search_weak(intset_l_t* set, skey_t key, node_l_t** right)
       succ = succ->next;
     }
 
-  *right = succ;
   return pred;
+}
+
+static inline node_l_t*
+search_weak_right(intset_l_t* set, skey_t key)
+{
+  node_l_t* succ = set->head->next;
+  while (succ->key < key)
+    {
+      succ = succ->next;
+    }
+
+  return succ;
 }
 
 static inline node_l_t*
 search_strong(intset_l_t* set, skey_t key, node_l_t** right)
 {
-  node_l_t* pred = search_weak(set, key, right);
+  node_l_t* pred = search_weak_left(set, key);
   LOCK(ND_GET_LOCK(pred));
   node_l_t* succ = pred->next;
   while (unlikely(succ->key < key))
@@ -61,8 +72,7 @@ search_strong(intset_l_t* set, skey_t key, node_l_t** right)
 sval_t
 list_search(intset_l_t* set, skey_t key)
 {
-  node_l_t* right;
-  search_weak(set, key, &right);
+  node_l_t* right = search_weak_right(set, key);
   if (right->key == key)
     {
       return right->val;
