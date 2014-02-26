@@ -1,25 +1,42 @@
 #include "bst_ellen.h"
 
 __thread search_result_t * last_result;
+__thread ssmem_allocator_t* alloc;
+
+node_t* create_node(skey_t key, sval_t value, bool_t is_leaf, int initializing) {
+    volatile node_t * new_node;
+#if GC == 1
+    if (unlikely(initializing)) {
+        new_node = (volatile node_t*) ssalloc(sizeof(node_t));
+    } else {
+        new_node = (volatile node_t*) ssmem_alloc(alloc, sizeof(node_t));
+    }
+#else
+    new_node = (volatile node_t*) ssalloc(sizeof(node_t));
+#endif
+    if (new_node==NULL) {
+        perror("malloc in bst create node");
+        exit(1);
+    }
+    new_node->leaf =is_leaf;
+    new_node->key=key;
+    new_node->value=value;
+    new_node->update=NULL;
+    new_node->right=NULL;
+    new_node->left=NULL;
+
+    asm volatile("" ::: "memory");
+    return (node_t*) new_node;
+}
 
 node_t* bst_initialize(){
     node_t* root;
     node_t* i1;
     node_t* i2;
-    root = (node_t*) ssalloc(64);
-    i1 = (node_t*) ssalloc(64);
-    i2 = (node_t*) ssalloc(64);
-
-    root->key=INF2;
-    root->leaf=FALSE;
-    i1->key=INF1;
-    i1->leaf=TRUE;
-    i2->key=INF2;
-    i2->leaf=TRUE;
-    root->update = NULL;
-    i1->update=NULL;
-    i2->update=NULL;
-    
+    root = create_node(INF2,0,FALSE,1);
+    i1 = create_node(INF1,0,TRUE,1);
+    i2 = create_node(INF2,0,TRUE,1);
+  
     root->left = i1;
     root->right = i2;
     
@@ -57,17 +74,52 @@ node_t* bst_find(skey_t key, node_t* root) {
     return NULL;
 }
 
+info_t* create_iinfo_t(node_t* p, node_t* ni, node_t* l){
+    volatile info_t * new_info;
+#if GC == 1
+    new_info = (volatile info_t*) ssmem_alloc(alloc,sizeof(info_t));
+#else
+    new_info = (volatile info_t*) ssalloc(sizeof(info_t));
+#endif
+    if (new_info==NULL) {
+        perror("malloc in bst create node");
+        exit(1);
+    }
+
+    new_info->iinfo.p = p; 
+    new_info->iinfo.new_internal = ni; 
+    new_info->iinfo.l = l; 
+    MEM_BARRIER;
+    return (info_t*) new_info;
+}
+
+info_t* create_dinfo_t(node_t* gp, node_t* p, node_t* l, update_t u){
+    volatile info_t * new_info;
+#if GC == 1
+    new_info = (volatile info_t*) ssmem_alloc(alloc,sizeof(info_t));
+#else
+    new_info = (volatile info_t*) ssalloc(sizeof(info_t));
+#endif
+    if (new_info==NULL) {
+        perror("malloc in bst create node");
+        exit(1);
+    }
+
+    new_info->dinfo.gp = gp; 
+    new_info->dinfo.p = p; 
+    new_info->dinfo.l = l; 
+    new_info->dinfo.pupdate = u; 
+    MEM_BARRIER;
+    return (info_t*) new_info;
+}
+
+
 bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
     node_t * new_internal;
     node_t *new_sibling;
 
-    node_t * new_node = (node_t*) ssalloc(sizeof(node_t));
-    new_node->leaf = TRUE;
-    new_node->key=key;
-    new_node->value=value;
-    new_node->update=NULL;
-    
-    asm volatile("" ::: "memory");
+    node_t * new_node = create_node(key, value, TRUE, 0); 
+   
     update_t result;
 
     info_t* op;
@@ -81,43 +133,47 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
         if (GETFLAG(search_result->pupdate) != STATE_CLEAN) {
             bst_help(search_result->pupdate);
         } else {
-            new_sibling = (node_t*) ssalloc(sizeof(node_t));
-            new_sibling->leaf = TRUE;
-            new_sibling->key = search_result->l->key;
-            new_sibling->value = search_result->l->value;
-            new_sibling->update=NULL;
+            new_sibling = create_node(search_result->l->key, search_result->l->value, TRUE, 0);
+            new_internal = create_node(max(key,search_result->l->key), 0, FALSE, 0);
 
-            new_internal = (node_t*) ssalloc(sizeof(node_t));
-            new_internal->leaf = FALSE; 
-            new_internal->update = NULL;
-            new_internal->key = max(key, search_result->l->key); 
-            if (new_node->key < new_sibling->key) {
+           if (new_node->key < new_sibling->key) {
                 new_internal->left = new_node;
                 new_internal->right = new_sibling;
             } else {
                 new_internal->left = new_sibling;
                 new_internal->right = new_node;
             }
-            op = (info_t*) ssalloc_alloc(1,sizeof(info_t));
-            op->iinfo.p = search_result->p;
-            op->iinfo.new_internal = new_internal;
-            op->iinfo.l =  search_result->l;
-            MEM_BARRIER;
+            op = create_iinfo_t(search_result->p, new_internal, search_result->l);
             result = CAS_PTR(&(search_result->p->update),search_result->pupdate,FLAG(op,STATE_IFLAG));
             if (result == search_result->pupdate) {
                 bst_help_insert(op);
+#if GC == 1
+                if (UNFLAG(search_result->pupdate)!=NULL) {
+                    ssmem_free(alloc, UNFLAG(search_result->pupdate));
+                }
+#endif
                 return TRUE;
             } else {
                 bst_help(result);
+#if GC == 1
+                ssmem_free(alloc,new_sibling);
+                ssmem_free(alloc,new_internal);
+                ssmem_free(alloc,op);
+#endif
             }
         }
     }
 }
 
 void bst_help_insert(info_t * op) {
-    bst_cas_child(op->iinfo.p,op->iinfo.l,op->iinfo.new_internal);
+    int i = bst_cas_child(op->iinfo.p,op->iinfo.l,op->iinfo.new_internal);
     //iinfo_t* cl = (iinfo_t*) UNFLAG(op);
     void* UNUSED dummy = CAS_PTR(&(op->iinfo.p->update),FLAG(op,STATE_IFLAG),FLAG(op,STATE_CLEAN));
+#if GC == 1
+   if (i){
+        ssmem_free(alloc,op->iinfo.l);
+    }
+#endif
 }
 
 sval_t bst_delete(skey_t key, node_t* root) {
@@ -138,19 +194,20 @@ sval_t bst_delete(skey_t key, node_t* root) {
         } else if (GETFLAG(search_result->pupdate)!=STATE_CLEAN){
             bst_help(search_result->pupdate);
         } else {
-            op = (info_t*) ssalloc_alloc(1,sizeof(info_t));
-            op->dinfo.gp = search_result->gp;
-            op->dinfo.p = search_result->p;
-            op->dinfo.l = search_result->l;
-            op->dinfo.pupdate = search_result->pupdate;
-            MEM_BARRIER;
+            op = create_dinfo_t(search_result->gp, search_result->p, search_result->l,search_result->pupdate);
             result = CAS_PTR(&(search_result->gp->update),search_result->gpupdate,FLAG(op,STATE_DFLAG));
             if (result == search_result->gpupdate) {
                 if (bst_help_delete(op)==TRUE) {
+#if GC == 1
+                    ssmem_free(alloc,search_result->gpupdate);
+#endif
                     return found_value;
                 }
             } else {
                 bst_help(result);
+#if GC == 1
+                ssmem_free(alloc,op);
+#endif
             }
         }
     }
@@ -161,10 +218,12 @@ bool_t bst_help_delete(info_t* op) {
     result = CAS_PTR(&(op->dinfo.p->update), op->dinfo.pupdate, FLAG(op,STATE_MARK));
     if ((result == op->dinfo.pupdate) || (result == ((info_t*)FLAG(op,STATE_MARK)))) {
         bst_help_marked(op);
+        //free op
         return TRUE;
     } else {
         bst_help(result);
         void* UNUSED dummy = CAS_PTR(&(op->dinfo.gp->update), FLAG(op,STATE_DFLAG), FLAG(op,STATE_CLEAN));
+        //free op
         return FALSE;
     }
 }
@@ -177,8 +236,15 @@ void bst_help_marked(info_t* op) {
     } else {
         other = op->dinfo.p->right; 
     }
-    bst_cas_child(op->dinfo.gp,op->dinfo.p,other);
+    int i = bst_cas_child(op->dinfo.gp,op->dinfo.p,other);
     void* UNUSED dummy = CAS_PTR(&(op->dinfo.gp->update), FLAG(op,STATE_DFLAG),FLAG(op,STATE_CLEAN));
+
+#if GC == 1
+    if (i){
+        ssmem_free(alloc,op->dinfo.l);
+        ssmem_free(alloc,op->dinfo.p);
+    }
+#endif
 }
 
 void bst_help(update_t u){
@@ -191,11 +257,13 @@ void bst_help(update_t u){
     }
 }
 
-void bst_cas_child(node_t* parent, node_t* old, node_t* new){
+int bst_cas_child(node_t* parent, node_t* old, node_t* new){
     if (new->key < parent->key) {
-      void* UNUSED dummy = CAS_PTR(&(parent->left),old,new);
+      if (CAS_PTR(&(parent->left),old,new) == old) return 1;
+      return 0;
     } else {
-      void* UNUSED dummy = CAS_PTR(&(parent->right),old,new);
+      if (CAS_PTR(&(parent->right),old,new) == old) return 1;
+      return 0;
     }
 }
 

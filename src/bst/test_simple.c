@@ -42,7 +42,6 @@
 #define DS_NODE             node_t
 #define DS_KEY              skey_t
 
-__thread ssmem_allocator_t* alloc;
 
 /* ################################################################### *
  * GLOBALS

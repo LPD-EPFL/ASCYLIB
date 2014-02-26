@@ -18,6 +18,7 @@
 #include "common.h"
 #include "atomic_ops_if.h"
 #include "ssalloc.h"
+#include "ssmem.h"
 
 //the states a node can have
 //we avoid an enum to better control the size of the data structures
@@ -45,6 +46,8 @@ typedef uint8_t bool_t;
 #define INF1 (KEY_MAX)
 #define MAX_KEY KEY_MAX //MAX_KEY should be of the form 2^n-1 for increased random key generation performance
 
+extern __thread ssmem_allocator_t* alloc;
+
 typedef ALIGNED(64) struct node_t node_t;
 typedef union info_t info_t;
 
@@ -66,6 +69,7 @@ typedef struct dinfo_t {
 union info_t {
     iinfo_t iinfo;
     dinfo_t dinfo;
+    uint8_t padding[CACHE_LINE_SIZE];
 };
 
 
@@ -76,6 +80,7 @@ struct node_t {
     node_t* left;
     node_t* right;
     bool_t leaf;
+    uint8_t padding[CACHE_LINE_SIZE - sizeof(sval_t) - sizeof(skey_t) - sizeof(update_t) - 2*sizeof(uintptr_t) - sizeof(bool_t)];
 };
 
 typedef ALIGNED(64) struct search_result_t {
@@ -91,7 +96,7 @@ typedef ALIGNED(64) struct search_result_t {
 
 extern __thread search_result_t * last_result;
 
-void bst_cas_child(node_t* parent, node_t* old, node_t* new);
+int bst_cas_child(node_t* parent, node_t* old, node_t* new);
 
 void bst_help(update_t u);
 
