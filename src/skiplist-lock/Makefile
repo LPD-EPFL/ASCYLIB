@@ -9,6 +9,9 @@ PROF = $(ROOT)/src
 
 all:	main
 
+ALGO_O = $(LBSL).o
+ALGO_C = $(LBSL).c
+
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
 
@@ -24,8 +27,8 @@ clh.o:
 skiplist-lock.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/skiplist-lock.o skiplist-lock.c
 
-optimistic.o: skiplist-lock.h 
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/optimistic.o optimistic.c 
+$(ALGO_O): skiplist-lock.h 
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/$(ALGO_O) $(ALGO_C)
 
 intset.o: skiplist-lock.h optimistic.h htlock.o clh.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/intset.o intset.c
@@ -33,8 +36,8 @@ intset.o: skiplist-lock.h optimistic.h htlock.o clh.o
 test.o: skiplist-lock.h optimistic.h intset.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
-main: measurements.o ssalloc.o skiplist-lock.o optimistic.o intset.o test.o clh.o
-	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/skiplist-lock.o $(BUILDIR)/optimistic.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
+main: measurements.o ssalloc.o skiplist-lock.o $(ALGO_O) intset.o test.o clh.o
+	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/skiplist-lock.o $(BUILDIR)/$(ALGO_O) $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
 	-rm -f $(BINS) *.o

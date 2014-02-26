@@ -44,6 +44,9 @@ lfsl:
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
 
+lbsl:
+	$(MAKE) "LOCK=TAS" src/skiplist-lock
+
 
 clean:
 	$(MAKE) -C src/linkedlist clean	

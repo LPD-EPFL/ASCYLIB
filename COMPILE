@@ -10,5 +10,8 @@ You may pass the following settings to `make`:
     * INIT=all : initialize the structure from all threads (default is from one)
     * LFSL= fraser  : compile with Fraser's lock-free skip list algo
       	    herlihy : compile with Herlihy's lock-free skip list algo (default)
+    * LBSL= herlihy : compile with Herlihy's lock-bazed lazy skip list algo (default)
+      	    pugh    : compile with Pugh's lock-based lazy  skip list algo
+      	    
 Example:
 	`make` VERSION=DEBUG GC=0

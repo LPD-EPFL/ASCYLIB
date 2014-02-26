@@ -42,6 +42,10 @@
 #define DEFAULT_ALTERNATE               0
 #define DEFAULT_EFFECTIVE 		1
 
+#define ALGO_HERLIHY 1
+#define ALGO_PUGH 2
+
+
 extern unsigned int global_seed;
 extern __thread ssmem_allocator_t* alloc;
 
@@ -52,8 +56,10 @@ typedef ALIGNED(64) struct sl_node
   skey_t key;
   sval_t val; 
   uint32_t toplevel;
+#if LBSL==ALGO_HERLIHY
   volatile uint32_t marked;
   volatile uint32_t fullylinked;
+#endif
 #if !defined(LL_GLOBAL_LOCK)
   ptlock_t lock;
 #endif

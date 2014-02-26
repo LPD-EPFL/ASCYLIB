@@ -102,8 +102,10 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
   node->key = key;
   node->val = val;
   node->toplevel = toplevel;
+#if LBSL==ALGO_HERLIHY
   node->marked = 0;
   node->fullylinked = 0;
+#endif
   INIT_LOCK(ND_GET_LOCK(node));
 
 #if defined(__tile__)
@@ -155,8 +157,10 @@ sl_set_new()
   ssalloc_align_alloc(0);
   max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
   min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
+#if LBSL==ALGO_HERLIHY
   max->fullylinked = 1;
   min->fullylinked = 1;
+#endif
   set->head = min;
 
 #if defined(LL_GLOBAL_LOCK)
@@ -201,7 +205,9 @@ int sl_set_size(sl_intset_t *set)
   node = set->head->next[0];
   while (node->next[0] != NULL) 
     {
+#if LBSL==ALGO_HERLIHY
       if (node->fullylinked && !node->marked)
+#endif
 	{
 	  size++;
 	}

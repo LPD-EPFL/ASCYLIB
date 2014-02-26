@@ -275,4 +275,10 @@ else
 endif
 
 LFSL=herlihy
+LBSL=herlihy
+ifeq ($(LBSL),herlihy)
+	CFLAGS += -DLBSL=1
+else
+	CFLAGS += -DLBSL=2
+endif
 
