@@ -42,7 +42,6 @@
 #define DS_NODE             node_t
 #define DS_KEY              skey_t
 
-__thread ssmem_allocator_t* alloc;
 
 /* ################################################################### *
  * GLOBALS
@@ -178,7 +177,7 @@ test(void* thread)
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
-  search_result_t* search_res;
+  DS_NODE* search_res;
   barrier_cross(&barrier_global);
 
   while (stop == 0) 
