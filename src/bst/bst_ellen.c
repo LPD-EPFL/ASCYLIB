@@ -148,8 +148,8 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
             if (result == search_result->pupdate) {
                 bst_help_insert(op);
 #if GC == 1
-                if (UNFLAG(search_result->pupdate)!=NULL) {
-                    ssmem_free(alloc, UNFLAG(search_result->pupdate));
+                if (UNFLAG(search_result->pupdate)!=0) {
+                    ssmem_free(alloc, (void*) UNFLAG(search_result->pupdate));
                 }
 #endif
                 return TRUE;

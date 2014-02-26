@@ -177,7 +177,7 @@ test(void* thread)
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
-  search_result_t* search_res;
+  DS_NODE* search_res;
   barrier_cross(&barrier_global);
 
   while (stop == 0) 
