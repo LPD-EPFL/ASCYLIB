@@ -4,20 +4,26 @@
 
 volatile node_t* bst_initialize() {
 
-    volatile node_t* root = (node_t*) ssalloc(CACHE_LINE_SIZE);
+  size_t s = sizeof(node_t);
+  while ((s & 63) != 0)
+    {
+      s++;
+    }
 
-	// assign minimum key to the root, actual tree will be 
-	// the right subtree of the root
-	root->key = 0;
-	root->value = FALSE; 
-	root->left = NULL;
-	root->right = NULL;
-	root->height = 0;
-	root->version = 0;
-	root->parent = NULL;
-	INIT_LOCK(&(root->lock));
+  volatile node_t* root = (node_t*) ssalloc(s);
+
+  // assign minimum key to the root, actual tree will be 
+  // the right subtree of the root
+  root->key = 0;
+  root->value = FALSE; 
+  root->left = NULL;
+  root->right = NULL;
+  root->height = 0;
+  root->version = 0;
+  root->parent = NULL;
+  INIT_LOCK(&(root->lock));
 	
-	return root;
+  return root;
 }
 
 bool_t bst_contains(skey_t key, volatile node_t* root) {
