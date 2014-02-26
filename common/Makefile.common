@@ -156,7 +156,7 @@ ifeq ($(PC_NAME), trigonak-laptop)
     CFLAGS += -DLAPTOP
 endif
 
-ifeq ($(PC_NAME), igor-M17xR4)
+ifeq ($(PC_NAME), igor)
     CFLAGS += -DIGORLAPTOPLINUX
 endif
 
