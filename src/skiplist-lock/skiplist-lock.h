@@ -59,6 +59,9 @@ typedef ALIGNED(64) struct sl_node
 #if LBSL==ALGO_HERLIHY
   volatile uint32_t marked;
   volatile uint32_t fullylinked;
+#  if !defined(LL_GLOBAL_LOCK) && PTLOCK_SIZE < 64 /* fixing crash */
+  volatile uint32_t padding;
+#  endif
 #endif
 #if !defined(LL_GLOBAL_LOCK)
   ptlock_t lock;

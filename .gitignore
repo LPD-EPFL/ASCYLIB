@@ -1,3 +1,4 @@
+
 *~
 /.#COMPILE
 /.gitignore~
@@ -9,8 +10,8 @@
 /cscope.out
 /events_all
 /gp
+/lb-sl.h
 /noise
 /noise.o
 /plots
 /runcrash
-

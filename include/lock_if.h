@@ -7,6 +7,7 @@
 
 #if defined(MUTEX)
 typedef pthread_mutex_t ptlock_t;
+#define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL);
 #  define DESTROY_LOCK(lock)			        pthread_mutex_destroy((pthread_mutex_t *) lock)
 #  define LOCK(lock)					pthread_mutex_lock((pthread_mutex_t *) lock)
@@ -18,6 +19,7 @@ typedef pthread_mutex_t ptlock_t;
 #  define GL_UNLOCK(lock)				pthread_mutex_unlock((pthread_mutex_t *) lock)
 #elif defined(SPIN)		/* pthread spinlock */
 typedef pthread_spinlock_t ptlock_t;
+#define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_spin_init((pthread_spinlock_t *) lock, PTHREAD_PROCESS_PRIVATE);
 #  define DESTROY_LOCK(lock)			        pthread_spin_destroy((pthread_spinlock_t *) lock)
 #  define LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
@@ -28,7 +30,14 @@ typedef pthread_spinlock_t ptlock_t;
 #  define GL_LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
 #  define GL_UNLOCK(lock)				pthread_spin_unlock((pthread_spinlock_t *) lock)
 #elif defined(TAS)			/* TAS */
-typedef volatile uint32_t ptlock_t;
+#  define PTLOCK_SIZE 32		/* choose 8, 16, 32, 64 */
+#  define PASTER(x, y, z) x ## y ## z
+#  define EVALUATE(sz) PASTER(uint, sz, _t)
+#  define UTYPE  EVALUATE(PTLOCK_SIZE)
+#  define PASTER2(x, y) x ## y
+#  define EVALUATE2(sz) PASTER2(CAS_U, sz)
+#  define CAS_UTYPE EVALUATE2(PTLOCK_SIZE)
+typedef volatile UTYPE ptlock_t;
 #  define INIT_LOCK(lock)				tas_init(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					tas_lock(lock)
@@ -54,7 +63,7 @@ tas_init(ptlock_t* l)
 static inline uint32_t
 tas_lock(ptlock_t* l)
 {
-  while (CAS_U32(l, TAS_FREE, TAS_LCKD) == TAS_LCKD)
+  while (CAS_UTYPE(l, TAS_FREE, TAS_LCKD) == TAS_LCKD)
     {
       PAUSE;
     }
