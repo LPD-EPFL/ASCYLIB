@@ -21,6 +21,9 @@ ifeq ($(VERSION),DEBUG)
      CFLAGS	+= -g -DDEBUG -O0
 else
      CFLAGS	+= -O3
+     ifeq ($(VERSION),SYMBOL)
+		CFLAGS	+= -g
+     endif
 endif
 
 # Compile with global lock
