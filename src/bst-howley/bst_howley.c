@@ -253,6 +253,9 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 		if ((seen_op == op->relocate_op.dest_op) || (seen_op == (operation_t *)FLAG(op, STATE_OP_RELOCATE))){
 			CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
 			seen_state = STATE_OP_SUCCESSFUL;
+            if (seen_op == op->relocate_op.dest_op) {
+                if (UNFLAG(seen_op)!=0) ssmem_free(alloc,(void*)UNFLAG(seen_op));
+            } 
 		} else {
 			// VCAS in original implementation
 			seen_state = CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_FAILED);
@@ -303,8 +306,10 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 #endif
 	if (CAS_PTR(&(pred->op), pred_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == pred_op) {
 		bst_help_child_cas(cas_op, pred, root);
-        if (UNFLAG(pred_op)!=NULL) ssmem_free(alloc,UNFLAG(pred_op));
-	}
+        if (UNFLAG(pred_op)!=0) ssmem_free(alloc,(void*)UNFLAG(pred_op));
+	} else {
+        ssmem_free(alloc,cas_op);
+    }
 }
 
 void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* curr_op, node_t* root ){
