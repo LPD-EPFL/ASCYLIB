@@ -217,7 +217,6 @@ endif
 # Global settings
 #################
 
-CFLAGS += -D_REENTRANT
 CFLAGS += -Wall
 CFLAGS += -fno-strict-aliasing
 CFLAGS += -I$(LIBAO_INC) -I$(ROOT)/include -I$(LIBSSMEM)/include
