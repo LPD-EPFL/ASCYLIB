@@ -9,6 +9,8 @@ PROF = $(ROOT)/src
 
 all:	main
 
+CHM=concurrent_hash_map2
+
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
 
@@ -21,14 +23,14 @@ htlock.o:
 clh.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/clh.o $(PROF)/clh.c
 
-concurrent_hash_map.o: concurrent_hash_map.c concurrent_hash_map.h
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/concurrent_hash_map.o concurrent_hash_map.c
+$(CHM).o: $(CHM).c $(CHM).h
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/$(CHM).o $(CHM).c
 
 test.o: 
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
-main: measurements.o ssalloc.o test.o htlock.o concurrent_hash_map.o
-	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/concurrent_hash_map.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
+main: measurements.o ssalloc.o test.o htlock.o $(CHM).o
+	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/$(CHM).o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
 	rm -f $(BINS)
