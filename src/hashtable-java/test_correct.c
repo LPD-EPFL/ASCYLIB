@@ -140,6 +140,7 @@ test(void* thread)
   ssmem_allocator_t* alloc_data = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
   assert(alloc_data != NULL);
   ssmem_alloc_init(alloc_data, SSMEM_DEFAULT_MEM_SIZE, ID);
+  barrier_cross(&barrier);
 #endif
     
   uint64_t key;

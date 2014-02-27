@@ -180,6 +180,11 @@ chm_seg_rehash(chm_t* set, int seg_num, chm_node_t* new)
 
   seg_new->size = seg_old->size + 1;
   set->segments[seg_num] = seg_new;
+
+#if GC == 1
+  ssmem_release(alloc, (void*) seg_old);
+  ssmem_release(alloc, seg_old->table);
+#endif
 }
 
 
@@ -241,7 +246,7 @@ chm_put(chm_t* set, skey_t key, sval_t val)
   if (unlikely(sizepp >= seg->size_limit))
     {
 #if defined(DEBUG)
-      printf("-[%3d]- seg size limit %u :: resize\n", seg_num, seg->size_limit);
+      /* printf("-[%3d]- seg size limit %u :: resize\n", seg_num, seg->size_limit); */
 #endif
       chm_seg_rehash(set, seg_num, n);
     }
