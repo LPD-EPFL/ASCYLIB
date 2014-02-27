@@ -31,7 +31,7 @@ void ht_delete(ht_intset_t *set)
   node_t *node, *next;
   int i;
   
-  for (i=0; i < *maxhtlength; i++) 
+  for (i=0; i < maxhtlength; i++) 
     {
       node = set->buckets[i]->head;
       while (node != NULL) 
@@ -52,7 +52,7 @@ ht_size(ht_intset_t *set)
   int size = 0;
   int i;
 	
-  for (i = 0; i < *maxhtlength; i++) 
+  for (i = 0; i < maxhtlength; i++) 
     {
       size += set_size(set->buckets[i]);
     }
@@ -83,7 +83,8 @@ ht_new()
       exit(1);
     }  
 
-  size_t bs = (*maxhtlength + 1) * sizeof(intset_t *);
+  set->hash = maxhtlength - 1;
+  size_t bs = (maxhtlength + 1) * sizeof(intset_t *);
 
   if ((set->buckets = (void *)ssalloc_alloc(1, bs)) == NULL)
     {
@@ -93,7 +94,7 @@ ht_new()
 
   ssalloc_align_alloc(0);
 
-  for (i=0; i < *maxhtlength; i++) 
+  for (i=0; i < maxhtlength; i++) 
     {
       set->buckets[i] = set_new();
     }

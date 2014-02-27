@@ -24,7 +24,7 @@
 #include "intset.h"
 
 /* Hashtable length (# of buckets) */
-unsigned int* maxhtlength;
+unsigned int maxhtlength;
 __thread unsigned long* seeds;
 
 ALIGNED(64) uint8_t running[64];

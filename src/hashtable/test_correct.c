@@ -43,7 +43,7 @@
  * GLOBALS
  * ################################################################### */
 
-unsigned int* maxhtlength;
+unsigned int maxhtlength;
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
 size_t load_factor = DEFAULT_LOAD;

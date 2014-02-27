@@ -43,7 +43,7 @@
  * GLOBALS
  * ################################################################### */
 
-unsigned int* maxhtlength;
+unsigned int maxhtlength;
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
 size_t load_factor = DEFAULT_LOAD;
@@ -433,9 +433,7 @@ main(int argc, char **argv)
     
   stop = 0;
 
-  maxhtlength = (unsigned int*) ssalloc(64);
-  assert(maxhtlength != NULL);
-  *maxhtlength = (unsigned int) initial / load_factor;
+  maxhtlength = (unsigned int) initial / load_factor;
     
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);

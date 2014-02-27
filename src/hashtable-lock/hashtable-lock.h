@@ -44,7 +44,7 @@ extern unsigned int maxhtlength;
 
 typedef struct ht_intset 
 {
-  /* intset_l_t *buckets[MAXHTLENGTH]; */
+  size_t hash;
   intset_l_t **buckets;
 } ht_intset_t;
 

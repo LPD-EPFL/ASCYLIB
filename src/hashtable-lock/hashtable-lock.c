@@ -94,6 +94,8 @@ ht_new()
       exit(1);
     }   
 
+  set->hash = maxhtlength - 1;
+
   size_t bs = (maxhtlength + 1) * sizeof(intset_l_t *);
   if ((set->buckets = (void *)ssalloc_alloc(1, bs)) == NULL)
     {
@@ -113,21 +115,21 @@ ht_new()
 sval_t
 ht_contains(ht_intset_t *set, skey_t key, int transactional) 
 {
-  int addr = key % maxhtlength;
+  int addr = key & set->hash;
   return set_contains_l(set->buckets[addr], key, transactional);
 }
 
 int
 ht_add(ht_intset_t *set, skey_t key, sval_t val, int transactional) 
 {
-  int addr = key % maxhtlength;
+  int addr = key & set->hash;
   return set_add_l(set->buckets[addr], key, val, transactional);
 }
 
 sval_t
 ht_remove(ht_intset_t *set, skey_t key, int transactional) 
 {
-  int addr = key % maxhtlength;
+  int addr = key & set->hash;
   return set_remove_l(set->buckets[addr], key, transactional);
 }
 
