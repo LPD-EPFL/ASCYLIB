@@ -181,8 +181,8 @@ do
     lat2_rem=$(process_array ${array2_rem})
 
     ratio_get=$(echo "${lat2_get}/${lat1_get}" | bc -l);
-    ratio_put=$(echo "${lat2_get}/${lat1_put}" | bc -l);
-    ratio_rem=$(echo "${lat2_get}/${lat1_rem}" | bc -l);
+    ratio_put=$(echo "${lat2_put}/${lat1_put}" | bc -l);
+    ratio_rem=$(echo "${lat2_rem}/${lat1_rem}" | bc -l);
     
     printf " %.2f," $ratio_get >> ./data/lat_get_ratio.txt;
     printf " %.2f," $ratio_put >> ./data/lat_put_ratio.txt;
