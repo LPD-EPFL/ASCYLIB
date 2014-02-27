@@ -15,7 +15,7 @@
 #include <inttypes.h>
 #include <string.h>
 
-/* #define SSALLOC_USE_MALLOC */
+#define SSALLOC_USE_MALLOC
 
 #define SSALLOC_NUM_ALLOCATORS 2
 
