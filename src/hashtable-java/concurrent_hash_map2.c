@@ -212,6 +212,33 @@ chm_get(chm_t* set, skey_t key)
 }
 
 
+static void
+chm_put_prefetch(chm_seg_t* seg, int hash_seed,skey_t key)
+{
+  chm_node_t** bucket =  &seg->table[hash(key, hash_seed) & seg->hash];
+  chm_node_t* curr = *bucket;
+  chm_node_t* pred = NULL;
+
+  while (curr != NULL)
+    {
+      if (curr->key == key)
+	{
+	  return;
+	}
+      pred = curr;
+      curr = curr->next;
+    }
+  
+  if (pred != NULL)
+    {
+      PREFETCHW(pred);
+    }
+  else
+    {
+      PREFETCHW(*bucket);
+    }
+}
+
 int
 chm_put(chm_t* set, skey_t key, sval_t val)
 {
@@ -219,10 +246,17 @@ chm_put(chm_t* set, skey_t key, sval_t val)
 
   volatile chm_seg_t* seg;
   volatile ptlock_t* seg_lock;
+
+  int walks = 0;
   do 
     {
       seg = set->segments[seg_num];
       seg_lock = &seg->lock;
+      if (walks > 0 && walks <= CHM_MAX_SCAN_RETRIES)
+	{
+	  chm_put_prefetch(seg, set->hash_seed, key);
+	}
+      walks++;
     }
   while (!TRYLOCK(seg_lock));
 
@@ -246,7 +280,7 @@ chm_put(chm_t* set, skey_t key, sval_t val)
   if (unlikely(sizepp >= seg->size_limit))
     {
 #if defined(DEBUG)
-      /* printf("-[%3d]- seg size limit %u :: resize\n", seg_num, seg->size_limit); */
+      printf("-[%3d]- seg size limit %u :: resize\n", seg_num, seg->size_limit);
 #endif
       chm_seg_rehash(set, seg_num, n);
     }
@@ -267,6 +301,32 @@ chm_put(chm_t* set, skey_t key, sval_t val)
   return 1;
 }
 
+
+static void
+chm_rem_prefetch(chm_seg_t* seg, int hash_seed, skey_t key)
+{
+  chm_node_t** bucket =  &seg->table[hash(key, hash_seed) & seg->hash];
+  chm_node_t* curr = *bucket;
+  chm_node_t* pred = NULL;
+  while (curr != NULL)
+    {
+      if (curr->key == key)
+	{
+	  if (pred != NULL)
+	    {
+	      PREFETCHW(pred);
+	    }
+	  else
+	    {
+	      PREFETCHW(*bucket);
+	    }
+	  break;
+	}
+      pred = curr;
+      curr = curr->next;
+    }
+}
+
 sval_t
 chm_rem(chm_t* set, skey_t key)
 {
@@ -274,10 +334,17 @@ chm_rem(chm_t* set, skey_t key)
 
   volatile chm_seg_t* seg;
   volatile ptlock_t* seg_lock;
+
+  int walks = 0;
   do 
     {
       seg = set->segments[seg_num];
       seg_lock = &seg->lock;
+      if (walks > 0 && walks <= CHM_MAX_SCAN_RETRIES)
+	{
+	  chm_rem_prefetch(seg, set->hash_seed, key);
+	}
+      walks++;
     }
   while (!TRYLOCK(seg_lock));
 
