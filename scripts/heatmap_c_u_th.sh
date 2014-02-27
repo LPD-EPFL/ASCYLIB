@@ -18,6 +18,8 @@ fi
 inits="256 1024 2048 8192 65536"
 duration=1000;
 
+source ./scripts/heatmap.config
+
 for initial in ${inits}
 do
 range=$((2*${initial}));
@@ -48,7 +50,7 @@ cp data/temp3.txt data/${unm}_sl_heatmap_uc_frac_${initial}.csv
 cp data/scal_temp.txt data/${unm}_sl_heatmap_uc_scal_${initial}.csv
 cp data/scal_data.txt data/${unm}_sl_heatmap_uc_scal_frac_${initial}.csv
 echo '#  bst';
-./scripts/heatmap_avg.sh ./bin/lb-bst2 ./bin/lf-bst-howley u c -i${initial} -r${range} -d$duration | tee data/${unm}_bst_heatmap_uc_${initial}.csv
+./scripts/heatmap_avg.sh ./bin/lb-bst2 ./bin/${lftree} u c -i${initial} -r${range} -d$duration | tee data/${unm}_bst_heatmap_uc_${initial}.csv
 cp data/temp1.txt data/${unm}_bst_heatmap_uc_lb_${initial}.csv
 cp data/temp2.txt data/${unm}_bst_heatmap_uc_lf_${initial}.csv
 cp data/temp3.txt data/${unm}_bst_heatmap_uc_frac_${initial}.csv

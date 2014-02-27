@@ -15,6 +15,8 @@ then
     INIT=one $MAKE -k lockfree
 fi
 
+source ./scripts/heatmap.config
+
 inits="256 1024 2048 8192 65536"
 duration=2000;
 
@@ -33,5 +35,5 @@ echo '#  ht';
 echo '#  sl';
 ./scripts/heatmap.sh ./bin/lb-sl ./bin/lf-sl u c -i${initial} -r${range} -d$duration | tee data/${unm}_sl_heatmap_uc_${initial}.csv
 echo '#  bst';
-./scripts/heatmap.sh ./bin/lb-bst2 ./bin/lf-bst-howley u c -i${initial} -r${range} -d$duration | tee data/${unm}_bst_heatmap_uc_${initial}.csv
+./scripts/heatmap.sh ./bin/lb-bst2 ./bin/${lftree} u c -i${initial} -r${range} -d$duration | tee data/${unm}_bst_heatmap_uc_${initial}.csv
 done

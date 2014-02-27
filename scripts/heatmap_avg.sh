@@ -1,11 +1,9 @@
 #!/bin/bash
 
-#default axes values
-ranges="16 32 64 128 256 512 1024 2048 4096 8192 16384";
-updates="0 1 10 20 50 100";
-cores="socketandone"
+source ./scripts/heatmap.config
 num_repetitions=3
 median=0
+
 
 prog1=$1
 shift;
