@@ -8,7 +8,7 @@ then
     MAKE=gmake
 fi;
 
-source lat_distribution.config
+source scripts/lat_distribution.config
 
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
