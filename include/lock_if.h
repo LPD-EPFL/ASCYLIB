@@ -41,6 +41,7 @@ typedef volatile UTYPE ptlock_t;
 #  define INIT_LOCK(lock)				tas_init(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					tas_lock(lock)
+#  define TRYLOCK(lock)					tas_trylock(lock)
 #  define UNLOCK(lock)					tas_unlock(lock)
 /* GLOBAL lock */
 #  define GL_INIT_LOCK(lock)				tas_init(lock)
@@ -68,6 +69,12 @@ tas_lock(ptlock_t* l)
       PAUSE;
     }
   return 0;
+}
+
+static inline uint32_t
+tas_trylock(ptlock_t* l)
+{
+  return (CAS_UTYPE(l, TAS_FREE, TAS_LCKD) == TAS_FREE);
 }
 
 static inline uint32_t

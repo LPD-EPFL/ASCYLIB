@@ -34,7 +34,7 @@
 #define DS_ADD(s,k,v)       chm_put(s, k, (sval_t) v)
 #define DS_REMOVE(s,k)      chm_rem(s, k)
 #define DS_SIZE(s)          chm_size(s)
-#define DS_NEW()            chm_new()
+#define DS_NEW(ca,co)       chm_new(ca, co)
 
 #define DS_TYPE             chm_t
 #define DS_NODE             chm_node_t
@@ -44,6 +44,7 @@
  * ################################################################### */
 
 size_t initial = DEFAULT_INITIAL;
+size_t concurrency = CHM_NUM_SEGMENTS;
 size_t range = DEFAULT_RANGE; 
 size_t load_factor = DEFAULT_LOAD;
 size_t update = DEFAULT_UPDATE;
@@ -316,6 +317,7 @@ main(int argc, char **argv)
     {"print-vals",                required_argument, NULL, 'v'},
     {"vals-pf",                   required_argument, NULL, 'f'},
     {"load-factor",               required_argument, NULL, 'l'},
+    {"concurrency",               required_argument, NULL, 'c'},
     {NULL, 0, NULL, 0}
   };
 
@@ -323,7 +325,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:c:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -350,6 +352,8 @@ main(int argc, char **argv)
 		 "        Test duration in milliseconds\n"
 		 "  -i, --initial-size <int>\n"
 		 "        Number of elements to insert before test\n"
+		 "  -c, --concurrency <int>\n"
+		 "        Concurrency level for the hash table\n"
 		 "  -n, --num-threads <int>\n"
 		 "        Number of threads\n"
 		 "  -r, --range <int>\n"
@@ -371,6 +375,9 @@ main(int argc, char **argv)
 	  break;
 	case 'i':
 	  initial = atoi(optarg);
+	  break;
+	case 'c':
+	  concurrency = pow2roundup(atoi(optarg));
 	  break;
 	case 'n':
 	  num_threads = atoi(optarg);
@@ -415,7 +422,8 @@ main(int argc, char **argv)
     }
 
   printf("## Test correctness \n");
-  printf("## Initial: %zu / Range: %zu / Load factor: %zu \n", initial, range, load_factor);
+  printf("## Initial: %zu / Range: %zu / Load factor: %zu / Concurrency: %zu\n", initial, range, load_factor, concurrency);
+
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;
   printf("Sizeof initial: %.2f KB = %.2f MB\n", kb, mb);
@@ -445,12 +453,6 @@ main(int argc, char **argv)
 
   get_rate = 1 - update_rate;
 
-  /* printf("num_threads = %u\n", num_threads); */
-  /* printf("cap: = %u\n", num_buckets); */
-  /* printf("num elem = %u\n", num_elements); */
-  /* printf("filing rate= %f\n", filling_rate); */
-  /* printf("update = %f (putting = %f)\n", update_rate, put_rate); */
-
 
   rand_max = range - 1;
     
@@ -461,10 +463,10 @@ main(int argc, char **argv)
     
   stop = 0;
     
-  maxhtlength = (unsigned int) initial / load_factor;
+  size_t capacity = initial / load_factor;
 
   ssalloc_align();
-  DS_TYPE* set = DS_NEW();
+  DS_TYPE* set = DS_NEW(capacity, concurrency);
   assert(set != NULL);
 
   /* Initializes the local data */
