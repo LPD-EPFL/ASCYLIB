@@ -46,17 +46,6 @@ ssalloc_init()
 }
 
 void
-ssalloc_align_alloc(unsigned int allocator)
-{
-#if !defined(SSALLOC_USE_MALLOC)
-  while (alloc_next[allocator] & (SSMEM_CACHE_LINE_SIZE - 1))
-    {
-      alloc_next[allocator]++;
-    }
-#endif
-}
-
-void
 ssalloc_offset(size_t size)
 {
 #if !defined(SSALLOC_USE_MALLOC)

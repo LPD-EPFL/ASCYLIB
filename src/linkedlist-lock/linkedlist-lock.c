@@ -70,29 +70,25 @@ intset_l_t *set_new_l()
   intset_l_t *set;
   node_l_t *min, *max;
 
-#warning "this could be problematic for the hash table"
   if ((set = (intset_l_t *)ssalloc_aligned(CACHE_LINE_SIZE, sizeof(intset_l_t))) == NULL) 
     {
       perror("malloc");
       exit(1);
     }
 
-  /* ssalloc_align_alloc(0); */
   max = new_node_l(KEY_MAX, 0, NULL, 1);
   /* ssalloc_align_alloc(0); */
   min = new_node_l(KEY_MIN, 0, max, 1);
   set->head = min;
 
-  ssalloc_align_alloc(0);
 #if defined(LL_GLOBAL_LOCK)
-  set->lock = (volatile ptlock_t*) ssalloc(sizeof(ptlock_t));
+  set->lock = (volatile ptlock_t*) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(ptlock_t));
   if (set->lock == NULL)
     {
       perror("malloc");
       exit(1);
     }
   GL_INIT_LOCK(set->lock);
-  ssalloc_align_alloc(0);
 #endif
 
   MEM_BARRIER;

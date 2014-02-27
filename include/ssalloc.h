@@ -15,7 +15,9 @@
 #include <inttypes.h>
 #include <string.h>
 
-/* #define SSALLOC_USE_MALLOC */
+#if GC == 1			/* don't even allocate ssalloc if we have ssmem */
+#  define SSALLOC_USE_MALLOC
+#endif
 
 #define SSALLOC_NUM_ALLOCATORS 2
 
@@ -32,7 +34,6 @@
 
 void ssalloc_set(void* mem);
 void ssalloc_init();
-void ssalloc_align_alloc(unsigned int allocator);
 void ssalloc_offset(size_t size);
 void* ssalloc_alloc(unsigned int allocator, size_t size);
 void* ssalloc_aligned_alloc(unsigned int allocator, size_t alignment, size_t size);

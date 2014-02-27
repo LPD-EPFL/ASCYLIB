@@ -87,7 +87,6 @@ ht_new()
   ht_intset_t *set;
   int i;
 	
-#warning "do i need to make it a full CL here?"
   if ((set = (ht_intset_t *)ssalloc_aligned_alloc(1, CACHE_LINE_SIZE, sizeof(ht_intset_t))) == NULL)
     {
       perror("malloc");
@@ -102,8 +101,6 @@ ht_new()
       perror("malloc");
       exit(1);
     }  
-
-  ssalloc_align_alloc(0);
 
   for (i=0; i < maxhtlength; i++) 
     {

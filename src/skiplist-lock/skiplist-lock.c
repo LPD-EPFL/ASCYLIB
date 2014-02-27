@@ -72,7 +72,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
 	{
 	  ns += 64 - ns_rm;
 	}
-      node = (sl_node_t*)ssalloc(ns);
+      node = (sl_node_t*)ssalloc_aligned(CACHE_LINE_SIZE, ns);
     }
   else 
     {
@@ -154,7 +154,6 @@ sl_set_new()
       exit(1);
     }
 
-  ssalloc_align_alloc(0);
   max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
   min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
 #if LBSL==ALGO_HERLIHY
@@ -164,15 +163,13 @@ sl_set_new()
   set->head = min;
 
 #if defined(LL_GLOBAL_LOCK)
-  ssalloc_align_alloc(0);
-  set->lock = (volatile ptlock_t*) ssalloc(sizeof(ptlock_t));
+  set->lock = (volatile ptlock_t*) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(ptlock_t));
   if (set->lock == NULL)
     {
       perror("malloc");
       exit(1);
     }
   GL_INIT_LOCK(set->lock);
-  ssalloc_align_alloc(0);
 #endif
 
   return set;

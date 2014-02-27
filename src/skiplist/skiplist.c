@@ -163,8 +163,6 @@ sl_set_new()
       exit(1);
     }
 
-  ssalloc_align_alloc(0);
-
   max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
   min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
   set->head = min;
