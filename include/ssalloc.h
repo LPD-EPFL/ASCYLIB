@@ -15,7 +15,7 @@
 #include <inttypes.h>
 #include <string.h>
 
-#define SSALLOC_USE_MALLOC
+/* #define SSALLOC_USE_MALLOC */
 
 #define SSALLOC_NUM_ALLOCATORS 2
 
@@ -29,17 +29,17 @@
 #  define SSALLOC_SIZE (1024 * 1024 * 1024)
 #endif
 
-/* extern const size_t ssalloc_size_alloc[SSALLOC_NUM_ALLOCATORS]; */
-
 
 void ssalloc_set(void* mem);
 void ssalloc_init();
-void ssalloc_align();
 void ssalloc_align_alloc(unsigned int allocator);
 void ssalloc_offset(size_t size);
 void* ssalloc_alloc(unsigned int allocator, size_t size);
+void* ssalloc_aligned_alloc(unsigned int allocator, size_t alignment, size_t size);
 void ssfree_alloc(unsigned int allocator, void* ptr);
 void* ssalloc(size_t size);
+void* ssalloc_aligned(size_t alignment, size_t size);
+
 void ssfree(void* ptr);
 
 #endif

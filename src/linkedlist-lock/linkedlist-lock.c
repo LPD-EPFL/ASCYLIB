@@ -70,7 +70,8 @@ intset_l_t *set_new_l()
   intset_l_t *set;
   node_l_t *min, *max;
 
-  if ((set = (intset_l_t *)ssalloc(sizeof(intset_l_t))) == NULL) 
+#warning "this could be problematic for the hash table"
+  if ((set = (intset_l_t *)ssalloc_aligned(CACHE_LINE_SIZE, sizeof(intset_l_t))) == NULL) 
     {
       perror("malloc");
       exit(1);

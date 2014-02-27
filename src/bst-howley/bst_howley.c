@@ -8,7 +8,7 @@ node_t* create_node(skey_t key, sval_t value, int initializing) {
     volatile node_t * new_node;
 #if GC == 1
     if (unlikely(initializing)) {
-        new_node = (volatile node_t*) ssalloc(sizeof(node_t));
+        new_node = (volatile node_t*) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(node_t));
     } else {
         new_node = (volatile node_t*) ssmem_alloc(alloc, sizeof(node_t));
     }

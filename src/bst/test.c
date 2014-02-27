@@ -272,8 +272,6 @@ int main(int argc, char* const argv[]) {
     }
 
     max_key--;
-    //aligmenent in the custom memory allocator to a 64 byte boundary 
-    ssalloc_align();
     //we round the max key up to the nearest power of 2, which makes our random key generation more efficient
     max_key = pow2roundup(max_key)-1;
 

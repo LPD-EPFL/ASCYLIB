@@ -467,7 +467,6 @@ main(int argc, char **argv)
     
   levelmax = floor_log_2((unsigned int) initial);
 
-  ssalloc_align();
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
 

@@ -502,7 +502,6 @@ main(int argc, char **argv)
 
   rcu_init();
     
-  ssalloc_align();
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
 

@@ -329,7 +329,6 @@ main(int argc, char **argv)
 	
   srand((int)time(0));
 
-  ssalloc_align();
   set = set_new();
   /* stop = 0; */
   *running = 1;

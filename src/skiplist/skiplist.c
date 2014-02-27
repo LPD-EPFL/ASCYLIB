@@ -157,7 +157,7 @@ sl_set_new()
   sl_intset_t *set;
   sl_node_t *min, *max;
 	
-  if ((set = (sl_intset_t *)ssalloc(sizeof(sl_intset_t))) == NULL)
+  if ((set = (sl_intset_t *)ssalloc_aligned(CACHE_LINE_SIZE, sizeof(sl_intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);

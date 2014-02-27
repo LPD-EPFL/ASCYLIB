@@ -437,7 +437,6 @@ main(int argc, char **argv)
   assert(maxhtlength != NULL);
   *maxhtlength = (unsigned int) initial / load_factor;
     
-  ssalloc_align();
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
 

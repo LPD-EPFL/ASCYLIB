@@ -14,6 +14,8 @@
 #include "ssalloc.h"
 #include "measurements.h"
 
+#define SSMEM_CACHE_LINE_SIZE 64
+
 #if !defined(SSALLOC_USE_MALLOC)
 static __thread uintptr_t ssalloc_app_mem[SSALLOC_NUM_ALLOCATORS];
 static __thread size_t alloc_next[SSALLOC_NUM_ALLOCATORS] = {0};
@@ -37,23 +39,8 @@ ssalloc_init()
   int i;
   for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
     {
-      ssalloc_app_mem[i] = (uintptr_t) memalign(CACHE_LINE_SIZE, SSALLOC_SIZE);
+      ssalloc_app_mem[i] = (uintptr_t) memalign(SSMEM_CACHE_LINE_SIZE, SSALLOC_SIZE);
       assert((void*) ssalloc_app_mem[i] != NULL);
-    }
-#endif
-}
-
-void
-ssalloc_align()
-{
-#if !defined(SSALLOC_USE_MALLOC)
-  int i;
-  for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
-    {
-      while (alloc_next[i] & (CACHE_LINE_SIZE - 1))
-	{
-	  alloc_next[i]++;
-	}
     }
 #endif
 }
@@ -62,7 +49,7 @@ void
 ssalloc_align_alloc(unsigned int allocator)
 {
 #if !defined(SSALLOC_USE_MALLOC)
-  while (alloc_next[allocator] & (CACHE_LINE_SIZE - 1))
+  while (alloc_next[allocator] & (SSMEM_CACHE_LINE_SIZE - 1))
     {
       alloc_next[allocator]++;
     }
@@ -108,6 +95,38 @@ void*
 ssalloc(size_t size)
 {
   return ssalloc_alloc(0, size);
+}
+
+void*
+ssalloc_aligned_alloc(unsigned int allocator, size_t alignement, size_t size)
+{
+  void* ret = NULL;
+
+#if defined(SSALLOC_USE_MALLOC)
+  ret = (void*) memalign(alignement, size);
+#else
+  ret = (void*) (ssalloc_app_mem[allocator] + alloc_next[allocator]);
+  uintptr_t retu = (uintptr_t) ret;
+  if ((retu & (SSMEM_CACHE_LINE_SIZE - 1)) != 0)
+    {
+      size_t offset = SSMEM_CACHE_LINE_SIZE - (retu & (SSMEM_CACHE_LINE_SIZE - 1));
+      retu += offset;
+      alloc_next[allocator] += offset;
+      ret = (void*) retu;
+    }
+  alloc_next[allocator] += size;
+  if (alloc_next[allocator] > SSALLOC_SIZE)
+    {
+      fprintf(stderr, "*** warning: allocator %2d : out of bounds alloc\n", allocator);
+    }
+#endif
+  return ret;
+}
+
+void*
+ssalloc_aligned(size_t alignment, size_t size)
+{
+  return ssalloc_aligned_alloc(0, alignment, size);
 }
 
 void

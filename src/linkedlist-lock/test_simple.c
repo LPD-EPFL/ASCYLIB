@@ -468,7 +468,6 @@ main(int argc, char **argv)
     
   stop = 0;
     
-  ssalloc_align();
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
 

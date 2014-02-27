@@ -84,12 +84,11 @@ floor_log_2(unsigned int n)
 ht_intset_t*
 ht_new() 
 {
-  ssalloc_align();
-
   ht_intset_t *set;
   int i;
 	
-  if ((set = (ht_intset_t *)ssalloc_alloc(1, sizeof(ht_intset_t))) == NULL)
+#warning "do i need to make it a full CL here?"
+  if ((set = (ht_intset_t *)ssalloc_aligned_alloc(1, CACHE_LINE_SIZE, sizeof(ht_intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);

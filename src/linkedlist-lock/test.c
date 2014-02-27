@@ -354,7 +354,6 @@ main(int argc, char **argv)
   else
     srand(seed);
 	
-  ssalloc_align();
   set = set_new_l();
 	
   /* stop = 0; */

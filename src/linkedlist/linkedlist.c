@@ -49,15 +49,12 @@ set_new()
   intset_t *set;
   node_t *min, *max;
 	
+#warning "this could be problematic for the hash table"
   if ((set = (intset_t*)ssalloc(sizeof(intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);
     }
-
-#define CL_NUM(x) ((uintptr_t) (x) / 64)
-#define CL_OFF(x)((uintptr_t) (x) % 64)
-  /* printf("* set @ %p (%lu / %lu )\n", set, CL_NUM(set), CL_OFF(set)); */
 
   max = new_node(KEY_MAX, 0, NULL, 1);
   min = new_node(KEY_MIN, 0, max, 1);

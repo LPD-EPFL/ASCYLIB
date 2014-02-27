@@ -10,7 +10,7 @@ volatile node_t* bst_initialize() {
       s++;
     }
 
-  volatile node_t* root = (node_t*) ssalloc(s);
+  volatile node_t* root = (node_t*) ssalloc_aligned(CACHE_LINE_SIZE, s);
 
   // assign minimum key to the root, actual tree will be 
   // the right subtree of the root

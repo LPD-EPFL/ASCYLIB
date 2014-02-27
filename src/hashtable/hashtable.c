@@ -74,15 +74,10 @@ int floor_log_2(unsigned int n) {
 ht_intset_t* 
 ht_new() 
 {
-  ssalloc_align();
-
   ht_intset_t *set;
   int i;
 	
-  /* if ((set = (ht_intset_t *)malloc(sizeof(ht_intset_t))) == NULL) */
-  /* if ((set = (ht_intset_t *)memalign(64, 64)) == NULL) */
-  /* if ((set = (ht_intset_t *)ssalloc(sizeof(ht_intset_t))) == NULL) */
-  if ((set = (ht_intset_t *)ssalloc_alloc(1, sizeof(ht_intset_t))) == NULL)
+  if ((set = (ht_intset_t *)ssalloc_aligned_alloc(1, CACHE_LINE_SIZE, sizeof(ht_intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);
@@ -90,9 +85,6 @@ ht_new()
 
   size_t bs = (*maxhtlength + 1) * sizeof(intset_t *);
 
-  /* if ((set->buckets = (void *)memalign(64, bs)) == NULL) */
-  /* if ((set->buckets = (void *)ssalloc(bs)) == NULL) */
-  /* if ((set->buckets = (void *)malloc(bs)) == NULL) */
   if ((set->buckets = (void *)ssalloc_alloc(1, bs)) == NULL)
     {
       perror("malloc");

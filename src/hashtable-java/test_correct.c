@@ -466,7 +466,6 @@ main(int argc, char **argv)
     
   size_t capacity = initial / load_factor;
 
-  ssalloc_align();
   DS_TYPE* set = DS_NEW(capacity, concurrency);
   assert(set != NULL);
 

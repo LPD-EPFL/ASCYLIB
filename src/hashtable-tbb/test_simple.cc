@@ -458,8 +458,6 @@ main(int argc, char **argv)
 
   maxhtlength = (unsigned int) initial / load_factor;
 
-  ssalloc_align();
-
   /* Initializes the local data */
   putting_succ = (ticks *) calloc(num_threads , sizeof(ticks));
   putting_fail = (ticks *) calloc(num_threads , sizeof(ticks));
