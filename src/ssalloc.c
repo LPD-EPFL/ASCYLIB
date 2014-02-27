@@ -37,7 +37,7 @@ ssalloc_init()
   int i;
   for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
     {
-      ssalloc_app_mem[i] = (uintptr_t) memalign(64, SSALLOC_SIZE);
+      ssalloc_app_mem[i] = (uintptr_t) memalign(CACHE_LINE_SIZE, SSALLOC_SIZE);
       assert((void*) ssalloc_app_mem[i] != NULL);
     }
 #endif
@@ -50,7 +50,7 @@ ssalloc_align()
   int i;
   for (i = 0; i < SSALLOC_NUM_ALLOCATORS; i++)
     {
-      while (alloc_next[i] % 64)
+      while (alloc_next[i] & (CACHE_LINE_SIZE - 1))
 	{
 	  alloc_next[i]++;
 	}
@@ -62,7 +62,7 @@ void
 ssalloc_align_alloc(unsigned int allocator)
 {
 #if !defined(SSALLOC_USE_MALLOC)
-  while (alloc_next[allocator] % 64)
+  while (alloc_next[allocator] & (CACHE_LINE_SIZE - 1))
     {
       alloc_next[allocator]++;
     }
