@@ -14,11 +14,12 @@ nc <-ncol(ll)-1
 ll <- ll[,2:nc]
 ll_matrix <- data.matrix(ll)
 col = brewer.pal(11,"RdYlGn")
-#myBreaks=c(0, 0.33, 0.50, 0.75, 0.85, 0.97, 1.03, 1.1, 1.3, 1.5, 2, 10000)
-myBreaks=c(10000, 2, 1.5, 1.3, 1.1, 1.03, 0.97, 0.85, 0.75, 0.50, 0.33, 0)
+myBreaks=c(0, 0.33, 0.50, 0.75, 0.85, 0.97, 1.03, 1.1, 1.3, 1.5, 2, 10000)
+#myBreaks=c(10000, 2, 1.5, 1.3, 1.1, 1.03, 0.97, 0.85, 0.75, 0.50, 0.33, 0)
 #now to save in pdf
 pdf(file=args[6])
-hm <- heatmap.2(ll_matrix, scale="none", Rowv=NA, Colv=NA,
+par(cex.main=0.75)
+hm <- heatmap.2(1/ll_matrix, scale="none", Rowv=NA, Colv=NA,
                 col =col, ## using your colors,
                 cellnote=ll_matrix,
                 notecol="black",
