@@ -49,8 +49,7 @@ set_new()
   intset_t *set;
   node_t *min, *max;
 	
-#warning "this could be problematic for the hash table"
-  if ((set = (intset_t*)ssalloc(sizeof(intset_t))) == NULL)
+  if ((set = (intset_t*)ssalloc_aligned(CACHE_LINE_SIZE, sizeof(intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);
@@ -59,8 +58,6 @@ set_new()
   max = new_node(KEY_MAX, 0, NULL, 1);
   min = new_node(KEY_MIN, 0, max, 1);
   set->head = min;
-
-  ssalloc_align_alloc(0);
 
   return set;
 }

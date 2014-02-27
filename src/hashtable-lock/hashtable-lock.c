@@ -103,8 +103,6 @@ ht_new()
       exit(1);
     }  
 
-  ssalloc_align_alloc(0);
-
   for (i=0; i < maxhtlength; i++) 
     {
       set->buckets[i] = set_new_l();

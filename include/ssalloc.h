@@ -32,7 +32,6 @@
 
 void ssalloc_set(void* mem);
 void ssalloc_init();
-void ssalloc_align_alloc(unsigned int allocator);
 void ssalloc_offset(size_t size);
 void* ssalloc_alloc(unsigned int allocator, size_t size);
 void* ssalloc_aligned_alloc(unsigned int allocator, size_t alignment, size_t size);
