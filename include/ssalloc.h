@@ -15,7 +15,9 @@
 #include <inttypes.h>
 #include <string.h>
 
-/* #define SSALLOC_USE_MALLOC */
+#if GC == 1			/* don't even allocate ssalloc if we have ssmem */
+#  define SSALLOC_USE_MALLOC
+#endif
 
 #define SSALLOC_NUM_ALLOCATORS 2
 
