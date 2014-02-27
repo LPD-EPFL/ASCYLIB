@@ -157,9 +157,8 @@ int main(int argc, char* const argv[]) {
 	//place thread on the first cpu
     set_cpu(the_cores[0]);
 
-	ssalloc_init();
+    ssalloc_init();
 	//alignment in the custom memory allocator to a 64 byte boundary 
-    ssalloc_align();
 
 	pthread_t *threads;
     pthread_attr_t attr;
