@@ -23,7 +23,7 @@ do
     do
     #pdfs=$(ls -1 ${unm}_${structure}_heatmap_uc_*.pdf | sort -V);
     # might confuse these with some latency heatmaps
-	pdfs=$(find ./${unm}_${structure}_heatmap_uc_*.pdf -maxdepth 1 ! path "*_lat_*" | sort -V);
+    pdfs=$(ls -1 ${unm}_${structure}_heatmap_uc_*.pdf | grep -v "lat" | sort -V);
 	pdfs_scal=$(ls -1 ${unm}_${structure}_heatmap_scal_*.pdf | sort -V);
 	if [ "$pdfs" != "" ];
 	then
