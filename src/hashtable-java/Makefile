@@ -9,7 +9,9 @@ PROF = $(ROOT)/src
 
 all:	main
 
-CHM=concurrent_hash_map2
+CHM_VERSION = 2;
+CHM = concurrent_hash_map2
+# CFLAGS += -DCHM_VERSION=$(CHM_VERSION)
 
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c

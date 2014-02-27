@@ -13,7 +13,7 @@
  * parameters
  */
 
-#define CHM_NUM_SEGMENTS_INIT           128
+#define CHM_NUM_SEGMENTS                128
 
 /* 
  * structures

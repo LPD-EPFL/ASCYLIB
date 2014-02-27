@@ -13,7 +13,7 @@
  * parameters
  */
 
-#define CHM_NUM_SEGMENTS                128
+#define CHM_NUM_SEGMENTS                16
 #define CHM_LOAD_FACTOR                 0.75
 /* 
  * structures
@@ -37,6 +37,7 @@ typedef volatile struct chm_seg
       ptlock_t lock;
       uint32_t modifications;
       uint32_t size;
+      float load_factor;
       uint32_t size_limit;
       chm_node_t** table;
     };
@@ -52,6 +53,7 @@ typedef struct ALIGNED(64) chm
     {
       size_t num_segments;
       size_t hash;
+      int hash_seed;
       chm_seg_t** segments;
     };
     uint8_t padding[CACHE_LINE_SIZE];
@@ -62,7 +64,7 @@ typedef struct ALIGNED(64) chm
  * interface
  */
 
-chm_t* chm_new();
+chm_t* chm_new(size_t capacity, size_t concurrency);
 sval_t chm_get(chm_t* set, skey_t key);
 int chm_put(chm_t* set, skey_t key, sval_t val);
 sval_t chm_rem(chm_t* set, skey_t key);
