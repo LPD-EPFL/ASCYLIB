@@ -50,6 +50,10 @@ lbsl:
 htjava:
 	$(MAKE) "LOCK=TAS" src/hashtable-java
 
+lbhtgl:
+	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lock
+
+
 clean:
 	$(MAKE) -C src/linkedlist clean	
 	$(MAKE) -C src/skiplist clean
