@@ -77,21 +77,9 @@ ssalloc_offset(size_t size)
 #endif
 }
 
-//--------------------------------------------------------------------------------------
-// FUNCTION: ssmalloc
-//--------------------------------------------------------------------------------------
-// Allocate memory in off-chip shared memory. This is a collective call that should be
-// issued by all participating cores if consistent results are required. All cores will
-// allocate space that is exactly overlapping. Alternatively, determine the beginning of
-// the off-chip shared memory on all cores and subsequently let just one core do all the
-// allocating and freeing. It can then pass offsets to other cores who need to know what
-// shared memory regions were involved.
-//--------------------------------------------------------------------------------------
- // requested space
 void*
 ssalloc_alloc(unsigned int allocator, size_t size)
 {
-  /* PF_START(1); */
   void* ret = NULL;
 
 #if defined(SSALLOC_USE_MALLOC)
@@ -113,8 +101,6 @@ ssalloc_alloc(unsigned int allocator, size_t size)
 	}
     }
 #endif
-  /* PRINT("[lib] allocated %p [offs: %lu]", ret, ssalloc_app_addr_offs(ret)); */
-  /* PF_STOP(1); */
   return ret;
 }
 
@@ -124,12 +110,6 @@ ssalloc(size_t size)
   return ssalloc_alloc(0, size);
 }
 
-//--------------------------------------------------------------------------------------
-// FUNCTION: ssfree
-//--------------------------------------------------------------------------------------
-// Deallocate memory in shared memory. Also collective, see ssmalloc
-//--------------------------------------------------------------------------------------
-// pointer to data to be freed
 void
 ssfree_alloc(unsigned int allocator, void* ptr)
 {
