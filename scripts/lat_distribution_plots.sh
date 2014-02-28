@@ -6,7 +6,8 @@ for n in $unames; do
 for s in $structs; do
 for i in $initials; do
 for u in $updates; do
-for c in ${max_cores}; do
+mc=$(max_cores $n)
+for c in ${mc}; do
 for o in $ops; do
     file1=${data_folder}/${n}_lat_lf_${s}_${i}_${u}_${c}_${o}.csv
     file2=${data_folder}/${n}_lat_lb_${s}_${i}_${u}_${c}_${o}.csv
