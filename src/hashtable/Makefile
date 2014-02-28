@@ -3,7 +3,7 @@ ROOT = ../..
 include $(ROOT)/common/Makefile.common
 
 BINS = $(BINDIR)/lf-ht
-LLREP = $(ROOT)/src/linkedlist
+LLREP = lists
 PROF = $(ROOT)/src
 
 .PHONY:	all clean

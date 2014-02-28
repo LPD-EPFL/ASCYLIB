@@ -44,6 +44,9 @@ lfsl:
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
 
+lfht:
+	$(MAKE) "STM=LOCKFREE" src/hashtable
+
 lbht:
 	$(MAKE) "LOCK=TAS" src/hashtable-lock
 

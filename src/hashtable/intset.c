@@ -27,21 +27,21 @@ sval_t
 ht_contains(ht_intset_t *set, skey_t key)
 {
   int addr = key & set->hash;
-  return set_contains(set->buckets[addr], key);
+  return set_contains(&set->buckets[addr], key);
 }
 
 int 
 ht_add(ht_intset_t *set, skey_t key, sval_t val)
 {
   int addr = key & set->hash;
-  return set_add(set->buckets[addr], key, val);
+  return set_add(&set->buckets[addr], key, val);
 }
 
 sval_t
 ht_remove(ht_intset_t *set, skey_t key)
 {
   int addr = key & set->hash;
-  return set_remove(set->buckets[addr], key);
+  return set_remove(&set->buckets[addr], key);
 }
 
 /* 

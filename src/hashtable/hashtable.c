@@ -33,14 +33,13 @@ void ht_delete(ht_intset_t *set)
   
   for (i=0; i < maxhtlength; i++) 
     {
-      node = set->buckets[i]->head;
+      node = set->buckets[i].head;
       while (node != NULL) 
 	{
 	  next = node->next;
 	  free(node);
 	  node = next;
 	}
-      free(set->buckets[i]);
     }
   free(set->buckets);
   free(set);
@@ -54,7 +53,7 @@ ht_size(ht_intset_t *set)
 	
   for (i = 0; i < maxhtlength; i++) 
     {
-      size += set_size(set->buckets[i]);
+      size += set_size(&set->buckets[i]);
     }
   return size;
 }
@@ -84,17 +83,18 @@ ht_new()
     }  
 
   set->hash = maxhtlength - 1;
-  size_t bs = (maxhtlength + 1) * sizeof(intset_t *);
 
-  if ((set->buckets = (void *)ssalloc_alloc(1, bs)) == NULL)
+  size_t bs = (maxhtlength + 1) * sizeof(intset_t);
+  bs += CACHE_LINE_SIZE - (bs & CACHE_LINE_SIZE);
+  if ((set->buckets = ssalloc_alloc(1, bs)) == NULL)
     {
       perror("malloc");
       exit(1);
     }  
 
-  for (i=0; i < maxhtlength; i++) 
+  for (i = 0; i < maxhtlength; i++) 
     {
-      set->buckets[i] = set_new();
+      bucket_set_init(&set->buckets[i]);
     }
   return set;
 }

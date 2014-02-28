@@ -21,7 +21,7 @@
  * GNU General Public License for more details.
  */
 
-#include "../linkedlist/intset.h"
+#include "./lists/intset.h"
 
 #define DEFAULT_MOVE                    0
 #define DEFAULT_SNAPSHOT                0
@@ -45,7 +45,8 @@ extern pthread_key_t rng_seed_key;
 typedef struct ht_intset 
 {
   size_t hash;
-  intset_t **buckets;
+  intset_t* buckets;
+  uint8_t padding[CACHE_LINE_SIZE - 16 - sizeof(node_t*)];
 } ht_intset_t;
 
 void ht_delete(ht_intset_t *set);
