@@ -53,30 +53,27 @@ extern __thread ssmem_allocator_t* alloc;
 
 #define ALGO_TYPE                   algo_type
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct node_l
+typedef struct node_l
 {
   skey_t key;
   sval_t val;
-  struct node_l *next;
+  struct node_l* next;
   uint8_t marked;
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;
-  #endif
-  /* char padding[40]; */
+#endif
 } node_l_t;
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct intset_l 
+typedef struct intset_l 
 {
   node_l_t* head;
 #if defined(LL_GLOBAL_LOCK)
-  char padding1[56];
-  volatile ptlock_t lock;
-  char padding2[56];
+  volatile ptlock_t* lock;
 #endif
-} intset_l_t;
+}intset_l_t;
 
 node_l_t* new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing);
-intset_l_t* set_new_l();
+void bucket_set_init_l(intset_l_t* set, ptlock_t* lock);
 void set_delete_l(intset_l_t* set);
 int set_size_l(intset_l_t* set);
 void node_delete_l(node_l_t* node);

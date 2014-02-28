@@ -35,7 +35,7 @@ search_weak_left(intset_l_t* set, skey_t key)
 {
   node_l_t* pred = set->head;
   node_l_t* succ = pred->next;
-  while (succ->key < key)
+  while (succ != NULL && succ->key < key)
     {
       pred = succ;
       succ = succ->next;
@@ -48,7 +48,7 @@ static inline node_l_t*
 search_weak_right(intset_l_t* set, skey_t key)
 {
   node_l_t* succ = set->head->next;
-  while (succ->key < key)
+  while (succ != NULL && succ->key < key)
     {
       succ = succ->next;
     }
@@ -60,10 +60,10 @@ static inline node_l_t*
 search_strong(intset_l_t* set, skey_t key, node_l_t** right)
 {
   node_l_t* pred = search_weak_left(set, key);
-  GL_LOCK(&set->lock);
+  GL_LOCK(set->lock);
   LOCK(ND_GET_LOCK(pred));
   node_l_t* succ = pred->next;
-  while (unlikely(succ->key < key))
+  while (succ != NULL && unlikely(succ->key < key))
     {
       UNLOCK(ND_GET_LOCK(pred));
       pred = succ;
@@ -78,7 +78,7 @@ sval_t
 list_search(intset_l_t* set, skey_t key)
 {
   node_l_t* right = search_weak_right(set, key);
-  if (right->key == key)
+  if (right != NULL && right->key == key)
     {
       return right->val;
     }
@@ -93,7 +93,7 @@ list_insert(intset_l_t* set, skey_t key, sval_t val)
   node_l_t* right;
   /* optimize for step-wise strong search:: if found, return before locking! */
   node_l_t* left = search_strong(set, key, &right);
-  if (right->key == key)
+  if (right != NULL && right->key == key)
     {
       result = 0;
     }
@@ -104,7 +104,7 @@ list_insert(intset_l_t* set, skey_t key, sval_t val)
     }
 
   UNLOCK(ND_GET_LOCK(left));
-  GL_UNLOCK(&set->lock);
+  GL_UNLOCK(set->lock);
   return result;
 }
 
@@ -114,7 +114,7 @@ list_delete(intset_l_t* set, skey_t key)
   sval_t result = 0;
   node_l_t* right;
   node_l_t* left = search_strong(set, key, &right);   /* TODO:: optimize for step-wise strong search!! */
-  if (right->key == key)
+  if (right != NULL && right->key == key)
     {
       LOCK(ND_GET_LOCK(right));
       result = right->val;
@@ -126,6 +126,6 @@ list_delete(intset_l_t* set, skey_t key)
 #endif
     }
   UNLOCK(ND_GET_LOCK(left));
-  GL_UNLOCK(&set->lock);
+  GL_UNLOCK(set->lock);
   return result;
 }

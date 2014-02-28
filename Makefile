@@ -7,7 +7,7 @@ NOISE = src/noise
 
 .PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE)
 
-all:	lockfree tas
+all:	lockfree tas lbhtgl
 
 mutex:
 	$(MAKE) "LOCK=MUTEX" $(LBENCHS)
@@ -43,6 +43,9 @@ lfsl:
 
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
+
+lbht:
+	$(MAKE) "LOCK=TAS" src/hashtable-lock
 
 lbsl:
 	$(MAKE) "LOCK=TAS" src/skiplist-lock

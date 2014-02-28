@@ -1,6 +1,10 @@
 You may pass the following settings to `make`:
     * VERSION=	 DEBUG : compile with O0 and debug flags
       		 SYMBOL :  compile with O3 and -g
+		 O0 : compile with -O0
+		 O1 : compile with -O1
+		 O2 : compile with -O2
+		 O3 : compile with -O3 (default)
     * GC=0 or GC=1 : disable/enable GC (default is 1)
     * TEST=old : use the old test.c file (disables GC)
     * TEST=correct : use the test_correct.c file (enables GC)
