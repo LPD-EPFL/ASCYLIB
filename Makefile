@@ -7,7 +7,7 @@ NOISE = src/noise
 
 .PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE)
 
-all:	lockfree tas
+all:	lockfree tas lbhtgl
 
 mutex:
 	$(MAKE) "LOCK=MUTEX" $(LBENCHS)
