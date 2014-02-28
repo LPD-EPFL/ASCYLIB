@@ -3,7 +3,7 @@ ROOT = ../..
 include $(ROOT)/common/Makefile.common
 
 BINS  = $(BINDIR)/lb-ht$(BIN_SUFFIX)
-LLREP = $(ROOT)/src/linkedlist-lock
+LLREP = lists
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
