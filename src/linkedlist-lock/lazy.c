@@ -117,7 +117,7 @@ parse_delete(intset_l_t *set, skey_t key)
 	  curr = curr->next;
 	}
 
-      if (key != key && !curr->marked)
+      if (curr->key != key && !curr->marked)
 	{
 	  return false;
 	}
