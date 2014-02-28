@@ -16,15 +16,26 @@ SOLARIS_CC2 	?= /usr/sfw/bin/gcc
 TILERA_CC	?= tile-gcc
 CC ?= gcc
 
-# Profile
+VERSION         ?= O3
 ifeq ($(VERSION),DEBUG)
-     CFLAGS	+= -g -DDEBUG -O0
-else
-     CFLAGS	+= -O3
-     ifeq ($(VERSION),SYMBOL)
-		CFLAGS	+= -g
-     endif
+	CFLAGS	+= -g -DDEBUG -O0
 endif
+ifeq ($(VERSION),SYMBOL)
+	CFLAGS	+= -O3 -g
+endif
+ifeq ($(VERSION),O0)
+	CFLAGS	+= -O0
+endif
+ifeq ($(VERSION),O1)
+	CFLAGS	+= -O1
+endif
+ifeq ($(VERSION),O2)
+	CFLAGS	+= -O2
+endif
+ifeq ($(VERSION),O3)
+	CFLAGS	+= -O3
+endif
+
 
 # Compile with global lock
 ifeq ($(GRANULARITY),GLOBAL_LOCK)

@@ -37,7 +37,7 @@ ht_delete(ht_intset_t *set)
 	
   for (i=0; i < maxhtlength; i++) 
     {
-      node = set->buckets[i]->head;
+      node = set->buckets[i].head;
       while (node != NULL) 
 	{
 	  next = node->next;
@@ -45,7 +45,6 @@ ht_delete(ht_intset_t *set)
 	  ssfree(node);		/* TODO: fix with ssmem */
 	  node = next;
 	}
-      ssfree(set->buckets[i]);
     }
   free(set);
 }
@@ -59,7 +58,7 @@ ht_size(ht_intset_t *set)
 	
   for (i=0; i < maxhtlength; i++) 
     {
-      node = set->buckets[i]->head->next;
+      node = set->buckets[i].head;
       while (node->next) 
 	{
 	  size++;
@@ -95,16 +94,32 @@ ht_new()
 
   set->hash = maxhtlength - 1;
 
-  size_t bs = (maxhtlength + 1) * sizeof(intset_l_t *);
-  if ((set->buckets = (void *)ssalloc_alloc(1, bs)) == NULL)
+  size_t bs = (maxhtlength + 1) * sizeof(intset_l_t);
+  bs += CACHE_LINE_SIZE - (bs & CACHE_LINE_SIZE);
+  if ((set->buckets = ssalloc_alloc(1, bs)) == NULL)
     {
-      perror("malloc");
+      perror("malloc buckets");
       exit(1);
     }  
 
+#if defined(LL_GLOBAL_LOCK)
+  size_t ls = (maxhtlength + 1) * sizeof(ptlock_t);
+  ls += CACHE_LINE_SIZE - (ls & CACHE_LINE_SIZE);
+  if ((set->locks = ssalloc_alloc(1, ls)) == NULL)
+    {
+      perror("malloc locks");
+      exit(1);
+    }  
+#endif
+
   for (i=0; i < maxhtlength; i++) 
     {
-      set->buckets[i] = set_new_l();
+#if defined(LL_GLOBAL_LOCK)
+      ptlock_t* l = &set->locks[i];
+#else
+      ptlock_t* l = NULL;
+#endif
+      bucket_set_init_l(&set->buckets[i], l);
     }
   return set;
 }
@@ -113,21 +128,21 @@ sval_t
 ht_contains(ht_intset_t *set, skey_t key, int transactional) 
 {
   int addr = key & set->hash;
-  return set_contains_l(set->buckets[addr], key, transactional);
+  return set_contains_l(&set->buckets[addr], key, transactional);
 }
 
 int
 ht_add(ht_intset_t *set, skey_t key, sval_t val, int transactional) 
 {
   int addr = key & set->hash;
-  return set_add_l(set->buckets[addr], key, val, transactional);
+  return set_add_l(&set->buckets[addr], key, val, transactional);
 }
 
 sval_t
 ht_remove(ht_intset_t *set, skey_t key, int transactional) 
 {
   int addr = key & set->hash;
-  return set_remove_l(set->buckets[addr], key, transactional);
+  return set_remove_l(&set->buckets[addr], key, transactional);
 }
 
 /* 

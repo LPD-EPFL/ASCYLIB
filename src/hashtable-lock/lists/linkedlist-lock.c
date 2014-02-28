@@ -65,28 +65,20 @@ new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
   return (node_l_t*) node;
 }
 
-intset_l_t *set_new_l()
+void
+bucket_set_init_l(intset_l_t* set, ptlock_t* lock)
 {
-  intset_l_t *set;
-  node_l_t *min, *max;
+  node_l_t *min;
 
-  if ((set = (intset_l_t *)ssalloc_aligned(CACHE_LINE_SIZE, sizeof(intset_l_t))) == NULL) 
-    {
-      perror("malloc");
-      exit(1);
-    }
-
-  max = new_node_l(KEY_MAX, 0, NULL, 1);
-  /* ssalloc_align_alloc(0); */
-  min = new_node_l(KEY_MIN, 0, max, 1);
+  min = new_node_l(KEY_MIN, 0, NULL, 1);
   set->head = min;
 
 #if defined(LL_GLOBAL_LOCK)
-  GL_INIT_LOCK(&set->lock);
+  set->lock = lock;
+  GL_INIT_LOCK(set->lock);
 #endif
 
   MEM_BARRIER;
-  return set;
 }
 
 void
