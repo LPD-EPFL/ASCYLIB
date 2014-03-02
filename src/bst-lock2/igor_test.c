@@ -25,10 +25,15 @@ int main(int argc, char const *argv[])
 	printf("node size: %d\n", sizeof(node_t));
 	printf("lock size: %d\n", sizeof(ptlock_t));
 
-	// bst_add(3, root);
-	// bst_add(1, root);
-	// bst_add(2, root);
-	// bst_print(root);
+	bst_add(3, 10, root);
+	bst_add(2, 20, root);
+	bst_add(1, 15, root);
+	bst_print(root);
+
+	printf("3 - %d\n", bst_contains(3, root));
+	printf("2 - %d\n", bst_contains(2, root));
+	printf("1 - %d\n", bst_contains(1, root));
+
 
 	// bst_remove(1, root);
 	// bst_print(root);

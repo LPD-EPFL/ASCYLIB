@@ -4,37 +4,43 @@
 
 volatile node_t* bst_initialize() {
 
-    volatile node_t* root = (node_t*) ssalloc(CACHE_LINE_SIZE);
+  size_t s = sizeof(node_t);
+  while ((s & 63) != 0)
+    {
+      s++;
+    }
 
-	// assign minimum key to the root, actual tree will be 
-	// the right subtree of the root
-	root->key = 0;
-	root->value = 0;  
-	root->left = NULL;
-	root->right = NULL;
-	root->height = 0;
-	root->version = 0;
-	root->parent = NULL;
-	INIT_LOCK(&(root->lock));
-	
-	return root;
+  volatile node_t* root = (node_t*) ssalloc(s);
+
+  // assign minimum key to the root, actual tree will be 
+  // the right subtree of the root
+  root->key = 0;
+  root->value = FALSE; 
+  root->left = NULL;
+  root->right = NULL;
+  root->height = 0;
+  root->version = 0;
+  root->parent = NULL;
+  INIT_LOCK(&(root->lock));
+
+  return root;
 }
 
 // When the function returns 0, it means that the node was not found
 // (similarly to Howley)
 sval_t bst_contains(skey_t key, volatile node_t* root) {
-	printf("Bst contains (key %d)\n", key);
+	// printf("Bst contains (key %d)\n", key);
     while(TRUE) {
 		volatile node_t* right = root->right;
 
 		if (right == NULL) {
-            printf("ret1: right==NuLL\n");
+            // printf("ret1: right==NuLL\n");
 			return FALSE;
 		} else {
 			volatile int right_cmp = key - right->key;
 
 			if (right_cmp == 0) {
-                printf("ret2: right_cmp == 0\n");
+                // printf("ret2: right_cmp == 0\n");
 				return right->value;
 			}
 
@@ -49,10 +55,10 @@ sval_t bst_contains(skey_t key, volatile node_t* root) {
                 if (vo != RETRY) {
                     //return vo == FOUND;
                     if (vo != NOT_FOUND) {
-                        printf("ret3: vo != NOT_FOUND, vo = %d\n", vo);
+                        // printf("ret3: vo != NOT_FOUND, vo = %d\n", vo);
                         return vo;
                     } else { 
-                        printf("ret4: vo != NOT_FOUND, vo = %d\n", vo);
+                        // printf("ret4: vo != NOT_FOUND, vo = %d\n", vo);
                         return 0;
                     }
                 }
@@ -63,13 +69,13 @@ sval_t bst_contains(skey_t key, volatile node_t* root) {
 
 sval_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t node_v) {
 
-    printf("Attempt get: skey %d\n", k);
+    // printf("Attempt get: skey %d\n", k);
 	while(TRUE){
         volatile node_t* child = CHILD(node, is_right);
 
         if(child == NULL){
             if(node->version != node_v){
-                printf("ret5: node->version != node_v\n");
+                // printf("ret5: node->version != node_v\n");
 
                 return RETRY;
             }
@@ -82,7 +88,7 @@ sval_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t no
             	//Verify that it's a value node
                 //CHANGE
                 //TODO: Leave NOT_FOUND or change to 0?
-                printf("ret6: child_cmp == 0, child->value: %d\n", child->value);
+                // printf("ret6: child_cmp == 0, child->value: %d\n", child->value);
 
                 return child->value ? child->value : NOT_FOUND;
             }
@@ -93,19 +99,19 @@ sval_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t no
                 wait_until_not_changing(child);
 
                 if(node->version != node_v){
-                    printf("ret7: node->version != node_v\n");
+                    // printf("ret7: node->version != node_v\n");
 
                     return RETRY;
                 }
             } else if(child != CHILD(node, is_right)){
                 if(node->version != node_v){
-                    printf("ret8: node->version != node_v\n");
+                    // printf("ret8: node->version != node_v\n");
 
                     return RETRY;
                 }
             } else {
                 if(node->version != node_v){
-                 printf("ret9: node->version != node_v\n");
+                 // printf("ret9: node->version != node_v\n");
   
                   return RETRY;
                 }
@@ -113,7 +119,7 @@ sval_t attempt_get(skey_t k, volatile node_t* node, bool_t is_right, uint64_t no
                 sval_t result = attempt_get(k, child, (child_cmp < 0 ? FALSE : TRUE), child_ovl);
                 if(result != RETRY){
                     //CHANGE (leave like this)
-                    printf("ret10: result %d\n", result);
+                    // printf("ret10: result %d\n", result);
 
                     return result;
                 }
@@ -156,7 +162,7 @@ sval_t update_under_root(skey_t key, function_t func, sval_t new_value, volatile
             } else if(right == holder->right){
                 sval_t vo = attempt_update(key, func, new_value, holder, right, ovl);
                 if(vo != RETRY){
-                    printf("Return from update_under root, vo %d\n", vo);
+                    // printf("Return from update_under root, vo %d\n", vo);
                     return vo == NOT_FOUND ? 0 : vo;   
                 }
             }
@@ -204,7 +210,7 @@ bool_t attempt_insert_into_empty(skey_t key, sval_t value, volatile node_t* hold
 
 sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v) {
 
-    printf("attempt_update: key %d, new_value %d\n", key, new_value);
+    // printf("attempt_update: key %d, new_value %d\n", key, new_value);
 	int cmp = key - node->key;
    
     if(cmp == 0){
@@ -219,6 +225,7 @@ sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile no
         volatile node_t* child = CHILD(node, is_right);
 
         if(node->version != node_v){
+            // printf("Retrying 3\n");
 
             return RETRY;
         }
@@ -241,7 +248,7 @@ sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile no
                     if(node->version != node_v){
                         // releaseAll();
                         UNLOCK(node_lock);
-                        
+                        // printf("Retrying 2\n");
                         return RETRY;
                     }
 
@@ -284,11 +291,12 @@ sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile no
                 //RETRY
             } else {
                 if(node->version != node_v){
-                    
+                    // printf("Retrying 1\n");
                     return RETRY;
                 }
 
-                result_t vo = attempt_update(key, func, new_value, node, child, child_v);
+                sval_t vo = attempt_update(key, func, new_value, node, child, child_v);
+                // if (vo ==RETRY) printf("Retrying - vo %d\n", vo);
                 if(vo != RETRY){
                     return vo == NOT_FOUND ? 0 : vo;   
                 }

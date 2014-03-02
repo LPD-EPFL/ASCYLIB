@@ -32,7 +32,6 @@
 // typedef uint32_t bst_height_t; 
 // typedef uint64_t bst_version_t;
 typedef uint8_t bool_t;
-typedef uint8_t result_t;
 typedef uint8_t function_t;
 
 typedef ALIGNED(64) union node_t node_t;
@@ -139,11 +138,11 @@ static inline bool_t SHOULD_UPDATE(function_t func, sval_t prev) {
 	return func == UPDATE_IF_ABSENT ? prev == 0 : prev != 0;
 }
 
-static inline result_t UPDATE_RESULT(function_t func, sval_t prev) {
+static inline sval_t UPDATE_RESULT(function_t func, sval_t prev) {
 
 	return func == UPDATE_IF_ABSENT ? NOT_FOUND : prev;
 }
 
-static inline result_t NO_UPDATE_RESULT(function_t func, sval_t prev){
+static inline sval_t NO_UPDATE_RESULT(function_t func, sval_t prev){
     return func == UPDATE_IF_ABSENT ? prev : NOT_FOUND;
 }
