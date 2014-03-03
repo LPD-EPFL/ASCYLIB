@@ -1,5 +1,3 @@
-#!/bin/bash
-
 source ./scripts/heatmap.config
 num_repetitions=3
 median=0

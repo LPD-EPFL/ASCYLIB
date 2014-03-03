@@ -1,4 +1,3 @@
-#!/bin/bash
 
 file_prefix=$1
 shift;
@@ -17,7 +16,8 @@ for i in $initials; do
     r=$((i*2)) 
     for u in $updates; do
 	for c in ${max_cores}; do
-	    out=$(${run_script} $prog $params -i${i} -n${c} -u${u} -r{r});
+        echo "running $prog $params -i${i} -n${c} -u${u} -r${r}"
+	    out=$(${run_script} $prog $params -i${i} -n${c} -u${u} -r${r});
 	    if [ $u -ne 0 ]
 	    then
 		echo "$out" | grep latency_put | cut -d' ' -f2-| tr ',' '\n' | sort -n | head -n -1 >> ${data_folder}/${file_prefix}_${i}_${u}_${c}_put.csv

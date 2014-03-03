@@ -14,7 +14,9 @@ fi
 
 unm=$(uname -n);
 ts="${unm}_${executable}_$(date +%Y_%m_%d_%H_%M)"
-mkdir -p archive/$ts
+archive_target="archive/$ts";
+mkdir -p $archive_target;
 
-cp data/${unm}* archive/$ts/
+find ./data/ -name ${unm}* ! -name ${unm}_lat* -exec cp {} $archive_target \;
+# cp data/${unm}* archive/$ts/
 

@@ -1,4 +1,3 @@
-#!/bin/bash
 
 source ./scripts/heatmap.config
 

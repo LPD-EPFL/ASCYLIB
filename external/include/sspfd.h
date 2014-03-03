@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-/* #define SSPFD_DO_TIMINGS 1 */
+//#define SSPFD_DO_TIMINGS 1
 
 #if SSPFD_DO_TIMINGS != 1	/* empty macros when not benchmarkings */
 /* 
@@ -152,6 +152,7 @@ getticks()
   return ret;
 }
 #  elif defined(__tile__)
+#    include <tmc/mem.h>
 #    include <arch/cycle.h>
 static inline ticks getticks()
 {
