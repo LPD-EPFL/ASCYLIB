@@ -251,14 +251,14 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 		// VCAS in original implementation
 		operation_t* seen_op = CAS_PTR(&(op->relocate_op.dest->op), op->relocate_op.dest_op, FLAG(op, STATE_OP_RELOCATE));
 		if ((seen_op == op->relocate_op.dest_op) || (seen_op == (operation_t *)FLAG(op, STATE_OP_RELOCATE))){
-			CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
+			CAS_U32(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
 			seen_state = STATE_OP_SUCCESSFUL;
             if (seen_op == op->relocate_op.dest_op) {
                 if (UNFLAG(seen_op)!=0) ssmem_free(alloc,(void*)UNFLAG(seen_op));
             } 
 		} else {
 			// VCAS in original implementation
-			seen_state = CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_FAILED);
+			seen_state = CAS_U32(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_FAILED);
 		}
 	}
 
