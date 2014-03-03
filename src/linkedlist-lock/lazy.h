@@ -29,13 +29,6 @@
 
 #include "coupling.h"
 
-/* handling logical deletion flag */ 
-extern inline int is_marked_ref(uintptr_t i);
-extern inline uintptr_t unset_mark(uintptr_t* i);
-extern inline uintptr_t set_mark(uintptr_t* i);
-extern inline uintptr_t get_unmarked_ref(uintptr_t w);
-extern inline uintptr_t get_marked_ref(uintptr_t w);
-
 /* linked list accesses */
 extern int parse_validate(node_l_t* pred, node_l_t* curr);
 sval_t parse_find(intset_l_t* set, skey_t key);

@@ -25,9 +25,9 @@ int main(int argc, char const *argv[])
 	printf("node size: %d\n", sizeof(node_t));
 	printf("lock size: %d\n", sizeof(ptlock_t));
 
-	// bst_add(3, root);
-	// bst_add(1, root);
-	// bst_add(2, root);
+	bst_add(3, root);
+	bst_add(2, root);
+	bst_add(1, root);
 	// bst_print(root);
 
 	// bst_remove(1, root);

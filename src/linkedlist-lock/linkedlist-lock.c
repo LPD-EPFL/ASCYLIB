@@ -52,6 +52,7 @@ new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
   node->key = key;
   node->val = val;
   node->next = next;
+  node->marked = 0;
 
   INIT_LOCK(ND_GET_LOCK(node));
 
@@ -69,28 +70,25 @@ intset_l_t *set_new_l()
   intset_l_t *set;
   node_l_t *min, *max;
 
-  if ((set = (intset_l_t *)ssalloc(sizeof(intset_l_t))) == NULL) 
+  if ((set = (intset_l_t *)ssalloc_aligned(CACHE_LINE_SIZE, sizeof(intset_l_t))) == NULL) 
     {
       perror("malloc");
       exit(1);
     }
 
-  /* ssalloc_align_alloc(0); */
   max = new_node_l(KEY_MAX, 0, NULL, 1);
   /* ssalloc_align_alloc(0); */
   min = new_node_l(KEY_MIN, 0, max, 1);
   set->head = min;
 
-  ssalloc_align_alloc(0);
 #if defined(LL_GLOBAL_LOCK)
-  set->lock = (volatile ptlock_t*) ssalloc(sizeof(ptlock_t));
+  set->lock = (volatile ptlock_t*) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(ptlock_t));
   if (set->lock == NULL)
     {
       perror("malloc");
       exit(1);
     }
   GL_INIT_LOCK(set->lock);
-  ssalloc_align_alloc(0);
 #endif
 
   MEM_BARRIER;
@@ -111,13 +109,14 @@ void set_delete_l(intset_l_t *set)
   node_l_t *node, *next;
 
   node = set->head;
-  while (node != NULL) {
-    next = (node_l_t*) get_unmarked_ref((uintptr_t) node->next);
-    DESTROY_LOCK(&node->lock);
-    /* free(node); */
-    ssfree(node);		/* TODO : fix with ssmem */
-    node = next;
-  }
+  while (node != NULL) 
+    {
+      next = node->next;
+      DESTROY_LOCK(&node->lock);
+      /* free(node); */
+      ssfree(node);		/* TODO : fix with ssmem */
+      node = next;
+    }
   ssfree(set);
 }
 
@@ -127,11 +126,11 @@ int set_size_l(intset_l_t *set)
   node_l_t *node;
 
   /* We have at least 2 elements */
-  node = (node_l_t*) get_unmarked_ref((uintptr_t) set->head->next);
+  node = set->head->next;
   while (node->next != NULL) 
     {
       size++;
-      node = (node_l_t*) get_unmarked_ref((uintptr_t) node->next);
+      node = node->next;
     }
 
   return size;

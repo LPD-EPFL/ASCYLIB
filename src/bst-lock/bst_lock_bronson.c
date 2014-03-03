@@ -5,7 +5,7 @@
 
 node_t* bst_initialize() {
 	// printf("bst_initialize\n");
-	node_t* root = (node_t*) ssalloc(sizeof(node_t));
+        node_t* root = (node_t*) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(node_t));
 
 	// assign minimum key to the root, actual tree will be 
 	// the right subtree of the root

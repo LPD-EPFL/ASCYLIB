@@ -130,7 +130,6 @@ void *test(void *data)
     set_cpu(the_cores[d->id]);
     //initialize the custom memeory allocator for this thread (we do not use malloc due to concurrency bottleneck issues)
     ssalloc_init();
-    ssalloc_align();
 
     //for fine-grain latency measurements, we need to get the lenght of a getticks() function call, which is also counted
     //by default when we do getticks(); //code... getticks(); PF_START and PF_STOP use this when fine grain measurements are enabled
@@ -324,8 +323,6 @@ int main(int argc, char* const argv[]) {
     }
  
     max_key--;
-    //aligmenent in the custom memory allocator to a 64 byte boundary 
-    ssalloc_align();
     //we round the max key up to the nearest power of 2, which makes our random key generation more efficient
     max_key = pow2roundup(max_key)-1;
  

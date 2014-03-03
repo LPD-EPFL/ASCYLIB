@@ -36,40 +36,9 @@ pthread_key_t rng_seed_key;
 #endif /* ! TLS */
 unsigned int levelmax;
 
-typedef struct barrier {
-  pthread_cond_t complete;
-  pthread_mutex_t mutex;
-  int count;
-  int crossing;
-} barrier_t;
-
-void barrier_init(barrier_t *b, int n)
-{
-  pthread_cond_init(&b->complete, NULL);
-  pthread_mutex_init(&b->mutex, NULL);
-  b->count = n;
-  b->crossing = 0;
-}
-
-void barrier_cross(barrier_t *b)
-{
-  pthread_mutex_lock(&b->mutex);
-  /* One more thread through */
-  b->crossing++;
-  /* If not all here, wait */
-  if (b->crossing < b->count) {
-    pthread_cond_wait(&b->complete, &b->mutex);
-  } else {
-    pthread_cond_broadcast(&b->complete);
-    /* Reset for next time */
-    b->crossing = 0;
-  }
-  pthread_mutex_unlock(&b->mutex);
-}
-
 typedef ALIGNED(64) struct thread_data 
 {
-  val_t first;
+  sval_t first;
   long range;
   int update;
   int unit_tx;
@@ -121,8 +90,8 @@ void print_skiplist(sl_intset_t *set) {
 void* 
 test(void *data) 
 {
-  val_t last = -1;
-  val_t val = 0;
+  sval_t last = -1;
+  sval_t val = 0;
   int unext; 
 
   thread_data_t *d = (thread_data_t *)data;
@@ -155,7 +124,7 @@ test(void *data)
 	if (last < 0) { // add
 				
 	  val = rand_range_re(&d->seed, d->range);
-	  if (sl_add(d->set, val, TRANSACTIONAL)) {
+	  if (sl_add(d->set, val, val)) {
 	    d->nb_added++;
 	    last = val;
 	  } 				
@@ -165,7 +134,7 @@ test(void *data)
 				
 	  if (d->alternate) { // alternate mode (default)
 					
-	    if (sl_remove(d->set, last, TRANSACTIONAL)) {
+	    if (sl_remove(d->set, last)) {
 	      d->nb_removed++;
 	    }
 	    last = -1;
@@ -175,7 +144,7 @@ test(void *data)
 	    // Random computation only in non-alternated cases 
 	    val = rand_range_re(&d->seed, d->range);
 	    // Remove one random value 
-	    if (sl_remove(d->set, val, TRANSACTIONAL)) {
+	    if (sl_remove(d->set, val)) {
 	      d->nb_removed++;
 	      // Repeat until successful, to avoid size variations 
 	      last = -1;
@@ -212,7 +181,7 @@ test(void *data)
 	  else 
 	  val = rand_range_re(&d->seed, d->range);*/
 			
-	if (sl_contains(d->set, val, TRANSACTIONAL)) 
+	if (sl_contains(d->set, val)) 
 	  d->nb_found++;
 	d->nb_contains++;
 			
@@ -255,7 +224,7 @@ void *test2(void *data)
 	if (last < 0) {
 	  /* Add random value */
 	  val = rand_range_re(&d->seed, d->range);
-	  if (sl_add(d->set, val, TRANSACTIONAL)) {
+	  if (sl_add(d->set, val, val)) {
 	    d->nb_added++;
 	    last = val;
 	  }
@@ -263,7 +232,7 @@ void *test2(void *data)
 	} else {
 	  if (d->alternate) {
 	    /* Remove last value */
-	    if (sl_remove(d->set, last, TRANSACTIONAL)) {
+	    if (sl_remove(d->set, last)) {
 	      d->nb_removed++;
 	      last = -1; 
 	    }
@@ -272,7 +241,7 @@ void *test2(void *data)
 	    /* Random computation only in non-alternated cases */
 	    newval = rand_range_re(&d->seed, d->range);
 	    /* Remove one random value */
-	    if (sl_remove(d->set, newval, TRANSACTIONAL)) {
+	    if (sl_remove(d->set, newval)) {
 	      d->nb_removed++;
 	      /* Repeat until successful, to avoid size variations */
 	      last = -1;
@@ -283,7 +252,7 @@ void *test2(void *data)
       } else {
 	/* Look for random value */
 	val = rand_range_re(&d->seed, d->range);
-	if (sl_contains(d->set, val, TRANSACTIONAL))
+	if (sl_contains(d->set, val))
 	  d->nb_found++;
 	d->nb_contains++;
       }
@@ -333,8 +302,8 @@ main(int argc, char **argv)
 		
   sl_intset_t *set;
   int i, c, size;
-  val_t last = 0; 
-  val_t val = 0;
+  sval_t last = 0; 
+  sval_t val = 0;
   unsigned long reads, effreads, updates, effupds, aborts, aborts_locked_read, 
     aborts_locked_write, aborts_validate_read, aborts_validate_write, 
     aborts_validate_commit, aborts_invalid_memory, max_retries;
@@ -348,7 +317,7 @@ main(int argc, char **argv)
   int initial = DEFAULT_INITIAL;
   int nb_threads = DEFAULT_NB_THREADS;
   long range = DEFAULT_RANGE;
-  int seed = DEFAULT_SEED;
+  int seed = 0;
   int update = DEFAULT_UPDATE;
   int unit_tx = DEFAULT_ELASTICITY;
   int alternate = DEFAULT_ALTERNATE;

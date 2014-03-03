@@ -72,7 +72,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
 	{
 	  ns += 64 - ns_rm;
 	}
-      node = (sl_node_t*)ssalloc(ns);
+      node = (sl_node_t*)ssalloc_aligned(CACHE_LINE_SIZE, ns);
     }
   else 
     {
@@ -102,8 +102,10 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
   node->key = key;
   node->val = val;
   node->toplevel = toplevel;
+#if LBSL==ALGO_HERLIHY
   node->marked = 0;
   node->fullylinked = 0;
+#endif
   INIT_LOCK(ND_GET_LOCK(node));
 
 #if defined(__tile__)
@@ -146,29 +148,28 @@ sl_set_new()
   sl_intset_t *set;
   sl_node_t *min, *max;
 	
-  if ((set = (sl_intset_t *)ssalloc(sizeof(sl_intset_t))) == NULL)
+  if ((set = (sl_intset_t *)ssalloc_aligned(CACHE_LINE_SIZE, sizeof(sl_intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);
     }
 
-  ssalloc_align_alloc(0);
   max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
   min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
+#if LBSL==ALGO_HERLIHY
   max->fullylinked = 1;
   min->fullylinked = 1;
+#endif
   set->head = min;
 
 #if defined(LL_GLOBAL_LOCK)
-  ssalloc_align_alloc(0);
-  set->lock = (volatile ptlock_t*) ssalloc(sizeof(ptlock_t));
+  set->lock = (volatile ptlock_t*) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(ptlock_t));
   if (set->lock == NULL)
     {
       perror("malloc");
       exit(1);
     }
   GL_INIT_LOCK(set->lock);
-  ssalloc_align_alloc(0);
 #endif
 
   return set;
@@ -201,7 +202,9 @@ int sl_set_size(sl_intset_t *set)
   node = set->head->next[0];
   while (node->next[0] != NULL) 
     {
+#if LBSL==ALGO_HERLIHY
       if (node->fullylinked && !node->marked)
+#endif
 	{
 	  size++;
 	}

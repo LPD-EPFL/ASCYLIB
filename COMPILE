@@ -1,10 +1,22 @@
 You may pass the following settings to `make`:
-    * VERSION=DEBUG : compile with O0 and debug flags
+    * VERSION=	 DEBUG : compile with O0 and debug flags
+      		 SYMBOL :  compile with O3 and -g
+		 O0 : compile with -O0
+		 O1 : compile with -O1
+		 O2 : compile with -O2
+		 O3 : compile with -O3 (default)
     * GC=0 or GC=1 : disable/enable GC (default is 1)
     * TEST=old : use the old test.c file (disables GC)
     * TEST=correct : use the test_correct.c file (enables GC)
-    * LATENCY=1 : enable per operation latency measurements
+    * LATENCY= 1 : enable per operation latency measurements with getticks
+      	       2 : enable per operation latency measurements with sspfd (only id==0 prints results)
+	       3 : enable per operation latency measurements with sspfd (all cores print results)
     * GRANULARITY=GLOBAL_LOCK (or G=GL) for global lock
     * INIT=all : initialize the structure from all threads (default is from one)
+    * LFSL= fraser  : compile with Fraser's lock-free skip list algo
+      	    herlihy : compile with Herlihy's lock-free skip list algo (default)
+    * LBSL= herlihy : compile with Herlihy's lock-bazed lazy skip list algo (default)
+      	    pugh    : compile with Pugh's lock-based lazy  skip list algo
+      	    
 Example:
 	`make` VERSION=DEBUG GC=0

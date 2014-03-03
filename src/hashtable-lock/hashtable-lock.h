@@ -24,7 +24,7 @@
  * GNU General Public License for more details.
  */
 
-#include "../linkedlist-lock/intset.h"
+#include "./lists/intset.h"
 
 #define DEFAULT_MOVE                    0
 #define DEFAULT_SNAPSHOT                0
@@ -44,8 +44,10 @@ extern unsigned int maxhtlength;
 
 typedef struct ht_intset 
 {
-  /* intset_l_t *buckets[MAXHTLENGTH]; */
-  intset_l_t **buckets;
+  size_t hash;
+  intset_l_t* buckets;
+  ptlock_t* locks;
+  uint8_t padding[CACHE_LINE_SIZE - 24];
 } ht_intset_t;
 
 void ht_delete(ht_intset_t *set);

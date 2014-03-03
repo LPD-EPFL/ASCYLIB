@@ -24,7 +24,7 @@
 #include "intset.h"
 
 /* Hashtable length (# of buckets) */
-unsigned int* maxhtlength;
+unsigned int maxhtlength;
 __thread unsigned long* seeds;
 
 ALIGNED(64) uint8_t running[64];
@@ -35,38 +35,6 @@ __thread unsigned int *rng_seed;
 #else /* ! TLS */
 pthread_key_t rng_seed_key;
 #endif /* ! TLS */
-
-typedef struct barrier {
-	pthread_cond_t complete;
-	pthread_mutex_t mutex;
-	int count;
-	int crossing;
-} barrier_t;
-
-
-void barrier_init(barrier_t *b, int n)
-{
-	pthread_cond_init(&b->complete, NULL);
-	pthread_mutex_init(&b->mutex, NULL);
-	b->count = n;
-	b->crossing = 0;
-}
-
-void barrier_cross(barrier_t *b)
-{
-	pthread_mutex_lock(&b->mutex);
-	/* One more thread through */
-	b->crossing++;
-	/* If not all here, wait */
-	if (b->crossing < b->count) {
-		pthread_cond_wait(&b->complete, &b->mutex);
-	} else {
-		pthread_cond_broadcast(&b->complete);
-		/* Reset for next time */
-		b->crossing = 0;
-	}
-	pthread_mutex_unlock(&b->mutex);
-}
 
 /* 
  * Returns a pseudo-random value in [1;range).

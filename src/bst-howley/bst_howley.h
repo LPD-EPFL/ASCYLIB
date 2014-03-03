@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "atomic_ops_if.h"
 #include "ssalloc.h"
+#include "ssmem.h"
 #include "common.h"
 
 #define TRUE 1
@@ -32,6 +33,8 @@
 #define INF KEY_MAX
 
 typedef uint8_t bool_t;
+
+extern __thread ssmem_allocator_t* alloc;
 
 extern const sval_t val_mask;
 
@@ -65,12 +68,14 @@ struct node_t {
 	operation_t* /*volatile*/ op;
 	node_t* /*volatile*/ left;
 	node_t* /*volatile*/ right;
+    uint8_t padding[CACHE_LINE_SIZE-sizeof(sval_t)-sizeof(skey_t)-3*sizeof(uintptr_t)];
 	// char padding[32];
 };
 
 union operation_t {
 	child_cas_op_t child_cas_op;
 	relocate_op_t relocate_op;
+    uint8_t padding[CACHE_LINE_SIZE];
 };
 
 //BST functions

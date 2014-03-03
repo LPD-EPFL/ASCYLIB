@@ -7,6 +7,7 @@
 
 #if defined(MUTEX)
 typedef pthread_mutex_t ptlock_t;
+#define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL);
 #  define DESTROY_LOCK(lock)			        pthread_mutex_destroy((pthread_mutex_t *) lock)
 #  define LOCK(lock)					pthread_mutex_lock((pthread_mutex_t *) lock)
@@ -18,6 +19,7 @@ typedef pthread_mutex_t ptlock_t;
 #  define GL_UNLOCK(lock)				pthread_mutex_unlock((pthread_mutex_t *) lock)
 #elif defined(SPIN)		/* pthread spinlock */
 typedef pthread_spinlock_t ptlock_t;
+#define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_spin_init((pthread_spinlock_t *) lock, PTHREAD_PROCESS_PRIVATE);
 #  define DESTROY_LOCK(lock)			        pthread_spin_destroy((pthread_spinlock_t *) lock)
 #  define LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
@@ -28,15 +30,24 @@ typedef pthread_spinlock_t ptlock_t;
 #  define GL_LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
 #  define GL_UNLOCK(lock)				pthread_spin_unlock((pthread_spinlock_t *) lock)
 #elif defined(TAS)			/* TAS */
-typedef volatile uint64_t ptlock_t;
+#  define PTLOCK_SIZE 32		/* choose 8, 16, 32, 64 */
+#  define PASTER(x, y, z) x ## y ## z
+#  define EVALUATE(sz) PASTER(uint, sz, _t)
+#  define UTYPE  EVALUATE(PTLOCK_SIZE)
+#  define PASTER2(x, y) x ## y
+#  define EVALUATE2(sz) PASTER2(CAS_U, sz)
+#  define CAS_UTYPE EVALUATE2(PTLOCK_SIZE)
+typedef volatile UTYPE ptlock_t;
 #  define INIT_LOCK(lock)				tas_init(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					tas_lock(lock)
+#  define TRYLOCK(lock)					tas_trylock(lock)
 #  define UNLOCK(lock)					tas_unlock(lock)
 /* GLOBAL lock */
 #  define GL_INIT_LOCK(lock)				tas_init(lock)
 #  define GL_DESTROY_LOCK(lock)			
 #  define GL_LOCK(lock)					tas_lock(lock)
+#  define GL_TRYLOCK(lock)				tas_trylock(lock)
 #  define GL_UNLOCK(lock)              			tas_unlock(lock)
 
 #  define TAS_FREE 0
@@ -54,7 +65,7 @@ tas_init(ptlock_t* l)
 static inline uint32_t
 tas_lock(ptlock_t* l)
 {
-  while (CAS_U64(l, TAS_FREE, TAS_LCKD) == TAS_LCKD)
+  while (CAS_UTYPE(l, TAS_FREE, TAS_LCKD) == TAS_LCKD)
     {
       PAUSE;
     }
@@ -62,12 +73,18 @@ tas_lock(ptlock_t* l)
 }
 
 static inline uint32_t
+tas_trylock(ptlock_t* l)
+{
+  return (CAS_UTYPE(l, TAS_FREE, TAS_LCKD) == TAS_FREE);
+}
+
+static inline uint32_t
 tas_unlock(ptlock_t* l)
 {
-  *l = TAS_FREE;
 #if defined(__tile__)
   MEM_BARRIER;
 #endif
+  *l = TAS_FREE;
   return 0;
 }
 
@@ -222,6 +239,13 @@ ticket_unlock(volatile ptlock_t* l)
 #  define UNLOCK(lock)
 #  define PREFETCHW_LOCK(lock)
 
+#  define INIT_LOCK_A(lock)       GL_INIT_LOCK(lock)
+#  define DESTROY_LOCK_A(lock)    GL_DESTROY_LOCK(lock)			
+#  define LOCK_A(lock)            GL_LOCK(lock)
+#  define TRYLOCK_A(lock)         GL_TRYLOCK(lock)
+#  define UNLOCK_A(lock)          GL_UNLOCK(lock)
+#  define PREFETCHW_LOCK_A(lock)  
+
 #else  /* !LL_GLOBAL_LOCK */
 #  define ND_GET_LOCK(nd)                 &nd->lock
 
@@ -234,6 +258,13 @@ ticket_unlock(volatile ptlock_t* l)
 #  define GL_DESTROY_LOCK(lock)			
 #  define GL_LOCK(lock)
 #  define GL_UNLOCK(lock)
+
+#  define INIT_LOCK_A(lock)       INIT_LOCK(lock)
+#  define DESTROY_LOCK_A(lock)    DESTROY_LOCK(lock)			
+#  define LOCK_A(lock)            LOCK(lock)
+#  define TRYLOCK_A(lock)         TRYLOCK(lock)
+#  define UNLOCK_A(lock)          UNLOCK(lock)
+#  define PREFETCHW_LOCK_A(lock)  PREFETCHW_LOCK(lock)
 
 #endif
 

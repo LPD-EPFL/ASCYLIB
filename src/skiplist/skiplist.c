@@ -32,7 +32,7 @@ get_rand_level()
   int i, level = 1;
   for (i = 0; i < levelmax - 1; i++)
     {
-      if ((rand_range(100)-1) < 50)
+      if ((rand_range(101)) < 50)
   	level++;
       else
   	break;
@@ -157,13 +157,11 @@ sl_set_new()
   sl_intset_t *set;
   sl_node_t *min, *max;
 	
-  if ((set = (sl_intset_t *)ssalloc(sizeof(sl_intset_t))) == NULL)
+  if ((set = (sl_intset_t *)ssalloc_aligned(CACHE_LINE_SIZE, sizeof(sl_intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);
     }
-
-  ssalloc_align_alloc(0);
 
   max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
   min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
@@ -192,12 +190,14 @@ sl_set_size(sl_intset_t *set)
   int size = 0;
   sl_node_t *node;
 
-  node = set->head->next[0];
+  node = GET_UNMARKED(set->head->next[0]);
   while (node->next[0] != NULL)
     {
-      if (!node->deleted)
-	size++;
-      node = node->next[0];
+      if (!IS_MARKED(node->next[0]))
+	{
+	  size++;
+	}
+      node = GET_UNMARKED(node->next[0]);
     }
 
   return size;

@@ -26,10 +26,6 @@
 
 #include "hashtable-lock.h"
 
-#if defined(USE_SSPFD)
-#   include "sspfd.h"
-#endif
-
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
@@ -56,7 +52,7 @@ size_t duration = DEFAULT_DURATION;
 int algo_type = DEFAULT_LOCKTYPE;
 
 size_t print_vals_num = 100; 
-size_t pf_vals_num = 8;
+size_t pf_vals_num = 1023;
 size_t put, put_explicit = false;
 double update_rate, put_rate, get_rate;
 
@@ -94,80 +90,7 @@ extern __thread uint32_t put_num_failed_expand;
 extern __thread uint32_t put_num_failed_on_new;
 #endif
 
-/* ################################################################### *
- * BARRIER
- * ################################################################### */
-
-typedef struct barrier 
-{
-  pthread_cond_t complete;
-  pthread_mutex_t mutex;
-  int count;
-  int crossing;
-} barrier_t;
-
-void barrier_init(barrier_t *b, int n) 
-{
-  pthread_cond_init(&b->complete, NULL);
-  pthread_mutex_init(&b->mutex, NULL);
-  b->count = n;
-  b->crossing = 0;
-}
-
-void barrier_cross(barrier_t *b) 
-{
-  pthread_mutex_lock(&b->mutex);
-  /* One more thread through */
-  b->crossing++;
-  /* If not all here, wait */
-  if (b->crossing < b->count) {
-    pthread_cond_wait(&b->complete, &b->mutex);
-  } else {
-    pthread_cond_broadcast(&b->complete);
-    /* Reset for next time */
-    b->crossing = 0;
-  }
-  pthread_mutex_unlock(&b->mutex);
-}
 barrier_t barrier, barrier_global;
-
-
-#define PFD_TYPE 0
-
-#if !defined(COMPUTE_LATENCY)
-#  define START_TS(s)
-#  define END_TS(s, i)
-#  define ADD_DUR(tar)
-#  define ADD_DUR_FAIL(tar)
-#  define PF_INIT(s, e, id)
-#elif PFD_TYPE == 0
-#  define START_TS(s)				\
-  {						\
-    asm volatile ("");				\
-    start_acq = getticks();			\
-    asm volatile ("");
-#  define END_TS(s, i)				\
-    asm volatile ("");				\
-    end_acq = getticks();			\
-    asm volatile ("");				\
-    }
-
-#  define ADD_DUR(tar) tar += (end_acq - start_acq - correction)
-#  define ADD_DUR_FAIL(tar)					\
-  else								\
-    {								\
-      ADD_DUR(tar);						\
-    }
-#  define PF_INIT(s, e, id)
-#else
-#  define SSPFD_NUM_ENTRIES  pf_vals_num
-#  define START_TS(s)      SSPFDI(s)
-#  define END_TS(s, i)     SSPFDO(s, i & SSPFD_NUM_ENTRIES)
-
-#  define ADD_DUR(tar) 
-#  define ADD_DUR_FAIL(tar)
-#  define PF_INIT(s, e, id) SSPFDINIT(s, e, id)
-#endif
 
 typedef struct thread_data
 {
@@ -329,20 +252,13 @@ test(void* thread)
   getting_count_succ[ID] += my_getting_count_succ;
   removing_count_succ[ID]+= my_removing_count_succ;
 
-#if (PFD_TYPE == 1) && defined(COMPUTE_LATENCY)
-  if (ID == 0)
+  EXEC_IN_DEC_ID_ORDER(ID, num_threads)
     {
-      printf("get ----------------------------------------------------\n");
-      SSPFDPN(0, SSPFD_NUM_ENTRIES, print_vals_num);
-      printf("put ----------------------------------------------------\n");
-      SSPFDPN(1, SSPFD_NUM_ENTRIES, print_vals_num);
-      printf("rem ----------------------------------------------------\n");
-      SSPFDPN(2, SSPFD_NUM_ENTRIES, print_vals_num);
-
+      print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
     }
-#endif
+  EXEC_IN_DEC_ID_ORDER_END(&barrier);
 
-  /* SSPFDTERM(); */
+  SSPFDTERM();
 #if GC == 1
   ssmem_term();
   free(alloc);
@@ -422,6 +338,7 @@ main(int argc, char **argv)
 		 "        Use lock-based algorithm\n"
 		 "        1 = lock-coupling,\n"
 		 "        2 = lazy algorithm\n"
+		 "        3 = Pugh's lazy algorithm\n"
 		 );
 	  exit(0);
 	case 'd':
@@ -446,9 +363,6 @@ main(int argc, char **argv)
 	case 'l':
 	  load_factor = atoi(optarg);
 	  break;
-	  /* case 'b': */
-	  /*   num_buckets_param = atoi(optarg); */
-	  /*   break; */
 	case 'x':
 	  algo_type = atoi(optarg);
 	  break;
@@ -478,8 +392,20 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
-  printf("## Initial: %zu / Range: %zu / %s / Load factor: %zu\n", initial, range, 
-	 (algo_type == 1) ? "handover-hand locks" : "lazy locks", load_factor);
+  printf("## Initial: %zu / Range: %zu / Load factor: %zu / ", initial, range, load_factor);
+  switch (algo_type)
+    {
+    case 1:
+      printf("handover-hand locks");
+      break;
+    case 2:
+      printf("lazy locks");
+      break;
+    default:
+      printf("Pugh's lazy locks");
+    }
+  printf("\n");
+
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;
@@ -528,7 +454,6 @@ main(int argc, char **argv)
     
   maxhtlength = (unsigned int) initial / load_factor;
 
-  ssalloc_align();
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
 

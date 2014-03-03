@@ -26,38 +26,6 @@
 
 #include "lazy.h"
 
-inline int
-is_marked_ref(uintptr_t i) 
-{
-  return (int) (i & 0x1L);
-}
-
-inline uintptr_t
-unset_mark(uintptr_t* i) 
-{
-  *i &= ~0x1L;
-  return *i;
-}
-
-inline uintptr_t
-set_mark(uintptr_t* i)
-{
-  *i |= 0x1L;
-  return *i;
-}
-
-inline uintptr_t
-get_unmarked_ref(uintptr_t w) 
-{
-  return w & ~0x1L;
-}
-
-inline uintptr_t
-get_marked_ref(uintptr_t w) 
-{
-  return w | 0x1L;
-}
-
 /*
  * Checking that both curr and pred are both unmarked and that pred's next pointer
  * points to curr to verify that the entries are adjacent and present in the list.
@@ -65,17 +33,16 @@ get_marked_ref(uintptr_t w)
 inline int
 parse_validate(node_l_t* pred, node_l_t* curr) 
 {
-  /* FIX: checking pred twice :: return (!is_marked_ref((long) pred) && !is_marked_ref((long) pred) && (pred->next == curr)); */
-  return (!is_marked_ref((uintptr_t) pred->next) && !is_marked_ref((uintptr_t) curr->next) && (pred->next == curr));
+  return (!pred->marked && !curr->marked && (pred->next == curr));
 }
 
 sval_t
 parse_find(intset_l_t *set, skey_t key)
 {
   node_l_t* curr = set->head;
-  while (curr->key < key || is_marked_ref((uintptr_t) curr->next))
+  while (curr->key < key || curr->marked)
     {
-      curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
+      curr = curr->next;
     }
 
   sval_t res = 0;
@@ -91,34 +58,41 @@ int
 parse_insert(intset_l_t *set, skey_t key, sval_t val)
 {
   node_l_t *curr, *pred, *newnode;
-  int result;
+  int result = -1;
 	
-  pred = set->head;
-  curr = (node_l_t*) get_unmarked_ref((uintptr_t) pred->next);
-  while (curr->key < key) 
+  do
     {
-      pred = curr;
-      curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
-    }
+      pred = set->head;
+      curr = pred->next;
+      while (curr->key < key) 
+	{
+	  pred = curr;
+	  curr = curr->next;
+	}
 
-  if (curr->key == key && !is_marked_ref((uintptr_t) curr->next))
-    {
-      return false;
-    }
+      if (curr->key == key && !curr->marked)
+	{
+	  return false;
+	}
 
-  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
-  PREFETCHW_LOCK(curr);
-  LOCK(ND_GET_LOCK(pred));
-  LOCK(ND_GET_LOCK(curr));
-  result = (parse_validate(pred, curr) && (curr->key != key));
-  if (result) 
-    {
-      newnode = new_node_l(key, val, curr, 0);
-      pred->next = newnode;
-    } 
-  GL_UNLOCK(set->lock);
-  UNLOCK(ND_GET_LOCK(curr));
-  UNLOCK(ND_GET_LOCK(pred));
+      GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+      PREFETCHW_LOCK(curr);
+      LOCK(ND_GET_LOCK(pred));
+      LOCK(ND_GET_LOCK(curr));
+      if (parse_validate(pred, curr))
+	{
+	  result = (curr->key != key);
+	  if (result) 
+	    {
+	      newnode = new_node_l(key, val, curr, 0);
+	      pred->next = newnode;
+	    } 
+	}
+      GL_UNLOCK(set->lock);
+      UNLOCK(ND_GET_LOCK(curr));
+      UNLOCK(ND_GET_LOCK(pred));
+    }
+  while (result < 0);
   return result;
 }
 
@@ -131,36 +105,47 @@ parse_delete(intset_l_t *set, skey_t key)
 {
   node_l_t *pred, *curr;
   sval_t result = 0;
+  int done = 0;
 	
-  pred = set->head;
-  curr = (node_l_t*) get_unmarked_ref((uintptr_t) pred->next);
-  while (curr->key < key)
+  do
     {
-      pred = curr;
-      curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
-    }
+      pred = set->head;
+      curr = pred->next;
+      while (curr->key < key)
+	{
+	  pred = curr;
+	  curr = curr->next;
+	}
 
-  if (key != key && !is_marked_ref((uintptr_t) curr->next))
-    {
-      return false;
-    }
+      if (curr->key != key && !curr->marked)
+	{
+	  return false;
+	}
 
-  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
-  PREFETCHW_LOCK(curr);
-  LOCK(ND_GET_LOCK(pred));
-  LOCK(ND_GET_LOCK(curr));
-  if (parse_validate(pred, curr) && (key == curr->key))
-    {
-      result = curr->val;
-      node_l_t* c_nxt = curr->next;
-      set_mark((uintptr_t*) &curr->next);
-      pred->next = c_nxt;
+      GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+      PREFETCHW_LOCK(curr);
+      LOCK(ND_GET_LOCK(pred));
+      LOCK(ND_GET_LOCK(curr));
+
+      if (parse_validate(pred, curr))
+	{
+	  if (key == curr->key)
+	    {
+	      result = curr->val;
+	      node_l_t* c_nxt = curr->next;
+	      curr->marked = 1;
+	      pred->next = c_nxt;
 #if GC == 1
-      ssmem_free(alloc, curr);
+	      ssmem_free(alloc, curr);
 #endif
+	    }
+	  done = 1;
+	}
+
+      GL_UNLOCK(set->lock);
+      UNLOCK(ND_GET_LOCK(curr));
+      UNLOCK(ND_GET_LOCK(pred));
     }
-  GL_UNLOCK(set->lock);
-  UNLOCK(ND_GET_LOCK(curr));
-  UNLOCK(ND_GET_LOCK(pred));
+  while (!done);
   return result;
 }

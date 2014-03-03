@@ -1,13 +1,13 @@
 .PHONY:	all
 
-BENCHS = src/sftree src/linkedlist src/hashtable src/hashtable-rcu src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/
-LBENCHS = src/linkedlist-lock src/hashtable-lock src/hashtable-tbb src/skiplist-lock src/bst-lock2
+BENCHS = src/sftree src/linkedlist src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/
+LBENCHS = src/linkedlist-lock src/hashtable-lock src/hashtable-tbb src/hashtable-java src/skiplist-lock src/bst-lock2
 LFBENCHS = src/linkedlist src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley
 NOISE = src/noise
 
 .PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE)
 
-all:	lockfree tas
+all:	lockfree tas lbhtgl
 
 mutex:
 	$(MAKE) "LOCK=MUTEX" $(LBENCHS)
@@ -38,6 +38,27 @@ noise:
 
 tbb:
 	$(MAKE) "LOCK=TAS" src/hashtable-tbb
+lfsl:
+	$(MAKE) "STM=LOCKFREE" src/skiplist
+
+lbll:
+	$(MAKE) "LOCK=TAS" src/linkedlist-lock
+
+lfht:
+	$(MAKE) "STM=LOCKFREE" src/hashtable
+
+lbht:
+	$(MAKE) "LOCK=TAS" src/hashtable-lock
+
+lbsl:
+	$(MAKE) "LOCK=TAS" src/skiplist-lock
+
+htjava:
+	$(MAKE) "LOCK=TAS" src/hashtable-java
+
+lbhtgl:
+	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lock
+
 
 clean:
 	$(MAKE) -C src/linkedlist clean	

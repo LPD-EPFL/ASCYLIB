@@ -1,3 +1,6 @@
+#ifndef _SKIPLIST_H_
+#define _SKIPLIST_H_
+
 /*
  * File:
  *   skiplist.h
@@ -80,3 +83,27 @@ void sl_set_delete(sl_intset_t *set);
 int sl_set_size(sl_intset_t *set);
 
 inline long rand_range(long r); /* declared in test.c */
+
+static inline int
+is_marked(uintptr_t i)
+{
+  return (int)(i & (uintptr_t)0x01);
+}
+
+static inline uintptr_t
+unset_mark(uintptr_t i)
+{
+  return (i & ~(uintptr_t)0x01);
+}
+
+static inline uintptr_t
+set_mark(uintptr_t i)
+{
+  return (i | (uintptr_t)0x01);
+}
+
+#define GET_UNMARKED(p) (sl_node_t*) unset_mark((uintptr_t) (p))
+#define GET_MARKED(p) set_mark((uintptr_t) (p))
+#define IS_MARKED(p) is_marked((uintptr_t) (p))
+
+#endif	/* _SKIPLIST_H_ */

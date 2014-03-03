@@ -30,24 +30,6 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 #define FRASER_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
 
-inline int
-is_marked(uintptr_t i)
-{
-  return (int)(i & (uintptr_t)0x01);
-}
-
-inline uintptr_t
-unset_mark(uintptr_t i)
-{
-  return (i & ~(uintptr_t)0x01);
-}
-
-inline uintptr_t
-set_mark(uintptr_t i)
-{
-  return (i | (uintptr_t)0x01);
-}
-
 void
 fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **right_list)
 {
@@ -101,7 +83,6 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
 sval_t
 fraser_find(sl_intset_t *set, skey_t key)
 {
-  /* sl_node_t **succs; */
   sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
 
@@ -233,7 +214,6 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  if (ATOMIC_CAS_MB(&pred->next[i], succ, new))
 	    break;
 
-	  /* MEM_BARRIER; */
 	  fraser_search(set, key, preds, succs);
 	}
     }

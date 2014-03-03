@@ -26,22 +26,22 @@
 sval_t
 ht_contains(ht_intset_t *set, skey_t key)
 {
-  int addr = key % *maxhtlength;
-  return set_contains(set->buckets[addr], key);
+  int addr = key & set->hash;
+  return set_contains(&set->buckets[addr], key);
 }
 
 int 
 ht_add(ht_intset_t *set, skey_t key, sval_t val)
 {
-  int addr = key % *maxhtlength;
-  return set_add(set->buckets[addr], key, val);
+  int addr = key & set->hash;
+  return set_add(&set->buckets[addr], key, val);
 }
 
 sval_t
 ht_remove(ht_intset_t *set, skey_t key)
 {
-  int addr = key % *maxhtlength;
-  return set_remove(set->buckets[addr], key);
+  int addr = key & set->hash;
+  return set_remove(&set->buckets[addr], key);
 }
 
 /* 
@@ -59,8 +59,8 @@ int ht_move_naive(ht_intset_t *set, int val1, int val2, int transactional) {
 	
 	int addr1, addr2;
 		
-	addr1 = val1 % *maxhtlength;
-	addr2 = val2 % *maxhtlength;
+	addr1 = val1 % maxhtlength;
+	addr2 = val2 % maxhtlength;
 	result =  (set_remove(set->buckets[addr1], val1, transactional) && 
 			   set_add(set->buckets[addr2], val2, transactional));
 	
@@ -72,7 +72,7 @@ int ht_move_naive(ht_intset_t *set, int val1, int val2, int transactional) {
 	if (transactional > 1) {
 	  
 	  TX_START(EL);
-	  addr1 = val1 % *maxhtlength;
+	  addr1 = val1 % maxhtlength;
 	  prev = (node_t *)TX_LOAD(&set->buckets[addr1]->head);
 	  next = (node_t *)TX_LOAD(&prev->next);
 	  while(1) {
@@ -87,7 +87,7 @@ int ht_move_naive(ht_intset_t *set, int val1, int val2, int transactional) {
 	    TX_STORE(&prev->next, n);
 	    FREE(next, sizeof(node_t));
 	    /* Inserting */
-	    addr2 = val2 % *maxhtlength;
+	    addr2 = val2 % maxhtlength;
 	    prev = (node_t *)TX_LOAD(&set->buckets[addr2]->head);
 	    next = (node_t *)TX_LOAD(&prev->next);
 	    while(1) {
@@ -107,7 +107,7 @@ int ht_move_naive(ht_intset_t *set, int val1, int val2, int transactional) {
 	} else { 
 
 	  TX_START(NL);
-	  addr1 = val1 % *maxhtlength;
+	  addr1 = val1 % maxhtlength;
 	  prev = (node_t *)TX_LOAD(&set->buckets[addr1]->head);
 	  next = (node_t *)TX_LOAD(&prev->next);
 	  while(1) {
@@ -122,7 +122,7 @@ int ht_move_naive(ht_intset_t *set, int val1, int val2, int transactional) {
 	    TX_STORE(&prev->next, n);
 	    FREE(next, sizeof(node_t));
 	    /* Inserting */
-	    addr2 = val2 % *maxhtlength;
+	    addr2 = val2 % maxhtlength;
 	    prev = (node_t *)TX_LOAD(&set->buckets[addr2]->head);
 	    next = (node_t *)TX_LOAD(&prev->next);
 	    while(1) {
@@ -163,8 +163,8 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional) {
 
 	int addr1, addr2;
 		
-	addr1 = val1 % *maxhtlength;
-	addr2 = val2 % *maxhtlength;
+	addr1 = val1 % maxhtlength;
+	addr2 = val2 % maxhtlength;
 
 	if (set_remove(set->buckets[addr1], val1, 0)) 
 	  result = 1;
@@ -180,7 +180,7 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional) {
 	
 	  TX_START(EL);
 	  result = 0;
-	  addr1 = val1 % *maxhtlength;
+	  addr1 = val1 % maxhtlength;
 	  prev = (node_t *)TX_LOAD(&set->buckets[addr1]->head);
 	  next = (node_t *)TX_LOAD(&prev->next);
 	  while(1) {
@@ -193,7 +193,7 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional) {
 	  next1 = next;
 	  if (v == val1) {
 	    /* Inserting */
-	    addr2 = val2 % *maxhtlength;
+	    addr2 = val2 % maxhtlength;
 	    prev = (node_t *)TX_LOAD(&set->buckets[addr2]->head);
 	    next = (node_t *)TX_LOAD(&prev->next);
 	    while(1) {
@@ -219,7 +219,7 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional) {
 
 	  TX_START(NL);
 	  result = 0;
-	  addr1 = val1 % *maxhtlength;
+	  addr1 = val1 % maxhtlength;
 	  prev = (node_t *)TX_LOAD(&set->buckets[addr1]->head);
 	  next = (node_t *)TX_LOAD(&prev->next);
 	  while(1) {
@@ -232,7 +232,7 @@ int ht_move(ht_intset_t *set, int val1, int val2, int transactional) {
 	  next1 = next;
 	  if (v == val1) {
 	    /* Inserting */
-	    addr2 = val2 % *maxhtlength;
+	    addr2 = val2 % maxhtlength;
 	    prev = (node_t *)TX_LOAD(&set->buckets[addr2]->head);
 	    next = (node_t *)TX_LOAD(&prev->next);
 	    while(1) {
@@ -277,8 +277,8 @@ int ht_move_orrollback(ht_intset_t *set, int val1, int val2, int transactional) 
 #ifdef SEQUENTIAL
 
 	int addr1, addr2;		
-	addr1 = val1 % *maxhtlength;
-	addr2 = val2 % *maxhtlength;
+	addr1 = val1 % maxhtlength;
+	addr2 = val2 % maxhtlength;
 	result =  (set_remove(set->buckets[addr1], val1, transactional) &&
 			   set_add(set->buckets[addr2], val2, transactional));
 	
@@ -291,7 +291,7 @@ int ht_move_orrollback(ht_intset_t *set, int val1, int val2, int transactional) 
 
 	  TX_START(EL);
 	  result = 0;
-	  addr1 = val1 % *maxhtlength;
+	  addr1 = val1 % maxhtlength;
 	  prev = (node_t *)TX_LOAD(&set->buckets[addr1]->head);
 	  next = (node_t *)TX_LOAD(&prev->next);
 	  while(1) {
@@ -307,7 +307,7 @@ int ht_move_orrollback(ht_intset_t *set, int val1, int val2, int transactional) 
 	    n = (node_t *)TX_LOAD(&next->next);
 	    TX_STORE(&prev->next, n);
 	    /* Inserting */
-	    addr2 = val2 % *maxhtlength;
+	    addr2 = val2 % maxhtlength;
 	    prev = (node_t *)TX_LOAD(&set->buckets[addr2]->head);
 	    next = (node_t *)TX_LOAD(&prev->next);
 	    while(1) {
@@ -332,7 +332,7 @@ int ht_move_orrollback(ht_intset_t *set, int val1, int val2, int transactional) 
 	  
 	  TX_START(NL);
 	  result = 0;
-	  addr1 = val1 % *maxhtlength;
+	  addr1 = val1 % maxhtlength;
 	  prev = (node_t *)TX_LOAD(&set->buckets[addr1]->head);
 	  next = (node_t *)TX_LOAD(&prev->next);
 	  while(1) {
@@ -348,7 +348,7 @@ int ht_move_orrollback(ht_intset_t *set, int val1, int val2, int transactional) 
 	    n = (node_t *)TX_LOAD(&next->next);
 	    TX_STORE(&prev->next, n);
 	    /* Inserting */
-	    addr2 = val2 % *maxhtlength;
+	    addr2 = val2 % maxhtlength;
 	    prev = (node_t *)TX_LOAD(&set->buckets[addr2]->head);
 	    next = (node_t *)TX_LOAD(&prev->next);
 	    while(1) {
@@ -397,7 +397,7 @@ int ht_snapshot(ht_intset_t *set, int transactional) {
   int i, sum = 0;
   node_t *next;
 	
-  for (i=0; i < *maxhtlength; i++) {
+  for (i=0; i < maxhtlength; i++) {
     next = set->buckets[i]->head->next;
     while(next->next) {
       sum += next->val;
@@ -414,7 +414,7 @@ int ht_snapshot(ht_intset_t *set, int transactional) {
   // always a normal transaction
   TX_START(NL);
   result = 0;
-  for (i=0; i < *maxhtlength; i++) {
+  for (i=0; i < maxhtlength; i++) {
     next = (node_t *)TX_LOAD(&set->buckets[i]->head->next);
     while(next->next) {
       sum += TX_LOAD(&next->val);

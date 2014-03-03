@@ -25,9 +25,7 @@ extern __thread unsigned long* seeds;
   seed_rand() 
   {
     unsigned long* seeds;
-    /* seeds = (unsigned long*) malloc(3 * sizeof(unsigned long)); */
-    seeds = (unsigned long*) ssalloc(64);
-    /* seeds = (unsigned long*) memalign(64, 64); */
+    seeds = (unsigned long*) ssalloc_aligned(64, 64);
     seeds[0] = getticks() % 123456789;
     seeds[1] = getticks() % 362436069;
     seeds[2] = getticks() % 521288629;

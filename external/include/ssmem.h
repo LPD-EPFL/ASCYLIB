@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdint.h>
 
-
 /* **************************************************************************************** */
 /* parameters */
 /* **************************************************************************************** */
@@ -46,6 +45,8 @@ typedef struct ALIGNED(CACHE_LINE_SIZE) ssmem_allocator
       size_t collected_set_num;	/* number of sets in the collected_set_list */
       struct ssmem_free_set* available_set_list; /* list of set structs that are not used
 						  and can be used as free sets */
+      size_t released_num;	/* number of released memory objects */
+      struct ssmem_released* released_mem_list; /* list of release memory objects */
     };
     uint8_t padding[2 * CACHE_LINE_SIZE];
   };
@@ -82,6 +83,18 @@ typedef struct ALIGNED(CACHE_LINE_SIZE) ssmem_free_set
   uintptr_t* set;
 } ssmem_free_set_t;
 
+
+/* 
+ * a timestamped node of released memory. The memory will be returned to the OS
+ * (free(node->mem)) when the current timestamp is greater than the one of the node
+ */
+typedef struct ssmem_released
+{
+  size_t* ts_set;
+  void* mem;
+  struct ssmem_released* next;
+} ssmem_released_t;
+
 /*
  * a generic list that keeps track of actual memory that has been allocated
  * (using malloc / memalign) and the different allocators that the list is using
@@ -91,11 +104,6 @@ typedef struct ssmem_list
   void* obj;
   struct ssmem_list* next;
 } ssmem_list_t;
-
-extern __thread volatile ssmem_ts_t* ssmem_ts_local;
-extern __thread size_t ssmem_num_allocators;
-extern __thread ssmem_list_t* ssmem_allocator_list;
-
 
 /* **************************************************************************************** */
 /* ssmem interface */
@@ -116,6 +124,10 @@ void ssmem_alloc_term(ssmem_allocator_t* a);
 inline void* ssmem_alloc(ssmem_allocator_t* a, size_t size);
 /* free some memory using allocator a */
 inline void ssmem_free(ssmem_allocator_t* a, void* obj);
+
+/* release some memory to the OS using allocator a */
+inline void ssmem_release(ssmem_allocator_t* a, void* obj);
+
 
 /* debug/help functions */
 void ssmem_ts_list_print();

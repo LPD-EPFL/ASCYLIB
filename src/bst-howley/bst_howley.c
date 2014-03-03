@@ -1,19 +1,56 @@
 #include "bst_howley.h"
+
+__thread ssmem_allocator_t* alloc;
+
 const sval_t val_mask = ~(0x3);
 
+node_t* create_node(skey_t key, sval_t value, int initializing) {
+    volatile node_t * new_node;
+#if GC == 1
+    if (unlikely(initializing)) {
+        new_node = (volatile node_t*) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(node_t));
+    } else {
+        new_node = (volatile node_t*) ssmem_alloc(alloc, sizeof(node_t));
+    }
+#else
+    new_node = (volatile node_t*) ssalloc(sizeof(node_t));
+#endif
+    if (new_node==NULL) {
+        perror("malloc in bst create node");
+        exit(1);
+    }
+    new_node->key=key;
+    new_node->value=value;
+    new_node->op=NULL;
+    new_node->right=NULL;
+    new_node->left=NULL;
+
+    asm volatile("" ::: "memory");
+    return (node_t*) new_node;
+}
+
+operation_t* alloc_op() {
+    volatile operation_t * new_op;
+#if GC == 1
+    new_op = (volatile operation_t*) ssmem_alloc(alloc, sizeof(operation_t));
+#else
+    new_op = (volatile operation_t*) ssalloc(sizeof(operation_t));
+#endif
+    if (new_op==NULL) {
+        perror("malloc in bst create node");
+        exit(1);
+    }
+    return (operation_t*) new_op;
+}
 
 node_t* bst_initialize() {
 
 	// node_t* root = (node_t*) ssalloc(sizeof(node_t));
-	node_t* root = (node_t*) ssalloc(CACHE_LINE_SIZE);
+	node_t* root = create_node(0,0,1);
 
 	// assign minimum key to the root, actual tree will be 
 	// the right subtree of the root
-	root->key = 0;
-	root->left = NULL;
-	root->right = NULL;
-	root->op = NULL;
-	
+
 	return root;
 }
 
@@ -111,12 +148,7 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 			return FALSE;
 		}
 
-		new_node = (node_t*) ssalloc(sizeof(node_t));
-		new_node->key = k;
-		new_node->value = v;
-		new_node->op = NULL;
-		new_node->left = NULL;
-		new_node->right = NULL;
+		new_node = create_node(k,v,0);
 
 		bool_t is_left = (result == NOT_FOUND_L);
 		node_t* old;
@@ -126,7 +158,7 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 			old = curr->right;
 		}
 
-		cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
+		cas_op = alloc_op();
 		cas_op->child_cas_op.is_left = is_left;
 		cas_op->child_cas_op.expected = old;
 		cas_op->child_cas_op.update = new_node;
@@ -135,8 +167,11 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
 
 			bst_help_child_cas(cas_op, curr, root);
+            if (UNFLAG(curr_op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr_op));
 			return TRUE;
-		}
+		} else {
+            ssmem_free(alloc,cas_op);
+        }
 	}
 }
 
@@ -149,6 +184,9 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 		address = &(dest->right);
 	}
 	void* UNUSED dummy0 = CAS_PTR(address, op->child_cas_op.expected, op->child_cas_op.update);
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
 	void* UNUSED dummy1 = CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
 
@@ -172,6 +210,8 @@ sval_t bst_remove(skey_t k, node_t* root){
 		if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
 			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
 				bst_help_marked(pred, pred_op, curr, root);
+                if (UNFLAG(curr->op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr->op));
+                ssmem_free(alloc,curr);
 				return res;
 			}
 		} else { // node has two children
@@ -180,7 +220,7 @@ sval_t bst_remove(skey_t k, node_t* root){
 				continue;
 			} 
 
-			reloc_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
+			reloc_op = alloc_op(); 
 			reloc_op->relocate_op.state = STATE_OP_ONGOING;
 			reloc_op->relocate_op.dest = curr;
 			reloc_op->relocate_op.dest_op = curr_op;
@@ -191,10 +231,15 @@ sval_t bst_remove(skey_t k, node_t* root){
 
 			MEM_BARRIER;
 			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
+                if (UNFLAG(replace_op)!=0) ssmem_free(alloc,(void*)UNFLAG(replace_op));
 				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
+                    //if (UNFLAG(replace->op)!=0) ssmem_free(alloc,(void*)UNFLAG(replace->op));
+                    ssmem_free(alloc,replace);
 					return res;
 				}
-			}
+			} else {
+                ssmem_free(alloc,reloc_op);
+            }
 		}
 	}
 }
@@ -208,6 +253,9 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 		if ((seen_op == op->relocate_op.dest_op) || (seen_op == (operation_t *)FLAG(op, STATE_OP_RELOCATE))){
 			CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
 			seen_state = STATE_OP_SUCCESSFUL;
+            if (seen_op == op->relocate_op.dest_op) {
+                if (UNFLAG(seen_op)!=0) ssmem_free(alloc,(void*)UNFLAG(seen_op));
+            } 
 		} else {
 			// VCAS in original implementation
 			seen_state = CAS_PTR(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_FAILED);
@@ -248,15 +296,20 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 	} else {
 		new_ref = curr->left;
 	}
-
-	operation_t* cas_op = (operation_t*) ssalloc_alloc(1, sizeof(operation_t));
+	operation_t* cas_op = alloc_op();
 	cas_op->child_cas_op.is_left = (curr == pred->left);
 	cas_op->child_cas_op.expected = curr;
 	cas_op->child_cas_op.update = new_ref;
 
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
 	if (CAS_PTR(&(pred->op), pred_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == pred_op) {
 		bst_help_child_cas(cas_op, pred, root);
-	}
+        if (UNFLAG(pred_op)!=0) ssmem_free(alloc,(void*)UNFLAG(pred_op));
+	} else {
+        ssmem_free(alloc,cas_op);
+    }
 }
 
 void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* curr_op, node_t* root ){

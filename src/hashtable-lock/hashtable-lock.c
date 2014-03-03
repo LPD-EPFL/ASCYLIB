@@ -37,7 +37,7 @@ ht_delete(ht_intset_t *set)
 	
   for (i=0; i < maxhtlength; i++) 
     {
-      node = set->buckets[i]->head;
+      node = set->buckets[i].head;
       while (node != NULL) 
 	{
 	  next = node->next;
@@ -45,7 +45,6 @@ ht_delete(ht_intset_t *set)
 	  ssfree(node);		/* TODO: fix with ssmem */
 	  node = next;
 	}
-      ssfree(set->buckets[i]);
     }
   free(set);
 }
@@ -59,7 +58,7 @@ ht_size(ht_intset_t *set)
 	
   for (i=0; i < maxhtlength; i++) 
     {
-      node = set->buckets[i]->head->next;
+      node = set->buckets[i].head;
       while (node->next) 
 	{
 	  size++;
@@ -84,29 +83,43 @@ floor_log_2(unsigned int n)
 ht_intset_t*
 ht_new() 
 {
-  ssalloc_align();
-
   ht_intset_t *set;
   int i;
 	
-  if ((set = (ht_intset_t *)ssalloc_alloc(1, sizeof(ht_intset_t))) == NULL)
+  if ((set = (ht_intset_t *)ssalloc_aligned_alloc(1, CACHE_LINE_SIZE, sizeof(ht_intset_t))) == NULL)
     {
       perror("malloc");
       exit(1);
     }   
 
-  size_t bs = (maxhtlength + 1) * sizeof(intset_l_t *);
-  if ((set->buckets = (void *)ssalloc_alloc(1, bs)) == NULL)
+  set->hash = maxhtlength - 1;
+
+  size_t bs = (maxhtlength + 1) * sizeof(intset_l_t);
+  bs += CACHE_LINE_SIZE - (bs & CACHE_LINE_SIZE);
+  if ((set->buckets = ssalloc_alloc(1, bs)) == NULL)
     {
-      perror("malloc");
+      perror("malloc buckets");
       exit(1);
     }  
 
-  ssalloc_align_alloc(0);
+#if defined(LL_GLOBAL_LOCK)
+  size_t ls = (maxhtlength + 1) * sizeof(ptlock_t);
+  ls += CACHE_LINE_SIZE - (ls & CACHE_LINE_SIZE);
+  if ((set->locks = ssalloc_alloc(1, ls)) == NULL)
+    {
+      perror("malloc locks");
+      exit(1);
+    }  
+#endif
 
   for (i=0; i < maxhtlength; i++) 
     {
-      set->buckets[i] = set_new_l();
+#if defined(LL_GLOBAL_LOCK)
+      ptlock_t* l = &set->locks[i];
+#else
+      ptlock_t* l = NULL;
+#endif
+      bucket_set_init_l(&set->buckets[i], l);
     }
   return set;
 }
@@ -114,22 +127,22 @@ ht_new()
 sval_t
 ht_contains(ht_intset_t *set, skey_t key, int transactional) 
 {
-  int addr = key % maxhtlength;
-  return set_contains_l(set->buckets[addr], key, transactional);
+  int addr = key & set->hash;
+  return set_contains_l(&set->buckets[addr], key, transactional);
 }
 
 int
 ht_add(ht_intset_t *set, skey_t key, sval_t val, int transactional) 
 {
-  int addr = key % maxhtlength;
-  return set_add_l(set->buckets[addr], key, val, transactional);
+  int addr = key & set->hash;
+  return set_add_l(&set->buckets[addr], key, val, transactional);
 }
 
 sval_t
 ht_remove(ht_intset_t *set, skey_t key, int transactional) 
 {
-  int addr = key % maxhtlength;
-  return set_remove_l(set->buckets[addr], key, transactional);
+  int addr = key & set->hash;
+  return set_remove_l(&set->buckets[addr], key, transactional);
 }
 
 /* 
@@ -138,62 +151,63 @@ ht_remove(ht_intset_t *set, skey_t key, int transactional)
 int
 ht_move(ht_intset_t *set, int val1, int val2, int transactional) 
 {
-  node_l_t *pred1, *curr1, *curr2, *pred2, *newnode;
-  int addr1, addr2, result = 0;
+  int result = 0;
+  /* node_l_t *pred1, *curr1, *curr2, *pred2, *newnode; */
+  /* int addr1, addr2, result = 0; */
 	
-#ifdef DEBUG
-  printf("++> ht_move(%d, %d)\n", (int) val1, (int) val2);
-  IO_FLUSH;
-#endif
+/* #ifdef DEBUG */
+/*   printf("++> ht_move(%d, %d)\n", (int) val1, (int) val2); */
+/*   IO_FLUSH; */
+/* #endif */
 	
-  if (val1 == val2) return 0;
+/*   if (val1 == val2) return 0; */
 	
-  // records pred and succ of val1
-  addr1 = val1 % maxhtlength;
-  pred1 = set->buckets[addr1]->head;
-  curr1 = pred1->next;
-  while (curr1->val < val1) {
-    pred1 = curr1;
-    curr1 = curr1->next;
-  }
-  // records pred and succ of val2 
-  addr2 = val2 % maxhtlength;
-  pred2 = set->buckets[addr2]->head;
-  curr2 = pred2->next;
-  while (curr2->val < val2) {
-    pred2 = curr2;
-    curr2 = curr2->next;
-  }
-  // unnecessary move
-  if (pred1->val == pred2->val || curr1->val == pred2->val || 
-      curr2->val == pred1->val || curr1->val == curr2->val) 
-    return 0;
-  // acquire locks in order
-  if (addr1 < addr2 || (addr1 == addr2 && val1 < val2)) {
-    LOCK(ND_GET_LOCK(pred1));
-    LOCK(ND_GET_LOCK(curr1));
-    LOCK(ND_GET_LOCK(pred2));
-    LOCK(ND_GET_LOCK(curr2));
-  } else {
-    LOCK(ND_GET_LOCK(pred2));
-    LOCK(ND_GET_LOCK(curr2));
-    LOCK(ND_GET_LOCK(pred1));
-    LOCK(ND_GET_LOCK(curr1));
-  }
-  // remove val1 and insert val2 
-  result = (parse_validate(pred1, curr1) && (val1 == curr1->val) &&
-	    parse_validate(pred2, curr2) && (curr2->val != val2));
-  if (result) {
-    set_mark((uintptr_t*) &curr1->next);
-    pred1->next = curr1->next;
-    newnode = new_node_l(val2, val2, curr2, 0);
-    pred2->next = newnode;
-  }
-  // release locks in order
-  UNLOCK(ND_GET_LOCK(pred2));
-  UNLOCK(ND_GET_LOCK(pred1));
-  UNLOCK(ND_GET_LOCK(curr2));
-  UNLOCK(ND_GET_LOCK(curr1));
+/*   // records pred and succ of val1 */
+/*   addr1 = val1 % maxhtlength; */
+/*   pred1 = set->buckets[addr1]->head; */
+/*   curr1 = pred1->next; */
+/*   while (curr1->val < val1) { */
+/*     pred1 = curr1; */
+/*     curr1 = curr1->next; */
+/*   } */
+/*   // records pred and succ of val2  */
+/*   addr2 = val2 % maxhtlength; */
+/*   pred2 = set->buckets[addr2]->head; */
+/*   curr2 = pred2->next; */
+/*   while (curr2->val < val2) { */
+/*     pred2 = curr2; */
+/*     curr2 = curr2->next; */
+/*   } */
+/*   // unnecessary move */
+/*   if (pred1->val == pred2->val || curr1->val == pred2->val ||  */
+/*       curr2->val == pred1->val || curr1->val == curr2->val)  */
+/*     return 0; */
+/*   // acquire locks in order */
+/*   if (addr1 < addr2 || (addr1 == addr2 && val1 < val2)) { */
+/*     LOCK(ND_GET_LOCK(pred1)); */
+/*     LOCK(ND_GET_LOCK(curr1)); */
+/*     LOCK(ND_GET_LOCK(pred2)); */
+/*     LOCK(ND_GET_LOCK(curr2)); */
+/*   } else { */
+/*     LOCK(ND_GET_LOCK(pred2)); */
+/*     LOCK(ND_GET_LOCK(curr2)); */
+/*     LOCK(ND_GET_LOCK(pred1)); */
+/*     LOCK(ND_GET_LOCK(curr1)); */
+/*   } */
+/*   // remove val1 and insert val2  */
+/*   result = (parse_validate(pred1, curr1) && (val1 == curr1->val) && */
+/* 	    parse_validate(pred2, curr2) && (curr2->val != val2)); */
+/*   if (result) { */
+/*     set_mark((uintptr_t*) &curr1->next); */
+/*     pred1->next = curr1->next; */
+/*     newnode = new_node_l(val2, val2, curr2, 0); */
+/*     pred2->next = newnode; */
+/*   } */
+/*   // release locks in order */
+/*   UNLOCK(ND_GET_LOCK(pred2)); */
+/*   UNLOCK(ND_GET_LOCK(pred1)); */
+/*   UNLOCK(ND_GET_LOCK(curr2)); */
+/*   UNLOCK(ND_GET_LOCK(curr1)); */
 		
   return result;
 }
@@ -203,26 +217,26 @@ ht_move(ht_intset_t *set, int val1, int val2, int transactional)
  * This cannot be consistent when used with move operation.
  */
 int ht_snapshot_unmovable(ht_intset_t *set, int transactional) {
-	node_l_t *next, *curr;
-	int i;
+	/* node_l_t *next, *curr; */
+	/* int i; */
 	int sum = 0;
 	
-	for (i=0; i < maxhtlength; i++) {
-		curr = set->buckets[i]->head;
-		next = set->buckets[i]->head->next;
+	/* for (i=0; i < maxhtlength; i++) { */
+	/* 	curr = set->buckets[i]->head; */
+	/* 	next = set->buckets[i]->head->next; */
 		
-  		//pthread_mutex_lock((pthread_mutex_t *) &next));
-		LOCK(ND_GET_LOCK(next));
+  	/* 	//pthread_mutex_lock((pthread_mutex_t *) &next)); */
+	/* 	LOCK(ND_GET_LOCK(next)); */
 	    
-		while (next->next) {
-			UNLOCK(ND_GET_LOCK(next));
-			curr = next;
-			if (!is_marked_ref((long) next)) sum += next->val;
-			next = curr->next;
-			LOCK(ND_GET_LOCK(next));
-		}
-		UNLOCK(ND_GET_LOCK(next));
-	}
+	/* 	while (next->next) { */
+	/* 		UNLOCK(ND_GET_LOCK(next)); */
+	/* 		curr = next; */
+	/* 		if (!is_marked_ref((long) next)) sum += next->val; */
+	/* 		next = curr->next; */
+	/* 		LOCK(ND_GET_LOCK(next)); */
+	/* 	} */
+	/* 	UNLOCK(ND_GET_LOCK(next)); */
+	/* } */
 	
 	return sum;
 }
@@ -232,47 +246,47 @@ int ht_snapshot_unmovable(ht_intset_t *set, int transactional) {
  * Read all elements of the hashtable (parses all linked-lists)
  */
 int ht_snapshot(ht_intset_t *set, int transactional) {
-	node_l_t *next, *curr;
-	int i;
-	int sum = 0;
+	/* node_l_t *next, *curr; */
+	/* int i; */
+	/* int sum = 0; */
 	
-	int m = maxhtlength;
+	/* int m = maxhtlength; */
 	
-	for (i=0; i < m; i++) {
-	  do {
-	    LOCK(ND_GET_LOCK(set->buckets[i]->head));
-	    LOCK(ND_GET_LOCK(set->buckets[i]->head->next));
-	    curr = set->buckets[i]->head;
-	    next = set->buckets[i]->head->next;
-	  } while (!parse_validate(curr, next));
+	/* for (i=0; i < m; i++) { */
+	/*   do { */
+	/*     LOCK(ND_GET_LOCK(set->buckets[i]->head)); */
+	/*     LOCK(ND_GET_LOCK(set->buckets[i]->head->next)); */
+	/*     curr = set->buckets[i]->head; */
+	/*     next = set->buckets[i]->head->next; */
+	/*   } while (!parse_validate(curr, next)); */
 
-	  while (next->next) {
-	    while(1) {
-	      LOCK(ND_GET_LOCK(next->next));
-	      curr = next;
-	      next = curr->next;
-	      if (parse_validate(curr, next)) {
-		if (!is_marked_ref((long) next)) {
-		  sum += curr->val;
-		}
-		break;
-	      }
-	    }
-	  }
-	}
+	/*   while (next->next) { */
+	/*     while(1) { */
+	/*       LOCK(ND_GET_LOCK(next->next)); */
+	/*       curr = next; */
+	/*       next = curr->next; */
+	/*       if (parse_validate(curr, next)) { */
+	/* 	if (!is_marked_ref((long) next)) { */
+	/* 	  sum += curr->val; */
+	/* 	} */
+	/* 	break; */
+	/*       } */
+	/*     } */
+	/*   } */
+	/* } */
 	
-	for (i=0; i < m; i++) {
-	  curr = set->buckets[i]->head;
-	  next = set->buckets[i]->head->next;
+	/* for (i=0; i < m; i++) { */
+	/*   curr = set->buckets[i]->head; */
+	/*   next = set->buckets[i]->head->next; */
 	  
-	  UNLOCK(ND_GET_LOCK(curr));
-	  UNLOCK(ND_GET_LOCK(next));
-	  while (next->next) {
-	    curr = next;
-	    next = curr->next;
-	    UNLOCK(ND_GET_LOCK(next));
-	  }
-	}
+	/*   UNLOCK(ND_GET_LOCK(curr)); */
+	/*   UNLOCK(ND_GET_LOCK(next)); */
+	/*   while (next->next) { */
+	/*     curr = next; */
+	/*     next = curr->next; */
+	/*     UNLOCK(ND_GET_LOCK(next)); */
+	/*   } */
+	/* } */
 	
 	return 1;
 }

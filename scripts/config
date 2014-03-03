@@ -5,6 +5,37 @@ then
     run_script="./run"
 fi;
 
+max_cores(){
+if [ $1 = "maglite" ];
+then
+	echo 64;
+elif [ $1 = "lpd48core" ];
+then
+	echo 48;
+elif [ $1 = "parsasrv1.epfl.ch" ];
+then
+	echo 36;
+elif [ $1 = "diassrv8" ];
+then
+	echo 80;
+elif [ $1 = "lpdpc34" ];
+then
+	echo 8;
+elif [ $1 = "lpdpc4" ];
+then
+	echo 8;
+elif [ $1 = "lpdxeon2680" ];
+then
+	echo 40;
+elif [ $1 = "ol-collab1" ];
+then
+	echo 256;
+else
+	echo 48;
+fi;
+
+}
+
 if [ $unm = "maglite" ];
 then
 	max_cores=64;
@@ -20,9 +51,15 @@ then
 elif [ $unm = "lpdpc34" ];
 then
 	max_cores=8;
+elif [ $unm = "lpdpc4" ];
+then
+	max_cores=8;
 elif [ $unm = "lpdxeon2680" ];
 then
 	max_cores=40;
+elif [ $unm = "ol-collab1" ];
+then
+	max_cores=256;
 else
 	max_cores=48;
 fi;
@@ -45,11 +82,47 @@ then
     elif [ $unm = "lpdpc34" ];
     then
 	cores=$(seq 2 1 8);
+    elif [ $unm = "lpdpc4" ];
+    then
+	cores=$(seq 2 1 8);
     elif [ $unm = "lpdxeon2680" ];
     then
 	cores=$(seq 10 10 40);
+    elif [ $unm = "ol-collab1" ];
+    then
+	cores=$(seq 32 32 256);
     else
 	cores=$(seq 6 6 48);
+    fi;
+elif [ "$cores" = "socketandone" ];
+then
+    if [ $unm = "maglite" ];
+    then
+	cores_init=$(seq 8 8 64);
+	cores="1 ${cores_init}";
+    elif [ $unm = "parsasrv1.epfl.ch" ];
+    then
+	cores_init=$(seq 6 6 36);
+	cores="1 ${cores_init}";
+    elif [ $unm = "diassrv8" ];
+    then
+	cores_init=$(seq 10 10 80);
+	cores="1 ${cores_init}";
+    elif [ $unm = "lpdpc34" ];
+    then
+	cores_init=$(seq 2 1 8);
+	cores="1 ${cores_init}";
+    elif [ $unm = "lpdxeon2680" ];
+    then
+	cores_init=$(seq 10 10 40);
+	cores="1 ${cores_init}";
+    elif [ $unm = "ol-collab1" ];
+    then
+	cores_init=$(seq 32 32 256);
+	cores="1 ${cores_init}";
+    else
+	cores_init=$(seq 6 6 48);
+	cores="1 ${cores_init}";
     fi;
 elif [ "$cores" = "insocket" ];
 then

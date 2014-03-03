@@ -3,7 +3,7 @@ ROOT = ../..
 include $(ROOT)/common/Makefile.common
 
 BINS = $(BINDIR)/lf-ht
-LLREP = $(ROOT)/src/linkedlist
+LLREP = lists
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
@@ -19,7 +19,7 @@ ssalloc.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/ssalloc.o $(PROF)/ssalloc.c
 
 linkedlist.o:
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist.o $(LLREP)/linkedlist.c $(BUILDIR)/measurements.o
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist.o $(LLREP)/linkedlist.c
 
 harris.o: $(LLREP)/linkedlist.h linkedlist.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/harris.o $(LLREP)/$(LIST_IMPL).c

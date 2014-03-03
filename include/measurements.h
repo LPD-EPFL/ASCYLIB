@@ -22,14 +22,18 @@ extern "C" {
 #    define REF_SPEED_GHZ           2.8
 #  elif defined(SCC)
 #    define REF_SPEED_GHZ           0.533
-#  elif defined(__sparc__)
+#  elif defined(MAGLITE)
 #    define REF_SPEED_GHZ           1.2
+#  elif defined(T44)
+#    define REF_SPEED_GHZ           2.998
 #  elif defined(__tilepro__)
 #    define REF_SPEED_GHZ           0.7
 #  elif defined(__tilegx__)
 #    define REF_SPEED_GHZ           1.2
 #  elif defined(LAPTOP) | defined(IGORLAPTOPLINUX) | defined(OANALAPTOPLINUX)
 #    define REF_SPEED_GHZ           2.4
+#  elif defined(LPDPC4)
+#    define REF_SPEED_GHZ           3.5
 #  else
 #    error "Need to set REF_SPEED_GHZ for the platform"
 #  endif
