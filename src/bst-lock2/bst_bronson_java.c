@@ -248,7 +248,7 @@ sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile no
                     if(node->version != node_v){
                         // releaseAll();
                         UNLOCK(node_lock);
-                        // printf("Retrying 2\n");
+                        //      f("Retrying 2\n");
                         return RETRY;
                     }
 

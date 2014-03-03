@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "utils.h"
 #include "ssalloc.h"
+#include "ssmem.h"
 #include "lock_if.h"
 #include "common.h"
 
@@ -33,6 +34,8 @@
 // typedef uint64_t bst_version_t;
 typedef uint8_t bool_t;
 typedef uint8_t function_t;
+
+extern __thread ssmem_allocator_t* alloc;
 
 typedef ALIGNED(64) union node_t node_t;
 
