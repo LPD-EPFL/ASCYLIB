@@ -55,11 +55,13 @@ do
     if [ $any_pdf -eq 1 ];
     then
 	all=$(ls ${unm}_*_heatmap_all.pdf);
+	echo "** merging: "$all;
 	pdftk $all cat output ${unm}_heatmap_all.pdf
     fi;
     if [ $any_pdf_scal -eq 1 ];
     then
 	all_scal=$(ls ${unm}_*_heatmap_all_scal.pdf);
+	echo "** merging: "$all_scal;
 	pdftk ${all_scal} cat output ${unm}_heatmap_all_scal.pdf
     fi;
 
