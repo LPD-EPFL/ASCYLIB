@@ -122,6 +122,10 @@
 
 #define SSPFD_PRINT(args...) printf("[%02lu] ", sspfd_get_id()); printf(args); printf("\n"); fflush(stdout)
 
+<<<<<<< HEAD
+=======
+//typedef uint64_t ticks;
+>>>>>>> bronsonkv
 
 #if !defined(_GETTICKS_H_) && !defined(_H_GETTICKS_)
 typedef uint64_t ticks;

@@ -32,10 +32,10 @@
  * ################################################################### */
 
 #define DS_CONTAINS(k,r)  bst_contains(k,r)
-#define DS_ADD(k,r)     bst_add(k,(k+4),r)
+#define DS_ADD(k,v,r)       bst_add(k,(sval_t)v,r)
 #define DS_REMOVE(k,r)    bst_remove(k,r)
-#define DS_SIZE(s)        bst_size(s)
-#define DS_NEW()          (node_t*) bst_initialize()
+#define DS_SIZE(s)          bst_size(s)
+#define DS_NEW()           (node_t*) bst_initialize()
 
 #define DS_TYPE             node_t
 #define DS_NODE             node_t
@@ -54,7 +54,7 @@ size_t num_threads = DEFAULT_NB_THREADS;
 size_t duration = DEFAULT_DURATION;
 
 size_t print_vals_num = 100; 
-size_t pf_vals_num = 1023;
+size_t pf_vals_num = 8;
 size_t put, put_explicit = false;
 double update_rate, put_rate, get_rate;
 
@@ -139,9 +139,13 @@ test(void* thread)
   alloc = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
   assert(alloc != NULL);
   ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, ID);
+  ssmem_allocator_t* alloc_data = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
+  assert(alloc_data != NULL);
+  ssmem_alloc_init(alloc_data, SSMEM_DEFAULT_MEM_SIZE, ID);
 #endif
-
+    
   DS_KEY key;
+  size_t* val = NULL;
   int c = 0;
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
   uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
@@ -154,21 +158,26 @@ test(void* thread)
       num_elems_thread++;
     }
     
-#if INITIALIZE_FROM_ONE == 1
-  num_elems_thread = (ID == 0) * initial;
-#endif
-
   for(i = 0; i < num_elems_thread; i++) 
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(key,set) == false)
+      if (val == NULL)
+	{
+	  val = (size_t*) ssmem_alloc(alloc_data, sizeof(size_t));
+	}
+      val[0] = key;
+
+      if(DS_ADD(key, val, set) == false)
 	{
 	  i--;
 	}
+      else
+	{
+	  val = NULL;
+	}
     }
   MEM_BARRIER;
-
   barrier_cross(&barrier);
 
   if (!ID)
@@ -177,7 +186,6 @@ test(void* thread)
     }
 
   barrier_cross(&barrier_global);
-
   while (stop == 0) 
     {
       c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
@@ -185,48 +193,63 @@ test(void* thread)
 
       if (unlikely(c <= scale_put))
 	{
-      bool_t res;
+	  if (val == NULL)
+	    {
+	      val = (size_t*) ssmem_alloc(alloc_data, sizeof(size_t));
+	    }
+	  val[0] = key;
+
+	  int res;
 	  START_TS(1);
-	  res = DS_ADD(key,set);
+	  res = DS_ADD(key, val, set);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
 	      ADD_DUR(my_putting_succ);
 	      my_putting_count_succ++;
+	      val = NULL;
 	    }
 	  ADD_DUR_FAIL(my_putting_fail);
 	  my_putting_count++;
 	} 
       else if(unlikely(c <= scale_rem))
 	{
-	  int removed;
+	  size_t* removed;
 	  START_TS(2);
-	  removed = DS_REMOVE(key,set);
+	  removed = (size_t*) DS_REMOVE(key, set);
 	  END_TS(2, my_removing_count);
-	  if(removed != 0) 
+	  if(removed != NULL) 
 	    {
 	      ADD_DUR(my_removing_succ);
 	      my_removing_count_succ++;
+	      if (removed[0] != key)
+		{
+		  printf(" *[REM]* WRONG for key: %-10lu : %-10lu @ %p\n", key, removed[0], removed);
+		}
+	      ssmem_free(alloc_data, removed);
 	    }
 	  ADD_DUR_FAIL(my_removing_fail);
 	  my_removing_count++;
 	}
       else
 	{ 
-        bool_t res;
+	  size_t* res;
 	  START_TS(0);
-	  res = DS_CONTAINS(key, set);
+	  res = (size_t*) DS_CONTAINS(key, set);
 	  END_TS(0, my_getting_count);
-	  if(res) 
+	  if(res != NULL) 
 	    {
 	      ADD_DUR(my_getting_succ);
 	      my_getting_count_succ++;
+	      if (res[0] != key)
+		{
+		  printf(" *[GET]* WRONG for key: %-10lu : %-10lu @ %p\n", key, res[0], res);
+		}
 	    }
 	  ADD_DUR_FAIL(my_getting_fail);
 	  my_getting_count++;
 	}
     }
-
   barrier_cross(&barrier);
 
   if (!ID)
@@ -263,6 +286,7 @@ test(void* thread)
 #if GC == 1
   ssmem_term();
   free(alloc);
+  free(alloc_data);
 #endif
 
   pthread_exit(NULL);
@@ -381,7 +405,8 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
-  printf("## Initial: %zu / Range: %zu /\n", initial, range);
+  printf("## Test correctness \n");
+  printf("## Initial: %zu / Range: %zu\n", initial, range);
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;

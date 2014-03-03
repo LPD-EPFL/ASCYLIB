@@ -30,6 +30,9 @@ bst_bronson_java_test_scalability.o: bst_bronson_java.h
 igor_test.o: bst_bronson_java.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/igor_test.o igor_test.c
 
+oana_test.o: bst_bronson_java.h
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/oana_test.o oana_test.c
+
 #main: measurements.o ssalloc.o  bst_bronson_java.o bst_bronson_java_test_scalability.o
 #	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_bronson_java.o $(BUILDIR)/bst_bronson_java_test_scalability.o -o $(BINS) $(LDFLAGS)
 
@@ -41,6 +44,9 @@ test1: measurements.o ssalloc.o  bst_bronson_java.o bst_bronson_java_test.o
 
 igor: measurements.o ssalloc.o  bst_bronson_java.o igor_test.o
 	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_bronson_java.o $(BUILDIR)/igor_test.o -o $(BINS) $(LDFLAGS)
+
+oana: measurements.o ssalloc.o  bst_bronson_java.o oana_test.o
+	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_bronson_java.o $(BUILDIR)/oana_test.o -o $(BINS) $(LDFLAGS)
 
 test.o: bst_bronson_java.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
