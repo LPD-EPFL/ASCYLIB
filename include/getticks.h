@@ -1,6 +1,10 @@
 #ifndef _H_GETTICKS_
 #define _H_GETTICKS_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 typedef uint64_t ticks;
 
@@ -35,6 +39,10 @@ static inline ticks
 getticks()
 {
   return get_cycle_count();
+}
+#endif
+
+#ifdef __cplusplus
 }
 #endif
 

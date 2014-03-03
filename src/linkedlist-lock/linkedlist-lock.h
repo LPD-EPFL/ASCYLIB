@@ -44,7 +44,7 @@
 #include "ssalloc.h"
 #include "ssmem.h"
 
-#define DEFAULT_LOCKTYPE	  	1
+#define DEFAULT_LOCKTYPE	  	2
 #define DEFAULT_ALTERNATE		0
 #define DEFAULT_EFFECTIVE		1
 

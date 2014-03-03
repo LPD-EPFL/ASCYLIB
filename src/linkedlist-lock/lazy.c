@@ -72,15 +72,14 @@ parse_validate(node_l_t* pred, node_l_t* curr)
 sval_t
 parse_find(intset_l_t *set, skey_t key)
 {
-  node_l_t *curr;
-  curr = set->head;
-  while (curr->key < key)
+  node_l_t* curr = set->head;
+  while (curr->key < key || is_marked_ref((uintptr_t) curr->next))
     {
       curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
     }
 
   sval_t res = 0;
-  if ((curr->key == key) && !is_marked_ref((uintptr_t) curr->next))
+  if ((curr->key == key))
     {
       res = curr->val;
     }
@@ -102,12 +101,13 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
       curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
     }
 
-  if (!is_marked_ref((uintptr_t) curr->next) && curr->key == key)
+  if (curr->key == key && !is_marked_ref((uintptr_t) curr->next))
     {
       return false;
     }
 
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  PREFETCHW_LOCK(curr);
   LOCK(ND_GET_LOCK(pred));
   LOCK(ND_GET_LOCK(curr));
   result = (parse_validate(pred, curr) && (curr->key != key));
@@ -122,10 +122,10 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
   return result;
 }
 
-  /*
-   * Logically remove an element by setting a mark bit to 1 
-   * before removing it physically.
-   */
+/*
+ * Logically remove an element by setting a mark bit to 1 
+ * before removing it physically.
+ */
 sval_t
 parse_delete(intset_l_t *set, skey_t key)
 {
@@ -140,12 +140,13 @@ parse_delete(intset_l_t *set, skey_t key)
       curr = (node_l_t*) get_unmarked_ref((uintptr_t) curr->next);
     }
 
-  if (!is_marked_ref((uintptr_t) curr->next) && key != key)
+  if (key != key && !is_marked_ref((uintptr_t) curr->next))
     {
       return false;
     }
 
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  PREFETCHW_LOCK(curr);
   LOCK(ND_GET_LOCK(pred));
   LOCK(ND_GET_LOCK(curr));
   if (parse_validate(pred, curr) && (key == curr->key))

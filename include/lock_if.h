@@ -3,6 +3,8 @@
 
 #include "utils.h"
 
+#define PREFETCHW_LOCK(lock)                            PREFETCHW(lock)
+
 #if defined(MUTEX)
 typedef pthread_mutex_t ptlock_t;
 #  define INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL);
@@ -204,7 +206,6 @@ ticket_unlock(volatile ptlock_t* l)
 /* GLOBAL LOCK --------------------------------------------------------------------------------------- */
 /* --------------------------------------------------------------------------------------------------- */
 
-/* #define LL_GLOBAL_LOCK */
 
 #if defined(LL_GLOBAL_LOCK)
 #  define ND_GET_LOCK(nd)                 nd /* LOCK / UNLOCK are not defined in any case ;-) */
@@ -213,11 +214,13 @@ ticket_unlock(volatile ptlock_t* l)
 #  undef DESTROY_LOCK
 #  undef LOCK
 #  undef UNLOCK
+#  undef PREFETCHW_LOCK
 
 #  define INIT_LOCK(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)
 #  define UNLOCK(lock)
+#  define PREFETCHW_LOCK(lock)
 
 #else  /* !LL_GLOBAL_LOCK */
 #  define ND_GET_LOCK(nd)                 &nd->lock

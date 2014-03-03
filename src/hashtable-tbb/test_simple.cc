@@ -276,8 +276,8 @@ test(void* thread)
       if (unlikely(c <= scale_put))
 	{
 	  int res;
-	  START_TS(1);
 	  IntTable::accessor a;
+	  START_TS(1);
 	  res = DS_ADD(mset, a, key);
 	  END_TS(1, my_putting_count);
 	  if(res)
