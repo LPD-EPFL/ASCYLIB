@@ -15,7 +15,9 @@
 
 #define CHM_NUM_SEGMENTS                16
 #define CHM_LOAD_FACTOR                 0.75
+#define CHM_TRY_PREFETCH                0
 #define CHM_MAX_SCAN_RETRIES            64
+
 /* 
  * structures
  */

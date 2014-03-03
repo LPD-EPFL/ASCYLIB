@@ -247,16 +247,21 @@ chm_put(chm_t* set, skey_t key, sval_t val)
   volatile chm_seg_t* seg;
   volatile ptlock_t* seg_lock;
 
+#if CHM_TRY_PREFETCH == 1
   int walks = 0;
+#endif
+
   do 
     {
       seg = set->segments[seg_num];
       seg_lock = &seg->lock;
+#if CHM_TRY_PREFETCH == 1
       if (walks > 0 && walks <= CHM_MAX_SCAN_RETRIES)
 	{
 	  chm_put_prefetch(seg, set->hash_seed, key);
 	}
       walks++;
+#endif
     }
   while (!TRYLOCK_A(seg_lock));
 
@@ -335,16 +340,21 @@ chm_rem(chm_t* set, skey_t key)
   volatile chm_seg_t* seg;
   volatile ptlock_t* seg_lock;
 
+#if CHM_TRY_PREFETCH == 1
   int walks = 0;
+#endif
+
   do 
     {
       seg = set->segments[seg_num];
       seg_lock = &seg->lock;
+#if CHM_TRY_PREFETCH == 1
       if (walks > 0 && walks <= CHM_MAX_SCAN_RETRIES)
 	{
 	  chm_rem_prefetch(seg, set->hash_seed, key);
 	}
       walks++;
+#endif
     }
   while (!TRYLOCK_A(seg_lock));
 

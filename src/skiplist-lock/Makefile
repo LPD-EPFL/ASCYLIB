@@ -2,15 +2,16 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS = $(BINDIR)/lb-sl$(BIN_SUFFIX)
+ALGO_O = $(LBSL).o
+ALGO_C = $(LBSL).c
+ALGO_SUFFIX = "_$(LBSL)"
+
+BINS = "$(BINDIR)/lb-sl$(ALGO_SUFFIX)$(BIN_SUFFIX)"
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
 
 all:	main
-
-ALGO_O = $(LBSL).o
-ALGO_C = $(LBSL).c
 
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c

@@ -31,8 +31,8 @@
 #  endif
 #  if defined(__SSE__)
 #    include <xmmintrin.h>
-#else
-#define _mm_pause() asm volatile ("nop")
+#  else
+#    define _mm_pause() asm volatile ("nop")
 #  endif
 #  if defined(__SSE2__)
 #    include <emmintrin.h>
@@ -441,15 +441,17 @@ is_power_of_two (unsigned int x)
 
 
   /* PLATFORM specific -------------------------------------------------------------------- */
-#if defined(__x86_64__)
-#  define PREFETCHW(x)		     asm volatile("prefetchw %0" :: "m" (*(unsigned long *)x))
-#elif defined(__sparc__)
-#  define PREFETCHW(x)		
-#elif defined(XEON)
-#  define PREFETCHW(x)		
-#else
-#  define PREFETCHW(x)		
-#endif
+#if !defined(PREFETCHW)
+#  if defined(__x86_64__)
+#    define PREFETCHW(x)		     asm volatile("prefetchw %0" :: "m" (*(unsigned long *)x))
+#  elif defined(__sparc__)
+#    define PREFETCHW(x)		
+#  elif defined(XEON)
+#    define PREFETCHW(x)		
+#  else
+#    define PREFETCHW(x)		
+#  endif
+#endif 
 
   //debugging functions
 #ifdef DEBUG
@@ -508,9 +510,9 @@ is_power_of_two (unsigned int x)
     cpu_set_t mask;
     CPU_ZERO(&mask);
     CPU_SET(cpu, &mask);
-#if defined(PLATFORM_NUMA)
+#  if defined(PLATFORM_NUMA)
     numa_set_preferred(get_cluster(cpu));
-#endif
+#  endif
     pthread_t thread = pthread_self();
     if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &mask) != 0) 
       {
