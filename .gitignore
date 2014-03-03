@@ -3,6 +3,7 @@
 /.#COMPILE
 /.gitignore~
 /any.sh
+/archive
 /bin
 /build
 /core
