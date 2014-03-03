@@ -55,7 +55,7 @@ chm_seg_new(size_t capacity, float load_factor)
       seg->table[i] = NULL;
     }
 
-  INIT_LOCK(&seg->lock);
+  INIT_LOCK_A(&seg->lock);
   return seg;
 }
 
@@ -258,7 +258,7 @@ chm_put(chm_t* set, skey_t key, sval_t val)
 	}
       walks++;
     }
-  while (!TRYLOCK(seg_lock));
+  while (!TRYLOCK_A(seg_lock));
 
   chm_node_t** bucket = &seg->table[hash(key, set->hash_seed) & seg->hash];
   chm_node_t* curr = *bucket;
@@ -267,7 +267,7 @@ chm_put(chm_t* set, skey_t key, sval_t val)
     {
       if (curr->key == key)
 	{
-	  UNLOCK(seg_lock);
+	  UNLOCK_A(seg_lock);
 	  return 0;
 	}
       pred = curr;
@@ -295,7 +295,7 @@ chm_put(chm_t* set, skey_t key, sval_t val)
 	  *bucket = n;
 	}
       seg->size = sizepp;
-      UNLOCK(seg_lock);
+      UNLOCK_A(seg_lock);
     }
 
   return 1;
@@ -346,7 +346,7 @@ chm_rem(chm_t* set, skey_t key)
 	}
       walks++;
     }
-  while (!TRYLOCK(seg_lock));
+  while (!TRYLOCK_A(seg_lock));
 
   chm_node_t** bucket = &seg->table[hash(key, set->hash_seed) & seg->hash];
   chm_node_t* curr = *bucket;
@@ -368,13 +368,13 @@ chm_rem(chm_t* set, skey_t key)
 	  ssmem_free(alloc, (void*) curr);
 #endif
 	  seg->size--;
-	  UNLOCK(seg_lock);
+	  UNLOCK_A(seg_lock);
 	  return curr->val;
 	}
       pred = curr;
       curr = curr->next;
     }
-  UNLOCK(seg_lock);
+  UNLOCK_A(seg_lock);
  return 0;
 }
 

@@ -47,6 +47,7 @@ typedef volatile UTYPE ptlock_t;
 #  define GL_INIT_LOCK(lock)				tas_init(lock)
 #  define GL_DESTROY_LOCK(lock)			
 #  define GL_LOCK(lock)					tas_lock(lock)
+#  define GL_TRYLOCK(lock)				tas_trylock(lock)
 #  define GL_UNLOCK(lock)              			tas_unlock(lock)
 
 #  define TAS_FREE 0
@@ -238,6 +239,13 @@ ticket_unlock(volatile ptlock_t* l)
 #  define UNLOCK(lock)
 #  define PREFETCHW_LOCK(lock)
 
+#  define INIT_LOCK_A(lock)       GL_INIT_LOCK(lock)
+#  define DESTROY_LOCK_A(lock)    GL_DESTROY_LOCK(lock)			
+#  define LOCK_A(lock)            GL_LOCK(lock)
+#  define TRYLOCK_A(lock)         GL_TRYLOCK(lock)
+#  define UNLOCK_A(lock)          GL_UNLOCK(lock)
+#  define PREFETCHW_LOCK_A(lock)  
+
 #else  /* !LL_GLOBAL_LOCK */
 #  define ND_GET_LOCK(nd)                 &nd->lock
 
@@ -250,6 +258,13 @@ ticket_unlock(volatile ptlock_t* l)
 #  define GL_DESTROY_LOCK(lock)			
 #  define GL_LOCK(lock)
 #  define GL_UNLOCK(lock)
+
+#  define INIT_LOCK_A(lock)       INIT_LOCK(lock)
+#  define DESTROY_LOCK_A(lock)    DESTROY_LOCK(lock)			
+#  define LOCK_A(lock)            LOCK(lock)
+#  define TRYLOCK_A(lock)         TRYLOCK(lock)
+#  define UNLOCK_A(lock)          UNLOCK(lock)
+#  define PREFETCHW_LOCK_A(lock)  PREFETCHW_LOCK(lock)
 
 #endif
 
