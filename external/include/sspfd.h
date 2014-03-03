@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define SSPFD_DO_TIMINGS 1
+//#define SSPFD_DO_TIMINGS 1
 
 #if SSPFD_DO_TIMINGS != 1	/* empty macros when not benchmarkings */
 /* 
@@ -121,10 +121,9 @@
 #endif 
 
 #define SSPFD_PRINT(args...) printf("[%02lu] ", sspfd_get_id()); printf(args); printf("\n"); fflush(stdout)
-
+#if !defined(_GETTICKS_H_) && !defined(_H_GETTICKS_)
 typedef uint64_t ticks;
 
-#if !defined(_GETTICKS_H_) && !defined(_H_GETTICKS_)
 #if defined(__i386__)
 static inline ticks 
 getticks(void) 
