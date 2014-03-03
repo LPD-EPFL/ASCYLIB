@@ -1,3 +1,4 @@
+
 *~
 /.#COMPILE
 /.gitignore~
@@ -13,4 +14,4 @@
 /noise.o
 /plots
 /runcrash
-
+/throughput_ticket
