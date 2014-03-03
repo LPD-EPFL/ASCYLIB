@@ -29,17 +29,17 @@ do
 
 	data=./data/${unm}_bst_heatmap_uc_${initial}.csv;
 	[ -f $data ] && R -f ./scripts/heatmap2_th.r --args $data ./$plots_folder/${unm}_bst_heatmap_uc_${initial}.pdf "BST, lf/lb, $unm, $initial initial" "Cores" "Update ratio" ./${data_folder}/${unm}_bst_heatmap_uc_frac_${initial}.csv
-    
-    data=./data/${unm}_ll_heatmap_uc_scal_${initial}.csv;
+	
+	data=./data/${unm}_ll_heatmap_uc_scal_${initial}.csv;
 	[ -f $data ] && R -f ./scripts/heatmap2_sc.r --args $data ./$plots_folder/${unm}_ll_heatmap_scal_uc_${initial}.pdf "LL, Scal, lf/lb, $unm, $initial initial" "Cores" "Update ratio" ./${data_folder}/${unm}_ll_heatmap_uc_scal_frac_${initial}.csv
 
-    data=./data/${unm}_ht_heatmap_uc_scal_${initial}.csv;
+	data=./data/${unm}_ht_heatmap_uc_scal_${initial}.csv;
 	[ -f $data ] && R -f ./scripts/heatmap2_sc.r --args $data ./$plots_folder/${unm}_ht_heatmap_scal_uc_${initial}.pdf "HT, Scal, lf/lb, $unm, $initial initial" "Cores" "Update ratio" ./${data_folder}/${unm}_ht_heatmap_uc_scal_frac_${initial}.csv
 
-    data=./data/${unm}_sl_heatmap_uc_scal_${initial}.csv;
+	data=./data/${unm}_sl_heatmap_uc_scal_${initial}.csv;
 	[ -f $data ] && R -f ./scripts/heatmap2_sc.r --args $data ./$plots_folder/${unm}_sl_heatmap_scal_uc_${initial}.pdf "SL, Scal, lf/lb, $unm, $initial initial" "Cores" "Update ratio" ./${data_folder}/${unm}_sl_heatmap_uc_scal_frac_${initial}.csv
 
-    data=./data/${unm}_bst_heatmap_uc_scal_${initial}.csv;
+	data=./data/${unm}_bst_heatmap_uc_scal_${initial}.csv;
 	[ -f $data ] && R -f ./scripts/heatmap2_sc.r --args $data ./$plots_folder/${unm}_bst_heatmap_scal_uc_${initial}.pdf "BST, Scal, lf/lb, $unm, $initial initial" "Cores" "Update ratio" ./${data_folder}/${unm}_bst_heatmap_uc_scal_frac_${initial}.csv
 
 
