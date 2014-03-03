@@ -10,11 +10,7 @@ volatile node_t* bst_initialize() {
       s++;
     }
 
-<<<<<<< HEAD
   volatile node_t* root = (node_t*) ssalloc_aligned(CACHE_LINE_SIZE, s);
-=======
-  volatile node_t* root = (node_t*) ssalloc(s);
->>>>>>> bronsonkv
 
   // assign minimum key to the root, actual tree will be 
   // the right subtree of the root
@@ -26,11 +22,7 @@ volatile node_t* bst_initialize() {
   root->version = 0;
   root->parent = NULL;
   INIT_LOCK(&(root->lock));
-<<<<<<< HEAD
-	
-=======
 
->>>>>>> bronsonkv
   return root;
 }
 
