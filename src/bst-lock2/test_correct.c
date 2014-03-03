@@ -41,6 +41,7 @@
 #define DS_NODE             node_t
 #define DS_KEY              skey_t
 
+__thread ssmem_allocator_t* alloc;
 
 /* ################################################################### *
  * GLOBALS
@@ -53,7 +54,7 @@ size_t num_threads = DEFAULT_NB_THREADS;
 size_t duration = DEFAULT_DURATION;
 
 size_t print_vals_num = 100; 
-size_t pf_vals_num = 1023;
+size_t pf_vals_num = 8;
 size_t put, put_explicit = false;
 double update_rate, put_rate, get_rate;
 
