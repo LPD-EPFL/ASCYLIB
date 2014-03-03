@@ -1,17 +1,28 @@
 #!/bin/bash
 
+#param1: list of platoform(s), e.g., "maglite lpdpc4"
+#param2: folder of plots to merge, e.g., "archive/something/plots"
+
 structures="ll ht sl bst";
 unames="maglite lpd48core lpdxeon2680 parsasrv1.epfl.ch diassrv8 lpdpc4 ol-collab1"
 if [ $# -ge 1 ];
 then
-    unames="$@";
+    unames="$1";
     echo "**Creating plots for: $unames";
 fi;
-inits="256 1024 2048 8192 65536"
-
 
 plots_folder=./plots
+
+if [ $# -ge 2 ];
+then
+    plots_folder="$2";
+    echo "**Merging plots in: $plots_folder";
+fi;
+
 cd $plots_folder;
+
+inits="256 1024 2048 8192 65536"
+
 
 #per size
 for unm in $unames

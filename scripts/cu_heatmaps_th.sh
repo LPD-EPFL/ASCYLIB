@@ -1,17 +1,29 @@
 #!/bin/bash
 
+#param1: list of platoform(s), e.g., "maglite lpdpc4"
+#param2: folder of data to create plots for, e.g., "archive/something"
+
 unames="maglite lpd48core lpdxeon2680 parsasrv1.epfl.ch diassrv8 lpdpc4 ol-collab1"
 if [ $# -ge 1 ];
 then
-    unames="$@";
+    unames="$1";
     echo "**Creating plots for: $unames";
 fi;
 
-inits="256 1024 2048 8192 65536"
-
 plots_folder=plots
 data_folder=data
-[ -d foo ] || mkdir $plots_folder;
+
+if [ $# -ge 2 ];
+then
+    data_folder="$2";
+    echo "**Creating plots for data files in: $data_folder";
+    plots_folder=${data_folder}/plots;
+    echo "**Creating plots in: $plots_folder";
+fi;
+
+[ -d $plots_folder ] || mkdir -p $plots_folder;
+
+inits="256 1024 2048 8192 65536"
 
 for unm in $unames
 do
