@@ -1,4 +1,3 @@
-#!/bin/bash
 
 file_prefix=$1
 shift;
