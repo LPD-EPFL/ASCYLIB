@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-/* #define SSPFD_DO_TIMINGS 1 */
+//#define SSPFD_DO_TIMINGS 1
 
 #if SSPFD_DO_TIMINGS != 1	/* empty macros when not benchmarkings */
 /* 
@@ -121,12 +121,10 @@
 #endif 
 
 #define SSPFD_PRINT(args...) printf("[%02lu] ", sspfd_get_id()); printf(args); printf("\n"); fflush(stdout)
-
-
 #if !defined(_GETTICKS_H_) && !defined(_H_GETTICKS_)
 typedef uint64_t ticks;
 
-#  if defined(__i386__)
+#if defined(__i386__)
 static inline ticks 
 getticks(void) 
 {
@@ -135,7 +133,7 @@ getticks(void)
   __asm__ __volatile__("rdtsc" : "=A" (ret));
   return ret;
 }
-#  elif defined(__x86_64__)
+#elif defined(__x86_64__)
 static inline ticks
 getticks(void)
 {
@@ -143,7 +141,7 @@ getticks(void)
   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
   return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
 }
-#  elif defined(__sparc__)
+#elif defined(__sparc__)
 static inline ticks
 getticks()
 {
@@ -151,13 +149,14 @@ getticks()
   __asm__ __volatile__ ("rd %%tick, %0" : "=r" (ret) : "0" (ret)); 
   return ret;
 }
-#  elif defined(__tile__)
-#    include <arch/cycle.h>
+#elif defined(__tile__)
+#include <tmc/mem.h>
+#include <arch/cycle.h>
 static inline ticks getticks()
 {
   return get_cycle_count();
 }
-#  endif
+#endif
 #endif	/* _H_GETTICKS_ */
 
 #if !defined(PREFETCHW)
