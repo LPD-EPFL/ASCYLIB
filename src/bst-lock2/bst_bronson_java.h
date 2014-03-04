@@ -93,7 +93,7 @@ sval_t attempt_node_update(function_t func, sval_t new_value, volatile node_t* p
 
 sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v);
 
-volatile node_t* new_node(int height, skey_t key, uint64_t version, sval_t value, volatile node_t* parent, volatile node_t* left, volatile node_t* right);
+volatile node_t* new_node(int height, skey_t key, uint64_t version, sval_t value, volatile node_t* parent, volatile node_t* left, volatile node_t* right, bool_t initializing);
 
 bool_t attempt_insert_into_empty(skey_t key, sval_t value, volatile node_t* holder);
 

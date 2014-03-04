@@ -20,6 +20,12 @@ int main(int argc, char const *argv[])
 
 	ssalloc_init();
 
+#if GC == 1
+	alloc = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
+	assert(alloc != NULL);
+	ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, 0);
+#endif
+
 	node_t* root = bst_initialize();
 
 	printf("node size: %d\n", sizeof(node_t));

@@ -1,29 +1,46 @@
 #include "bst_bronson_java.h"
 #include <pthread.h>
 
+__thread ssmem_allocator_t* alloc;
 
 volatile node_t* bst_initialize() {
 
-  size_t s = sizeof(node_t);
-  while ((s & 63) != 0)
-    {
-      s++;
-    }
-
-  volatile node_t* root = (node_t*) ssalloc_aligned(CACHE_LINE_SIZE, s);
-
-  // assign minimum key to the root, actual tree will be 
-  // the right subtree of the root
-  root->key = 0;
-  root->value = FALSE; 
-  root->left = NULL;
-  root->right = NULL;
-  root->height = 0;
-  root->version = 0;
-  root->parent = NULL;
-  INIT_LOCK(&(root->lock));
+  volatile node_t* root = new_node(0, 0, 0, 0, NULL, NULL, NULL, TRUE);
 
   return root;
+}
+
+ volatile node_t* new_node(int height, skey_t key, uint64_t version, sval_t value, volatile node_t* parent, volatile node_t* left, volatile node_t* right, bool_t initializing) {
+
+    volatile node_t* node;
+
+#if GC == 1
+    if (unlikely(initializing))  {
+        node = (volatile node_t *) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(node_t));
+    } else {
+        node = (volatile node_t *) ssmem_alloc(alloc, sizeof(node_t));
+    }
+#else
+    node = (volatile node_t *) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(node_t));
+#endif
+
+    if (node == NULL) {
+        perror("malloc in bst create node");
+        exit(1);
+    }
+
+    node->height = height;
+    node->key = key;
+    node->version = version;
+    node->value = value;
+    node->parent = parent;
+    node->left = left;
+    node->right = right;
+    INIT_LOCK(&(node->lock));
+
+    // copied as-is from Howley tree. What does this do?
+    asm volatile("" ::: "memory");
+    return node;
 }
 
 // When the function returns 0, it means that the node was not found
@@ -180,7 +197,7 @@ bool_t attempt_insert_into_empty(skey_t key, sval_t value, volatile node_t* hold
 
 
     if(holder->right == NULL){
-        holder->right = new_node(1, key, 0, value, holder, NULL, NULL);
+        holder->right = new_node(1, key, 0, value, holder, NULL, NULL, FALSE);
         holder->height = 2;
 
         UNLOCK(holder_lock);
@@ -190,22 +207,6 @@ bool_t attempt_insert_into_empty(skey_t key, sval_t value, volatile node_t* hold
     	UNLOCK(holder_lock);
         return FALSE;
     }
-}
-
- volatile node_t* new_node(int height, skey_t key, uint64_t version, sval_t value, volatile node_t* parent,   volatile node_t* left, volatile node_t* right) {
-
-	volatile node_t* node = (node_t*) ssalloc(sizeof(node_t));
-
-	node->height = height;
-    node->key = key;
-    node->version = version;
-    node->value = value;
-    node->parent = parent;
-    node->left = left;
-    node->right = right;
-    INIT_LOCK(&(node->lock));
-
-    return node;
 }
 
 sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile node_t* parent, volatile node_t* node, uint64_t node_v) {
@@ -263,7 +264,7 @@ sval_t attempt_update(skey_t key, function_t func, sval_t new_value, volatile no
                             return NO_UPDATE_RESULT(func, 0);
                         }
 
-                        volatile node_t* new_child = new_node(1, key, 0, new_value, node, NULL, NULL);
+                        volatile node_t* new_child = new_node(1, key, 0, new_value, node, NULL, NULL, FALSE);
                         set_child(node, new_child, is_right);
 
                         success = TRUE;
