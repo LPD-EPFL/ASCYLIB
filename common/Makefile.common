@@ -292,6 +292,10 @@ else
 	CFLAGS += -DINITIALIZE_FROM_ONE=1
 endif
 
+ifeq ($(SET_CPU),0)
+	CFLAGS += -DNO_SET_CPU
+endif
+
 LFSL=herlihy
 LBSL=herlihy
 ifeq ($(LBSL),herlihy)

@@ -496,6 +496,7 @@ is_power_of_two (unsigned int x)
   static inline 
   void set_cpu(int cpu) 
   {
+#ifndef NO_SET_CPU
 #ifdef __sparc__
     processor_bind(P_LWPID,P_MYID, cpu, NULL);
 #elif defined(__tile__)
@@ -518,6 +519,7 @@ is_power_of_two (unsigned int x)
       {
 	fprintf(stderr, "Error setting thread affinity\n");
       }
+#endif
 #endif
   }
 
