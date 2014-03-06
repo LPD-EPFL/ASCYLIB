@@ -38,8 +38,12 @@ noise:
 
 tbb:
 	$(MAKE) "LOCK=TAS" src/hashtable-tbb
+
 lfsl:
 	$(MAKE) "STM=LOCKFREE" src/skiplist
+
+lfll:
+	$(MAKE) "STM=LOCKFREE" src/linkedlist
 
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
