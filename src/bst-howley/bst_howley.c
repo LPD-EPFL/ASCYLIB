@@ -167,7 +167,9 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
 
 			bst_help_child_cas(cas_op, curr, root);
+#ifndef __tile__
             if (UNFLAG(curr_op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr_op));
+#endif
 			return TRUE;
 		} else {
             ssmem_free(alloc,cas_op);
