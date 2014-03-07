@@ -167,10 +167,14 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
 
 			bst_help_child_cas(cas_op, curr, root);
+#if GC == 1
             if (UNFLAG(curr_op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr_op));
+#endif
 			return TRUE;
 		} else {
+#if GC == 1
             ssmem_free(alloc,cas_op);
+#endif
         }
 	}
 }
@@ -210,8 +214,10 @@ sval_t bst_remove(skey_t k, node_t* root){
 		if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
 			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
 				bst_help_marked(pred, pred_op, curr, root);
+#if GC == 1
                 if (UNFLAG(curr->op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr->op));
                 ssmem_free(alloc,curr);
+#endif
 				return res;
 			}
 		} else { // node has two children
@@ -231,14 +237,20 @@ sval_t bst_remove(skey_t k, node_t* root){
 
 			MEM_BARRIER;
 			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
+#if GC == 1
                 if (UNFLAG(replace_op)!=0) ssmem_free(alloc,(void*)UNFLAG(replace_op));
+#endif
 				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
                     //if (UNFLAG(replace->op)!=0) ssmem_free(alloc,(void*)UNFLAG(replace->op));
+#if GC == 1
                     ssmem_free(alloc,replace);
+#endif
 					return res;
 				}
 			} else {
+#if GC == 1
                 ssmem_free(alloc,reloc_op);
+#endif
             }
 		}
 	}
@@ -254,7 +266,9 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 			CAS_U32(&(op->relocate_op.state), STATE_OP_ONGOING, STATE_OP_SUCCESSFUL);
 			seen_state = STATE_OP_SUCCESSFUL;
             if (seen_op == op->relocate_op.dest_op) {
+#if GC == 1
                 if (UNFLAG(seen_op)!=0) ssmem_free(alloc,(void*)UNFLAG(seen_op));
+#endif
             } 
 		} else {
 			// VCAS in original implementation
@@ -306,9 +320,13 @@ void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* r
 #endif
 	if (CAS_PTR(&(pred->op), pred_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == pred_op) {
 		bst_help_child_cas(cas_op, pred, root);
+#if GC == 1
         if (UNFLAG(pred_op)!=0) ssmem_free(alloc,(void*)UNFLAG(pred_op));
+#endif
 	} else {
+#if GC == 1
         ssmem_free(alloc,cas_op);
+#endif
     }
 }
 
