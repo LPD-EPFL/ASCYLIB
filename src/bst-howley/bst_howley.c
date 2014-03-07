@@ -168,7 +168,7 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 
 			bst_help_child_cas(cas_op, curr, root);
 #if GC == 1
-            if (UNFLAG(curr_op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr_op));
+            //if (UNFLAG(curr_op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr_op));
 #endif
 			return TRUE;
 		} else {
