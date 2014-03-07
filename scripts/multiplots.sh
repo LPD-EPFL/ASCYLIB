@@ -22,7 +22,7 @@ fi;
 for s in $structs; do
     for i in $inits; do
         for unm in $unames; do
-           R -f change_data.r --args ./data/${unm}_${s}_heatmap_uc_${i}.csv ./data/${unm}_${s}_heatmap_uc_scal_${i}.csv ./data/${unm}_${s}_heatmap_uc_lat_get_ratio_${i}.csv ./data/${unm}_${s}_heatmap_uc_lat_put_ratio_${i}.csv ./data/${unm}_${s}_heatmap_uc_lat_rem_ratio_${i}.csv ${plots_folder}/${unm}_${s}_${i}_merged.pdf "Stats $s $unm init=${i}" 
+           R -f scripts/multiplot.r  --args ./data/${unm}_${s}_heatmap_uc_${i}.csv ./data/${unm}_${s}_heatmap_uc_scal_${i}.csv ./data/${unm}_${s}_heatmap_uc_lat_get_ratio_${i}.csv ./data/${unm}_${s}_heatmap_uc_lat_put_ratio_${i}.csv ./data/${unm}_${s}_heatmap_uc_lat_rem_ratio_${i}.csv ${plots_folder}/${unm}_multi_${s}_${i}_merged.pdf "Stats $s $unm init=${i}" 
         done
     done
 done
