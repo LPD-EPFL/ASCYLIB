@@ -1,11 +1,12 @@
 .PHONY:	all
 
-BENCHS = src/sftree src/linkedlist src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/
+BENCHS = src/sftree src/linkedlist src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/ src/tests/
 LBENCHS = src/linkedlist-lock src/hashtable-lock src/hashtable-tbb src/hashtable-java src/skiplist-lock src/bst-lock2
 LFBENCHS = src/linkedlist src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley
 NOISE = src/noise
+TESTS = src/tests
 
-.PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE)
+.PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS)
 
 all:	lockfree tas lbhtgl
 
@@ -35,6 +36,9 @@ lockfree:
 
 noise:
 	$(MAKE) $(NOISE)
+
+tests:
+	$(MAKE) $(TESTS)
 
 tbb:
 	$(MAKE) "LOCK=TAS" src/hashtable-tbb
@@ -79,8 +83,8 @@ clean:
 	$(MAKE) -C src/bst-lock2 clean
 	$(MAKE) -C src/deque clean
 	$(MAKE) -C src/noise clean
+	$(MAKE) -C src/tests clean
 	rm -rf build
-#	$(MAKE) -C rbtree-boosted clean
 
 # $(BENCHS):
 # 	$(MAKE) -C $@ $(TARGET)
@@ -92,4 +96,7 @@ $(LFBENCHS):
 	$(MAKE) -C $@ $(TARGET)
 
 $(NOISE):
+	$(MAKE) -C $@ $(TARGET)
+
+$(TESTS):
 	$(MAKE) -C $@ $(TARGET)
