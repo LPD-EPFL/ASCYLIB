@@ -17,6 +17,8 @@
 #include <unistd.h>
 #include <malloc.h>
 #include "utils.h"
+#include "common.h"
+#include "ssmem.h"
 #include "atomic_ops.h"
 #include "rapl_read.h"
 #ifdef __sparc__
@@ -25,32 +27,29 @@
 #  include <sys/procset.h>
 #endif
 
-#include "bst_howley.h"
-
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(k,r)  bst_contains(k,r)
-#define DS_ADD(k,r)       bst_add(k,(k+4),r)
-#define DS_REMOVE(k,r)    bst_remove(k,r)
-#define DS_SIZE(s)          bst_size(s)
-#define DS_NEW()           bst_initialize()
+#define DS_CONTAINS(s,k)  (k & 1)
+#define DS_ADD(s,k)       (k & 1)
+#define DS_REMOVE(s,k)    (k & 1)
+#define DS_SIZE(s)        1
+#define DS_NEW()          (void*) 1
 
-#define DS_TYPE             node_t
-#define DS_NODE             node_t
-#define DS_KEY              skey_t
-
+#define DS_TYPE           void*
+#define DS_NODE           int
 
 /* ################################################################### *
  * GLOBALS
  * ################################################################### */
 
-size_t initial = DEFAULT_INITIAL;
-size_t range = DEFAULT_RANGE; 
-size_t update = DEFAULT_UPDATE;
-size_t num_threads = DEFAULT_NB_THREADS; 
-size_t duration = DEFAULT_DURATION;
+size_t initial = 1024;
+size_t range = 2048;
+size_t load_factor;
+size_t update = 20;
+size_t num_threads = 1;
+size_t duration = 1000;
 
 size_t print_vals_num = 100; 
 size_t pf_vals_num = 1023;
@@ -60,6 +59,7 @@ double update_rate, put_rate, get_rate;
 size_t size_after = 0;
 int seed = 0;
 __thread unsigned long * seeds;
+__thread ssmem_allocator_t* alloc;
 uint32_t rand_max;
 #define rand_min 1
 
@@ -107,7 +107,7 @@ test(void* thread)
   set_cpu(phys_id);
   ssalloc_init();
 
-  DS_TYPE* set = td->set;
+  UNUSED DS_TYPE* set = td->set;
 
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
 
@@ -142,7 +142,7 @@ test(void* thread)
 
   RR_INIT(phys_id);
 
-  DS_KEY key;
+  uint64_t key;
   int c = 0;
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
   uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
@@ -157,13 +157,25 @@ test(void* thread)
 
 #if INITIALIZE_FROM_ONE == 1
   num_elems_thread = (ID == 0) * initial;
+  key = range;
 #endif
-    
+
   for(i = 0; i < num_elems_thread; i++) 
     {
+#if INITIALIZE_FROM_ONE == 1
+      if (initial > 10000)
+	{
+	  key--;
+	}
+      else
+	{
+	  key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
+	}
+#else
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
+#endif
       
-      if(DS_ADD(key,set) == false)
+      if(DS_ADD(set, key) == false)
 	{
 	  i--;
 	}
@@ -177,6 +189,7 @@ test(void* thread)
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
+
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
@@ -188,9 +201,9 @@ test(void* thread)
 
       if (unlikely(c <= scale_put))
 	{
-      bool_t res;
+	  int res;
 	  START_TS(1);
-	  res = DS_ADD(key,set);
+	  res = DS_ADD(set, key);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -204,7 +217,7 @@ test(void* thread)
 	{
 	  int removed;
 	  START_TS(2);
-	  removed = DS_REMOVE(key,set);
+	  removed = DS_REMOVE(set, key);
 	  END_TS(2, my_removing_count);
 	  if(removed != 0) 
 	    {
@@ -216,11 +229,11 @@ test(void* thread)
 	}
       else
 	{ 
-      bool_t res;
+	  int res;
 	  START_TS(0);
-	  res = DS_CONTAINS(key, set);
+	  res = DS_CONTAINS(set, key);
 	  END_TS(0, my_getting_count);
-	  if(res) 
+	  if(res != 0) 
 	    {
 	      ADD_DUR(my_getting_succ);
 	      my_getting_count_succ++;
@@ -297,7 +310,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:p:b:v:f:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -359,6 +372,9 @@ main(int argc, char **argv)
 	  put_explicit = 1;
 	  put = atoi(optarg);
 	  break;
+	case 'l':
+	  load_factor = atoi(optarg);
+	  break;
 	case 'v':
 	  print_vals_num = atoi(optarg);
 	  break;
@@ -385,7 +401,7 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
-  printf("## Initial: %zu / Range: %zu /\n", initial, range);
+  printf("## Initial: %zu / Range: %zu\n", initial, range);
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;
@@ -414,8 +430,6 @@ main(int argc, char **argv)
       put_rate = update_rate / 2;
     }
 
-
-
   get_rate = 1 - update_rate;
 
   /* printf("num_threads = %u\n", num_threads); */
@@ -433,7 +447,7 @@ main(int argc, char **argv)
   timeout.tv_nsec = (duration % 1000) * 1000000;
     
   stop = 0;
-
+    
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
 
@@ -548,7 +562,7 @@ main(int argc, char **argv)
   if (size_after != (initial + pr))
     {
       printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
-      assert(size_after == (initial + pr));
+      /* assert(size_after == (initial + pr)); */
     }
 
   printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success", "succ %", "total %", "effective %");
@@ -582,7 +596,7 @@ main(int argc, char **argv)
   double eop_corrected = (1e6 * pow_tot_corrected) / throughput;
   printf("#Energy per Operation                      : %11f (corrected = %10f) uJ\n", eop, eop_corrected);
 #endif    
-    
+
   pthread_exit(NULL);
     
   return 0;

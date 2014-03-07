@@ -304,3 +304,7 @@ else
 	CFLAGS += -DLBSL=2
 endif
 
+ifeq ($(POWER),1)
+	CFLAGS += -DRAPL_READ_ENABLE=1
+	LDFLAGS += -lraplread -lm
+endif

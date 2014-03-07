@@ -18,6 +18,7 @@
 #include <malloc.h>
 #include "utils.h"
 #include "atomic_ops.h"
+#include "rapl_read.h"
 #ifdef __sparc__
 #  include <sys/types.h>
 #  include <sys/processor.h>
@@ -138,7 +139,9 @@ test(void* thread)
   assert(alloc != NULL);
   ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, ID);
 #endif
-    
+
+  RR_INIT(phys_id);
+
   uint64_t key;
   int c = 0;
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
@@ -188,6 +191,8 @@ test(void* thread)
 
 
   barrier_cross(&barrier_global);
+
+  RR_START_SIMPLE();
 
   while (stop == 0) 
     {
@@ -239,6 +244,7 @@ test(void* thread)
     }
 
   barrier_cross(&barrier);
+  RR_STOP_SIMPLE();
 
   if (!ID)
     {
@@ -519,8 +525,8 @@ main(int argc, char **argv)
   barrier_cross(&barrier_global);
   gettimeofday(&start, NULL);
   nanosleep(&timeout, NULL);
-
   stop = 1;
+
   gettimeofday(&end, NULL);
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
@@ -609,6 +615,19 @@ main(int argc, char **argv)
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
+
+  RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
+#if RAPL_READ_ENABLE == 1
+  rapl_stats_t s;
+  RR_STATS(&s);
+  double pow_tot_correction = (throughput * eng_per_test_iter_nj[num_threads-1][0]) / 1e9;
+  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS] - pow_tot_correction;
+  printf("#Total Power Corrected                     : %11f (correction= %10f) W\n",  pow_tot_corrected, pow_tot_correction);
+
+  double eop = (1e6 * s.power_total[NUMBER_OF_SOCKETS]) / throughput;
+  double eop_corrected = (1e6 * pow_tot_corrected) / throughput;
+  printf("#Energy per Operation                      : %11f (corrected = %10f) uJ\n", eop, eop_corrected);
+#endif    
     
   pthread_exit(NULL);
     

@@ -18,6 +18,7 @@
 #include <malloc.h>
 #include "utils.h"
 #include "atomic_ops.h"
+#include "rapl_read.h"
 #ifdef __sparc__
 #  include <sys/types.h>
 #  include <sys/processor.h>
@@ -83,7 +84,6 @@ uint32_t rand_max;
 #define rand_min 1
 
 static volatile int stop;
-__thread uint32_t phys_id;
 
 volatile ticks *putting_succ;
 volatile ticks *putting_fail;
@@ -122,7 +122,7 @@ test(void* thread)
 {
   thread_data_t* td = (thread_data_t*) thread;
   uint8_t ID = td->id;
-  phys_id = the_cores[ID];
+  int phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();
 
@@ -153,6 +153,7 @@ test(void* thread)
 #if GC == 1
 #endif
 
+  RR_INIT(phys_id);
   uint64_t key;
 
   uint32_t c = 0;
@@ -166,6 +167,10 @@ test(void* thread)
     {
       num_elems_thread++;
     }
+
+#if INITIALIZE_FROM_ONE == 1
+  num_elems_thread = (ID == 0) * initial;
+#endif
     
   for(i = 0; i < num_elems_thread; i++) 
     {
@@ -189,6 +194,8 @@ test(void* thread)
 
 
   barrier_cross(&barrier_global);
+
+  RR_START_SIMPLE();
 
   while (stop == 0) 
     {
@@ -242,6 +249,7 @@ test(void* thread)
     }
 
   barrier_cross(&barrier);
+  RR_STOP_SIMPLE();
 
   if (!ID)
     {
@@ -589,6 +597,21 @@ main(int argc, char **argv)
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
+
+  RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
+#if RAPL_READ_ENABLE == 1
+  rapl_stats_t s;
+  RR_STATS(&s);
+  double pow_tot_correction = (throughput * eng_per_test_iter_nj[num_threads-1][0]) / 1e9;
+  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS] - pow_tot_correction;
+  printf("#Total Power Corrected                     : %11f (correction= %10f) W\n",  pow_tot_corrected, pow_tot_correction);
+
+  double eop = (1e6 * s.power_total[NUMBER_OF_SOCKETS]) / throughput;
+  double eop_corrected = (1e6 * pow_tot_corrected) / throughput;
+  printf("#Energy per Operation                      : %11f (corrected = %10f) uJ\n", eop, eop_corrected);
+#endif    
+    
+  pthread_exit(NULL);
     
   return 0;
 }
