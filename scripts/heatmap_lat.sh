@@ -17,6 +17,15 @@ params=$@
 source scripts/config;
 source scripts/lock_exec;
 
+GREP=grep
+
+unm=$(uname -n);
+if [ $unm = "maglite" ];
+then
+    GREP=/opt/csw/bin/gegrep
+fi;
+
+
 case "${y_axis}" in
 s)  quantity_1=${ranges}
     par_1="-r"
@@ -123,7 +132,7 @@ do
     array1_rem=()
     for i in `seq 1 ${num_repetitions}`
     do
-        out=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val} | grep "srch_suc" -A 1 | grep -v "srch_suc")
+        out=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val} | $GREP "srch_suc" -A 1 | grep -v "srch_suc")
         echo "$out"
         put=$(echo $out | awk '{ print $4}')
         get=$(echo $out | awk '{ print $2}')
@@ -155,7 +164,7 @@ do
     array2_rem=()
     for i in `seq 1 ${num_repetitions}`
     do
-        out=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val} | grep "srch_suc" -A 1 | grep -v "srch_suc")
+        out=$(${run_script} $prog $params ${par_1}${y} ${par_2}${x} ${init}${init_val} | ${GREP} "srch_suc" -A 1 | grep -v "srch_suc")
         echo "$out"
         put=$(echo $out | awk '{ print $4}')
         get=$(echo $out | awk '{ print $2}')
