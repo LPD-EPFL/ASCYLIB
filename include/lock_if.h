@@ -38,6 +38,10 @@ typedef pthread_spinlock_t ptlock_t;
 #  define EVALUATE2(sz) PASTER2(CAS_U, sz)
 #  define CAS_UTYPE EVALUATE2(PTLOCK_SIZE)
 typedef volatile UTYPE ptlock_t;
+#  define TAS_FREE 0
+#  define TAS_LCKD 1
+
+#ifndef DO_TSX
 #  define INIT_LOCK(lock)				tas_init(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					tas_lock(lock)
@@ -49,9 +53,6 @@ typedef volatile UTYPE ptlock_t;
 #  define GL_LOCK(lock)					tas_lock(lock)
 #  define GL_TRYLOCK(lock)				tas_trylock(lock)
 #  define GL_UNLOCK(lock)              			tas_unlock(lock)
-
-#  define TAS_FREE 0
-#  define TAS_LCKD 1
 
 static inline void
 tas_init(ptlock_t* l)
@@ -87,6 +88,100 @@ tas_unlock(ptlock_t* l)
   *l = TAS_FREE;
   return 0;
 }
+#else
+//TSX
+#include <immintrin.h>
+#  define INIT_LOCK(lock)				tas_init_tsx(lock)
+#  define DESTROY_LOCK(lock)			
+#  define LOCK(lock)					tas_lock_tsx(lock)
+#  define TRYLOCK(lock)					tas_trylock_tsx(lock)
+#  define UNLOCK(lock)					tas_unlock_tsx(lock)
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				tas_init_tsx(lock)
+#  define GL_DESTROY_LOCK(lock)			
+#  define GL_LOCK(lock)					tas_lock_tsx(lock)
+#  define GL_TRYLOCK(lock)				tas_trylock_tsx(lock)
+#  define GL_UNLOCK(lock)              			tas_unlock_tsx(lock)
+
+extern __thread size_t num_pause, num_total, num_xtest;
+
+static inline void
+tas_init_tsx(ptlock_t* l)
+{
+  *l = TAS_FREE;
+#if defined(__tile__)
+  MEM_BARRIER;
+#endif
+}
+
+static inline uint32_t
+tas_lock_tsx(ptlock_t* l)
+{
+    num_total++;
+    int _xbegin_tries = 3;
+    int t;
+    for (t = 0; t < _xbegin_tries; t++)
+    {
+        while (*l != TAS_FREE)
+        {
+            PAUSE;
+        }
+
+        long status;
+        if ((status = _xbegin()) == _XBEGIN_STARTED)
+        {
+            if (*l == TAS_FREE)
+            {
+                return 0;
+            }
+
+            _xabort(0xff);
+        }
+        else
+        {
+            if (status & _XABORT_EXPLICIT)
+            {
+                break;
+            }
+            num_xtest++;
+            /* printf("", status); */
+            pause_rep((1<<(t+1)) & 255);
+        }
+    }
+
+
+    while (__atomic_exchange_n(l, TAS_LCKD, __ATOMIC_ACQUIRE))
+    {
+        PAUSE;
+    }
+
+    return 0;
+
+}
+
+static inline uint32_t
+tas_trylock_tsx(ptlock_t* l)
+{
+  return (CAS_UTYPE(l, TAS_FREE, TAS_LCKD) == TAS_FREE);
+}
+
+static inline uint32_t
+tas_unlock(ptlock_t* l)
+{
+  if (*l == TAS_FREE)
+    {
+      _xend();
+    }
+  else
+    {
+      num_pause++;
+      __atomic_clear(l, __ATOMIC_RELEASE);
+    }
+
+  return 0;
+}
+
+#endif
 
 #elif defined(TICKET)			/* ticket lock */
 
