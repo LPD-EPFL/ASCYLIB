@@ -142,7 +142,7 @@ ifeq ($(PC_NAME), lpdxeon2680)
 endif
 
 ifeq ($(PC_NAME), lpdpc34)
-    CFLAGS += -DHASWELL 
+    CFLAGS += -DHASWELL
     PLATFORM_NUMA = 0
 endif
 
@@ -294,6 +294,10 @@ endif
 
 ifeq ($(SET_CPU),0)
 	CFLAGS += -DNO_SET_CPU
+endif
+
+ifeq ($(DO_TSX),1)
+	CFLAGS += -DDO_TSX -mrtm -m64
 endif
 
 LFSL=herlihy

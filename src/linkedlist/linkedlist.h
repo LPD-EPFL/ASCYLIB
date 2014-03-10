@@ -27,6 +27,10 @@
 #include "ssalloc.h"
 #include "ssmem.h"
 
+#ifdef DO_TSX
+#include <immintrin.h>
+#endif
+
 #ifdef DEBUG
 #define IO_FLUSH                        fflush(NULL)
 /* Note: stdio is thread-safe */

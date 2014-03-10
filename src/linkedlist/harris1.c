@@ -116,6 +116,7 @@ harris_find(intset_t* the_list, skey_t key)
  * inserts a new node with the given value val in the list
  * (if the value was absent) or does nothing (if the value is already present).
  */
+#ifndef DO_TSX
 int
 harris_insert(intset_t *the_list, skey_t key, sval_t val)
 {
@@ -155,12 +156,58 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
 
   return 1;
 }
+#else
+int
+harris_insert(intset_t *the_list, skey_t key, sval_t val)
+{
+    node_t* cas_result;
+    node_t* right_node;
+    node_t* node_to_add = NULL;
 
+    node_t* left_node;
+    right_node = list_search(the_list, key, &left_node);
+    if (right_node->key == key) 
+    {
+        return 0;
+    }
+    node_to_add = new_node(key, val, right_node, 0);
+    long status;
+    if ((status=_xbegin()) == _XBEGIN_STARTED) {
+        if (left_node->next == right_node) {
+            left_node->next=node_to_add;
+            _xend();
+        } else {
+            _xabort(0xff);
+        }
+    }
+    if (status==_XBEGIN_STARTED) {
+        return 1;
+    }
+
+    do
+    {
+        node_t* left_node;
+        right_node = list_search(the_list, key, &left_node);
+        if (right_node->key == key) 
+        {
+            ssmem_free(alloc, node_to_add);
+            return 0;
+        }
+        node_to_add->next = right_node;
+        // Try to swing left_node's unmarked next pointer to a new node
+        cas_result = CAS_PTR(&left_node->next, right_node, node_to_add);
+    } while(cas_result != right_node);
+
+    return 1;
+}
+
+#endif
 /*
  * deletes a node with the given value val (if the value is present) 
  * or does nothing (if the value is already present).
  * The deletion is logical and consists of setting the node mark bit to 1.
  */
+#ifndef DO_TSX
 sval_t
 harris_delete(intset_t *the_list, skey_t key)
 {
@@ -191,6 +238,63 @@ harris_delete(intset_t *the_list, skey_t key)
 
   return ret;
 }
+#else
+sval_t
+harris_delete(intset_t *the_list, skey_t key)
+{
+    node_t* cas_result;
+    long unmarked_ref;
+    node_t* left_node;
+    node_t* right_node;
+    right_node = list_search(the_list, key, &left_node);
+
+    if (right_node->key != key)
+    {
+        return 0;
+    }
+
+    long status;
+    if ((status=_xbegin()) == _XBEGIN_STARTED) {
+        unmarked_ref = get_unmarked_ref((long)right_node->next);
+        long marked_ref = get_marked_ref(unmarked_ref);
+        if ((right_node->next==(node_t*)unmarked_ref) && (left_node->next == right_node)){
+            right_node->next = (node_t*) marked_ref;
+            left_node->next = (node_t*) unmarked_ref;
+            _xend();
+       } else {
+            _xabort(0xff);
+       }
+    }
+
+    if (status == _XBEGIN_STARTED) {
+            sval_t ret = right_node->val;
+            ssmem_free(alloc, right_node);
+            return ret;
+    }
+ 
+    do
+    {
+        right_node = list_search(the_list, key, &left_node);
+
+        if (right_node->key != key)
+        {
+            return 0;
+        }
+
+        // Try to mark right_node as logically deleted
+        unmarked_ref = get_unmarked_ref((long)right_node->next);
+        long marked_ref = get_marked_ref(unmarked_ref);
+        cas_result = CAS_PTR(&right_node->next, (node_t*)unmarked_ref, (node_t*)marked_ref);
+    } 
+    while(cas_result != (node_t*)unmarked_ref);
+
+    sval_t ret = right_node->val;
+
+    physical_delete_right(left_node, right_node);
+
+    return ret;
+}
+#endif
 
 int
 set_size(intset_t *set)
@@ -205,5 +309,6 @@ set_size(intset_t *set)
       if (!is_marked_ref((long) node->next)) size++;
       node = (node_t*) get_unmarked_ref((long) node->next);
     }
+
   return size;
 }
