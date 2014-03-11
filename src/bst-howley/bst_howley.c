@@ -66,6 +66,7 @@ sval_t bst_contains(skey_t k, node_t* root){
     return 0;
 }
 
+#ifndef DO_TSX
 sval_t bst_find(skey_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
 
 	sval_t result;
@@ -130,7 +131,125 @@ retry:
 
 	return result;
 } 
-  
+#else
+sval_t bst_find(skey_t k, node_t** pred, operation_t** pred_op, node_t** curr, operation_t** curr_op, node_t* aux_root, node_t* root){
+
+	sval_t result;
+	skey_t curr_key;
+	node_t* next;
+	node_t* last_right;
+	operation_t* last_right_op;
+
+    long status;
+
+    if ((status=_xbegin()) == _XBEGIN_STARTED) {
+        result = NOT_FOUND_R;
+        *curr = aux_root;
+        *curr_op = (*curr)->op;
+        if(GETFLAG(*curr_op) != STATE_OP_NONE){
+            _xabort(0xff);
+        }
+        next = (*curr)->right;
+        last_right = *curr;
+        last_right_op = *curr_op;
+
+        while (!ISNULL(next)){
+            *pred = *curr;
+            *pred_op = *curr_op;
+            *curr = next;
+            *curr_op = (*curr)->op;
+            if(GETFLAG(*curr_op) != STATE_OP_NONE){
+                _xabort(0xfe);	
+            }
+            curr_key = (*curr)->key;
+            if(k < curr_key){
+                result = NOT_FOUND_L;
+                next = (*curr)->left;
+            } else if(k > curr_key) {
+                result = NOT_FOUND_R;
+                next = (*curr)->right;
+                last_right = *curr;
+                last_right_op = *curr_op;
+            } else{
+                result = (*curr)->value;
+                break;
+            }
+        }
+
+        if ((!(result & val_mask)) && (last_right_op != last_right->op)) {
+            _xabort(0xfd);	
+        }
+
+        if ((*curr)->op != *curr_op){
+            _xabort(0xfc);	
+        }
+        _xend();
+    }
+
+    if (status==_XBEGIN_STARTED) {
+        return result;
+    }
+
+retry:
+	result = NOT_FOUND_R;
+	*curr = aux_root;
+	*curr_op = (*curr)->op;
+
+	if(GETFLAG(*curr_op) != STATE_OP_NONE){
+
+		if (aux_root == root){
+			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, root);
+			goto retry;
+		} else {
+			return ABORT;
+		}
+	}
+
+
+	next = (*curr)->right;
+	last_right = *curr;
+	last_right_op = *curr_op;
+
+	while (!ISNULL(next)){
+		*pred = *curr;
+		*pred_op = *curr_op;
+		*curr = next;
+		*curr_op = (*curr)->op;
+
+
+		if(GETFLAG(*curr_op) != STATE_OP_NONE){
+			bst_help(*pred, *pred_op, *curr, *curr_op, root);
+			goto retry;
+		}
+		curr_key = (*curr)->key;
+		if(k < curr_key){
+			result = NOT_FOUND_L;
+			next = (*curr)->left;
+		} else if(k > curr_key) {
+			result = NOT_FOUND_R;
+			next = (*curr)->right;
+			last_right = *curr;
+			last_right_op = *curr_op;
+		} else{
+			result = (*curr)->value;
+			break;
+		}
+	}
+	
+	if ((!(result & val_mask)) && (last_right_op != last_right->op)) {
+		goto retry;
+	}
+
+	if ((*curr)->op != *curr_op){
+		goto retry;
+	}
+
+	return result;
+} 
+
+#endif
+ 
+#ifndef DO_TSX
 bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 
 	node_t* pred;
@@ -180,6 +299,114 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
         }
 	}
 }
+#else 
+bool_t bst_add(skey_t k,sval_t v,  node_t* root){
+
+	node_t* pred;
+	node_t* curr;
+	node_t* new_node;
+	operation_t* pred_op;
+	operation_t* curr_op;
+	operation_t* cas_op;
+	sval_t  result;
+
+    long status;
+    result = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
+    if (result & val_mask) {
+			return FALSE;
+	}
+    new_node = create_node(k,v,0);
+    bool_t is_left = (result == NOT_FOUND_L);
+    node_t* old;
+    if (is_left) {
+        old = curr->left;
+    } else {
+        old = curr->right;
+    }
+
+    cas_op = alloc_op();
+    cas_op->child_cas_op.is_left = is_left;
+    cas_op->child_cas_op.expected = old;
+    cas_op->child_cas_op.update = new_node;
+
+    if ((status=_xbegin()) == _XBEGIN_STARTED) {
+        if (curr->op==curr_op) {
+            curr_op=FLAG(cas_op,STATE_OP_CHILDCAS);
+            node_t** address = NULL;
+            if (cas_op->child_cas_op.is_left) {
+                address = &(curr->left);
+            } else {
+                address = &(curr->right);
+            }
+            if (address = cas_op->child_cas_op.expected) {
+                address = cas_op->child_cas_op.update;
+                if (curr->op == FLAG(cas_op,STATE_OP_CHILDCAS)) {
+                    curr->op = FLAG(cas_op, STATE_OP_NONE);
+                } else {
+                    _xabort(0xfd);
+                }
+            } else {
+                _xabort(0xff);
+            }
+#if GC == 1
+            //if (UNFLAG(curr_op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr_op));
+#endif
+        } else {
+            _xabort(0xfe);
+        }
+        _xend();
+    }
+
+    if (status = _XBEGIN_STARTED) {
+			return TRUE;
+    } else {
+#if GC == 1
+            ssmem_free(alloc,cas_op);
+#endif
+
+    }
+
+	while(TRUE) {
+
+		result = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
+		if (result & val_mask) {
+			return FALSE;
+		}
+
+		new_node = create_node(k,v,0);
+
+		bool_t is_left = (result == NOT_FOUND_L);
+		node_t* old;
+		if (is_left) {
+			old = curr->left;
+		} else {
+			old = curr->right;
+		}
+
+		cas_op = alloc_op();
+		cas_op->child_cas_op.is_left = is_left;
+		cas_op->child_cas_op.expected = old;
+		cas_op->child_cas_op.update = new_node;
+
+#if defined(__tile__)
+		MEM_BARRIER;
+#endif
+		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
+
+			bst_help_child_cas(cas_op, curr, root);
+#if GC == 1
+            //if (UNFLAG(curr_op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr_op));
+#endif
+			return TRUE;
+		} else {
+#if GC == 1
+            ssmem_free(alloc,cas_op);
+#endif
+        }
+	}
+}
+
+#endif
 
 void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 
@@ -196,6 +423,7 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 	void* UNUSED dummy1 = CAS_PTR(&(dest->op), FLAG(op, STATE_OP_CHILDCAS), FLAG(op, STATE_OP_NONE));
 }
 
+#ifndef DO_TSX
 sval_t bst_remove(skey_t k, node_t* root){
 
 	node_t* pred;
@@ -259,7 +487,123 @@ sval_t bst_remove(skey_t k, node_t* root){
 		}
 	}
 }
+#else
+sval_t bst_remove(skey_t k, node_t* root){
 
+	node_t* pred;
+	node_t* curr;
+	node_t* replace;
+    sval_t val;
+	operation_t* pred_op;
+	operation_t* curr_op;
+	operation_t* replace_op;
+	operation_t* reloc_op;
+
+    sval_t res = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
+    if (!(res & val_mask)) {
+			return 0;
+    }
+
+    if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
+//tx1
+			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
+				bst_help_marked(pred, pred_op, curr, root);
+#if GC == 1
+                if (UNFLAG(curr->op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr->op));
+                ssmem_free(alloc,curr);
+#endif
+				return res;
+			}
+	} else { // node has two children
+			val = bst_find(k, &pred, &pred_op, &replace, &replace_op, curr, root);
+			if ((val == ABORT) || (curr->op != curr_op)) {
+				continue;
+			} 
+
+			reloc_op = alloc_op(); 
+
+//tx2
+			reloc_op->relocate_op.state = STATE_OP_ONGOING;
+			reloc_op->relocate_op.dest = curr;
+			reloc_op->relocate_op.dest_op = curr_op;
+			reloc_op->relocate_op.remove_key = k;
+			reloc_op->relocate_op.remove_value = res;
+			reloc_op->relocate_op.replace_key = replace->key;
+			reloc_op->relocate_op.replace_value = replace->value;
+
+			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
+#if GC == 1
+                if (UNFLAG(replace_op)!=0) ssmem_free(alloc,(void*)UNFLAG(replace_op));
+#endif
+				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
+                    //if (UNFLAG(replace->op)!=0) ssmem_free(alloc,(void*)UNFLAG(replace->op));
+#if GC == 1
+                    ssmem_free(alloc,replace);
+#endif
+					return res;
+				}
+			} else {
+#if GC == 1
+                ssmem_free(alloc,reloc_op);
+#endif
+            }
+		}
+
+
+	while(TRUE) {
+        sval_t res = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
+		if (!(res & val_mask)) {
+			return 0;
+		}
+
+		if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
+			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
+				bst_help_marked(pred, pred_op, curr, root);
+#if GC == 1
+                if (UNFLAG(curr->op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr->op));
+                ssmem_free(alloc,curr);
+#endif
+				return res;
+			}
+		} else { // node has two children
+			val = bst_find(k, &pred, &pred_op, &replace, &replace_op, curr, root);
+			if ((val == ABORT) || (curr->op != curr_op)) {
+				continue;
+			} 
+
+			reloc_op = alloc_op(); 
+			reloc_op->relocate_op.state = STATE_OP_ONGOING;
+			reloc_op->relocate_op.dest = curr;
+			reloc_op->relocate_op.dest_op = curr_op;
+			reloc_op->relocate_op.remove_key = k;
+			reloc_op->relocate_op.remove_value = res;
+			reloc_op->relocate_op.replace_key = replace->key;
+			reloc_op->relocate_op.replace_value = replace->value;
+
+#if defined(__tile__)
+			MEM_BARRIER;
+#endif
+			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
+#if GC == 1
+                if (UNFLAG(replace_op)!=0) ssmem_free(alloc,(void*)UNFLAG(replace_op));
+#endif
+				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
+                    //if (UNFLAG(replace->op)!=0) ssmem_free(alloc,(void*)UNFLAG(replace->op));
+#if GC == 1
+                    ssmem_free(alloc,replace);
+#endif
+					return res;
+				}
+			} else {
+#if GC == 1
+                ssmem_free(alloc,reloc_op);
+#endif
+            }
+		}
+	}
+}
+
+#endif
 bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
 
 	int seen_state = op->relocate_op.state;
