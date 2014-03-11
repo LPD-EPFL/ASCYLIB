@@ -74,6 +74,13 @@ cpy_search(copy_on_write_t* set, skey_t key)
 sval_t
 cpy_delete(copy_on_write_t* set, skey_t key)
 {
+#if CPY_ON_WRITE_READ_ONLY_FAIL == 1
+  if (cpy_search(set, key) == 0)
+    {
+      return 0;
+    }
+#endif
+
   sval_t removed = 0;
 
   LOCK_A(set->lock);
@@ -98,6 +105,7 @@ cpy_delete(copy_on_write_t* set, skey_t key)
   if (removed)
     {
       set->array = all_new;
+      ssmem_free(alloc, (void*) all_old);
     }
   else
     {
@@ -109,8 +117,16 @@ cpy_delete(copy_on_write_t* set, skey_t key)
 }
 
 int
-cpy_insert(copy_on_write_t* set, volatile skey_t key, sval_t val) 
+cpy_insert(copy_on_write_t* set, skey_t key, sval_t val) 
 {
+
+#if CPY_ON_WRITE_READ_ONLY_FAIL == 1
+  if (cpy_search(set, key) != 0)
+    {
+      return 0;
+    }
+#endif
+
   LOCK_A(set->lock);
 
   volatile array_ll_t* all_old = set->array;
