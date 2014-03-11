@@ -25,6 +25,9 @@
 #include "utils.h"
 
 __thread ssmem_allocator_t* alloc;
+#ifdef DO_TSX
+__thread size_t num_pause=0, num_total=0, num_xtest=0;
+#endif
 
 node_l_t*
 new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)

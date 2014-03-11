@@ -3,6 +3,10 @@
 
 __thread ssmem_allocator_t* alloc;
 
+#ifdef DO_TSX
+__thread size_t num_pause=0, num_total=0, num_xtest=0;
+#endif
+
 volatile node_t* bst_initialize() {
 
   volatile node_t* root = new_node(0, 0, 0, 0, NULL, NULL, NULL, TRUE);

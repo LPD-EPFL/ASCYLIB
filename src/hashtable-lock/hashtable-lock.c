@@ -27,6 +27,10 @@
 #include "hashtable-lock.h"
 #include "ssalloc.h"
 
+#ifdef DO_TSX
+__thread size_t num_pause=0, num_total=0, num_xtest=0;
+#endif
+
 unsigned int maxhtlength;
 
 void

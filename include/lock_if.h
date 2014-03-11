@@ -166,7 +166,7 @@ tas_trylock_tsx(ptlock_t* l)
 }
 
 static inline uint32_t
-tas_unlock(ptlock_t* l)
+tas_unlock_tsx(ptlock_t* l)
 {
   if (*l == TAS_FREE)
     {

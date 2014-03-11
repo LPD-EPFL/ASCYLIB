@@ -26,6 +26,9 @@
 
 unsigned int levelmax;
 __thread ssmem_allocator_t* alloc;
+#ifdef DO_TSX
+__thread size_t num_pause=0, num_total=0, num_xtest=0;
+#endif
 
 inline int
 get_rand_level()

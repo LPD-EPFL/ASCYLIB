@@ -212,6 +212,10 @@ uint8_t oldval;
 #  define SWAP_U16(a,b) swap_uint16(a,b)
 #  define SWAP_U32(a,b) swap_uint32(a,b)
 #  define SWAP_U64(a,b) swap_uint64(a,b)
+#ifdef DO_TSX
+#  define SWAP_U64_HLE_ACQ(a,b) swap_uint64_hle_acq(a,b)
+#  define SWAP_U64_HLE_RLS(a,b) swap_uint64_hle_rls(a,b)
+#endif
 //Fetch-and-increment
 #  define FAI_U8(a) __sync_fetch_and_add(a,1)
 #  define FAI_U16(a) __sync_fetch_and_add(a,1)

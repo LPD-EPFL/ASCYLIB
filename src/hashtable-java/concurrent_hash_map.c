@@ -1,6 +1,9 @@
 #include "concurrent_hash_map.h"
 
 __thread ssmem_allocator_t* alloc = NULL;
+#ifdef DO_TSX
+__thread size_t num_pause=0, num_total=0, num_xtest=0;
+#endif
 size_t maxhtlength = 0;
 
 
