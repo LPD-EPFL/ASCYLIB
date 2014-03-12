@@ -1,8 +1,8 @@
 .PHONY:	all
 
-BENCHS = src/sftree src/linkedlist src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/ src/tests/
+BENCHS = src/sftree src/linkedlist src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/ src/tests/ src/bst-drachsler
 LBENCHS = src/linkedlist-lock src/hashtable-lock src/hashtable-tbb src/hashtable-java src/skiplist-lock src/bst-lock2
-LFBENCHS = src/linkedlist src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley
+LFBENCHS = src/linkedlist src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley src/bst-drachsler
 NOISE = src/noise
 TESTS = src/tests
 
@@ -80,6 +80,7 @@ clean:
 	$(MAKE) -C src/sftree clean
 	$(MAKE) -C src/bst clean
 	$(MAKE) -C src/bst-howley clean
+	$(MAKE) -C src/bst-drachsler clean
 	$(MAKE) -C src/bst-lock2 clean
 	$(MAKE) -C src/deque clean
 	$(MAKE) -C src/noise clean
