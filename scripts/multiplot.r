@@ -58,13 +58,15 @@ total <- rbind(dat5, dat4, dat3, dat2, dat)
 myBreaks=c(0, 0.33, 0.50, 0.75, 0.85, 0.97, 1.03, 1.1, 1.3, 1.5, 2, Inf)
 col = brewer.pal(11,"RdYlGn")
 total$rat3=findInterval(total$val2, myBreaks, all.inside = TRUE)
+print(args[10])
+print(total)
 label_text <- rollapply(round(myBreaks, 2), width = 2, by = 1, FUN = function(i) paste(i, collapse = " : "))
 
 pdf(args[10], height=5, width=15)
 myplot <- ggplot(total, aes(factor(S), factor(updates), fill = factor(rat3,levels=c("1","2","3","4","5","6","7","8","9","10","11")))) +  
   geom_tile(colour = "white") +
+#geom_text(size=3,aes(fill=factor(total$rat3,levels=c("1","2","3","4","5","6","7","8","9","10","11")), label = round(total$val2,2))) +
   facet_grid(.~experiment) +
-  geom_text(size=3,aes(label = round(total$value,1))) +
   scale_fill_manual(values = col, name="Ratios", labels = label_text, drop=FALSE) +
   labs(title = args[11]) +
   xlab("cores") +
