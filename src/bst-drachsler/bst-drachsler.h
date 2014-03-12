@@ -48,9 +48,9 @@ struct node_t {
 
 node_t* search(skey_t key, node_t* root)
 
-sval_t contains(skey_t k);
+sval_t contains(skey_t k, node_t* root);
 
-bool_t insert(skey_t k, sval_t v);
+bool_t insert(skey_t k, sval_t v, node_t* root);
 
 node_t* choose_parent(node_t* pred, node_t* succ, node_t* first_cand);
 
@@ -58,7 +58,7 @@ void insert_to_tree(node_t* parent, node_t* new_node);
 
 node_t* lock_parent(node_t* node);
 
-sval_t remove(skey_t key);
+sval_t remove(skey_t key, node_t* root);
 
 bool_t acquire_tree_locks(node_t* n);
 
