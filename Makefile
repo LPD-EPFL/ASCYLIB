@@ -1,7 +1,7 @@
 .PHONY:	all
 
 BENCHS = src/sftree src/linkedlist src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/noise/ src/tests/
-LBENCHS = src/linkedlist-lock src/linkedlist-cpy_on_write src/hashtable-lock src/hashtable-tbb src/hashtable-java src/skiplist-lock src/bst-lock2
+LBENCHS = src/linkedlist-lock src/linkedlist-copy src/hashtable-lock src/hashtable-tbb src/hashtable-java src/skiplist-lock src/bst-lock2
 LFBENCHS = src/linkedlist src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley
 NOISE = src/noise
 TESTS = src/tests
@@ -52,8 +52,8 @@ lfll:
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
 
-cpy_on_write:
-	$(MAKE) "LOCK=CLH" src/linkedlist-cpy_on_write
+llcopy:
+	$(MAKE) "LOCK=CLH" src/linkedlist-copy
 
 lfht:
 	$(MAKE) "STM=LOCKFREE" src/hashtable
