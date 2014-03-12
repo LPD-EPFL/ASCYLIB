@@ -1,37 +1,27 @@
-ROOT = ../..
+VERSION = TCMALLOC_NO_UPDATE
 
-include $(ROOT)/common/Makefile.common
+CC = g++ -O3 -std=gnu++0x -g -w
 
-BINS = $(BINDIR)/lf-bst
-PROF = $(ROOT)/src
+ifeq "$(VERSION)" "MALLOC_UPDATE"
+CFLAGS = -lpthread -lrt -DUPDATEVAL
+else
+ifeq "$(VERSION)" "TCMALLOC_UPDATE"
+CFLAGS = -lpthread -lrt /usr/lib64/libtcmalloc.so.4 -DUPDATEVAL
+else
+ifeq "$(VERSION)" "TCMALLOC_NO_UPDATE"
+CFLAGS = -lpthread -lrt /usr/lib64/libtcmalloc.so.4
+else
+CFLAGS = -lpthread -lrt
+endif
+endif
+endif
 
-.PHONY:	all clean
+wfrbt: wfrbt.o
+	$(CC) $(CFLAGS) wfrbt.o -o wfrbt
 
-all:	main
-
-measurements.o:
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
-
-ssalloc.o:
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/ssalloc.o $(PROF)/ssalloc.c
-
-bst_ellen.o: 
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_ellen.o bst_ellen.c
-
-bst_test.o: bst_ellen.h
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_test.o bst_test.c
-
-test.o: bst_ellen.h
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
-
-bst_ellen_test2.o: bst_ellen.h
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/bst_ellen_test2.o bst_ellen_test2.c
-
-main: measurements.o ssalloc.o  bst_ellen.o test.o 
-	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_ellen.o  $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
-
-fairness: measurements.o ssalloc.o  bst_ellen.o bst_ellen_test2.o 
-	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_ellen.o  $(BUILDIR)/bst_ellen_test2.o -o $(BINS) $(LDFLAGS)
+wfrbt.o: wfrbt.h wfrbt.cpp
+	$(CC) $(CFLAGS) -c wfrbt.cpp
 
 clean:
-	-rm -f $(BINS)
+	rm -f wfrbt
+	rm -f wfrbt.o
