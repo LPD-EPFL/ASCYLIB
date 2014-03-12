@@ -17,7 +17,6 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
         perror("malloc in bst create node");
         exit(1);
     }
-
     new_node->left = NULL;
     new_node->right = NULL;
     new_node->parent = NULL;
@@ -30,20 +29,19 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
     new_node->key = k;
     new_node->value = value;
     new_node->mark = FALSE;
-
     asm volatile("" ::: "memory");
     return (node_t*) new_node;
 }
 
 node_t* initialize_tree(){
-    node_t* parent = create_node(MIN_KEY, (sval_t) 0, 1); 
-    node_t* root = create_node(MAX_KEY, (sval_t) 0, 1);
-    root->pred = parent;
-    root->succ = parent;
-    root->parent = parent;
-    parent->right = root;
-    parent->succ = root;
-    return root;
+   node_t* parent = create_node(MIN_KEY, (sval_t) 0, 1); 
+   node_t* root = create_node(MAX_KEY, (sval_t) 0, 1);
+   root->pred = parent;
+   root->succ = parent;
+   root->parent = parent;
+   parent->right = root;
+   parent->succ = root;
+   return root;
 }
 
 node_t* bst_search(skey_t k, node_t* root) {
@@ -241,7 +239,6 @@ bool_t acquire_tree_locks(node_t* n) {
                 if (l) { 
                     UNLOCK(&(parent->tree_lock));
                 }
-
                 continue;
             }
             if (s->right != NULL) {
@@ -292,7 +289,6 @@ void remove_from_tree(node_t* n, bool_t has_two_children) {
         } else {
             UNLOCK(&(s->tree_lock));
         }
-
     }
     if (child) {
         UNLOCK(&(child->tree_lock));
