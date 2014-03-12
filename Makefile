@@ -58,6 +58,9 @@ llcopy:
 htcopy:
 	$(MAKE) "LOCK=TAS" src/hashtable-copy
 
+htcopygl:
+	$(MAKE) "LOCK=CLH" "G=GL" src/hashtable-copy
+
 lfht:
 	$(MAKE) "STM=LOCKFREE" src/hashtable
 
