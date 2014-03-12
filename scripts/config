@@ -134,7 +134,7 @@ then
 	cores=$(seq 6 6 36);
     elif [ $unm = "diassrv8" ];
     then
-	cores=$(seq 10 10 80);
+	cores="$(seq 2 1 9) $(seq 10 10 80)";
     elif [ $unm = "lpdxeon2680" ];
     then
 	cores="$(seq 2 1 9) $(seq 10 10 40)";
