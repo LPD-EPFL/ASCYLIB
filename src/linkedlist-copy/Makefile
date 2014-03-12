@@ -28,7 +28,7 @@ test.o: copy_on_write.h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
 main: measurements.o ssalloc.o copy_on_write.o test.o htlock.o clh.o
-	$(CC) $(CFLAGS)l $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/copy_on_write.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS) 
+	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/copy_on_write.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS) 
 
 clean:
 	rm -f $(BINS)
