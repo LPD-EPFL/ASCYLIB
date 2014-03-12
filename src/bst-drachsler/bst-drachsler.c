@@ -1,6 +1,47 @@
 #include "bst-drachsler.h"
 
-node_t* search(skey_t k, node_t* root) {
+__thread ssmem_allocator_t* alloc;
+
+node_t* create_node(skey_t k, sval_t value) {
+    volatile node_t* new_node;
+#if GC == 1
+    new_node = (volatile node_t*) ssmem_alloc(alloc< sizeof(node_t));
+#else 
+    new_node = (volatile node_t*) ssalloc(alloc, sizeof(node_t));
+#endif
+    if (new_node == NULL) {
+        perror("malloc in bst create node");
+        exit(1);
+    }
+    
+    new_node->left = NULL;
+    new_node->right = NULL;
+    new_node->parent = NULL;
+    new_node->succ = NULL;
+    new_node->pred = NULL;
+    new_node->left_height = 0;
+    new_node->right_height = 0;
+    INIT_LOCK(&(new_node->tree_lock));
+    INIT_LOCK(&(new_node->succ_lock));
+    new_node->key = k;
+    new_node->value = value;
+    new_node->mark = FALSE;
+    
+    asm volatile("" ::: "memory");
+    return (node_t*) new_node;
+}
+
+node_t* initialize_tree(){
+   node_t* parent = create_node(MIN_KEY, (sval_t) 0); 
+   node_t* root = create_node(MAX_KEY, (sval_t) 0);
+   root->pred = parent;
+   root->succ = parent;
+   root->parent = parent;
+   parent->right = root;
+   parent->succ = root;
+}
+
+node_t* bst_search(skey_t k, node_t* root) {
     node_t* n = root;
     node_t* child;
     skey_t curr_key;
@@ -20,7 +61,7 @@ node_t* search(skey_t k, node_t* root) {
     }
 }
 
-sval_t contains(skey_t k, node_t* root) {
+sval_t bst_contains(skey_t k, node_t* root) {
     node_t* n = search(k,root);
     while (n->key > k){
         n=n->pred;
@@ -35,7 +76,7 @@ sval_t contains(skey_t k, node_t* root) {
     return 0;
 }
 
-bool_t insert(skey_t k, sval_t v) {
+bool_t bst_insert(skey_t k, sval_t v) {
     node_t* node = search(k);
     node_t* p;
     if (node->key > k) {
@@ -114,7 +155,7 @@ node_t* lock_parent(node_t* node) {
 }
 
 
-sval_t remove(skey_t k, node_t* root) {
+sval_t bst_remove(skey_t k, node_t* root) {
     node_t* node;
     while (1) {
         node = search(k, root);
@@ -231,6 +272,9 @@ void remove_from_tree(node_t* n, bool_t has_two_children) {
         UNLOCK(n->parent->tree_lock);
     }
     UNLOCK(n->tree_lock);
+#if GC == 1
+    ssmem_free(alloc, n);
+#endif
     //TODO: rbalance(parent,child);
 }
 
@@ -243,4 +287,13 @@ void update_child(node_t* parent, node_t* old_ch, node_t* new_ch) {
     if (new_ch != NULL) {
         new_ch->parent = parent;
     }
+}
+
+uint32_t bst_size(node_t* node) {
+    if (node==NULL) return 0;
+    uint32_t x = 0;
+    if ((node->key != MAX_KEY) && (node->key != MIN_KEY)) {
+        x = 1;
+    }
+    return x + bst_size(node->right) + bst_size(node->left);
 }
