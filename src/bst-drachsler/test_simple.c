@@ -35,7 +35,7 @@
 #define DS_ADD(k,r)     bst_insert(k,(k+4),r)
 #define DS_REMOVE(k,r)    bst_remove(k,r)
 #define DS_SIZE(s)        bst_size(s)
-#define DS_NEW()          (node_t*) bst_initialize()
+#define DS_NEW()          (node_t*) initialize_tree()
 
 #define DS_TYPE             node_t
 #define DS_NODE             node_t

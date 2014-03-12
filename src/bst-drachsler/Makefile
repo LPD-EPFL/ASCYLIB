@@ -2,7 +2,7 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS  = $(BINDIR)/lb-drachsler
+BINS  = $(BINDIR)/lb-bst-drachsler
 PROF = $(ROOT)/src
 
 .PHONY:	all clean

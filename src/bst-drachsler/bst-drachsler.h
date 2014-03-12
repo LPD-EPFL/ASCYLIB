@@ -37,7 +37,7 @@ typedef ALIGNED(64) struct node_t node_t;
 struct node_t {
     node_t* left;
     node_t* right;
-    node_t* partent;
+    node_t* parent;
     node_t* succ;
     node_t* pred;
     uint32_t left_height;
@@ -47,11 +47,11 @@ struct node_t {
     skey_t key;
     sval_t value;
     bool_t mark;
-}
+};
 
 node_t* initialize_tree();
 
-node_t* bst_search(skey_t key, node_t* root)
+node_t* bst_search(skey_t key, node_t* root);
 
 sval_t bst_contains(skey_t k, node_t* root);
 
