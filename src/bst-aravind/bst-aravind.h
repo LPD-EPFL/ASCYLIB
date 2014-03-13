@@ -1,13 +1,6 @@
 #ifndef _BST_ARAVIND_H_INCLUDED_
 #define _BST_ARAVIND_H_INCLUDED_
 
-enum{INS,DEL};
-enum {BLACK,RED};
-enum {UNMARK,MARK};
-enum {UNFLAG,FLAG};
-typedef uintptr_t Word;
-const unsigned WORD_RESERVED_BITS = 2;
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
@@ -19,6 +12,10 @@ const unsigned WORD_RESERVED_BITS = 2;
 
 #define TRUE 1
 #define FALSE 0
+
+#define INF2 (KEY_MAX + 2)
+#define INF1 (KEY_MAX + 1)
+#define INF0 (KEY_MAX)
 
 #define MAX_KEY KEY_MAX
 #define MIN_KEY 0
@@ -36,27 +33,34 @@ struct node_t{
     node_t* left;
 };
 
-
 typedef struct seekRecord{
-    // SeekRecord structure
-    //node_t * leaf;
-    skey_t leafKey;
-    node_t * parent;
-    AO_t pL;
-    bool isLeftL; // is L the left child of P?
-    node_t * lum;
-    AO_t lumC;
-    bool isLeftUM; // is  last unmarked node's child on access path the left child of  the last unmarked node?
-    //char padding[ CACHE_LINE_SIZE ];
+    node_t* ancestor;
+    node_t* successor;
+    node_t* parent;
+    node_t* leaf;
 } seekRecord_t;
 
 
-seekRecord_t * insseek(thread_data_t * data, skey_t key, int op);
-seekRecord_t * delseek(thread_data_t * data, skey_t key, int op);
-seekRecord_t * secondary_seek(thread_data_t * data, skey_t key, seekRecord_t * sr);
-sval_t search(thread_data_t * data, skey_t key);
-int help_conflicting_operation (thread_data_t * data, seekRecord_t * R);
-int inject(thread_data_t * data, seekRecord_t * R, int op);
-bool_t insert(thread_data_t * data, skey_t key, sval_t value);
-sval_t delete_node(thread_data_t * data, skey_t key);
+node_t* initialize_tree();
+void bst_init_local();
+node_t* create_node(skey_t k, sval_t value, int initializing);
+seekRecord_t * bst_seek(skey_t key, node_t* node_r, node_t* node_s);
+sval_t bst_search(skey_t key, node_t* node_r, node_t* node_s);
+bool_t bst_insert(skey_t key, sval_t val, node_t* node_r, node_t* node_s);
+sval_t* bst_remove(skey_t key, node_t* node_r, node_t* node_s);
+bool_t bst_cleanup(skey_t key);
+uint32_t bst_size(node_t* r);
+
+static inline uint64_t GETFLAG(update_t ptr) {
+    return ((uint64_t)ptr) & 3;
+}
+
+static inline uint64_t FLAG(update_t ptr, uint64_t flag) {
+    return (((uint64_t)ptr) & 0xfffffffffffffffc) | flag;
+}
+
+static inline uint64_t UNFLAG(update_t ptr) {
+    return (((uint64_t)ptr) & 0xfffffffffffffffc);
+}
+
 #endif
