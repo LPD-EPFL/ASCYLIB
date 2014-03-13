@@ -144,11 +144,11 @@ void insert_to_tree(node_t* parent, node_t* new_node, node_t* root) {
         parent->left = new_node;
         parent->left_height = 1;
     }
-    if (parent!=root) {
-        bst_rebalance(lock_parent(parent),parent,root);
-    } else {
+//    if (parent!=root) {
+//        bst_rebalance(lock_parent(parent),parent,root);
+//    } else {
         UNLOCK(&(parent->tree_lock));
-    }
+//    }
 }
 
 
@@ -299,25 +299,25 @@ void remove_from_tree(node_t* n, bool_t has_two_children,node_t* root) {
             UNLOCK(&(s->tree_lock));
         }
     }
-    //if (child) {
-    //    UNLOCK(&(child->tree_lock));
-    //}
+    if (child) {
+       UNLOCK(&(child->tree_lock));
+    }
 
-    //UNLOCK(&(parent->tree_lock));
+    UNLOCK(&(parent->tree_lock));
     UNLOCK(&(n->parent->tree_lock));
     UNLOCK(&(n->tree_lock));
-    bst_rebalance(parent,child,root);
-    if (violated) {
-        LOCK(&(s->tree_lock));
-        uint32_t dif = s->left_height-s->right_height;
-        if ((s->mark==FALSE) &&  ((dif>=2) || (dif<= (-2)))) {
-          //  bool_t lr=TRUE;
-           // if (dif>=2) lr=FALSE;
-            bst_rebalance(s, NULL, root); 
-        } else {
-            UNLOCK(&(s->tree_lock));
-        }
-    }
+    /*bst_rebalance(parent,child,root);*/
+    /*if (violated) {*/
+        /*LOCK(&(s->tree_lock));*/
+        /*uint32_t dif = s->left_height-s->right_height;*/
+        /*if ((s->mark==FALSE) &&  ((dif>=2) || (dif<= (-2)))) {*/
+          /*//  bool_t lr=TRUE;*/
+           /*// if (dif>=2) lr=FALSE;*/
+            /*bst_rebalance(s, NULL, root); */
+        /*} else {*/
+            /*UNLOCK(&(s->tree_lock));*/
+        /*}*/
+    /*}*/
 #if GC == 1
     ssmem_free(alloc, n);
 #endif

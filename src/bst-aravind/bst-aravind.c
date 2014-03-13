@@ -1,4 +1,7 @@
 #include "bst-aravind.h"
+
+__thread seek_record_t seek_record;
+
 int perform_one_insert_window_operation(thread_data_t* data, seekRecord_t * R, long newKey){
 		node_t *newInt ;
 		node_t *newLeaf;
@@ -85,6 +88,169 @@ int perform_one_delete_window_operation(thread_data_t* data, seekRecord_t * R, l
 			result = atomic_cas_full(&R->lum->child.AO_val2, R->lumC, newWord);
 		}
 		return result;	
+}
+
+seekRecord_t * bst_seek(skey_t key, node_t* node_r, node_t* node_s){
+    seek_record->ancestor = node_r;
+    seek_record->successor = node_s;
+    seek_record->parent = node_s;
+    seek_record->leaf = ADDRESS(node_s->left);
+
+    node_t* parent_field = seek_record->parent->left;
+    node_t* current_field = seek_record->leaf->left;
+    node_t* current = ADDRESS(current_field);
+
+
+    while (current != NULL) {
+        if (!GETTAG(parent_field)) {
+            seek_record->ancestor = seek_record->parent;
+            seek_record->successor = seek_record->leaf;
+        }
+        seek_record->parent = seek_record->leaf;
+        seek_record->leaf = current;
+
+        parent_field = current_field;
+        if (key < current->key) {
+            current_field=current->left;
+        } else {
+            current_field=current->right;
+        }
+        current=ADDRESS(current_field);
+    }
+    return seek_record;
+}
+
+sval_t search(skey_t key, node_t* node_r, node_t* node_s) {
+   seek(key, node_r, node_s);
+   if (seek_record->leaf->key == key) {
+        return seek_record->leaf->value;
+   } else {
+        return 0;
+   }
+}
+
+
+bool_t bst_insert(skey_t key, sval_t val, node_t* node_r, node_t* node_s) {
+    while (1) {
+        seek(key, node_r, node_s);
+        if (seek_record->leaf->key == key) return FALSE;
+        node_t* parent = seek_record->parent;
+        node_t* leaf = seek_record->leaf;
+
+        node_t** child_addr;
+        if (key < paernt->key) {
+           child_addr=&(parent->left); 
+        } else {
+            child_addr=&(parent->right);
+        }
+        //TODO check this
+        node_t* new_internal=create_node(max(key,node_r->right->key),0); 
+        node_t* new_node = create_node(key,val);
+        
+        node_t* result = CAS_PTR(child_addr, ADDRESS(leaf), ADDRESS(new_internal));
+        if (result == ADDRESS(leaf)) {
+            return TRUE;
+        }
+        node_t* chld = *child_addr; 
+        if ( (ADDRESS(chld)==leaf) && (GETFLAG(chld) || GETTAG(chld)) ) {
+            bst_cleanup(key); 
+        }
+    }
+}
+
+sval_t* bst_remove(skey_t key, node_t* node_r, node_t* node_s) {
+    mode_t mode = INJECTION; 
+    node_t* leaf;
+    sval_t* val = 0;
+    while (1) {
+        seek(key, node_t* node_r, node_t* node_s);
+        sval_t val = leaf->value;
+        node_t* parent = seek_record->parent;
+
+        node_t** child_addr;
+        if (key < parent->key) {
+            child_addr = &(parent->left);
+        } else {
+            child_addr = &(parent->right);
+        }
+
+        if (mode == INJECTION) {
+            leaf = seek_record->leaf;
+            if (leaf->key != key) {
+                return 0;
+            }
+            node_t* lf = ADDRESS(leaf);
+            node_t* result = CAS_PTR(child_addr, lf, FLAG(lf));
+            if (result == ADDRESS(leaf)) {
+                mode = CLEANUP;
+                bool_t done = bst_cleanup(key);
+                if (done == TRUE) {
+                    return val;
+                }
+            } else {
+                node_t* chld = *child_addr;
+                if ( (ADDRESS(chld) == leaf) && (GETFALG(chld) || GETTAG(chld)) ) {
+                    bst_cleanup(key);
+                }
+            }
+        } else {
+            if (seek_record->leaf != leaf) {
+                return val; 
+            } else {
+                bool_t done = bst_cleanup(key);
+                if (done == TRUE) {
+                    return val;
+                }
+            }
+        }
+    }
+}
+
+
+bool_t bst_cleanup(skey_t key) {
+    node_t* ancestor = seek_record->ancestor;
+    node_t* successor = seek_record->successor;
+    node_t* parent = seek_record->parent;
+    node_t* leaf = seek_record->leaf;
+
+    node_t** succ_addr;
+    if (key < ancestor->key) {
+        succ_addr = &(ancestor->left);
+    } else {
+        succ_addr = &(ancestor->right);
+    }
+
+    node_t** child_adddr;
+    node_t** sibling_addr;
+    if (key < parent->key) {
+       child_addr = &(parent->left);
+       sibling_addr = &(parent->right);
+    } else {
+       child_addr = &(parent->right);
+       sibling_addr = &(parent->left);
+    }
+
+    node_t* chld = &(child_addr);
+    if (!GETFLAG(chld)) {
+        sibling_addr = child_addr;
+    }
+retry:
+    node_t* unflagged = *sibling_addr;
+    node_t* flagged = FLAG(*unflagged);
+    node_t* res = CAS_PTR(sibling_addr,*sibling_add, flagged);
+    if (res != unflagged) {
+        goto retry;
+    }
+
+    node_t* sibl = *sibling_add;
+    if ( CAS_PTR(succ_addr, ADDRESS(successor), UNTAG(sibl)) == ADDRESS(successor)) {
+#if GC == 1
+        //free ADDRESS(leaf)
+        //free ADDRESS(successor)
+#endif
+        return TRUE;
+    }
+    return FALSE;
 }
 
 
