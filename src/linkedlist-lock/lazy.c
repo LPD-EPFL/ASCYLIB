@@ -78,7 +78,7 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
       GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
       PREFETCHW_LOCK(curr);
       LOCK(ND_GET_LOCK(pred));
-      LOCK(ND_GET_LOCK(curr));
+      /* LOCK(ND_GET_LOCK(curr)); */
       if (parse_validate(pred, curr))
 	{
 	  result = (curr->key != key);
@@ -89,7 +89,7 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
 	    } 
 	}
       GL_UNLOCK(set->lock);
-      UNLOCK(ND_GET_LOCK(curr));
+      /* UNLOCK(ND_GET_LOCK(curr)); */
       UNLOCK(ND_GET_LOCK(pred));
     }
   while (result < 0);
