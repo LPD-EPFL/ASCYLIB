@@ -103,7 +103,7 @@ bool_t bst_insert(skey_t k, sval_t v, node_t* root) {
             s->pred = new_node;
             p->succ = new_node;
             UNLOCK(&(p->succ_lock));
-            insert_to_tree(parent,new_node);
+            insert_to_tree(parent,new_node,root);
             return true;
         }
         UNLOCK(&(p->succ_lock));
@@ -135,7 +135,7 @@ node_t* choose_parent(node_t* p, node_t* s, node_t* first_cand){
     }
 }
 
-void insert_to_tree(node_t* parent, node_t* new_node) {
+void insert_to_tree(node_t* parent, node_t* new_node, node_t* root) {
     new_node->parent = parent;
     if (parent->key < new_node->key) {
         parent->right = new_node;
@@ -144,8 +144,11 @@ void insert_to_tree(node_t* parent, node_t* new_node) {
         parent->left = new_node;
         parent->left_height = 1;
     }
-    UNLOCK(&(parent->tree_lock));
-    //TODO: replace the prev instr with bst_rebalance(lock_parent(parent)),parent);
+    if (parent!=root) {
+        bst_rebalance(lock_parent(parent),parent,root);
+    } else {
+        UNLOCK(&(parent->tree_lock));
+    }
 }
 
 
@@ -188,7 +191,7 @@ sval_t bst_remove(skey_t k, node_t* root) {
             UNLOCK(&(s->succ_lock));
             UNLOCK(&(p->succ_lock));
             sval_t v = s->value;
-            remove_from_tree(s, has_two_children);
+            remove_from_tree(s, has_two_children,root);
             return v; 
         }
         UNLOCK(&(p->succ_lock));
@@ -257,10 +260,12 @@ bool_t acquire_tree_locks(node_t* n) {
     }
 }
 
-void remove_from_tree(node_t* n, bool_t has_two_children) {
+void remove_from_tree(node_t* n, bool_t has_two_children,node_t* root) {
     node_t* child;
     node_t* parent;
-    int l=0;
+    bool_t violated = FALSE;
+    node_t* s;
+    //int l=0;
     if (has_two_children == FALSE) { 
         if ( n->right == NULL) {
             child = n->left;
@@ -270,10 +275,10 @@ void remove_from_tree(node_t* n, bool_t has_two_children) {
         parent = n->parent;
         update_child(parent, n, child);
     } else {
-        node_t* s = n->succ;
+        s = n->succ;
         child = s->right;
         parent = s->parent;
-        if (parent != n ) l=1;
+        //if (parent != n ) l=1;
         update_child(parent, s, child);
         s->left = n->left;
         s->right = n->right;
@@ -284,23 +289,38 @@ void remove_from_tree(node_t* n, bool_t has_two_children) {
             n->right->parent = s;
         }
         update_child(n->parent, n, s);
+        uint32_t dif = s->left_height-s->right_height;
+        if ((dif>=2) || (dif<= (-2))) {
+            violated = TRUE;
+        }
         if (parent == n) {
             parent = s;
         } else {
             UNLOCK(&(s->tree_lock));
         }
     }
-    if (child) {
-        UNLOCK(&(child->tree_lock));
-    }
+    //if (child) {
+    //    UNLOCK(&(child->tree_lock));
+    //}
 
-    UNLOCK(&(parent->tree_lock));
+    //UNLOCK(&(parent->tree_lock));
     UNLOCK(&(n->parent->tree_lock));
     UNLOCK(&(n->tree_lock));
+    bst_rebalance(parent,child,root);
+    if (violated) {
+        LOCK(&(s->tree_lock));
+        uint32_t dif = s->left_height-s->right_height;
+        if ((s->mark==FALSE) &&  ((dif>=2) || (dif<= (-2)))) {
+          //  bool_t lr=TRUE;
+           // if (dif>=2) lr=FALSE;
+            bst_rebalance(s, NULL, root); 
+        } else {
+            UNLOCK(&(s->tree_lock));
+        }
+    }
 #if GC == 1
     ssmem_free(alloc, n);
 #endif
-    //TODO: rbalance(parent,child);
 }
 
 void update_child(node_t* parent, node_t* old_ch, node_t* new_ch) {
@@ -319,7 +339,7 @@ bool_t update_height(node_t* ch, node_t* node, bool_t is_left) {
     if (ch == NULL) {
         new_h = 0;
     } else {
-        new_h = max(ch->leftHeight, ch->right_height) + 1;
+        new_h = max(ch->left_height, ch->right_height) + 1;
     }
     int32_t old_h;
     if (is_left == TRUE) {
@@ -328,14 +348,14 @@ bool_t update_height(node_t* ch, node_t* node, bool_t is_left) {
         old_h = node->right_height;
     }
     if (is_left == TRUE) {
-        node->left_height = new_height;
+        node->left_height = new_h;
     } else {
-        node->right_height =new_height;
+        node->right_height =new_h;
     }
     if (old_h == new_h) {
-        return TRUE;
+        return FALSE;
     }
-    retrun FALSE;
+    return TRUE;
 }
 
 bool_t restart(node_t* node, node_t* parent) {
@@ -357,10 +377,10 @@ bool_t restart(node_t* node, node_t* parent) {
             child = node->right;
         }
         if (child == NULL) {
-            return true;
+            return TRUE;
         }
-        if (TRYLOCK(child->tree_lock)) {
-            return true;
+        if (TRYLOCK(&(child->tree_lock))) {
+            return TRUE;
         }
     }
 }
@@ -385,7 +405,7 @@ void bst_rebalance(node_t* node, node_t* child, node_t* root) {
     if (node == root) {
        UNLOCK(&(node->tree_lock));
        if (child != NULL) {
-            UNLOCK(&(node->tree_lock));
+            UNLOCK(&(child->tree_lock));
        }
        return;
     }
@@ -396,7 +416,7 @@ void bst_rebalance(node_t* node, node_t* child, node_t* root) {
         }
         node_t* parent = NULL;
         bool_t updated = update_height(child,node,is_left);
-        int32_t bf = node->left_height() - node->right_height();
+        int32_t bf = node->left_height - node->right_height;
         if ((updated == FALSE) && (( bf < 2) && (bf > (-2)))) {
             if (child) {
                 UNLOCK(&(child->tree_lock));
@@ -404,7 +424,7 @@ void bst_rebalance(node_t* node, node_t* child, node_t* root) {
             UNLOCK(&(node->tree_lock));
             return;
         }
-        while (( bf < 2) && (bf > (-2))) {
+        while (( bf > 2) || (bf < (-2))) {
             if (((is_left==TRUE) && (bf <= -2)) || ((is_left==FALSE) && (bf  >= 2))) {
                 if (child != NULL) {
                     UNLOCK(&(child->tree_lock));
@@ -504,14 +524,14 @@ void bst_rebalance(node_t* node, node_t* child, node_t* root) {
         if (parent!=NULL) {
             node = parent;
         } else {
-            node= lockParent(node);
+            node= lock_parent(node);
         }
         parent = NULL;
     }
     if (child != NULL) {
         UNLOCK(&(child->tree_lock));
     }
-    UNLOCK(&(parent->tree_lock));
+    UNLOCK(&(node->tree_lock));
 }
 
 uint32_t bst_size(node_t* node) {

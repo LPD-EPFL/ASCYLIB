@@ -65,7 +65,7 @@ bool_t bst_insert(skey_t k, sval_t v, node_t* root);
 
 node_t* choose_parent(node_t* pred, node_t* succ, node_t* first_cand);
 
-void insert_to_tree(node_t* parent, node_t* new_node);
+void insert_to_tree(node_t* parent, node_t* new_node, node_t* root);
 
 node_t* lock_parent(node_t* node);
 
@@ -73,7 +73,7 @@ sval_t bst_remove(skey_t key, node_t* root);
 
 bool_t acquire_tree_locks(node_t* n);
 
-void remove_from_tree(node_t* n, bool_t has_two_children);
+void remove_from_tree(node_t* n, bool_t has_two_children, node_t* root);
 
 void update_child(node_t *parent, node_t* old_ch, node_t* new_ch);
 
