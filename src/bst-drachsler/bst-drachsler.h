@@ -28,6 +28,12 @@
 #define MAX_KEY KEY_MAX
 #define MIN_KEY 0
 
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
+
 typedef uint8_t bool_t;
 
 extern __thread ssmem_allocator_t* alloc;
@@ -40,8 +46,8 @@ struct node_t {
     node_t* parent;
     node_t* succ;
     node_t* pred;
-    uint32_t left_height;
-    uint32_t right_height;
+    int32_t left_height;
+    int32_t right_height;
     ptlock_t tree_lock;
     ptlock_t succ_lock;
     skey_t key;
@@ -72,5 +78,9 @@ void remove_from_tree(node_t* n, bool_t has_two_children);
 void update_child(node_t *parent, node_t* old_ch, node_t* new_ch);
 
 uint32_t bst_size(node_t* node);
+
+void bst_rebalance(node_t* node, node_t* child, node_t* root);
+
+void bst_rotate(node_t* child, node_t* n, node_t* parent, bool_t left_rotation);
 
 #endif

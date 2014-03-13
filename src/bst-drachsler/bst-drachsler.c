@@ -34,14 +34,14 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
 }
 
 node_t* initialize_tree(){
-   node_t* parent = create_node(MIN_KEY, (sval_t) 0, 1); 
-   node_t* root = create_node(MAX_KEY, (sval_t) 0, 1);
-   root->pred = parent;
-   root->succ = parent;
-   root->parent = parent;
-   parent->right = root;
-   parent->succ = root;
-   return root;
+    node_t* parent = create_node(MIN_KEY, (sval_t) 0, 1); 
+    node_t* root = create_node(MAX_KEY, (sval_t) 0, 1);
+    root->pred = parent;
+    root->succ = parent;
+    root->parent = parent;
+    parent->right = root;
+    parent->succ = root;
+    return root;
 }
 
 node_t* bst_search(skey_t k, node_t* root) {
@@ -145,7 +145,7 @@ void insert_to_tree(node_t* parent, node_t* new_node) {
         parent->left_height = 1;
     }
     UNLOCK(&(parent->tree_lock));
-    //TODO: replace the prev instr with rebalance(lock_parent(parent)),parent);
+    //TODO: replace the prev instr with bst_rebalance(lock_parent(parent)),parent);
 }
 
 
@@ -314,6 +314,206 @@ void update_child(node_t* parent, node_t* old_ch, node_t* new_ch) {
     }
 }
 
+bool_t update_height(node_t* ch, node_t* node, bool_t is_left) {
+    int32_t new_h;
+    if (ch == NULL) {
+        new_h = 0;
+    } else {
+        new_h = max(ch->leftHeight, ch->right_height) + 1;
+    }
+    int32_t old_h;
+    if (is_left == TRUE) {
+        old_h = node->left_height;
+    } else {
+        old_h = node->right_height;
+    }
+    if (is_left == TRUE) {
+        node->left_height = new_height;
+    } else {
+        node->right_height =new_height;
+    }
+    if (old_h == new_h) {
+        return TRUE;
+    }
+    retrun FALSE;
+}
+
+bool_t restart(node_t* node, node_t* parent) {
+    if (parent != NULL) {
+        UNLOCK(&(parent->tree_lock));
+    }
+    while (1) {
+        UNLOCK(&(node->tree_lock));
+        LOCK(&(node->tree_lock));
+        if (node->mark == TRUE) {
+            UNLOCK(&(node->tree_lock));
+            return FALSE;
+        }
+        int32_t bf = node->left_height - node->right_height;
+        node_t* child;
+        if (bf >= 2) {
+            child = node->left;
+        } else { 
+            child = node->right;
+        }
+        if (child == NULL) {
+            return true;
+        }
+        if (TRYLOCK(child->tree_lock)) {
+            return true;
+        }
+    }
+}
+
+void bst_rotate(node_t* child, node_t* n, node_t* parent, bool_t left_rotation) {
+    update_child(parent,n,child);
+    n->parent = child;
+    if (left_rotation == TRUE) {
+        update_child(n,child,child->left);
+        child->left = n;
+        n->right_height = child->left_height;
+        child->left_height = max(n->left_height,n->right_height) + 1;
+    } else {
+        update_child(n,child,child->right);
+        child->right = n;
+        n->left_height = child->right_height;
+        child->right_height = max(n->left_height,n->right_height) + 1;
+    }
+}
+
+void bst_rebalance(node_t* node, node_t* child, node_t* root) {
+    if (node == root) {
+       UNLOCK(&(node->tree_lock));
+       if (child != NULL) {
+            UNLOCK(&(node->tree_lock));
+       }
+       return;
+    }
+    while (node != root) {
+        bool_t is_left = FALSE;
+        if (node->left == child) {
+            is_left = TRUE; 
+        }
+        node_t* parent = NULL;
+        bool_t updated = update_height(child,node,is_left);
+        int32_t bf = node->left_height() - node->right_height();
+        if ((updated == FALSE) && (( bf < 2) && (bf > (-2)))) {
+            if (child) {
+                UNLOCK(&(child->tree_lock));
+            }
+            UNLOCK(&(node->tree_lock));
+            return;
+        }
+        while (( bf < 2) && (bf > (-2))) {
+            if (((is_left==TRUE) && (bf <= -2)) || ((is_left==FALSE) && (bf  >= 2))) {
+                if (child != NULL) {
+                    UNLOCK(&(child->tree_lock));
+                }
+                if (is_left == TRUE) {
+                    child = node->right;
+                } else {
+                    child = node->left;
+                }
+                if (is_left==TRUE) {
+                    is_left = FALSE;
+                } else {
+                    is_left= TRUE;
+                }
+                if (!TRYLOCK(&(child->tree_lock))) {
+                    if (restart(node,parent)==FALSE) {
+                        return;
+                    }
+                    parent=NULL;
+                    bf = node->left_height - node->right_height;
+                    if (bf >= 2) {
+                        child = node->left;
+                    } else { 
+                        child = node->right;
+                    }
+                    if (node->left == child) {
+                        is_left = TRUE;
+                    } else {
+                        is_left = FALSE;
+                    }
+                    continue; 
+                }
+
+            }
+            int32_t ch_bf = child->left_height - child->right_height;
+            if (((is_left == TRUE) && (ch_bf < 0)) || ((is_left == FALSE) && (ch_bf > 0))) {
+                node_t* grand_child;
+                if (is_left == TRUE) {
+                    grand_child = child->right;
+                } else {
+                    grand_child = child->left;
+                }
+                if (!TRYLOCK(&(grand_child->tree_lock))){
+                    UNLOCK(&(child->tree_lock)); 
+                    if (restart(node,parent)==FALSE) {
+                        return;
+                    }
+                    parent=NULL;
+                    bf = node->left_height - node->right_height;
+                    if (bf >= 2) {
+                        child = node->left;
+                    } else { 
+                        child = node->right;
+                    }
+                    if (node->left == child) {
+                        is_left = TRUE;
+                    } else {
+                        is_left = FALSE;
+                    }
+                    continue; 
+                }
+                bst_rotate(grand_child,child,node,is_left);
+                UNLOCK(&(child->tree_lock));
+                child = grand_child;
+            }
+            if (parent == NULL) {
+                parent = lock_parent(node);
+            }
+            bool_t not_is_left = is_left == TRUE ? FALSE : TRUE;
+            bst_rotate(child, node, parent, not_is_left); 
+            bf = node->left_height - node->right_height;
+            if ((bf >= 2) || (bf <= (-2))) {
+                UNLOCK(&(parent->tree_lock));
+                parent = child;
+                child = NULL;
+                if (bf >= 2) {
+                    is_left = FALSE;
+                } else {
+                    is_left = TRUE;
+                }
+                continue;
+            }
+            node_t* temp = node;
+            node = child;
+            child = temp;
+            if (node->left == child) {
+                is_left = TRUE;
+            } else {
+                is_left = FALSE;
+            }
+            bf = node->left_height - node->right_height;
+        }
+        if (child != NULL) {
+            UNLOCK(&(child->tree_lock));
+        }
+        child = node;
+        if (parent!=NULL) {
+            node = parent;
+        } else {
+            node= lockParent(node);
+        }
+        parent = NULL;
+    }
+    if (child != NULL) {
+        UNLOCK(&(child->tree_lock));
+    }
+    UNLOCK(&(parent->tree_lock));
+}
+
 uint32_t bst_size(node_t* node) {
     if (node==NULL) return 0;
     uint32_t x = 0;
@@ -322,3 +522,4 @@ uint32_t bst_size(node_t* node) {
     }
     return x + bst_size(node->right) + bst_size(node->left);
 }
+
