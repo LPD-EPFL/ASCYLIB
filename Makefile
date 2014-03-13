@@ -52,6 +52,9 @@ lfll:
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
 
+lbllclh:
+	$(MAKE) "LOCK=TAS" src/linkedlist-lock
+
 llcopy:
 	$(MAKE) "LOCK=CLH" src/linkedlist-copy
 
