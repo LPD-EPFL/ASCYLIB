@@ -25,22 +25,21 @@
 #  include <sys/procset.h>
 #endif
 
-#include "bst_howley.h"
+#include "bst-drachsler.h"
 
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
 #define DS_CONTAINS(k,r)  bst_contains(k,r)
-#define DS_ADD(k,r)       bst_add(k,(k+4),r)
+#define DS_ADD(k,r)     bst_insert(k,(k+4),r)
 #define DS_REMOVE(k,r)    bst_remove(k,r)
-#define DS_SIZE(s)          bst_size(s)
-#define DS_NEW()           bst_initialize()
+#define DS_SIZE(s)        bst_size(s)
+#define DS_NEW()          (node_t*) initialize_tree()
 
 #define DS_TYPE             node_t
 #define DS_NODE             node_t
 #define DS_KEY              skey_t
-
 
 /* ################################################################### *
  * GLOBALS
@@ -154,11 +153,11 @@ test(void* thread)
     {
       num_elems_thread++;
     }
-
+    
 #if INITIALIZE_FROM_ONE == 1
   num_elems_thread = (ID == 0) * initial;
 #endif
-    
+
   for(i = 0; i < num_elems_thread; i++) 
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
@@ -216,7 +215,7 @@ test(void* thread)
 	}
       else
 	{ 
-      bool_t res;
+        bool_t res;
 	  START_TS(0);
 	  res = DS_CONTAINS(key, set);
 	  END_TS(0, my_getting_count);
@@ -414,8 +413,6 @@ main(int argc, char **argv)
       put_rate = update_rate / 2;
     }
 
-
-
   get_rate = 1 - update_rate;
 
   /* printf("num_threads = %u\n", num_threads); */
@@ -433,7 +430,7 @@ main(int argc, char **argv)
   timeout.tv_nsec = (duration % 1000) * 1000000;
     
   stop = 0;
-
+    
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
 
@@ -581,7 +578,7 @@ main(int argc, char **argv)
   double eop = (1e6 * s.power_total[NUMBER_OF_SOCKETS]) / throughput;
   double eop_corrected = (1e6 * pow_tot_corrected) / throughput;
   printf("#Energy per Operation                      : %11f (corrected = %10f) uJ\n", eop, eop_corrected);
-#endif    
+#endif
     
   pthread_exit(NULL);
     

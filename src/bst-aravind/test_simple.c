@@ -25,17 +25,18 @@
 #  include <sys/procset.h>
 #endif
 
-#include "bst_howley.h"
+#include "bst-aravind.h"
 
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(k,r)  bst_contains(k,r)
-#define DS_ADD(k,r)       bst_add(k,(k+4),r)
+#define DS_CONTAINS(k,r)  bst_search(k,r)
+#define DS_ADD(k,r)       bst_insert(k,(k+4),r)
 #define DS_REMOVE(k,r)    bst_remove(k,r)
 #define DS_SIZE(s)          bst_size(s)
-#define DS_NEW()           bst_initialize()
+#define DS_NEW()           initialize_tree()
+#define DS_LOCAL()         bst_init_local()
 
 #define DS_TYPE             node_t
 #define DS_NODE             node_t
@@ -106,6 +107,7 @@ test(void* thread)
   int phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();
+  DS_LOCAL();
 
   DS_TYPE* set = td->set;
 
@@ -157,8 +159,8 @@ test(void* thread)
 
 #if INITIALIZE_FROM_ONE == 1
   num_elems_thread = (ID == 0) * initial;
-#endif
-    
+#endif    
+
   for(i = 0; i < num_elems_thread; i++) 
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
@@ -177,6 +179,7 @@ test(void* thread)
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
+  sval_t search_res;
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
@@ -190,7 +193,7 @@ test(void* thread)
 	{
       bool_t res;
 	  START_TS(1);
-	  res = DS_ADD(key,set);
+	  res = DS_ADD(key, set);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -202,7 +205,7 @@ test(void* thread)
 	} 
       else if(unlikely(c <= scale_rem))
 	{
-	  int removed;
+	  sval_t removed;
 	  START_TS(2);
 	  removed = DS_REMOVE(key,set);
 	  END_TS(2, my_removing_count);
@@ -216,11 +219,10 @@ test(void* thread)
 	}
       else
 	{ 
-      bool_t res;
 	  START_TS(0);
-	  res = DS_CONTAINS(key, set);
+	  search_res = DS_CONTAINS(key, set);
 	  END_TS(0, my_getting_count);
-	  if(res) 
+	  if(search_res!=0) 
 	    {
 	      ADD_DUR(my_getting_succ);
 	      my_getting_count_succ++;

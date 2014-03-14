@@ -25,32 +25,33 @@
 #  include <sys/procset.h>
 #endif
 
-#include "bst_howley.h"
+#include "copy_on_write.h"
 
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(k,r)  bst_contains(k,r)
-#define DS_ADD(k,r)       bst_add(k,(k+4),r)
-#define DS_REMOVE(k,r)    bst_remove(k,r)
-#define DS_SIZE(s)          bst_size(s)
-#define DS_NEW()           bst_initialize()
+#define DS_CONTAINS(s,k,t)  cpy_search(s, k)
+#define DS_ADD(s,k,t)       cpy_insert(s, k, k)
+#define DS_REMOVE(s,k,t)    cpy_delete(s, k)
+#define DS_SIZE(s)          copy_on_write_size(s)
+#define DS_NEW()            copy_on_write_new()
 
-#define DS_TYPE             node_t
-#define DS_NODE             node_t
-#define DS_KEY              skey_t
-
+#define DS_TYPE             copy_on_write_t
+#define DS_NODE             kv_t
 
 /* ################################################################### *
  * GLOBALS
  * ################################################################### */
 
+size_t array_ll_fixed_size = DEFAULT_RANGE;
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
+size_t load_factor;
 size_t update = DEFAULT_UPDATE;
 size_t num_threads = DEFAULT_NB_THREADS; 
 size_t duration = DEFAULT_DURATION;
+int test_verbose = 0;
 
 size_t print_vals_num = 100; 
 size_t pf_vals_num = 1023;
@@ -133,16 +134,22 @@ test(void* thread)
 #endif
     
   seeds = seed_rand();
+
+#if defined(HTICKET)
+  init_thread_htlocks(the_cores[d->id]);
+#elif defined(CLH)
+  init_clh_thread(&clh_local_p);
+#endif
+
 #if GC == 1
   alloc = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
   assert(alloc != NULL);
   ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, ID);
 #endif
-    
 
   RR_INIT(phys_id);
 
-  DS_KEY key;
+  uint64_t key;
   int c = 0;
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
   uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
@@ -157,13 +164,25 @@ test(void* thread)
 
 #if INITIALIZE_FROM_ONE == 1
   num_elems_thread = (ID == 0) * initial;
+  key = range;
 #endif
-    
+
   for(i = 0; i < num_elems_thread; i++) 
     {
+#if INITIALIZE_FROM_ONE == 1
+      if (initial > 10000)
+	{
+	  key--;
+	}
+      else
+	{
+	  key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
+	}
+#else
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
+#endif
       
-      if(DS_ADD(key,set) == false)
+      if(DS_ADD(set, key, ALGO_TYPE) == false)
 	{
 	  i--;
 	}
@@ -177,6 +196,7 @@ test(void* thread)
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
+
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
@@ -188,9 +208,9 @@ test(void* thread)
 
       if (unlikely(c <= scale_put))
 	{
-      bool_t res;
+	  int res;
 	  START_TS(1);
-	  res = DS_ADD(key,set);
+	  res = DS_ADD(set, key, ALGO_TYPE);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -204,7 +224,7 @@ test(void* thread)
 	{
 	  int removed;
 	  START_TS(2);
-	  removed = DS_REMOVE(key,set);
+	  removed = DS_REMOVE(set, key, ALGO_TYPE);
 	  END_TS(2, my_removing_count);
 	  if(removed != 0) 
 	    {
@@ -216,11 +236,11 @@ test(void* thread)
 	}
       else
 	{ 
-      bool_t res;
+	  int res;
 	  START_TS(0);
-	  res = DS_CONTAINS(key, set);
+	  res = DS_CONTAINS(set, key, ALGO_TYPE);
 	  END_TS(0, my_getting_count);
-	  if(res) 
+	  if(res != 0) 
 	    {
 	      ADD_DUR(my_getting_succ);
 	      my_getting_count_succ++;
@@ -275,6 +295,10 @@ test(void* thread)
 int
 main(int argc, char **argv) 
 {
+#if defined(CLH)
+  init_clh_thread(&clh_local_p);
+#endif
+
   set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
@@ -282,6 +306,7 @@ main(int argc, char **argv)
   struct option long_options[] = {
     // These options don't set a flag
     {"help",                      no_argument,       NULL, 'h'},
+    {"verbose",                   no_argument,       NULL, 'e'},
     {"duration",                  required_argument, NULL, 'd'},
     {"initial-size",              required_argument, NULL, 'i'},
     {"num-threads",               required_argument, NULL, 'n'},
@@ -297,7 +322,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:p:b:v:f:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:el:p:b:v:f:x:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -320,6 +345,8 @@ main(int argc, char **argv)
 		 "Options:\n"
 		 "  -h, --help\n"
 		 "        Print this message\n"
+		 "  -e, --verbose\n"
+		 "        Be verbose\n"
 		 "  -d, --duration <int>\n"
 		 "        Test duration in milliseconds\n"
 		 "  -i, --initial-size <int>\n"
@@ -343,6 +370,9 @@ main(int argc, char **argv)
 	case 'd':
 	  duration = atoi(optarg);
 	  break;
+	case 'e':
+	  test_verbose = 1;
+	  break;
 	case 'i':
 	  initial = atoi(optarg);
 	  break;
@@ -358,6 +388,9 @@ main(int argc, char **argv)
 	case 'p':
 	  put_explicit = 1;
 	  put = atoi(optarg);
+	  break;
+	case 'l':
+	  load_factor = atoi(optarg);
 	  break;
 	case 'v':
 	  print_vals_num = atoi(optarg);
@@ -385,7 +418,7 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
-  printf("## Initial: %zu / Range: %zu /\n", initial, range);
+  printf("## Initial: %zu / Range: %zu\n", initial, range);
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;
@@ -397,6 +430,8 @@ main(int argc, char **argv)
       printf("** rounding up range (to make it power of 2): old: %zu / new: %zu\n", range, range_pow2);
       range = range_pow2;
     }
+
+  array_ll_fixed_size = range;
 
   if (put > update)
     {
@@ -413,8 +448,6 @@ main(int argc, char **argv)
     {
       put_rate = update_rate / 2;
     }
-
-
 
   get_rate = 1 - update_rate;
 
@@ -433,7 +466,7 @@ main(int argc, char **argv)
   timeout.tv_nsec = (duration % 1000) * 1000000;
     
   stop = 0;
-
+    
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
 
@@ -485,8 +518,8 @@ main(int argc, char **argv)
   barrier_cross(&barrier_global);
   gettimeofday(&start, NULL);
   nanosleep(&timeout, NULL);
-
   stop = 1;
+
   gettimeofday(&end, NULL);
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
@@ -517,6 +550,12 @@ main(int argc, char **argv)
     
   for(t=0; t < num_threads; t++) 
     {
+      if (test_verbose)
+	{
+	  printf("Thrd: %3lu : srch: %10zu (%10zu) / insr: %10zu (%10zu) / rems: %10zu (%10zu)\n",
+		 t, getting_count[t], getting_count_succ[t], putting_count[t], putting_count_succ[t],
+		 removing_count[t], removing_count_succ[t]);
+	}
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];

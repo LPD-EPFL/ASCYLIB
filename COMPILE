@@ -18,6 +18,6 @@ You may pass the following settings to `make`:
     * LBSL= herlihy : compile with Herlihy's lock-bazed lazy skip list algo (default)
       	    pugh    : compile with Pugh's lock-based lazy  skip list algo
     * SET_CPU=0 : does not pin threads to cores (does this by default) 
-      	    
+    * POWER=1 : enable power measurements with rapl_read library (default is 0)      	    
 Example:
 	`make` VERSION=DEBUG GC=0

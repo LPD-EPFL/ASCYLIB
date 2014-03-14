@@ -170,7 +170,9 @@ bool_t bst_add(bst_key_t k, node_t* root){
 		cas_op->child_cas_op.expected = old;
 		cas_op->child_cas_op.update = new_node;
 
+#if defined(__tile__)
 		MEM_BARRIER;
+#endif
 		if (CAS_PTR(&curr->op, curr_op, FLAG(cas_op, STATE_OP_CHILDCAS)) == curr_op) {
 
 			bst_help_child_cas(cas_op, curr, root);
@@ -226,7 +228,9 @@ bool_t bst_remove(bst_key_t k, node_t* root){
 			reloc_op->relocate_op.remove_key = k;
 			reloc_op->relocate_op.replace_key = replace->key;
 
+#if defined(__tile__)
 			MEM_BARRIER;
+#endif
 			if (CAS_PTR(&(replace->op), replace_op, FLAG(reloc_op, STATE_OP_RELOCATE)) == replace_op) {
 				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
 					return TRUE;

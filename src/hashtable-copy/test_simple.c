@@ -25,22 +25,20 @@
 #  include <sys/procset.h>
 #endif
 
-#include "bst_howley.h"
+#include "copy_on_write.h"
 
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(k,r)  bst_contains(k,r)
-#define DS_ADD(k,r)       bst_add(k,(k+4),r)
-#define DS_REMOVE(k,r)    bst_remove(k,r)
-#define DS_SIZE(s)          bst_size(s)
-#define DS_NEW()           bst_initialize()
+#define DS_CONTAINS(s,k,t)  cpy_search(s, k)
+#define DS_ADD(s,k,t)       cpy_insert(s, k, k)
+#define DS_REMOVE(s,k,t)    cpy_delete(s, k)
+#define DS_SIZE(s)          copy_on_write_size(s)
+#define DS_NEW(nb)          copy_on_write_new(nb)
 
-#define DS_TYPE             node_t
-#define DS_NODE             node_t
-#define DS_KEY              skey_t
-
+#define DS_TYPE             copy_on_write_t
+#define DS_NODE             kv_t
 
 /* ################################################################### *
  * GLOBALS
@@ -48,6 +46,7 @@
 
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
+size_t load_factor = DEFAULT_LOAD;
 size_t update = DEFAULT_UPDATE;
 size_t num_threads = DEFAULT_NB_THREADS; 
 size_t duration = DEFAULT_DURATION;
@@ -133,16 +132,22 @@ test(void* thread)
 #endif
     
   seeds = seed_rand();
+
+#if defined(HTICKET)
+  init_thread_htlocks(the_cores[d->id]);
+#elif defined(CLH)
+  init_clh_thread(&clh_local_p);
+#endif
+
 #if GC == 1
   alloc = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
   assert(alloc != NULL);
   ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, ID);
 #endif
-    
 
   RR_INIT(phys_id);
 
-  DS_KEY key;
+  uint64_t key;
   int c = 0;
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
   uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
@@ -163,7 +168,7 @@ test(void* thread)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(key,set) == false)
+      if(DS_ADD(set, key, ALGO_TYPE) == false)
 	{
 	  i--;
 	}
@@ -177,6 +182,7 @@ test(void* thread)
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
+
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
@@ -188,9 +194,9 @@ test(void* thread)
 
       if (unlikely(c <= scale_put))
 	{
-      bool_t res;
+	  int res;
 	  START_TS(1);
-	  res = DS_ADD(key,set);
+	  res = DS_ADD(set, key, ALGO_TYPE);
 	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
@@ -204,7 +210,7 @@ test(void* thread)
 	{
 	  int removed;
 	  START_TS(2);
-	  removed = DS_REMOVE(key,set);
+	  removed = DS_REMOVE(set, key, ALGO_TYPE);
 	  END_TS(2, my_removing_count);
 	  if(removed != 0) 
 	    {
@@ -216,11 +222,11 @@ test(void* thread)
 	}
       else
 	{ 
-      bool_t res;
+	  int res;
 	  START_TS(0);
-	  res = DS_CONTAINS(key, set);
+	  res = DS_CONTAINS(set, key, ALGO_TYPE);
 	  END_TS(0, my_getting_count);
-	  if(res) 
+	  if(res != 0) 
 	    {
 	      ADD_DUR(my_getting_succ);
 	      my_getting_count_succ++;
@@ -290,6 +296,7 @@ main(int argc, char **argv)
     {"num-buckets",               required_argument, NULL, 'b'},
     {"print-vals",                required_argument, NULL, 'v'},
     {"vals-pf",                   required_argument, NULL, 'f'},
+    {"load-factor",               required_argument, NULL, 'l'},
     {NULL, 0, NULL, 0}
   };
 
@@ -297,7 +304,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:p:b:v:f:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:x:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -338,6 +345,11 @@ main(int argc, char **argv)
 		 "        When using detailed profiling, how many values to print.\n"
 		 "  -f, --val-pf <int>\n"
 		 "        When using detailed profiling, how many values to keep track of.\n"
+		 "  -x, --lock-based algorithm (default=1)\n"
+		 "        Use lock-based algorithm\n"
+		 "        1 = lock-coupling,\n"
+		 "        2 = lazy algorithm\n"
+		 "        3 = Pugh's lazy algorithm\n"
 		 );
 	  exit(0);
 	case 'd':
@@ -358,6 +370,9 @@ main(int argc, char **argv)
 	case 'p':
 	  put_explicit = 1;
 	  put = atoi(optarg);
+	  break;
+	case 'l':
+	  load_factor = atoi(optarg);
 	  break;
 	case 'v':
 	  print_vals_num = atoi(optarg);
@@ -385,7 +400,7 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
-  printf("## Initial: %zu / Range: %zu /\n", initial, range);
+  printf("## Initial: %zu / Range: %zu / Load factor: %zu \n", initial, range, load_factor);
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;
@@ -414,8 +429,6 @@ main(int argc, char **argv)
       put_rate = update_rate / 2;
     }
 
-
-
   get_rate = 1 - update_rate;
 
   /* printf("num_threads = %u\n", num_threads); */
@@ -433,8 +446,11 @@ main(int argc, char **argv)
   timeout.tv_nsec = (duration % 1000) * 1000000;
     
   stop = 0;
+    
+  size_t maxhtlength = (unsigned int) initial / load_factor;
+  array_ll_fixed_size = range / maxhtlength;
 
-  DS_TYPE* set = DS_NEW();
+  DS_TYPE* set = DS_NEW(maxhtlength);
   assert(set != NULL);
 
   /* Initializes the local data */
@@ -582,7 +598,7 @@ main(int argc, char **argv)
   double eop_corrected = (1e6 * pow_tot_corrected) / throughput;
   printf("#Energy per Operation                      : %11f (corrected = %10f) uJ\n", eop, eop_corrected);
 #endif    
-    
+
   pthread_exit(NULL);
     
   return 0;

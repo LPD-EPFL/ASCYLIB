@@ -13,7 +13,7 @@ typedef intptr_t skey_t;
 typedef intptr_t sval_t;
 
 #define KEY_MIN                         INT_MIN
-#define KEY_MAX                         (INT_MAX - 1)
+#define KEY_MAX                         (INT_MAX - 2)
 
 #define DEFAULT_DURATION                1000
 #define DEFAULT_INITIAL                 1024
