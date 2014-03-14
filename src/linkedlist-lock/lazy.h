@@ -29,6 +29,9 @@
 
 #include "coupling.h"
 
+#define LAZY_RO_FAIL 1
+
+
 /* linked list accesses */
 extern int parse_validate(node_l_t* pred, node_l_t* curr);
 sval_t parse_find(intset_l_t* set, skey_t key);
