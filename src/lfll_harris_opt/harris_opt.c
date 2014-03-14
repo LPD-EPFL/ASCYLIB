@@ -76,17 +76,22 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
 {
   node_t* left_node = set->head;
   node_t* right_node = set->head->next;
-  while(likely((right_node->key < key || is_marked_ref((long)right_node->next))))
+  while(1)
     {
-      if (unlikely(is_marked_ref((long)right_node->next)))
+      uintptr_t right_node_nxt = (uintptr_t) right_node->next;
+      if (unlikely(is_marked_ref(right_node_nxt)))
 	{
 	  physical_delete_right(left_node, right_node);
 	}
       else 
 	{
+	  if (unlikely(right_node->key >= key))
+	    {
+	      break;
+	    }
 	  left_node = right_node;
 	}
-      right_node = (node_t*)get_unmarked_ref((long)right_node->next);
+      right_node = (node_t*)get_unmarked_ref(right_node_nxt);
     }
   *left_node_ptr = left_node;
   return right_node;
@@ -99,7 +104,7 @@ sval_t
 harris_find(intset_t* the_list, skey_t key)
 {
   node_t* node = the_list->head->next;
-  while(node->key < key)
+  while(likely(node->key < key))
     {
       node = (node_t*)get_unmarked_ref((long)node->next);
     }
