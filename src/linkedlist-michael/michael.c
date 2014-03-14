@@ -79,7 +79,7 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
  retry:
   left_node = set->head;
   right_node = set->head->next;
-  while(right_node->key < key)
+  while(1)
     {
       if (unlikely(left_node->next != right_node))
 	{
@@ -95,6 +95,10 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
 	}
       else 
 	{
+	  if(right_node->key >= key)
+	    {
+	      break;
+	    }
 	  left_node = right_node;
 	}
       right_node = (node_t*)get_unmarked_ref((long)right_node->next);
