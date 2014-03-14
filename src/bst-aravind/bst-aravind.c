@@ -204,6 +204,7 @@ bool_t bst_cleanup(skey_t key) {
     if (!GETFLAG(chld)) {
         sibling_addr = child_addr;
     }
+//#if defined(__tile__) || defined(__sparc__)
     while (1) {
         node_t* untagged = *sibling_addr;
         node_t* tagged = (node_t*)TAG(untagged);
@@ -212,6 +213,9 @@ bool_t bst_cleanup(skey_t key) {
             break;
          }
     }
+//#else
+//    set_bit(sibling_addr,1);
+//#endif
 
     node_t* sibl = *sibling_addr;
     if ( CAS_PTR(succ_addr, ADDRESS(successor), UNTAG(sibl)) == ADDRESS(successor)) {
