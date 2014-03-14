@@ -40,6 +40,23 @@ struct node_t{
     node_t* left;
 };
 
+#ifndef __tile__
+#ifndef __sparc__
+
+static inline void set_bit(volatile uintptr_t* *array, int bit) {
+    asm("bts %1,%0" : "+m" (*array) : "r" (bit));
+}
+static inline bool_t set_bit2(volatile uintptr_t *array, int bit) {
+
+   // asm("bts %1,%0" :  "+m" (*array): "r" (bit));
+     bool_t flag; 
+     __asm__ __volatile__("lock bts %2,%1; setb %0" : "=q" (flag) : "m" (*array), "r" (bit)); return flag; 
+   return flag;
+}
+#endif
+#endif
+
+
 typedef struct seek_record_t{
     node_t* ancestor;
     node_t* successor;
