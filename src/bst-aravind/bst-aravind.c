@@ -116,7 +116,9 @@ bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
             new_internal->right = new_node;
             new_internal->left = leaf;
         }
-        
+ #ifdef __tile__
+    MEM_BARRIER;
+#endif
         node_t* result = CAS_PTR(child_addr, ADDRESS(leaf), ADDRESS(new_internal));
         if (result == ADDRESS(leaf)) {
             return TRUE;
