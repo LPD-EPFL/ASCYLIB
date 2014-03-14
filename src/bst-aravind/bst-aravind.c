@@ -38,7 +38,7 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
         new_node = (volatile node_t*) ssmem_alloc(alloc, sizeof(node_t));
     }
 #else 
-    new_node = (volatile node_t*) ssalloc(CACHE_LINE_SIZE, sizeof(node_t));
+    new_node = (volatile node_t*) ssalloc(sizeof(node_t));
 #endif
     if (new_node == NULL) {
         perror("malloc in bst create node");

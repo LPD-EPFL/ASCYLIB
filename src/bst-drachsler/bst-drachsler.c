@@ -11,7 +11,7 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
         new_node = (volatile node_t*) ssmem_alloc(alloc, sizeof(node_t));
     }
 #else 
-    new_node = (volatile node_t*) ssalloc(CACHE_LINE_SIZE, sizeof(node_t));
+    new_node = (volatile node_t*) ssalloc(sizeof(node_t));
 #endif
     if (new_node == NULL) {
         perror("malloc in bst create node");
@@ -96,10 +96,11 @@ bool_t bst_insert(skey_t k, sval_t v, node_t* root) {
                 UNLOCK(&(p->succ_lock)); 
                 return FALSE;
             }
-            node_t* new_node = create_node(k,v,0);
+            volatile node_t* new_node = create_node(k,v,0);
             node_t* parent = choose_parent(p, s, node);
             new_node->succ = s;
             new_node->pred = p;
+            new_node->parent = parent;
             s->pred = new_node;
             p->succ = new_node;
             UNLOCK(&(p->succ_lock));
@@ -184,6 +185,7 @@ sval_t bst_remove(skey_t k, node_t* root) {
             }
             LOCK(&(s->succ_lock));
             bool_t has_two_children = acquire_tree_locks(s);
+            lock_parent(s);
             s->mark = TRUE;
             node_t* s_succ = s->succ;
             s_succ->pred = p;
@@ -201,18 +203,20 @@ sval_t bst_remove(skey_t k, node_t* root) {
 bool_t acquire_tree_locks(node_t* n) {
     while (1) {
         LOCK(&(n->tree_lock));
-        lock_parent(n);
-        if ((n->right == NULL) || (n->left == NULL)) {
-            if (n->right != NULL) {
-                if(!TRYLOCK(&(n->right->tree_lock))) {
+        node_t* left = n->left;
+        node_t* right = n->right;
+        //lock_parent(n);
+        if ((right == NULL) || (left == NULL)) {
+            if (right != NULL) {
+                if(!TRYLOCK(&(right->tree_lock))) {
                     UNLOCK(&(n->tree_lock));
-                    UNLOCK(&(n->parent->tree_lock));
+                    //UNLOCK(&(n->parent->tree_lock));
                     continue;
                 }
-            } else if (n->left != NULL) {
-                if(!TRYLOCK(&(n->left->tree_lock))) {
+            } else if (left != NULL) {
+                if(!TRYLOCK(&(left->tree_lock))) {
                     UNLOCK(&(n->tree_lock));
-                    UNLOCK(&(n->parent->tree_lock));
+                    //UNLOCK(&(n->parent->tree_lock));
                     continue;
                 }
             }
@@ -221,37 +225,39 @@ bool_t acquire_tree_locks(node_t* n) {
             node_t* s = n->succ;
             int l=0;
             node_t* parent;
-            if (s->parent != n) {
-                parent = s->parent;
+            node_t* sp = s->parent;
+            if (sp != n) {
+                parent = sp;
                 if (!TRYLOCK(&(parent->tree_lock))) {
                     UNLOCK(&(n->tree_lock));
-                    UNLOCK(&(n->parent->tree_lock));
+                    //UNLOCK(&(n->parent->tree_lock));
                     continue;
                 }
                 l=1;
                 if ((parent != s->parent) || (parent->mark==TRUE)) {
                     UNLOCK(&(n->tree_lock));
                     UNLOCK(&(parent->tree_lock));
-                    UNLOCK(&(n->parent->tree_lock));
+                    //UNLOCK(&(n->parent->tree_lock));
                     continue;
                 }
             }
             if (!TRYLOCK(&(s->tree_lock))) {
                 UNLOCK(&(n->tree_lock));
-                UNLOCK(&(n->parent->tree_lock));
+                //UNLOCK(&(n->parent->tree_lock));
                 if (l) { 
                     UNLOCK(&(parent->tree_lock));
                 }
                 continue;
             }
-            if (s->right != NULL) {
-                if (!TRYLOCK(&(s->right->tree_lock))) {
+            node_t* sr = s->right;
+            if (sr != NULL) {
+                if (!TRYLOCK(&(sr->tree_lock))) {
                     UNLOCK(&(n->tree_lock));
                     UNLOCK(&(s->tree_lock));
                     if (l) { 
                         UNLOCK(&(parent->tree_lock));
                     }
-                    UNLOCK(&(n->parent->tree_lock));
+                    //UNLOCK(&(n->parent->tree_lock));
                     continue;
                 }
             }
@@ -298,12 +304,12 @@ void remove_from_tree(node_t* n, bool_t has_two_children,node_t* root) {
         } else {
             UNLOCK(&(s->tree_lock));
         }
+        UNLOCK(&(parent->tree_lock));
     }
     if (child) {
        UNLOCK(&(child->tree_lock));
     }
 
-    UNLOCK(&(parent->tree_lock));
     UNLOCK(&(n->parent->tree_lock));
     UNLOCK(&(n->tree_lock));
     /*bst_rebalance(parent,child,root);*/
