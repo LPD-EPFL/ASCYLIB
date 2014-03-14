@@ -2,14 +2,17 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS = $(BINDIR)/lf-ll
+LIST_V=1
+# LIST_V=
+
+BINS = $(BINDIR)/lf-ll$(LIST_V)
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
 
 all:	main
 
-LIST_IMPL = harris1
+LIST_IMPL = harris$(LIST_V)
 
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
