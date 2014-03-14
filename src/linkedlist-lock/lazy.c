@@ -40,13 +40,13 @@ sval_t
 parse_find(intset_l_t *set, skey_t key)
 {
   node_l_t* curr = set->head;
-  while (curr->key < key || curr->marked)
+  while (curr->key < key)
     {
       curr = curr->next;
     }
 
   sval_t res = 0;
-  if ((curr->key == key))
+  if ((curr->key == key) && !curr->marked)
     {
       res = curr->val;
     }
@@ -64,21 +64,21 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
     {
       pred = set->head;
       curr = pred->next;
-      while (curr->key < key) 
+      while (likely(curr->key < key))
 	{
 	  pred = curr;
 	  curr = curr->next;
 	}
 
+#if LAZY_RO_FAIL ==1 
       if (curr->key == key && !curr->marked)
 	{
 	  return false;
 	}
+#endif
 
       GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
-      PREFETCHW_LOCK(curr);
       LOCK(ND_GET_LOCK(pred));
-      LOCK(ND_GET_LOCK(curr));
       if (parse_validate(pred, curr))
 	{
 	  result = (curr->key != key);
@@ -89,7 +89,6 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
 	    } 
 	}
       GL_UNLOCK(set->lock);
-      UNLOCK(ND_GET_LOCK(curr));
       UNLOCK(ND_GET_LOCK(pred));
     }
   while (result < 0);
@@ -111,19 +110,20 @@ parse_delete(intset_l_t *set, skey_t key)
     {
       pred = set->head;
       curr = pred->next;
-      while (curr->key < key)
+      while (likely(curr->key < key))
 	{
 	  pred = curr;
 	  curr = curr->next;
 	}
 
+#if LAZY_RO_FAIL ==1 
       if (curr->key != key && !curr->marked)
 	{
 	  return false;
 	}
+#endif
 
       GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
-      PREFETCHW_LOCK(curr);
       LOCK(ND_GET_LOCK(pred));
       LOCK(ND_GET_LOCK(curr));
 

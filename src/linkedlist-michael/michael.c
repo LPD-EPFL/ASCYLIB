@@ -1,10 +1,10 @@
 /*
- *  linkedlist.c
  *
- *  Description:
- *   Lock-free linkedlist implementation of Harris' algorithm
- *   "A Pragmatic Implementation of Non-Blocking Linked Lists" 
- *   T. Harris, p. 300-314, DISC 2001.
+ * Description:
+ * similar to:
+ * Michael, M. M. (2002). High performance dynamic lock-free hash tables and list-based sets. 
+ * Proceedings of the Fourteenth Annual ACM Symposium on Parallel Algorithms and Architectures 
+ * - SPAA ’02, 73. doi:10.1145/564879.564881
  */
 
 #include "linkedlist.h"
@@ -74,16 +74,31 @@ physical_delete_right(node_t* left_node, node_t* right_node)
 static inline node_t* 
 list_search(intset_t* set, skey_t key, node_t** left_node_ptr) 
 {
-  node_t* left_node = set->head;
-  node_t* right_node = set->head->next;
-  while(likely((right_node->key < key || is_marked_ref((long)right_node->next))))
+  node_t* left_node;
+  node_t* right_node;
+ retry:
+  left_node = set->head;
+  right_node = set->head->next;
+  while(1)
     {
-      if (unlikely(is_marked_ref((long)right_node->next)))
+      if (unlikely(left_node->next != right_node))
 	{
-	  physical_delete_right(left_node, right_node);
+	  goto retry;
+	}
+
+      if (is_marked_ref((long)right_node->next)) 
+	{
+	  if (!physical_delete_right(left_node, right_node))
+	    {
+	      goto retry;
+	    }
 	}
       else 
 	{
+	  if(right_node->key >= key)
+	    {
+	      break;
+	    }
 	  left_node = right_node;
 	}
       right_node = (node_t*)get_unmarked_ref((long)right_node->next);
@@ -96,17 +111,13 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
  * returns a value different from 0 if there is a node in the list owning value val.
  */
 sval_t
-harris_find(intset_t* the_list, skey_t key)
+michael_find(intset_t* set, skey_t key)
 {
-  node_t* node = the_list->head->next;
-  while(node->key < key)
+  node_t* left;
+  node_t* right = list_search(set, key, &left);
+  if (right->key == key && !is_marked_ref((uintptr_t) right->next))
     {
-      node = (node_t*)get_unmarked_ref((long)node->next);
-    }
-
-  if (node->key == key && !is_marked_ref((long)node->next)) 
-    {
-      return node->val;
+      return right->val;
     }
   return 0;
 }
@@ -117,7 +128,7 @@ harris_find(intset_t* the_list, skey_t key)
  * (if the value was absent) or does nothing (if the value is already present).
  */
 int
-harris_insert(intset_t *the_list, skey_t key, sval_t val)
+michael_insert(intset_t *the_list, skey_t key, sval_t val)
 {
   node_t* cas_result;
   node_t* right_node;
@@ -129,25 +140,31 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
       right_node = list_search(the_list, key, &left_node);
       if (right_node->key == key) 
 	{
+#if GC == 1
+	  if (unlikely(node_to_add != NULL))
+	    {
+	      ssmem_free(alloc, node_to_add);
+	    }
+#endif
 	  return 0;
 	}
 
-      node_to_add = new_node(key, val, right_node, 0);
+      if (likely(node_to_add == NULL))
+	{
+	  node_to_add = new_node(key, val, right_node, 0);
+	}
+      else
+	{
+	  node_to_add->next = right_node;
+	}
 #ifdef __tile__
-      MEM_BARRIER;
+    MEM_BARRIER;
 #endif
       // Try to swing left_node's unmarked next pointer to a new node
       cas_result = CAS_PTR(&left_node->next, right_node, node_to_add);
-      if (likely(cas_result == right_node))
-	{
-	  return 1;
-	}
+    } while(cas_result != right_node);
 
-#if GC == 1
-      ssmem_free(alloc, node_to_add);
-#endif
-    } 
-  while (1);
+  return 1;
 }
 
 /*
@@ -156,7 +173,7 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
  * The deletion is logical and consists of setting the node mark bit to 1.
  */
 sval_t
-harris_delete(intset_t *the_list, skey_t key)
+michael_delete(intset_t *the_list, skey_t key)
 {
   node_t* cas_result;
   long unmarked_ref;
