@@ -240,6 +240,10 @@ harris_delete(intset_t *set, skey_t key)
 #endif
       ;
     }
+  else
+    {
+      harris_search(set, key, &left_node
+    }
 
   return ret;
 }

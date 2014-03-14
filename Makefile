@@ -46,13 +46,13 @@ tbb:
 lfsl:
 	$(MAKE) "STM=LOCKFREE" src/skiplist
 
-lfll:
+lfll_harris:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist
 
 lfll_harris_opt:
 	$(MAKE) "STM=LOCKFREE" src/lfll_harris_opt
 
-lfllmi:
+lfll_michael:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-michael
 
 lbll:
