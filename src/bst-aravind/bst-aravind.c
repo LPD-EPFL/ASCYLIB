@@ -20,6 +20,9 @@ node_t* initialize_tree(){
     r->right = inf2;
     s->right = inf1;
     s->left= inf0;
+    asm volatile("" ::: "memory");
+
+    return r;
 }
 
 void bst_init_local() {
@@ -49,7 +52,7 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
     return (node_t*) new_node;
 }
 
-seekRecord_t * bst_seek(skey_t key, node_t* node_r){
+seek_record_t * bst_seek(skey_t key, node_t* node_r){
     node_t* node_s = ADDRESS(node_r->left);
     seek_record->ancestor = node_r;
     seek_record->successor = node_s; 
@@ -81,7 +84,7 @@ seekRecord_t * bst_seek(skey_t key, node_t* node_r){
 }
 
 sval_t bst_search(skey_t key, node_t* node_r) {
-   seek(key, node_r);
+   bst_seek(key, node_r);
    if (seek_record->leaf->key == key) {
         return seek_record->leaf->value;
    } else {
@@ -92,20 +95,27 @@ sval_t bst_search(skey_t key, node_t* node_r) {
 
 bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
     while (1) {
-        seek(key, node_r);
+        bst_seek(key, node_r);
         if (seek_record->leaf->key == key) return FALSE;
         node_t* parent = seek_record->parent;
         node_t* leaf = seek_record->leaf;
 
         node_t** child_addr;
-        if (key < paernt->key) {
+        if (key < parent->key) {
            child_addr=&(parent->left); 
         } else {
             child_addr=&(parent->right);
         }
         //TODO check this
-        node_t* new_internal=create_node(max(key,node_r->right->key),0); 
-        node_t* new_node = create_node(key,val);
+        node_t* new_internal=create_node(max(key,leaf->key),0,0);
+        node_t* new_node = create_node(key,val,0);
+        if ( key < leaf->key) {
+            new_internal->left = new_node;
+            new_internal->right = leaf; 
+        } else {
+            new_internal->right = new_node;
+            new_internal->left = leaf;
+        }
         
         node_t* result = CAS_PTR(child_addr, ADDRESS(leaf), ADDRESS(new_internal));
         if (result == ADDRESS(leaf)) {
@@ -118,13 +128,13 @@ bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
     }
 }
 
-sval_t* bst_remove(skey_t key, node_t* node_r) {
+sval_t bst_remove(skey_t key, node_t* node_r) {
     bool_t injecting = TRUE; 
     node_t* leaf;
-    sval_t* val = 0;
+    sval_t val = 0;
     while (1) {
-        seek(key, node_t* node_r);
-        sval_t val = leaf->value;
+        bst_seek(key, node_r);
+        val = seek_record->leaf->value;
         node_t* parent = seek_record->parent;
 
         node_t** child_addr;
@@ -149,7 +159,7 @@ sval_t* bst_remove(skey_t key, node_t* node_r) {
                 }
             } else {
                 node_t* chld = *child_addr;
-                if ( (ADDRESS(chld) == leaf) && (GETFALG(chld) || GETTAG(chld)) ) {
+                if ( (ADDRESS(chld) == leaf) && (GETFLAG(chld) || GETTAG(chld)) ) {
                     bst_cleanup(key);
                 }
             }
@@ -180,7 +190,7 @@ bool_t bst_cleanup(skey_t key) {
         succ_addr = &(ancestor->right);
     }
 
-    node_t** child_adddr;
+    node_t** child_addr;
     node_t** sibling_addr;
     if (key < parent->key) {
        child_addr = &(parent->left);
@@ -190,19 +200,20 @@ bool_t bst_cleanup(skey_t key) {
        sibling_addr = &(parent->left);
     }
 
-    node_t* chld = &(child_addr);
+    node_t* chld = *(child_addr);
     if (!GETFLAG(chld)) {
         sibling_addr = child_addr;
     }
-retry:
-    node_t* untagged = *sibling_addr;
-    node_t* tagged = TAG(*untagged);
-    node_t* res = CAS_PTR(sibling_addr,*sibling_add, tagged);
-    if (res != untagged) {
-        goto retry;
+    while (1) {
+        node_t* untagged = *sibling_addr;
+        node_t* tagged = (node_t*)TAG(untagged);
+        node_t* res = CAS_PTR(sibling_addr,untagged, tagged);
+        if (res == untagged) {
+            break;
+         }
     }
 
-    node_t* sibl = *sibling_add;
+    node_t* sibl = *sibling_addr;
     if ( CAS_PTR(succ_addr, ADDRESS(successor), UNTAG(sibl)) == ADDRESS(successor)) {
 #if GC == 1
     ssmem_free(alloc, ADDRESS(leaf));
@@ -220,10 +231,10 @@ uint32_t bst_size(node_t* node) {
     }
     uint32_t l = 0;
     uint32_t r = 0;
-    if ( !GETMARK(node->left) && !GETTAG(node->left)) {
+    if ( !GETFLAG(node->left) && !GETTAG(node->left)) {
         l = bst_size(node->left);
     }
-    if ( !GETMARK(node->right) && !GETTAG(node->right)) {
+    if ( !GETFLAG(node->right) && !GETTAG(node->right)) {
         r = bst_size(node->right);
     }
     return l+r;

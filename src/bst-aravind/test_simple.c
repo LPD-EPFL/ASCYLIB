@@ -25,17 +25,17 @@
 #  include <sys/procset.h>
 #endif
 
-#include "bst_ellen.h"
+#include "bst-aravind.h"
 
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(k,r)  bst_find(k,r)
+#define DS_CONTAINS(k,r)  bst_search(k,r)
 #define DS_ADD(k,r)       bst_insert(k,(k+4),r)
-#define DS_REMOVE(k,r)    bst_delete(k,r)
+#define DS_REMOVE(k,r)    bst_remove(k,r)
 #define DS_SIZE(s)          bst_size(s)
-#define DS_NEW()           bst_initialize()
+#define DS_NEW()           initialize_tree()
 #define DS_LOCAL()         bst_init_local()
 
 #define DS_TYPE             node_t
@@ -179,7 +179,7 @@ test(void* thread)
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
-  DS_NODE* search_res;
+  sval_t search_res;
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
@@ -222,7 +222,7 @@ test(void* thread)
 	  START_TS(0);
 	  search_res = DS_CONTAINS(key, set);
 	  END_TS(0, my_getting_count);
-	  if(search_res!=NULL) 
+	  if(search_res!=0) 
 	    {
 	      ADD_DUR(my_getting_succ);
 	      my_getting_count_succ++;
