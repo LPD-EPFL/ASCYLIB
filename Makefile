@@ -55,6 +55,8 @@ lfll_harris_opt:
 lfll_michael:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-michael
 
+lfll: lfll_harris lfll_michael lfll_harris_opt
+
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
 
