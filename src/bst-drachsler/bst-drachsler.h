@@ -22,6 +22,8 @@
 #include "ssalloc.h"
 #include "ssmem.h"
 
+//#define DO_DRACHSLER_REBALANCE 1
+
 #define TRUE 1
 #define FALSE 0
 
@@ -46,8 +48,10 @@ struct node_t {
     node_t* parent;
     node_t* succ;
     node_t* pred;
+#ifdef DO_DRACHSLER_REBALANCE
     int32_t left_height;
     int32_t right_height;
+#endif
     ptlock_t tree_lock;
     ptlock_t succ_lock;
     skey_t key;
@@ -79,8 +83,12 @@ void update_child(node_t *parent, node_t* old_ch, node_t* new_ch);
 
 uint32_t bst_size(node_t* node);
 
+#ifdef DO_DRACHSLER_REBALANCE
+
 void bst_rebalance(node_t* node, node_t* child, node_t* root);
 
 void bst_rotate(node_t* child, node_t* n, node_t* parent, bool_t left_rotation);
+
+#endif
 
 #endif
