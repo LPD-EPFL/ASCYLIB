@@ -96,14 +96,17 @@ ssalloc_aligned_alloc(unsigned int allocator, size_t alignement, size_t size)
 #else
   ret = (void*) (ssalloc_app_mem[allocator] + alloc_next[allocator]);
   uintptr_t retu = (uintptr_t) ret;
-  if ((retu & (SSMEM_CACHE_LINE_SIZE - 1)) != 0)
+  if ((retu & (alignement - 1)) != 0)
     {
-      size_t offset = SSMEM_CACHE_LINE_SIZE - (retu & (SSMEM_CACHE_LINE_SIZE - 1));
+      size_t offset = alignement - (retu & (alignement - 1));
       retu += offset;
       alloc_next[allocator] += offset;
       ret = (void*) retu;
     }
+
   alloc_next[allocator] += size;
+
+  assert((((uintptr_t) ret) & (alignement-1)) == 0);
   if (alloc_next[allocator] > SSALLOC_SIZE)
     {
       fprintf(stderr, "*** warning: allocator %2d : out of bounds alloc\n", allocator);
