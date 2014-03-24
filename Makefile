@@ -30,7 +30,9 @@ clh:
 	$(MAKE) "LOCK=CLH" $(LBENCHS)
 
 sequential:
-	$(MAKE) "STM=SEQUENTIAL" $(SEQBENCHS)
+	$(MAKE) "STM=SEQUENTIAL" "GC=0" $(SEQBENCHS)
+
+seq:	sequential
 
 lockfree:
 	$(MAKE) "STM=LOCKFREE" $(LFBENCHS)
@@ -57,6 +59,8 @@ lfll_michael:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-michael
 
 lfll: lfll_harris lfll_michael lfll_harris_opt
+
+ll: lfll lbll llcopy
 
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
