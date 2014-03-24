@@ -3,10 +3,11 @@
 BENCHS = src/linkedlist src/lfll_harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/bst-aravind src/noise/ src/tests/
 LBENCHS = src/linkedlist-lock src/linkedlist-copy src/hashtable-lock src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-lock src/bst-lock2 src/bst-drachsler
 LFBENCHS = src/linkedlist src/lfll_harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley src/bst-aravind
+SEQBENCHS = src/linkedlist-seq
 NOISE = src/noise
 TESTS = src/tests
 
-.PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS)
+.PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS) $(SEQBENCHS)
 
 all:	lockfree tas lbhtgl
 
@@ -29,7 +30,7 @@ clh:
 	$(MAKE) "LOCK=CLH" $(LBENCHS)
 
 sequential:
-	$(MAKE) "STM=SEQUENTIAL" $(BENCHS)
+	$(MAKE) "STM=SEQUENTIAL" $(SEQBENCHS)
 
 lockfree:
 	$(MAKE) "STM=LOCKFREE" $(LFBENCHS)
@@ -108,8 +109,8 @@ clean:
 	$(MAKE) -C src/tests clean
 	rm -rf build
 
-# $(BENCHS):
-# 	$(MAKE) -C $@ $(TARGET)
+$(SEQBENCHS):
+	$(MAKE) -C $@ $(TARGET)
 
 $(LBENCHS):
 	$(MAKE) -C $@ $(TARGET)
