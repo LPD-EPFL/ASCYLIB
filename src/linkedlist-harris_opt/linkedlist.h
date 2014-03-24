@@ -42,7 +42,7 @@ extern __thread ssmem_allocator_t* alloc;
 
 typedef struct node 
 {
-  sval_t key;
+  skey_t key;
   sval_t val;
   struct node* next;
 #if defined(DO_PAD)

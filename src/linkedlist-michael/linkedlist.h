@@ -40,9 +40,9 @@ extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   4
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct node 
+typedef struct node 
 {
-  sval_t key;
+  skey_t key;
   sval_t val;
   struct node* next;
 #if defined(DO_PAD)
@@ -52,7 +52,7 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct node
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset 
 {
-  node_t *head;
+  node_t* head;
 } intset_t;
 
 node_t *new_node(skey_t key, sval_t val, node_t *next, int initializing);
