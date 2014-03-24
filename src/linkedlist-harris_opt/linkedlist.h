@@ -40,7 +40,7 @@ extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   4
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct node 
+typedef struct node 
 {
   sval_t key;
   sval_t val;
