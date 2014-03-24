@@ -22,8 +22,10 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
     new_node->parent = NULL;
     new_node->succ = NULL;
     new_node->pred = NULL;
+#ifdef DO_DRACHSLER_REBALANCE
     new_node->left_height = 0;
     new_node->right_height = 0;
+#endif
     INIT_LOCK(&(new_node->tree_lock));
     INIT_LOCK(&(new_node->succ_lock));
     new_node->key = k;
@@ -140,16 +142,25 @@ void insert_to_tree(node_t* parent, node_t* new_node, node_t* root) {
     new_node->parent = parent;
     if (parent->key < new_node->key) {
         parent->right = new_node;
+#ifdef DO_DRACHSLER_REBALANCE
         parent->right_height = 1;
+#endif
     } else {
         parent->left = new_node;
+#ifdef DO_DRACHSLER_REBALANCE
         parent->left_height = 1;
+#endif
     }
-//    if (parent!=root) {
-//        bst_rebalance(lock_parent(parent),parent,root);
-//    } else {
+
+#ifdef DO_DRACHSLER_REBALANCE
+    if (parent!=root) {
+        bst_rebalance(lock_parent(parent),parent,root);
+    } else {
         UNLOCK(&(parent->tree_lock));
-//    }
+    }
+#else
+    UNLOCK(&(parent->tree_lock));
+#endif
 }
 
 
@@ -269,7 +280,9 @@ bool_t acquire_tree_locks(node_t* n) {
 void remove_from_tree(node_t* n, bool_t has_two_children,node_t* root) {
     node_t* child;
     node_t* parent;
+#ifdef DO_DRACHSLER_REBALANCE
     bool_t violated = FALSE;
+#endif
     node_t* s;
     //int l=0;
     if (has_two_children == FALSE) { 
@@ -288,17 +301,21 @@ void remove_from_tree(node_t* n, bool_t has_two_children,node_t* root) {
         update_child(parent, s, child);
         s->left = n->left;
         s->right = n->right;
+#ifdef DO_DRACHSLER_REBALANCE
         s->left_height = n->left_height;
         s->right_height = n->right_height;
+#endif
         n->left->parent = s;
         if (n->right != NULL) {
             n->right->parent = s;
         }
         update_child(n->parent, n, s);
+#ifdef DO_DRACHSLER_REBALANCE
         uint32_t dif = s->left_height-s->right_height;
         if ((dif>=2) || (dif<= (-2))) {
             violated = TRUE;
         }
+#endif
         if (parent == n) {
             parent = s;
         } else {
@@ -310,20 +327,24 @@ void remove_from_tree(node_t* n, bool_t has_two_children,node_t* root) {
        UNLOCK(&(child->tree_lock));
     }
 
+#ifdef DO_DRACHSLER_REBALANCE
+    bst_rebalance(parent,child,root);
+    if (violated) {
+        LOCK(&(s->tree_lock));
+        uint32_t dif = s->left_height-s->right_height;
+        if ((s->mark==FALSE) &&  ((dif>=2) || (dif<= (-2)))) {
+          //  bool_t lr=TRUE;
+           // if (dif>=2) lr=FALSE;
+            bst_rebalance(s, NULL, root);
+        } else {
+            UNLOCK(&(s->tree_lock));
+        }
+    }
+#else 
     UNLOCK(&(n->parent->tree_lock));
     UNLOCK(&(n->tree_lock));
-    /*bst_rebalance(parent,child,root);*/
-    /*if (violated) {*/
-        /*LOCK(&(s->tree_lock));*/
-        /*uint32_t dif = s->left_height-s->right_height;*/
-        /*if ((s->mark==FALSE) &&  ((dif>=2) || (dif<= (-2)))) {*/
-          /*//  bool_t lr=TRUE;*/
-           /*// if (dif>=2) lr=FALSE;*/
-            /*bst_rebalance(s, NULL, root); */
-        /*} else {*/
-            /*UNLOCK(&(s->tree_lock));*/
-        /*}*/
-    /*}*/
+#endif
+
 #if GC == 1
     ssmem_free(alloc, n);
 #endif
@@ -340,6 +361,7 @@ void update_child(node_t* parent, node_t* old_ch, node_t* new_ch) {
     }
 }
 
+#ifdef DO_DRACHSLER_REBALANCE
 bool_t update_height(node_t* ch, node_t* node, bool_t is_left) {
     int32_t new_h;
     if (ch == NULL) {
@@ -539,6 +561,7 @@ void bst_rebalance(node_t* node, node_t* child, node_t* root) {
     }
     UNLOCK(&(node->tree_lock));
 }
+#endif
 
 uint32_t bst_size(node_t* node) {
     if (node==NULL) return 0;
