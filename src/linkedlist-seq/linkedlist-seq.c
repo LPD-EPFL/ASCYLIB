@@ -71,7 +71,7 @@ node_delete(node_t *node)
 #if GC == 1
   ssmem_free(alloc, node);
 #else
-  ssfree(node);
+  /* ssfree(node); */
 #endif
 }
 
