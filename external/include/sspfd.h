@@ -37,8 +37,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-//#define SSPFD_DO_TIMINGS 1
-
 #if SSPFD_DO_TIMINGS != 1	/* empty macros when not benchmarkings */
 /* 
  * initialize `num_stores` stores, with `num_entries` number of measurement entries each. 
@@ -63,6 +61,18 @@
 #  define SSPFDI_ID(store, id) 
 
 /* 
+ * start measurement (i.e., take start timestamp at this point) for any store. Need to do the calc
+ * with SSPFDO_G() then.
+ */
+#  define SSPFDI_G() 
+
+/* 
+ * only if sspfd_get_id() == id, start measurement (i.e., take start timestamp at this point) 
+ * for any store. Need to do the calc with SSPFDO_ID_G() then.
+ */
+#  define SSPFDI_ID_G(id) 
+
+/* 
  * stop measuring (i.e., take stop timestamp at this point) for store `store` and store the duration
  * since `SSPFDI(store)` in entry `entry`.
  */
@@ -73,6 +83,18 @@
  * and store the duration since `SSPFDI(store)` in entry `entry`.
  */
 #  define SSPFDO_ID(store, entry) 
+
+/* 
+ * stop measuring (i.e., take stop timestamp at this point) for SSPFDI_G and store the duration
+ * since `SSPFDI(store)` in entry `entry`.
+ */
+#  define SSPFDO_G(store, entry) 
+
+/* 
+ * if sspfd_get_id() == id, stop measuring (i.e., take stop timestamp at this point) for SSPFDI_ID_G
+ * and store the duration since `SSPFDI(store)` in entry `entry`.
+ */
+#  define SSPFDO_ID_G(store, entry, id) 
 
 /* 
  * generate statistics and print them for the first `num_vals` values of store `store`.
@@ -122,11 +144,10 @@
 
 #define SSPFD_PRINT(args...) printf("[%02lu] ", sspfd_get_id()); printf(args); printf("\n"); fflush(stdout)
 
-
-#if !defined(_GETTICKS_H_) && !defined(_H_GETTICKS_)
 typedef uint64_t ticks;
 
-#  if defined(__i386__)
+#if !defined(_GETTICKS_H_) && !defined(_H_GETTICKS_)
+#if defined(__i386__)
 static inline ticks 
 getticks(void) 
 {
@@ -135,7 +156,7 @@ getticks(void)
   __asm__ __volatile__("rdtsc" : "=A" (ret));
   return ret;
 }
-#  elif defined(__x86_64__)
+#elif defined(__x86_64__)
 static inline ticks
 getticks(void)
 {
@@ -143,7 +164,7 @@ getticks(void)
   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
   return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
 }
-#  elif defined(__sparc__)
+#elif defined(__sparc__)
 static inline ticks
 getticks()
 {
@@ -151,14 +172,13 @@ getticks()
   __asm__ __volatile__ ("rd %%tick, %0" : "=r" (ret) : "0" (ret)); 
   return ret;
 }
-#  elif defined(__tile__)
-#    include <tmc/mem.h>
-#    include <arch/cycle.h>
+#elif defined(__tile__)
+#include <arch/cycle.h>
 static inline ticks getticks()
 {
   return get_cycle_count();
 }
-#  endif
+#endif
 #endif	/* _H_GETTICKS_ */
 
 #if !defined(PREFETCHW)
@@ -212,6 +232,7 @@ typedef struct sspfd_stats
 extern __thread volatile size_t sspfd_num_stores;
 extern __thread volatile ticks** sspfd_store;
 extern __thread volatile ticks* _sspfd_s;
+extern __thread ticks _sspfd_s_global;
 extern __thread volatile ticks sspfd_correction;
 
 #if SSPFD_DO_TIMINGS == 1
@@ -233,6 +254,17 @@ extern __thread volatile ticks sspfd_correction;
       _sspfd_s[store] = getticks();		\
     }
 
+#  define SSPFDI_G()				\
+  asm volatile ("");				\
+  _sspfd_s_global = getticks();
+
+#  define SSPFDI_ID_G(id)			\
+  asm volatile ("");				\
+  if (sspfd_get_id() == id)			\
+    {						\
+      _sspfd_s_global = getticks();		\
+    }
+
 #  define SSPFDO(store, entry)						\
   asm volatile ("");							\
   sspfd_store[store][entry] =  getticks() - _sspfd_s[store] - sspfd_correction; \
@@ -245,6 +277,19 @@ extern __thread volatile ticks sspfd_correction;
       sspfd_store[store][entry] =  getticks() - _sspfd_s[store] - sspfd_correction; \
     }									\
   }
+
+#  define SSPFDO_G(store, entry)					\
+  asm volatile ("");							\
+  sspfd_store[store][entry] =  getticks() - _sspfd_s_global - sspfd_correction;
+
+
+#  define SSPFDO_ID_G(store, entry, id)					\
+  asm volatile ("");							\
+  if (sspfd_get_id() == id)						\
+    {									\
+      sspfd_store[store][entry] =  getticks() - _sspfd_s_global - sspfd_correction; \
+    }								       
+
 
 #  define SSPFDP(store, num_vals)		\
   {						\
