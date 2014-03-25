@@ -47,9 +47,9 @@ prog=$prog1;
 
 out=$($run_script ./$prog $params -n$c);
 
-get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
+get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | tr , '\n');
+put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | tr , '\n');
+rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | tr , '\n');
 
 echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
@@ -61,9 +61,9 @@ prog=$prog2;
 
 out=$($run_script ./$prog $params -n$c);
 
-get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
+get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | tr , '\n');
+put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | tr , '\n');
+rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | tr , '\n');
 
 echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
@@ -75,9 +75,9 @@ prog=$prog3;
 
 out=$($run_script ./$prog $params -n$c);
 
-get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
+get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | tr , '\n');
+put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | tr , '\n');
+rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | tr , '\n');
 
 echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
@@ -89,9 +89,9 @@ prog=$prog4;
 
 out=$($run_script ./$prog $params -n$c);
 
-get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
+get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | tr , '\n');
+put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | tr , '\n');
+rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | tr , '\n');
 
 echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
@@ -103,9 +103,9 @@ prog=$prog5;
 
 out=$($run_script ./$prog $params -n$c);
 
-get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
+get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | tr , '\n');
+put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | tr , '\n');
+rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | tr , '\n');
 
 echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
@@ -117,9 +117,9 @@ prog=$prog6;
 
 out=$($run_script ./$prog $params -n$c);
 
-get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
+get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | tr , '\n');
+put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | tr , '\n');
+rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | tr , '\n');
 
 echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
@@ -131,9 +131,9 @@ prog=$prog7;
 
 out=$($run_script ./$prog $params -n$c);
 
-get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
+get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | tr , '\n');
+put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | tr , '\n');
+rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | tr , '\n');
 
 echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
@@ -145,9 +145,9 @@ prog=$prog8;
 
 out=$($run_script ./$prog $params -n$c);
 
-get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
-rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | sed 'G;:a;s/,\(.*\(.\)\)/\2\1/;ta;s/.$//');
+get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | tr , '\n');
+put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | tr , '\n');
+rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | tr , '\n');
 
 echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
