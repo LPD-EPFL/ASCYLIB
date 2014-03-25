@@ -24,7 +24,7 @@ params="$@";
 
 
 echo "# #Cores: $cores / Params: $params";
-printf "#%-16s%-16s%-16s%-16s%-16s%-16s%-16s\n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7";
+printf "#%-30s%-30s%-30s%-30s%-30s%-30s%-30s\n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7";
 
 
 un=$(uname -n);
@@ -52,7 +52,7 @@ echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
 echo "$rem" > $tmp_rem;
 
-pr -w30 -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p1;
+pr  -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p1;
 
 prog=$prog2;
 
@@ -66,7 +66,7 @@ echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
 echo "$rem" > $tmp_rem;
 
-pr -w30 -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p2;
+pr  -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p2;
 
 prog=$prog3;
 
@@ -80,7 +80,7 @@ echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
 echo "$rem" > $tmp_rem;
 
-pr -w30 -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p3;
+pr  -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p3;
 
 prog=$prog4;
 
@@ -94,7 +94,7 @@ echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
 echo "$rem" > $tmp_rem;
 
-pr -w30 -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p4;
+pr  -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p4;
 
 prog=$prog5;
 
@@ -108,7 +108,7 @@ echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
 echo "$rem" > $tmp_rem;
 
-pr -w30 -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p5;
+pr  -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p5;
 
 prog=$prog6;
 
@@ -122,7 +122,7 @@ echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
 echo "$rem" > $tmp_rem;
 
-pr -w30 -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p6;
+pr  -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p6;
 
 prog=$prog7;
 
@@ -136,7 +136,7 @@ echo "$get" > $tmp_get;
 echo "$put" > $tmp_put;
 echo "$rem" > $tmp_rem;
 
-pr -w30 -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p7;
+pr  -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p7;
 
 paste $tmp_p1  $tmp_p2  $tmp_p3  $tmp_p4  $tmp_p5  $tmp_p6  $tmp_p7 | column -t;
 
