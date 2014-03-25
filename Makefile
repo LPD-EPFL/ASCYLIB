@@ -32,6 +32,9 @@ clh:
 sequential:
 	$(MAKE) "STM=SEQUENTIAL" "GC=0" $(SEQBENCHS)
 
+seqgc:
+	$(MAKE) "STM=SEQUENTIAL" $(SEQBENCHS)
+
 seq:	sequential
 
 lockfree:
