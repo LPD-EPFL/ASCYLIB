@@ -60,7 +60,7 @@ lfll_michael:
 
 lfll: lfll_harris lfll_michael lfll_harris_opt
 
-ll: lfll lbll llcopy
+ll: seq lfll lbll llcopy
 
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
