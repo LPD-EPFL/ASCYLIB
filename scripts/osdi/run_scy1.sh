@@ -2,9 +2,9 @@
 
 core_lat_dist=20;
 
-duration=5000;
+duration=2000;
 initials="1024 4096 8192";
-updates="0 1 10 20";
+updates="0 1 10 20 50";
 cores="all";
 
 out_folder=data;
