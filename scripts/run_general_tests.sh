@@ -20,9 +20,9 @@ source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
 
-ll_algos="./bin/lb-ll ./bin/lb-ll_copy ./bin/lb-ll_gl ./bin/lf-ll_harris ./bin/lf-ll_harris_opt ./bin/lf-ll_michael"
+ll_algos="./bin/lb-ll ./bin/lb-ll_copy ./bin/lf-ll_harris ./bin/lf-ll_harris_opt ./bin/lf-ll_michael"
 do_ll=1
-sl_algos="./bin/lb-sl_herlihy ./bin/lb-sl_herlihy_gl ./bin/lf-sl"
+sl_algos="./bin/lb-sl_herlihy ./bin/lf-sl"
 do_sl=1
 ht_algos="./bin/lb-ht_copy ./bin/lb-ht_tbb ./bin/lb-ht_copy_gl ./bin/lb-ht_gl ./bin/lb-ht ./bin/lb-ht_gl ./bin/lf-ht ./bin/lf-ht_rcu"
 do_ht=1
