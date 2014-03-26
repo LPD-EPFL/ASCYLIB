@@ -30,6 +30,10 @@
 #ifndef _SSPFD_H_
 #define _SSPFD_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <inttypes.h>
 #include <float.h>
@@ -147,7 +151,7 @@
 typedef uint64_t ticks;
 
 #if !defined(_GETTICKS_H_) && !defined(_H_GETTICKS_)
-#if defined(__i386__)
+#  if defined(__i386__)
 static inline ticks 
 getticks(void) 
 {
@@ -156,7 +160,7 @@ getticks(void)
   __asm__ __volatile__("rdtsc" : "=A" (ret));
   return ret;
 }
-#elif defined(__x86_64__)
+#  elif defined(__x86_64__)
 static inline ticks
 getticks(void)
 {
@@ -164,7 +168,7 @@ getticks(void)
   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
   return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
 }
-#elif defined(__sparc__)
+#  elif defined(__sparc__)
 static inline ticks
 getticks()
 {
@@ -172,13 +176,13 @@ getticks()
   __asm__ __volatile__ ("rd %%tick, %0" : "=r" (ret) : "0" (ret)); 
   return ret;
 }
-#elif defined(__tile__)
-#include <arch/cycle.h>
+#  elif defined(__tile__)
+#    include <arch/cycle.h>
 static inline ticks getticks()
 {
   return get_cycle_count();
 }
-#endif
+#  endif
 #endif	/* _H_GETTICKS_ */
 
 #if !defined(PREFETCHW)
@@ -232,7 +236,7 @@ typedef struct sspfd_stats
 extern __thread volatile size_t sspfd_num_stores;
 extern __thread volatile ticks** sspfd_store;
 extern __thread volatile ticks* _sspfd_s;
-extern __thread ticks _sspfd_s_global;
+extern __thread volatile ticks _sspfd_s_global;
 extern __thread volatile ticks sspfd_correction;
 
 #if SSPFD_DO_TIMINGS == 1
@@ -255,14 +259,17 @@ extern __thread volatile ticks sspfd_correction;
     }
 
 #  define SSPFDI_G()				\
-  asm volatile ("");				\
-  _sspfd_s_global = getticks();
+  asm volatile("" ::: "memory");		\
+  _sspfd_s_global = getticks();			\
+  asm volatile("" ::: "memory");		
 
 #  define SSPFDI_ID_G(id)			\
   asm volatile ("");				\
   if (sspfd_get_id() == id)			\
     {						\
+      asm volatile("" ::: "memory");		\
       _sspfd_s_global = getticks();		\
+      asm volatile("" ::: "memory");		\
     }
 
 #  define SSPFDO(store, entry)						\
@@ -271,23 +278,27 @@ extern __thread volatile ticks sspfd_correction;
   }
 
 #  define SSPFDO_ID(store, entry, id)					\
-  asm volatile ("");							\
+  asm volatile("" ::: "memory");					\
   if (sspfd_get_id() == id)						\
     {									\
+      asm volatile("" ::: "memory");					\
       sspfd_store[store][entry] =  getticks() - _sspfd_s[store] - sspfd_correction; \
+      asm volatile("" ::: "memory");					\
     }									\
   }
 
 #  define SSPFDO_G(store, entry)					\
-  asm volatile ("");							\
-  sspfd_store[store][entry] =  getticks() - _sspfd_s_global - sspfd_correction;
-
+  asm volatile("" ::: "memory");					\
+  sspfd_store[store][entry] =  getticks() - _sspfd_s_global - sspfd_correction;	\
+  asm volatile("" ::: "memory");					
 
 #  define SSPFDO_ID_G(store, entry, id)					\
-  asm volatile ("");							\
+  asm volatile("" ::: "memory");					\
   if (sspfd_get_id() == id)						\
     {									\
+      asm volatile("" ::: "memory");					\
       sspfd_store[store][entry] =  getticks() - _sspfd_s_global - sspfd_correction; \
+      asm volatile("" ::: "memory");					\
     }								       
 
 
@@ -360,13 +371,16 @@ extern __thread volatile ticks sspfd_correction;
 #endif /* !SSPFD_DO_TIMINGS */
 
 
-inline void sspfd_set_id(size_t id);
-inline size_t sspfd_get_id();
+void sspfd_set_id(size_t id);
+size_t sspfd_get_id();
 
 void sspfd_store_init(size_t num_stores, size_t num_entries, size_t id);
 void sspfd_store_term();
 void sspfd_get_stats(const size_t store, const size_t num_vals, sspfd_stats_t* sspfd_stats);
 void sspfd_print_stats(const sspfd_stats_t* sspfd_stats);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* _SSPFD_H_ */
