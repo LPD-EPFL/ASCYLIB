@@ -92,8 +92,13 @@ lbsl:
 htjava:
 	$(MAKE) "LOCK=TAS" src/hashtable-java
 
+htrcu:
+	$(MAKE) "LOCK=TAS" src/hashtable-rcu
+
 lbhtgl:
 	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lock
+
+ht:	lfht lbht lbhtgl htjava tbb htcopy htrcu
 
 
 clean:
