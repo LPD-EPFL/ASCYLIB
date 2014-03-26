@@ -208,14 +208,16 @@ test(void* thread)
 	  IntTable::accessor a;
 	  START_TS(1);
 	  res = DS_ADD(mset, a, key);
-	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
 	      a->second = key;
-	      ADD_DUR(my_putting_succ);
+	      END_TS(1, my_putting_count_succ);				
+	      ADD_DUR(my_putting_succ);					
 	      my_putting_count_succ++;
 	    }
-	  ADD_DUR_FAIL(my_putting_fail);
+	  END_TS_ELSE(4, my_putting_count - my_putting_count_succ,		
+		      my_putting_fail);					
+
 	  my_putting_count++;
 	} 
       else if(unlikely(c <= scale_rem))
@@ -223,13 +225,15 @@ test(void* thread)
 	  int removed;
 	  START_TS(2);
 	  removed = DS_REMOVE(mset, key);
-	  END_TS(2, my_removing_count);
 	  if(removed) 
 	    {
-	      ADD_DUR(my_removing_succ);
+	      END_TS(2, my_removing_count_succ);				
+	      ADD_DUR(my_removing_succ);					
 	      my_removing_count_succ++;
 	    }
-	  ADD_DUR_FAIL(my_removing_fail);
+	  END_TS_ELSE(5, my_removing_count - my_removing_count_succ,	
+		      my_removing_fail);					
+
 	  my_removing_count++;
 	}
       else
@@ -240,10 +244,13 @@ test(void* thread)
 	  END_TS(0, my_getting_count);
 	  if(res != 0) 
 	    {
-	      ADD_DUR(my_getting_succ);
+	      END_TS(0, my_getting_count_succ);				
+	      ADD_DUR(my_getting_succ);					
 	      my_getting_count_succ++;
 	    }
-	  ADD_DUR_FAIL(my_getting_fail);
+	  END_TS_ELSE(3, my_getting_count - my_getting_count_succ,
+		      my_getting_fail);					
+
 	  my_getting_count++;
 	}
     }
@@ -275,20 +282,13 @@ test(void* thread)
   getting_count_succ[ID] += my_getting_count_succ;
   removing_count_succ[ID]+= my_removing_count_succ;
 
-#if (PFD_TYPE == 1) && defined(COMPUTE_LATENCY)
-  if (ID == 0)
+  EXEC_IN_DEC_ID_ORDER(ID, num_threads)
     {
-      printf("get ----------------------------------------------------\n");
-      SSPFDPN(0, SSPFD_NUM_ENTRIES, print_vals_num);
-      printf("put ----------------------------------------------------\n");
-      SSPFDPN(1, SSPFD_NUM_ENTRIES, print_vals_num);
-      printf("rem ----------------------------------------------------\n");
-      SSPFDPN(2, SSPFD_NUM_ENTRIES, print_vals_num);
-
+      print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
     }
-#endif
+  EXEC_IN_DEC_ID_ORDER_END(&barrier);
 
-  /* SSPFDTERM(); */
+  SSPFDTERM();
 #if GC == 1
 #endif
 

@@ -216,14 +216,15 @@ test(void* thread)
 	  rcu_read_lock();
 	  res = DS_ADD(set, node);
 	  rcu_read_unlock();
-	  END_TS(1, my_putting_count);
 	  if(res)
 	    {
-	      ADD_DUR(my_putting_succ);
+	      END_TS(1, my_putting_count_succ);				
+	      ADD_DUR(my_putting_succ);					
 	      my_putting_count_succ++;
 	      node = NULL;
 	    }
-	  ADD_DUR_FAIL(my_putting_fail);
+	  END_TS_ELSE(4, my_putting_count - my_putting_count_succ,		
+		      my_putting_fail);					
 	  my_putting_count++;
 	} 
       else if(unlikely(c <= scale_rem))
@@ -235,14 +236,15 @@ test(void* thread)
 	  DS_CONTAINS(set, key, iter);
 	  removed = DS_REMOVE(set, iter.node);
 	  rcu_read_unlock();
-	  END_TS(2, my_removing_count);
 	  if(removed != 0) 
 	    {
-	      ADD_DUR(my_removing_succ);
+	      END_TS(2, my_removing_count_succ);				
+	      ADD_DUR(my_removing_succ);					
 	      my_removing_count_succ++;
 	      node_free(iter.node);
 	    }
-	  ADD_DUR_FAIL(my_removing_fail);
+	  END_TS_ELSE(5, my_removing_count - my_removing_count_succ,	
+		      my_removing_fail);					
 	  my_removing_count++;
 	}
       else
@@ -254,13 +256,14 @@ test(void* thread)
 	  DS_CONTAINS(set, key, iter);
 	  res = (iter.node != NULL);
 	  rcu_read_unlock();
-	  END_TS(0, my_getting_count);
 	  if(res != 0) 
 	    {
-	      ADD_DUR(my_getting_succ);
+	      END_TS(0, my_getting_count_succ);				
+	      ADD_DUR(my_getting_succ);					
 	      my_getting_count_succ++;
 	    }
-	  ADD_DUR_FAIL(my_getting_fail);
+	  END_TS_ELSE(3, my_getting_count - my_getting_count_succ,
+		      my_getting_fail);					
 	  my_getting_count++;
 	}
     }
