@@ -224,8 +224,6 @@ extern "C" {
   }									\
   while (0);
 
-#  define trunc
-
 #  define REPORT_TIMINGS_SECS_RANGE(start,end)	\
   prints_ticks_stats(start, end);
 
@@ -312,8 +310,6 @@ extern "C" {
     }                                                                   \
   }									\
   while (0);
-
-#  define trunc
 
 #  define REPORT_TIMINGS_SECS_RANGE(start,end)	\
   prints_ticks_stats(start, end);
