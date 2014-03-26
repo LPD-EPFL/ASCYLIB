@@ -13,17 +13,11 @@ seq_delete(intset_t *set, skey_t key)
   sval_t res = 0;
 	
   curr = set->head;
-  if (curr->next != NULL)
-    {
-    }
   next = curr->next;
 	
   while (next != NULL && next->key < key) 
     {
       curr = next;
-      if (next->next != NULL)
-	{
-	}
       next = next->next;
     }
 
@@ -33,12 +27,6 @@ seq_delete(intset_t *set, skey_t key)
       curr->next = next->next;
       node_delete(next);
     } 
-  else 
-    {
-      if (next != NULL)
-	{
-	}
-    }  
 
   return res;
 }
@@ -50,25 +38,16 @@ seq_find(intset_t *set, skey_t key)
   sval_t res = 0;
 	
   curr = set->head;
-  if (curr->next != NULL)
-    {
-    }
   next = curr->next;
 	
   while (next != NULL && next->key < key) 
     {
       curr = next;
-      if (next->next != NULL)
-	{
-	}
       next = curr->next;
     }	
   if (next != NULL && key == next->key)
     {
       res = next->val;
-    }
-  if (next != NULL)
-    {
     }
   return res;
 }
@@ -81,17 +60,11 @@ seq_insert(intset_t *set, skey_t key, sval_t val)
   int found;
 	
   curr = set->head;
-  if (curr->next != NULL)
-    {
-    }
   next = curr->next;
 	
   while (next != NULL && next->key < key) 
     {
       curr = next;
-      if (next->next != NULL)
-	{
-	}
       next = curr->next;
     }
   found = (next != NULL && key == next->key);
@@ -99,9 +72,6 @@ seq_insert(intset_t *set, skey_t key, sval_t val)
     {
       newnode =  new_node(key, val, next, 1);
       curr->next = newnode;
-    }
-  if (next != NULL)
-    {
     }
   return !found;
 }
