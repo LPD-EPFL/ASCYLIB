@@ -24,7 +24,7 @@ prog8="$1";
 shift;
 params="$@";
 
-printf "#   %-42s%-42s%-42s%-42s%-42s%-42s%-42s%-42s\n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7" "$prog8";
+printf "#   %-60s%-60s%-60s%-60s%-60s%-60s%-60s%-60s\n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7" "$prog8";
 
 echo "#co get_s  get_f put_s  put_f rem_s  rem_f get_s  get_f put_s  put_f rem_s  rem_f get_s  get_f put_s  put_f rem_s  rem_f get_s  get_f put_s  put_f rem_s  rem_f get_s  get_f put_s  put_f rem_s  rem_f get_s  get_f put_s  put_f rem_s  rem_f get_s  get_f put_s  put_f rem_s  rem_f get_s  get_f put_s  put_f rem_s  rem_f";
 
@@ -44,42 +44,42 @@ do
     prog=$prog1;
 
     thr=$($run_script ./$prog $params -n$c | grep "#thread" -A1 | tail -n1 | awk '{$1=""; print}');
-    printf "%-7d%-7d%-7d%-7d%-7d%-7d" $thr;
+    printf "%-10d%-10d%-10d%-10d%-10d%-10d" $thr;
 
     prog=$prog2;
 
     thr=$($run_script ./$prog $params -n$c | grep "#thread" -A1 | tail -n1 | awk '{$1=""; print}');
-    printf "%-7d%-7d%-7d%-7d%-7d%-7d" $thr;
+    printf "%-10d%-10d%-10d%-10d%-10d%-10d" $thr;
 
     prog=$prog3;
 
     thr=$($run_script ./$prog $params -n$c | grep "#thread" -A1 | tail -n1 | awk '{$1=""; print}');
-    printf "%-7d%-7d%-7d%-7d%-7d%-7d" $thr;
+    printf "%-10d%-10d%-10d%-10d%-10d%-10d" $thr;
 
     prog=$prog4;
 
     thr=$($run_script ./$prog $params -n$c | grep "#thread" -A1 | tail -n1 | awk '{$1=""; print}');
-    printf "%-7d%-7d%-7d%-7d%-7d%-7d" $thr;
+    printf "%-10d%-10d%-10d%-10d%-10d%-10d" $thr;
 
     prog=$prog5;
 
     thr=$($run_script ./$prog $params -n$c | grep "#thread" -A1 | tail -n1 | awk '{$1=""; print}');
-    printf "%-7d%-7d%-7d%-7d%-7d%-7d" $thr;
+    printf "%-10d%-10d%-10d%-10d%-10d%-10d" $thr;
 
     prog=$prog6;
 
     thr=$($run_script ./$prog $params -n$c | grep "#thread" -A1 | tail -n1 | awk '{$1=""; print}');
-    printf "%-7d%-7d%-7d%-7d%-7d%-7d" $thr;
+    printf "%-10d%-10d%-10d%-10d%-10d%-10d" $thr;
 
     prog=$prog7;
 
     thr=$($run_script ./$prog $params -n$c | grep "#thread" -A1 | tail -n1 | awk '{$1=""; print}');
-    printf "%-7d%-7d%-7d%-7d%-7d%-7d" $thr;
+    printf "%-10d%-10d%-10d%-10d%-10d%-10d" $thr;
 
     prog=$prog8;
 
     thr=$($run_script ./$prog $params -n$c | grep "#thread" -A1 | tail -n1 | awk '{$1=""; print}');
-    printf "%-7d%-7d%-7d%-7d%-7d%-7d" $thr;
+    printf "%-10d%-10d%-10d%-10d%-10d%-10d" $thr;
 
 
     echo "";
