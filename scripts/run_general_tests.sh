@@ -24,7 +24,7 @@ ll_algos="./bin/lb-ll ./bin/lb-ll_copy ./bin/lb-ll_gl ./bin/lf-ll_harris ./bin/l
 do_ll=1
 sl_algos="./bin/lb-sl_herlihy ./bin/lb-sl_herlihy_gl ./bin/lf-sl"
 do_sl=1
-ht_algos="./bin/lb-ht_copy ./bin/lb-ht_tbb ./bin/lb-ht_copy_gl ./bin/lb-ht_gl ./bin/lb-ht ./bin/lb-ht_gl ./bin/lf-ht ./bon/lf-ht_rcu"
+ht_algos="./bin/lb-ht_copy ./bin/lb-ht_tbb ./bin/lb-ht_copy_gl ./bin/lb-ht_gl ./bin/lb-ht ./bin/lb-ht_gl ./bin/lf-ht ./bin/lf-ht_rcu"
 do_ht=1
 bst_algos="./bin/lf-bst ./bin/lb-bst-drachsler ./bin/lf-bst-aravind ./bin/lf-bst-howley ./bin/lb-bst2"
 do_bst=1
@@ -97,6 +97,7 @@ run_test() {
 test_structure() {
     algos=$@
     for algo in ${algos}; do
+        if [ -e $algo ]; then
         echo "starting ${algo} tests..."
 #base case, all cores
         echo "   varying cores..."
@@ -119,6 +120,9 @@ test_structure() {
         throughput=$(run_test ${algo} -d${def_duration} -n${low_cores} -i${low_initial} -r${low_range} -u${low_update}) 
         scal=$(echo "${throughput}/${throughput_one}" | bc -l);
         echo "${uname} low ${namemap[${algo}]} ${throughput} ${scal}" >> ./data/extremes_${uname}.txt
+        else 
+            echo "$algo not found"
+        fi
     done
 }
 
