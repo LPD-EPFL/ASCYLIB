@@ -3,7 +3,7 @@
 BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/bst-aravind src/noise/ src/tests/
 LBENCHS = src/linkedlist-lock src/linkedlist-copy src/hashtable-lock src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-lock src/bst-lock2 src/bst-drachsler
 LFBENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley src/bst-aravind
-SEQBENCHS = src/linkedlist-seq
+SEQBENCHS = src/linkedlist-seq src/hashtable-seq
 NOISE = src/noise
 TESTS = src/tests
 
@@ -36,6 +36,9 @@ seqgc:
 	$(MAKE) "STM=SEQUENTIAL" $(SEQBENCHS)
 
 seq:	sequential
+
+seqht:
+	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/hashtable-seq
 
 lockfree:
 	$(MAKE) "STM=LOCKFREE" $(LFBENCHS)
