@@ -26,7 +26,7 @@ params="$@";
 
 
 echo "# #Cores: $cores / Params: $params";
-printf "#%-30s%-30s%-30s%-30s%-30s%-30s%-30s%-30s\n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7" "$prog8";
+printf "#%s  %s  %s  %s  %s  %s  %s  %s  \n" "$prog1" "$prog2" "$prog3" "$prog4" "$prog5" "$prog6" "$prog7" "$prog8";
 
 
 un=$(uname -n);
