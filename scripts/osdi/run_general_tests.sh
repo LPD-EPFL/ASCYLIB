@@ -1,6 +1,6 @@
 #!/bin/bash
 MAKE=make
-cores="socketandone"
+cores="all"
 
 #0 - median; 1 - max; 2 - min; 3 - avg
 res_type=0
