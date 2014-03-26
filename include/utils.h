@@ -640,7 +640,7 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
 
   //getticks needs to have a correction because the call itself takes a
   //significant number of cycles and skewes the measurement
-  extern inline ticks getticks_correction_calc();
+  extern ticks getticks_correction_calc();
 
   static inline ticks get_noop_duration() {
 #define NOOP_CALC_REPS 1000000
