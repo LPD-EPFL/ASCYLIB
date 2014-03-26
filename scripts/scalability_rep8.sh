@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#!/bin/bash
-
 cores=$1;
 shift;
 

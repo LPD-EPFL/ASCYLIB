@@ -13,54 +13,52 @@ result_type=$1;
 
 if [ "$result_type" = "max" ];
 then
-    run_script="./scripts/run_rep_max.sh $reps";
+    run_script="./scripts/run_rep_lat_max.sh $reps";
     echo "# Result from $reps repetitions: max";
     shift;
 
 elif [ "$result_type" = "min" ];
 then
-    run_script="./scripts/run_rep_min.sh $reps";
+    run_script="./scripts/run_rep_lat_min.sh $reps";
     echo "# Result from $reps repetitions: min";
     shift;
 elif [ "$result_type" = "median" ];
 then
-    run_script="./scripts/run_rep_med.sh $reps";
+    run_script="./scripts/run_rep_lat_med.sh $reps";
     echo "# Result from $reps repetitions: median";
     shift;
 else
-    run_script="./scripts/run_rep_max.sh $reps";
+    run_script="./scripts/run_rep_lat_max.sh $reps";
     echo "# Result from $reps repetitions: max (default). Available: min, max, median";
 fi;
 
-prog=$1;
+prog1="$1";
 shift;
 params="$@";
 
+printf "#   %-60s\n" "$prog1" 
 
-echo "#cores  throughput  %linear scalability"
+echo "#co get_s  get_f put_s  put_f rem_s";
 
-printf "%-8d" 1;
-thr1=$($run_script ./$prog $params -n1);
-printf "%-12d" $thr1;
-printf "%-8.2f" 100.00;
-printf "%-8d\n" 1;
-
-
-for c in $cores
+d=0;
+for c in 1 $cores
 do
-    if [ $c -eq 1 ]
+    if [ $c -eq 1 ];
     then
-	continue;
+	if [ $d -eq 1 ];
+	then
+	    continue;
+	fi;
     fi;
+    d=1;
 
-    printf "%-8d" $c;
+    printf "%-4d" $c;
+    prog=$prog1;
+
     thr=$($run_script ./$prog $params -n$c);
-    printf "%-12d" $thr;
-    scl=$(echo "$thr/$thr1" | bc -l);
-    linear_p=$(echo "100*(1-(($c-$scl)/$c))" | bc -l);
-    printf "%-8.2f" $linear_p;
-    printf "%-8.2f\n" $scl;
+    printf "%-10d%-10d%-10d%-10d%-10d%-10d" $thr;
 
+    echo "";
 done;
 
 source scripts/unlock_exec;
