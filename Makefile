@@ -64,9 +64,13 @@ lfll_harris_opt:
 lfll_michael:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-michael
 
+seqll:
+	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/linkedlist-seq
+
+
 lfll: lfll_harris lfll_michael lfll_harris_opt
 
-ll: seq lfll lbll llcopy
+ll: seqll lfll lbll llcopy
 
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
@@ -101,7 +105,7 @@ htrcu:
 lbhtgl:
 	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lock
 
-ht:	lfht lbht lbhtgl htjava tbb htcopy htrcu
+ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcu
 
 
 clean:
