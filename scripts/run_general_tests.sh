@@ -22,9 +22,9 @@ source scripts/lock_exec;
 
 ll_algos="./bin/lb-ll ./bin/lb-ll_copy ./bin/lb-ll_gl ./bin/lf-ll_harris ./bin/lf-ll_harris_opt ./bin/lf-ll_michael"
 do_ll=1
-sl_algos="./bin/lb-sl_herlihy ./bin/lb-sl_herilhy_gl ./bin/lf-sl"
+sl_algos="./bin/lb-sl_herlihy ./bin/lb-sl_herlihy_gl ./bin/lf-sl"
 do_sl=1
-ht_algos="./bin/lb-ht_copy ./lb-ht_tbb ./bin/lb-ht_copy_gl ./bin/lb-ht/_gl ./bin/lb-ht ./bin/lb-ht_gl ./bin/lf-ht ./bon/lf-ht_rcu"
+ht_algos="./bin/lb-ht_copy ./bin/lb-ht_tbb ./bin/lb-ht_copy_gl ./bin/lb-ht_gl ./bin/lb-ht ./bin/lb-ht_gl ./bin/lf-ht ./bon/lf-ht_rcu"
 do_ht=1
 bst_algos="./bin/lf-bst ./bin/lb-bst-drachsler ./bin/lf-bst-aravind ./bin/lf-bst-howley ./bin/lb-bst2"
 do_bst=1
@@ -46,8 +46,8 @@ high_update=50
 high_cores=20
 
 #parameters for the low contention experiment
-low_initial=65536
-low_range=131072
+low_initial=8192
+low_range=16384
 low_update=10
 low_cores=20
 
