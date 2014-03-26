@@ -1,7 +1,11 @@
 #!/bin/bash
 
-core_lat_dist=20;
+cores_lat_dist="5 10 20";
+LATENCY_TYPE=2			# 2 or 3
+LATENCY_POINTS=16384
 
+reps=10;
+keep=median 			# min, median, or max
 duration=2000;
 initials="1024 4096 8192";
 updates="0 1 10 20 50";
@@ -14,32 +18,60 @@ ub="bin/$un";
 
 mkdir $ub;
 
+
+
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 echo "~~~~~~~~~~~~ ~~~~~~~~~~~~ Throughput";
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
-make ll;
-mv bin/*ll* $ub;
+# ll ##################################################################
+structure=ll;
+make ${structure};
+mv bin/*${structure}* $ub;
 
-echo "~~~~~~~~~~~~ Working on ll";
-# "./$ub/lb-ll -x1" "./$ub/lb-ll -x2" "./$ub/lb-ll -x3" ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt
-
+echo "~~~~~~~~~~~~ Working on ${structure}";
 for i in $initials;
 do
     r=$((2*${i}));
     for u in $updates;
     do
 	params="-i$i -r$r -u$u -d$duration";
-	dat=$out_folder/scy1.thr.$un.i$i.u$u.dat;
+	dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
 	echo "~~~~~~~~ $params @ $dat";
-	./scripts/scalability8.sh "$cores" ./$ub/sq-ll "./$ub/lb-ll -x1" "./$ub/lb-ll -x2" "./$ub/lb-ll -x3" ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params | tee $dat; 
+	./scripts/scalability_rep8.sh "$cores" $reps $keep ./$ub/sq-ll "./$ub/lb-ll -x1" "./$ub/lb-ll -x2" "./$ub/lb-ll -x3" ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params | tee $dat; 
     done;
 done;
 
+# ht ##################################################################
+structure=ht;
+make ${structure};
+mv bin/*${structure}* $ub;
+
+echo "~~~~~~~~~~~~ Working on ${structure}";
+for i in $initials;
+do
+    r=$((2*${i}));
+    for u in $updates;
+    do
+	params="-i$i -r$r -u$u -d$duration";
+	dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
+	echo "~~~~~~~~ $params @ $dat";
+	./scripts/scalability_rep9.sh "$cores" $reps $keep ./$ub/sq-ht "./$ub/lb-ht_gl -x1" "./$ub/lb-ht_gl -x2" "./$ub/lb-ht_gl -x3" ./$ub/lb-ht_copy ./$ub/lf-ht_rcu "./$ub/lb-ht_java -c512" ./$ub/lb-ht_tbb ./$ub/lf-ht $params | tee $dat; 
+    done;
+done;
+
+
+
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 echo "~~~~~~~~~~~~ ~~~~~~~~~~~~ Latency average";
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
-make ll LATENCY=1;
-mv bin/*ll* $ub;
+# ll ##################################################################
+structure=ll;
+make ${structure} LATENCY=1;
+mv bin/*${structure}* $ub;
 
-echo "~~~~~~~~~~~~ Working on ll";
+echo "~~~~~~~~~~~~ Working on ${structure}";
 
 for i in $initials;
 do
@@ -47,29 +79,78 @@ do
     for u in $updates;
     do
 	params="-i$i -r$r -u$u -d$duration";
-	dat=$out_folder/scy1.lat.$un.i$i.u$u.dat;
+	dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
 	echo "~~~~~~~~ $params @ $dat";
-	./scripts/latency8.sh "$cores" ./$ub/sq-ll "./$ub/lb-ll -x1" "./$ub/lb-ll -x2" "./$ub/lb-ll -x3" ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params | tee $dat; 
+	./scripts/latency_rep8.sh "$cores" $reps $keep ./$ub/sq-ll "./$ub/lb-ll -x1" "./$ub/lb-ll -x2" "./$ub/lb-ll -x3" ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params | tee $dat; 
     done;
 done;
 
+# ht ##################################################################
+structure=ht;
+make ${structure} LATENCY=1;
+mv bin/*${structure}* $ub;
+
+echo "~~~~~~~~~~~~ Working on ${structure}";
+
+for i in $initials;
+do
+    r=$((2*${i}));
+    for u in $updates;
+    do
+	params="-i$i -r$r -u$u -d$duration";
+	dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
+	echo "~~~~~~~~ $params @ $dat";
+	./scripts/latency_rep9.sh "$cores" $reps $keep ./$ub/sq-ht "./$ub/lb-ht_gl -x1" "./$ub/lb-ht_gl -x2" "./$ub/lb-ht_gl -x3" ./$ub/lb-ht_copy ./$ub/lf-ht_rcu "./$ub/lb-ht_java -c512" ./$ub/lb-ht_tbb ./$ub/lf-ht $params | tee $dat; 
+    done;
+done;
+
+
+
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 echo "~~~~~~~~~~~~ ~~~~~~~~~~~~ Latency distribution";
+echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
-make ll LATENCY=3;
-mv bin/*ll* $ub;
+# ll ##################################################################
+structure=ll;
+make ${structure} LATENCY=$LATENCY_TYPE;
+mv bin/*${structure}* $ub;
 
-echo "~~~~~~~~~~~~ Working on ll";
+echo "~~~~~~~~~~~~ Working on ${structure}";
 
-for i in $initials;
+for c in $cores_lat_dist
 do
-    r=$((2*${i}));
-    for u in $updates;
+    for i in $initials;
     do
-	params="-i$i -r$r -u$u -d$duration";
-	dat=$out_folder/scy1.ldi.$un.i$i.u$u.dat;
-	echo "~~~~~~~~ $params @ $dat";
-	./scripts/latency_raw_suc8.sh $core_lat_dist ./$ub/sq-ll "./$ub/lb-ll -x1" "./$ub/lb-ll -x2" "./$ub/lb-ll -x3" ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params -v1000 -f1000 | tee $dat; 
+	r=$((2*${i}));
+	for u in $updates;
+	do
+	    params="-i$i -r$r -u$u -d$duration -n$c";
+	    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
+	    echo "~~~~~~~~ $params @ $dat";
+	    ./scripts/latency_raw_suc8.sh $c ./$ub/sq-ll "./$ub/lb-ll -x1" "./$ub/lb-ll -x2" "./$ub/lb-ll -x3" ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params -v$LATENCY_POINTS -f$LATENCY_POINTS $params | tee $dat; 
+	done;
     done;
 done;
 
+# ht ##################################################################
+structure=ht;
+make ${structure} LATENCY=$LATENCY_TYPE;
+mv bin/*${structure}* $ub;
+
+echo "~~~~~~~~~~~~ Working on ${structure}";
+
+for c in $cores_lat_dist
+do
+    for i in $initials;
+    do
+	r=$((2*${i}));
+	for u in $updates;
+	do
+	    params="-i$i -r$r -u$u -d$duration -n$c";
+	    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
+	    echo "~~~~~~~~ $params @ $dat";
+	    ./scripts/latency_raw_suc8.sh $c ./$ub/sq-ht "./$ub/lb-ht_gl -x1" "./$ub/lb-ht_gl -x2" "./$ub/lb-ht_gl -x3" ./$ub/lb-ht_copy ./$ub/lf-ht_rcu "./$ub/lb-ht_java -c512" ./$ub/lb-ht_tbb ./$ub/lf-ht -v$LATENCY_POINTS -f$LATENCY_POINTS $params | tee $dat; 
+	done;
+    done;
+done;
 
