@@ -127,6 +127,24 @@ then
 	done;
     done;
 
+    # sl ##################################################################
+    structure=sl;
+    make ${structure};
+    mv bin/*${structure}* $ub;
+
+    echo "~~~~~~~~~~~~ Working on ${structure}";
+    for i in $initials;
+    do
+	r=$((2*${i}));
+	for u in $updates;
+	do
+	    params="-i$i -r$r -u$u -d$duration";
+	    dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
+	    echo "~~~~~~~~ $params @ $dat";
+	    ./scripts/scalability_rep.sh "$cores" $reps $keep "bin/sq-sl bin/lb-sl_pugh bin/lb-sl_herlihy bin/lf-sl_fraser  bin/lf-sl_herlihy" $params | tee $dat; 
+	done;
+    done;
+
 fi;
 
 
@@ -172,6 +190,25 @@ then
 	    dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
 	    echo "~~~~~~~~ $params @ $dat";
 	    ./scripts/latency_rep9.sh "$cores" $reps $keep ./$ub/sq-ht "./$ub/lb-ht_gl -x1" "./$ub/lb-ht_gl -x2" "./$ub/lb-ht_gl -x3" ./$ub/lb-ht_copy ./$ub/lf-ht_rcu "./$ub/lb-ht_java -c512" ./$ub/lb-ht_tbb ./$ub/lf-ht $params | tee $dat; 
+	done;
+    done;
+
+    # sl ##################################################################
+    structure=sl;
+    make ${structure} LATENCY=1;
+    mv bin/*${structure}* $ub;
+
+    echo "~~~~~~~~~~~~ Working on ${structure}";
+
+    for i in $initials;
+    do
+	r=$((2*${i}));
+	for u in $updates;
+	do
+	    params="-i$i -r$r -u$u -d$duration";
+	    dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
+	    echo "~~~~~~~~ $params @ $dat";
+	    ./scripts/latency_rep.sh "$cores" $reps $keep "bin/sq-sl bin/lb-sl_pugh bin/lb-sl_herlihy bin/lf-sl_fraser  bin/lf-sl_herlihy" $params | tee $dat; 
 	done;
     done;
 
@@ -224,6 +261,28 @@ then
 		dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
 		./scripts/latency_raw_suc9.sh $c ./$ub/sq-ht "./$ub/lb-ht_gl -x1" "./$ub/lb-ht_gl -x2" "./$ub/lb-ht_gl -x3" ./$ub/lb-ht_copy ./$ub/lf-ht_rcu "./$ub/lb-ht_java -c512" ./$ub/lb-ht_tbb ./$ub/lf-ht $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
+	    done;
+	done;
+    done;
+
+    # sl ##################################################################
+    structure=ht;
+    make ${structure} LATENCY=$LATENCY_TYPE;
+    mv bin/*${structure}* $ub;
+
+    echo "~~~~~~~~~~~~ Working on ${structure}";
+
+    for c in $cores_lat_dist
+    do
+	for i in $initials;
+	do
+	    r=$((2*${i}));
+	    for u in $updates;
+	    do
+		params="-n$c -i$i -r$r -u$u -d$duration";
+		dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
+		echo "~~~~~~~~ $params @ $dat";
+		./scripts/latency_raw_suc.sh $c "bin/sq-sl bin/lb-sl_pugh bin/lb-sl_herlihy bin/lf-sl_fraser  bin/lf-sl_herlihy" $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
 	    done;
 	done;
     done;
