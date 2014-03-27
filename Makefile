@@ -1,7 +1,7 @@
 .PHONY:	all
 
 BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/bst-aravind src/noise/ src/tests/
-LBENCHS = src/linkedlist-lock src/linkedlist-copy src/hashtable-lock src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-lock src/bst-lock2 src/bst-drachsler
+LBENCHS = src/linkedlist-lock src/hashtable-lock src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-lock src/bst-lock2 src/bst-drachsler
 LFBENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq
 NOISE = src/noise
@@ -70,7 +70,31 @@ seqll:
 
 lfll: lfll_harris lfll_michael lfll_harris_opt
 
-ll: seqll lfll lbll llcopy
+ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy
+
+lbhtgl:
+	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lock
+
+lbht:
+	$(MAKE) "LOCK=TAS" src/hashtable-lock
+
+lbht_coupling:
+	$(MAKE) "LOCK=TAS" src/hashtable-coupling
+
+lbht_pugh:
+	$(MAKE) "LOCK=TAS" src/hashtable-pugh
+
+lbht_lazy:
+	$(MAKE) "LOCK=TAS" src/hashtable-lazy
+
+lbll_coupling:
+	$(MAKE) "LOCK=TAS" src/linkedlist-coupling
+
+lbll_pugh:
+	$(MAKE) "LOCK=TAS" src/linkedlist-pugh
+
+lbll_lazy:
+	$(MAKE) "LOCK=TAS" src/linkedlist-lazy
 
 lbll:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lock
@@ -90,9 +114,6 @@ htcopygl:
 lfht:
 	$(MAKE) "STM=LOCKFREE" src/hashtable
 
-lbht:
-	$(MAKE) "LOCK=TAS" src/hashtable-lock
-
 lbsl:
 	$(MAKE) "LOCK=TAS" src/skiplist-lock
 
@@ -102,10 +123,7 @@ htjava:
 htrcu:
 	$(MAKE) "LOCK=TAS" src/hashtable-rcu
 
-lbhtgl:
-	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lock
-
-ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcu
+ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcui lbht_coupling lbht_lazy lbht_pugh
 
 
 clean:
@@ -114,8 +132,14 @@ clean:
 	$(MAKE) -C src/hashtable clean
 	$(MAKE) -C src/hashtable-rcu clean
 	$(MAKE) -C src/rbtree clean
+	$(MAKE) -C src/linkedlist-coupling clean
 	$(MAKE) -C src/linkedlist-lock clean
+	$(MAKE) -C src/linkedlist-lazy clean
+	$(MAKE) -C src/linkedlist-pugh clean
+	$(MAKE) -C src/hashtable-pugh clean
 	$(MAKE) -C src/hashtable-lock clean
+	$(MAKE) -C src/hashtable-coupling clean
+	$(MAKE) -C src/hashtable-lazy clean
 	$(MAKE) -C src/skiplist-lock clean
 	$(MAKE) -C src/sftree clean
 	$(MAKE) -C src/bst clean

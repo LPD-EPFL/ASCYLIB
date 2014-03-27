@@ -1,0 +1,25 @@
+coupling.c:  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+coupling.c:  LOCK(ND_GET_LOCK(set->head));
+coupling.c:  curr = set->head;
+coupling.c:  GL_UNLOCK(set->lock);
+coupling.c:  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+coupling.c:  LOCK(ND_GET_LOCK(set->head));
+coupling.c:  curr = set->head;
+coupling.c:  GL_UNLOCK(set->lock);
+coupling.c:  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+coupling.c:  LOCK(ND_GET_LOCK(set->head));
+coupling.c:  curr = set->head;
+coupling.c:  GL_UNLOCK(set->lock);
+lazy.c:  curr = set->head;
+lazy.c:  pred = set->head;
+lazy.c:  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+lazy.c:  GL_UNLOCK(set->lock);
+lazy.c:  pred = set->head;
+lazy.c:  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+lazy.c:  GL_UNLOCK(set->lock);
+linkedlist-lock.c:  set->head = min;
+linkedlist-lock.c:  set->lock = (volatile ptlock_t*) ssalloc(sizeof(ptlock_t));
+linkedlist-lock.c:  if (set->lock == NULL)
+linkedlist-lock.c:  GL_INIT_LOCK(set->lock);
+linkedlist-lock.c:  node = set->head;
+linkedlist-lock.c:  node = (node_l_t*) get_unmarked_ref((uintptr_t) set->head->next);
