@@ -74,6 +74,9 @@ then
 elif [ "$cores" = "three" ];
 then
     cores=$(seq 3 3 $max_cores);
+elif [ "$cores" = "four" ];
+then
+    cores=$(seq 4 4 $max_cores);
 elif [ "$cores" = "socket" ];
 then
     if [ $unm = "maglite" ];
