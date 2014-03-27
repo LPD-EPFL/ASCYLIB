@@ -20,6 +20,6 @@ do
     printf "%-10d%-10d%-10d%-10d%-10d%-10d%-10d\n" $thr $lat >> $tmp;
 done;
 
-med_idx=$(echo "$reps/2" | bc);
+med_idx=$(echo "1 + $reps/2" | bc);
 sort -n $tmp | head -${med_idx} | tail -n1 | awk '{$1=""; print}';
 
