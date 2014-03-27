@@ -13,6 +13,7 @@ fi;
 if [ $# -le 1 ];		# pass any param to avoid compilation
 then
     LATENCY=1 INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k tas
+    LATENCY=1 INIT=one $MAKE LBSL=pugh -k tas
     LATENCY=1 INIT=one $MAKE -k tas
     LATENCY=1 INIT=one $MAKE -k lockfree
 fi
@@ -20,11 +21,11 @@ source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
 
-ll_algos="./bin/lb-ll ./bin/lb-ll_copy ./bin/lf-ll_harris ./bin/lf-ll_harris_opt ./bin/lf-ll_michael"
+ll_algos="./bin/lb-ll_lazy ./bin/lb-ll_coupling ./bin_lb-ll_pugh ./bin/lb-ll_copy ./bin/lf-ll_harris ./bin/lf-ll_harris_opt ./bin/lf-ll_michael"
 do_ll=1
-sl_algos="./bin/lb-sl_herlihy ./bin/lf-sl"
+sl_algos="./bin/lb-sl_herlihy ./bin/lb-sl_pugh ./bin/lf-sl"
 do_sl=1
-ht_algos="./bin/lb-ht_copy ./bin/lb-ht_tbb ./bin/lb-ht_copy_gl ./bin/lb-ht_gl ./bin/lb-ht ./bin/lb-ht_gl ./bin/lf-ht ./bin/lf-ht_rcu"
+ht_algos="./bin/lb-ht_copy ./bin/lb-ht_tbb ./bin/lb-ht_copy_gl ./bin/lb-ht_gl ./bin/lb-ht_lazy ./bin/lb-ht_coupling ./bin/lb-ht_pugh ./bin/lb-ht_gl ./bin/lf-ht ./bin/lf-ht_rcu"
 do_ht=1
 bst_algos="./bin/lf-bst ./bin/lb-bst-drachsler ./bin/lf-bst-aravind ./bin/lf-bst-howley ./bin/lb-bst2"
 do_bst=1
