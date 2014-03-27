@@ -69,7 +69,6 @@ void
 bucket_set_init_l(intset_l_t* set, ptlock_t* lock)
 {
   node_l_t *min;
-
   min = new_node_l(KEY_MIN, 0, NULL, 1);
   set->head = min;
 

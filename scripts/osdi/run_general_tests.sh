@@ -1,11 +1,12 @@
 #!/bin/bash
 MAKE=make
-cores="all"
+cores="socketandone"
 
 #0 - median; 1 - max; 2 - min; 3 - avg
 res_type=0
 
 uname=$(uname -n);
+
 if [ $unm = "ol-collab1" ];
 then
     MAKE=gmake
