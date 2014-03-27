@@ -1,6 +1,6 @@
 #!/bin/bash
 MAKE=make
-cores="socketandone"
+cores="all"
 
 #0 - median; 1 - max; 2 - min; 3 - avg
 res_type=0
@@ -100,6 +100,8 @@ test_structure() {
     struct=$1
     shift
     algos=$@
+    echo "machine structure cores throughput" > ./data/common_${struct}_${uname}.txt
+    echo "machine experiment structure throughput scalability" > ./data/extremes_${struct}_${uname}.txt
     for algo in ${algos}; do
         if [ -e $algo ]; then
         echo "starting ${algo} tests..."
@@ -129,9 +131,6 @@ test_structure() {
         fi
     done
 }
-
-echo "machine structure cores throughput" > ./data/common_${uname}.txt
-echo "machine experiment structure throughput scalability" > ./data/extremes_${uname}.txt
 
 if [ ${do_ll} -eq 1 ]; then
     test_structure ll ${ll_algos}
