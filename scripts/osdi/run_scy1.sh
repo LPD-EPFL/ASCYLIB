@@ -196,7 +196,7 @@ then
 		params="-i$i -r$r -u$u -d$duration -n$c";
 		dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_raw_suc8.sh $c ./$ub/sq-ll "./$ub/lb-ll -x1" "./$ub/lb-ll -x2" "./$ub/lb-ll -x3" ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params -v$LATENCY_POINTS -f$LATENCY_POINTS $params | tee $dat; 
+		./scripts/latency_raw_suc8.sh $c ./$ub/sq-ll "./$ub/lb-ll -x1" "./$ub/lb-ll -x2" "./$ub/lb-ll -x3" ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params -v$LATENCY_POINTS -f$LATENCY_POINTS $params | tee $dat | head -n32;
 	    done;
 	done;
     done;
@@ -218,7 +218,7 @@ then
 		params="-i$i -r$r -u$u -d$duration -n$c";
 		dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_raw_suc8.sh $c ./$ub/sq-ht "./$ub/lb-ht_gl -x1" "./$ub/lb-ht_gl -x2" "./$ub/lb-ht_gl -x3" ./$ub/lb-ht_copy ./$ub/lf-ht_rcu "./$ub/lb-ht_java -c512" ./$ub/lb-ht_tbb ./$ub/lf-ht -v$LATENCY_POINTS -f$LATENCY_POINTS $params | tee $dat; 
+		./scripts/latency_raw_suc8.sh $c ./$ub/sq-ht "./$ub/lb-ht_gl -x1" "./$ub/lb-ht_gl -x2" "./$ub/lb-ht_gl -x3" ./$ub/lb-ht_copy ./$ub/lf-ht_rcu "./$ub/lb-ht_java -c512" ./$ub/lb-ht_tbb ./$ub/lf-ht -v$LATENCY_POINTS -f$LATENCY_POINTS $params | tee $dat | head -n32; 
 	    done;
 	done;
     done;
