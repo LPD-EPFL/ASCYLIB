@@ -87,6 +87,15 @@ lbht_pugh:
 lbht_lazy:
 	$(MAKE) "LOCK=TAS" src/hashtable-lazy
 
+lbht_coupling_gl:
+	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-coupling
+
+lbht_pugh_gl:
+	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-pugh
+
+lbht_lazy_gl:
+	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lazy
+
 lbll_coupling:
 	$(MAKE) "LOCK=TAS" src/linkedlist-coupling
 
@@ -123,7 +132,7 @@ htjava:
 htrcu:
 	$(MAKE) "LOCK=TAS" src/hashtable-rcu
 
-ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcui lbht_coupling lbht_lazy lbht_pugh
+ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl
 
 
 clean:
