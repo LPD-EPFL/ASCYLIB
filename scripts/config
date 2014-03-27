@@ -68,6 +68,12 @@ fi;
 if [ "$cores" = "all" ];
 then
     cores=$(seq 2 1 $max_cores);
+elif [ "$cores" = "two" ];
+then
+    cores=$(seq 2 2 $max_cores);
+elif [ "$cores" = "three" ];
+then
+    cores=$(seq 3 3 $max_cores);
 elif [ "$cores" = "socket" ];
 then
     if [ $unm = "maglite" ];
