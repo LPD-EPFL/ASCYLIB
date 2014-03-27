@@ -37,18 +37,24 @@ lockc_delete(intset_l_t *set, skey_t key)
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
   curr = set->head;
-  LOCK(ND_GET_LOCK(curr->next));
+  if (curr->next != NULL)
+    {
+      LOCK(ND_GET_LOCK(curr->next));
+    }
   next = curr->next;
 	
-  while (next->key < key) 
+  while (next != NULL && next->key < key) 
     {
       UNLOCK(ND_GET_LOCK(curr));
       curr = next;
-      LOCK(ND_GET_LOCK(next->next));
+      if (next->next != NULL)
+	{
+	  LOCK(ND_GET_LOCK(next->next));
+	}
       next = next->next;
     }
 
-  if (key == next->key)
+  if (next != NULL && key == next->key)
     {
       res = next->val;
       curr->next = next->next;
@@ -59,7 +65,10 @@ lockc_delete(intset_l_t *set, skey_t key)
   else 
     {
       UNLOCK(ND_GET_LOCK(curr));
-      UNLOCK(ND_GET_LOCK(next));
+      if (next != NULL)
+	{
+	  UNLOCK(ND_GET_LOCK(next));
+	}
     }  
   GL_UNLOCK(set->lock);
 
@@ -75,46 +84,62 @@ lockc_find(intset_l_t *set, skey_t key)
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
   curr = set->head;
-  LOCK(ND_GET_LOCK(curr->next));
+  if (curr->next != NULL)
+    {
+      LOCK(ND_GET_LOCK(curr->next));
+    }
   next = curr->next;
 	
-  while (next->key < key) 
+  while (next != NULL && next->key < key) 
     {
       UNLOCK(ND_GET_LOCK(curr));
       curr = next;
-      LOCK(ND_GET_LOCK(next->next));
+      if (next->next != NULL)
+	{
+	  LOCK(ND_GET_LOCK(next->next));
+	}
       next = curr->next;
     }	
-  if (key == next->key)
+  if (next != NULL && key == next->key)
     {
       res = next->val;
     }
   GL_UNLOCK(set->lock);
   UNLOCK(ND_GET_LOCK(curr));
-  UNLOCK(ND_GET_LOCK(next));
+  if (next != NULL)
+    {
+      UNLOCK(ND_GET_LOCK(next));
+    }
   return res;
 }
 
 int
 lockc_insert(intset_l_t *set, skey_t key, sval_t val) 
 {
-  node_l_t *curr, *next, *newnode;
+  node_l_t *next, *newnode;
+  volatile node_l_t* curr;
   int found;
 	
   GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
   curr = set->head;
-  LOCK(ND_GET_LOCK(curr->next));
+  if (curr->next != NULL)
+    {
+      LOCK(ND_GET_LOCK(curr->next));
+    }
   next = curr->next;
 	
-  while (next->key < key) 
+  while (next != NULL && next->key < key) 
     {
       UNLOCK(ND_GET_LOCK(curr));
       curr = next;
-      LOCK(ND_GET_LOCK(next->next));
+      if (next->next != NULL)
+	{
+	  LOCK(ND_GET_LOCK(next->next));
+	}
       next = curr->next;
     }
-  found = (key == next->key);
+  found = (next != NULL && key == next->key);
   if (!found) 
     {
       newnode =  new_node_l(key, val, next, 1);
@@ -122,6 +147,9 @@ lockc_insert(intset_l_t *set, skey_t key, sval_t val)
     }
   GL_UNLOCK(set->lock);
   UNLOCK(ND_GET_LOCK(curr));
-  UNLOCK(ND_GET_LOCK(next));
+  if (next != NULL)
+    {
+      UNLOCK(ND_GET_LOCK(next));
+    }
   return !found;
 }

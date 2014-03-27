@@ -32,7 +32,6 @@
 
 
 /* linked list accesses */
-extern int parse_validate(node_l_t* pred, node_l_t* curr);
 sval_t parse_find(intset_l_t* set, skey_t key);
 int parse_insert(intset_l_t* set, skey_t key, sval_t val);
 sval_t parse_delete(intset_l_t* set, skey_t key);
