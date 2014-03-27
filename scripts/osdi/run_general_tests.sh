@@ -96,6 +96,8 @@ run_test() {
 }
 
 test_structure() {
+    struct=$1
+    shift
     algos=$@
     for algo in ${algos}; do
         if [ -e $algo ]; then
@@ -106,7 +108,7 @@ test_structure() {
         for c in ${cores}; do
             printf "${c} "
             throughput=$(run_test ${algo} -d${def_duration} -n${c} -i${base_initial} -r${base_range} -u${base_update}) 
-            echo "${uname} ${namemap[${algo}]} ${c} ${throughput}" >> ./data/common_${uname}.txt
+            echo "${uname} ${namemap[${algo}]} ${c} ${throughput}" >> ./data/common_${struct}_${uname}.txt
         done
         printf "\n"
 #hight contention case
@@ -114,13 +116,13 @@ test_structure() {
         throughput_one=$(run_test ${algo} -d${def_duration} -n1 -i${high_initial} -r${high_range} -u${high_update}) 
         throughput=$(run_test ${algo} -d${def_duration} -n${high_cores} -i${high_initial} -r${high_range} -u${high_update}) 
         scal=$(echo "${throughput}/${throughput_one}" | bc -l);
-        echo "${uname} high ${namemap[${algo}]} ${throughput} ${scal}" >> ./data/extremes_${uname}.txt
+        echo "${uname} high ${namemap[${algo}]} ${throughput} ${scal}" >> ./data/extremes_${struct}_${uname}.txt
 #low contention case
         echo "   low contention..."
         throughput_one=$(run_test ${algo} -d${def_duration} -n1 -i${low_initial} -r${low_range} -u${low_update}) 
         throughput=$(run_test ${algo} -d${def_duration} -n${low_cores} -i${low_initial} -r${low_range} -u${low_update}) 
         scal=$(echo "${throughput}/${throughput_one}" | bc -l);
-        echo "${uname} low ${namemap[${algo}]} ${throughput} ${scal}" >> ./data/extremes_${uname}.txt
+        echo "${uname} low ${namemap[${algo}]} ${throughput} ${scal}" >> ./data/extremes_${struct}_${uname}.txt
         else 
             echo "$algo not found"
         fi
@@ -131,16 +133,16 @@ echo "machine structure cores throughput" > ./data/common_${uname}.txt
 echo "machine experiment structure throughput scalability" > ./data/extremes_${uname}.txt
 
 if [ ${do_ll} -eq 1 ]; then
-    test_structure ${ll_algos}
+    test_structure ll ${ll_algos}
 fi
 if [ ${do_ht} -eq 1 ]; then
-    test_structure ${ht_algos}
+    test_structure ht ${ht_algos}
 fi
 if [ ${do_sl} -eq 1 ]; then
-    test_structure ${sl_algos}
+    test_structure sl ${sl_algos}
 fi
 if [ ${do_bst} -eq 1 ]; then
-    test_structure ${bst_algos}
+    test_structure bst ${bst_algos}
 fi
 
 source scripts/unlock_exec;
