@@ -67,8 +67,13 @@ ht_num=9;
 i_num=$(echo $initials | wc -w);
 u_num=$(echo $updates | wc -w);
 source scripts/config;
+
 c_num=$(echo "1 "${cores} | wc -w);
-est_time=$(echo "${metrics}*${i_num}*${u_num}*(${ll_num}+${ht_num})*${reps}*(${duration}/1000)*${c_num}/3600" | bc -l);
+est_time_thr_lat=$(echo "${metrics}*${i_num}*${u_num}*(${ll_num}+${ht_num})*${reps}*(${duration}/1000)*${c_num}/3600" | bc -l);
+
+c_num_ldi=$(echo $cores_lat_dist | wc -w);
+est_time_ldi=$(echo "${c_num_ldi}*${i_num}*${u_num}*(${ll_num}+${ht_num})*(${duration}/1000)/3600" | bc -l);
+est_time=$(echo "${est_time_thr_lat}+${est_time_ldi}" | bc -l);
 printf "## Estimated time for the experiment: %6.3f h\n" $est_time;
 printf "   Continue? [Y/n] ";
 read cont;
@@ -218,7 +223,7 @@ then
 		params="-n$c -i$i -r$r -u$u -d$duration";
 		dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_raw_suc8.sh $c ./$ub/sq-ht "./$ub/lb-ht_gl -x1" "./$ub/lb-ht_gl -x2" "./$ub/lb-ht_gl -x3" ./$ub/lb-ht_copy ./$ub/lf-ht_rcu "./$ub/lb-ht_java -c512" ./$ub/lb-ht_tbb ./$ub/lf-ht $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
+		./scripts/latency_raw_suc9.sh $c ./$ub/sq-ht "./$ub/lb-ht_gl -x1" "./$ub/lb-ht_gl -x2" "./$ub/lb-ht_gl -x3" ./$ub/lb-ht_copy ./$ub/lf-ht_rcu "./$ub/lb-ht_java -c512" ./$ub/lb-ht_tbb ./$ub/lf-ht $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
 	    done;
 	done;
     done;
