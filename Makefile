@@ -1,9 +1,9 @@
 .PHONY:	all
 
-BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist src/rbtree src/deque src/bst src/bst-howley src/bst-aravind src/noise/ src/tests/
-LBENCHS = src/linkedlist-lock src/hashtable-lock src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-lock src/bst-lock2 src/bst-drachsler
-LFBENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/skiplist src/bst src/bst-howley src/bst-aravind
-SEQBENCHS = src/linkedlist-seq src/hashtable-seq
+BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh  src/bst src/bst-howley src/bst-aravind src/noise/ src/tests/
+LBENCHS = src/linkedlist-lock src/hashtable-lock src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/bst-lock2 src/bst-drachsler
+LFBENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/bst src/bst-howley src/bst-aravind
+SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq
 NOISE = src/noise
 TESTS = src/tests
 
@@ -40,6 +40,9 @@ seq:	sequential
 seqht:
 	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/hashtable-seq
 
+seqsl:
+	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/skiplist-seq
+
 lockfree:
 	$(MAKE) "STM=LOCKFREE" $(LFBENCHS)
 
@@ -54,6 +57,21 @@ tbb:
 
 lfsl:
 	$(MAKE) "STM=LOCKFREE" src/skiplist
+
+lfsl_fraser:
+	$(MAKE) "STM=LOCKFREE" src/skiplist-fraser
+
+lfsl_herlihy_lf:
+	$(MAKE) "STM=LOCKFREE" src/skiplist-herlihy_lf
+
+lbsl_pugh:
+	$(MAKE) "LOCK=TAS" src/skiplist-pugh
+
+lbsl_herlihy_lb:
+	$(MAKE) "LOCK=TAS" src/skiplist-herlihy_lb
+
+sl:	seqsl lfsl_fraser lfsl_herlihy_lf lbsl_pugh lbsl_herlihy_lb
+
 
 lfll_harris:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist
@@ -86,6 +104,15 @@ lbht_pugh:
 
 lbht_lazy:
 	$(MAKE) "LOCK=TAS" src/hashtable-lazy
+
+lbht_coupling_gl:
+	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-coupling
+
+lbht_pugh_gl:
+	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-pugh
+
+lbht_lazy_gl:
+	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lazy
 
 lbll_coupling:
 	$(MAKE) "LOCK=TAS" src/linkedlist-coupling
@@ -123,7 +150,7 @@ htjava:
 htrcu:
 	$(MAKE) "LOCK=TAS" src/hashtable-rcu
 
-ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcui lbht_coupling lbht_lazy lbht_pugh
+ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl
 
 
 clean:

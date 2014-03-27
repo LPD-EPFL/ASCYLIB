@@ -17,6 +17,6 @@ do
     $run_script ./$prog $params | grep "#txs" | cut -d'(' -f2 | cut -d. -f1 >> $tmp;
 done;
 
-med_idx=$(echo "$reps/2" | bc);
+med_idx=$(echo "1 + $reps/2" | bc);
 sort -n $tmp | head -${med_idx} | tail -n1;
 
