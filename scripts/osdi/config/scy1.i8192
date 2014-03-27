@@ -1,0 +1,10 @@
+cores_lat_dist="5 20";
+LATENCY_TYPE=2			# 2 or 3
+LATENCY_POINTS=16384
+
+reps=3;
+keep=median 			# min, median, or max
+duration=400;
+initials="8192";
+updates="0 1 10 20 50";
+cores="two";

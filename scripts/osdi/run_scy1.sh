@@ -1,33 +1,47 @@
 #!/bin/bash
 
-cores_lat_dist="5 10 20";
-LATENCY_TYPE=2			# 2 or 3
-LATENCY_POINTS=16384
+configuration=./scripts/osdi/config/scy1.long
 
-reps=8;
-keep=median 			# min, median, or max
-duration=1000;
-initials="1024 4096 8192";
-updates="0 1 10 20 50";
-cores="all";
+if [ $# -gt 0 ];
+then
+    configuration="$1";
+    shift;
+    echo "# Using configuration file: $configuration";
+    if [ ! -f "$configuration" ];
+    then
+	echo "* File does not exist: $configuration";
+	exit;
+    fi;
+fi;
+
+source ${configuration};
 
 out_folder=data;
 
 un=$(uname -n);
 ub="bin/$un";
+if [ ! -d "$ub" ];
+then
+    mkdir $ub;
+fi;
 
-mkdir $ub;
-
-
+# estimate the time to execute the experiment
 ll_num=8;
 ht_num=9;
 i_num=$(echo $initials | wc -w);
 u_num=$(echo $updates | wc -w);
 source scripts/config;
-c_num=$max_cores;
+c_num=$(echo "1 "${cores} | wc -w);
 est_time=$(echo "2*${i_num}*${u_num}*(${ll_num}+${ht_num})*${reps}*(${duration}/1000)*${c_num}/3600" | bc -l);
-printf "## Estimated time for the experiment (hours): %.3f\n" $est_time;
-sleep 2;
+printf "## Estimated time for the experiment: %6.3f h\n" $est_time;
+printf "   Continue? [Y/n] ";
+read cont;
+if [ "$cont" = "n" ];
+then
+    exit;
+fi;
+#############################################
+
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 echo "~~~~~~~~~~~~ ~~~~~~~~~~~~ Throughput";
