@@ -4,7 +4,7 @@ LATENCY_POINTS=512
 
 reps=3;
 keep=median 			# min, median, or max
-duration=400;
+duration=10;
 initials="8192";
 updates="0 1 10 20 50";
-cores="two";
+cores="socket";
