@@ -64,15 +64,16 @@ fi;
 # estimate the time to execute the experiment
 ll_num=8;
 ht_num=9;
+sl_num=5;
 i_num=$(echo $initials | wc -w);
 u_num=$(echo $updates | wc -w);
 source scripts/config;
 
 c_num=$(echo "1 "${cores} | wc -w);
-est_time_thr_lat=$(echo "${metrics}*${i_num}*${u_num}*(${ll_num}+${ht_num})*${reps}*(${duration}/1000)*${c_num}/3600" | bc -l);
+est_time_thr_lat=$(echo "${metrics}*${i_num}*${u_num}*(${ll_num}+${ht_num}+${sl_num})*${reps}*(${duration}/1000)*${c_num}/3600" | bc -l);
 
 c_num_ldi=$(echo $cores_lat_dist | wc -w);
-est_time_ldi=$(echo "${c_num_ldi}*${i_num}*${u_num}*(${ll_num}+${ht_num})*(${duration}/1000)/3600" | bc -l);
+est_time_ldi=$(echo "${c_num_ldi}*${i_num}*${u_num}*(${ll_num}+${ht_num}+${sl_num})*(${duration}/1000)/3600" | bc -l);
 est_time=$(echo "${est_time_thr_lat}+${est_time_ldi}" | bc -l);
 printf "## Estimated time for the experiment: %6.3f h\n" $est_time;
 printf "   Continue? [Y/n] ";
