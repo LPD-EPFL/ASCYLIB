@@ -1,0 +1,12 @@
+cores_lat_dist="10 20";
+LATENCY_TYPE=3			# 2 or 3
+LATENCY_POINTS=512
+
+reps=3;
+keep=median 			# min, median, or max
+duration=400;
+initials="1024 4096 8192";
+updates="5 10 20";
+cores="two";
+
+COMPILE_FLAGS="SET_CPU=0"
