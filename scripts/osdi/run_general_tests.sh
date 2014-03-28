@@ -29,13 +29,13 @@ source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
 
-ll_algos="./bin/lb-ll_lazy ./bin/lb-ll_coupling ./bin_lb-ll_pugh ./bin/lb-ll_copy ./bin/lf-ll_harris ./bin/lf-ll_harris_opt ./bin/lf-ll_michael"
+ll_algos="./${ub}/lb-ll_lazy ./${ub}/lb-ll_coupling ./${ub}_lb-ll_pugh ./${ub}/lb-ll_copy ./${ub}/lf-ll_harris ./${ub}/lf-ll_harris_opt ./${ub}/lf-ll_michael"
 do_ll=1
-sl_algos="./bin/lb-sl_herlihy ./bin/lb-sl_pugh ./bin/lf-sl"
+sl_algos="./${ub}/lb-sl_herlihy ./${ub}/lb-sl_pugh ./${ub}/lf-sl"
 do_sl=1
-ht_algos="./bin/lb-ht_tbb ./bin/lb-ht_java ./bin/lb-ht_copy_gl ./bin/lb-ht_lazy_gl ./bin/lb-ht_coupling_gl ./bin/lb-ht_pugh_gl ./bin/lf-ht ./bin/lf-ht_rcu"
+ht_algos="./${ub}/lb-ht_tbb ./${ub}/lb-ht_java ./${ub}/lb-ht_copy_gl ./${ub}/lb-ht_lazy_gl ./${ub}/lb-ht_coupling_gl ./${ub}/lb-ht_pugh_gl ./${ub}/lf-ht ./${ub}/lf-ht_rcu"
 do_ht=1
-bst_algos="./bin/lf-bst ./bin/lb-bst-drachsler ./bin/lf-bst-aravind ./bin/lf-bst-howley ./bin/lb-bst2"
+bst_algos="./${ub}/lf-bst ./${ub}/lb-bst-drachsler ./${ub}/lf-bst-aravind ./${ub}/lf-bst-howley ./${ub}/lb-bst2"
 do_bst=1
 
 num_repetitions=7
