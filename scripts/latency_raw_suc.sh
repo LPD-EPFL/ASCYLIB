@@ -58,8 +58,8 @@ for i in $(seq 1 1 $progs_num);
 do
     tmps="$tmps $(get_tmp $tmp_template $i)";
 done;
-echo $tmps;
-paste $tmps | column -t;
+
+paste $(echo "$tmps") | column -t;
 
 echo "";
 
