@@ -40,8 +40,14 @@ seq:	sequential
 seqht:
 	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/hashtable-seq
 
+seqhtgc:
+	$(MAKE) "STM=SEQUENTIAL" "GC=1" src/hashtable-seq
+
 seqsl:
 	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/skiplist-seq
+
+seqslgc:
+	$(MAKE) "STM=SEQUENTIAL" "GC=1" src/skiplist-seq
 
 lockfree:
 	$(MAKE) "STM=LOCKFREE" $(LFBENCHS)
@@ -84,6 +90,9 @@ lfll_michael:
 
 seqll:
 	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/linkedlist-seq
+
+seqllgc:
+	$(MAKE) "STM=SEQUENTIAL" "GC=1" src/linkedlist-seq
 
 
 lfll: lfll_harris lfll_michael lfll_harris_opt
