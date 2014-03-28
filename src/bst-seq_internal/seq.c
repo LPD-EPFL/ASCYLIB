@@ -49,25 +49,27 @@ seq_delete_node(node_t** node)
   else 
     {
       /* delete node with two children */
-      node_t* rchild = (*node)->right;
-      node_t* rchildparent = *node;
-      while(rchild->left != NULL)
+      node_t* pred = (*node)->left;
+      node_t* pred_pred = *node;
+      while(pred->right != NULL)
 	{
-	  rchildparent=rchild;
-	  rchild = rchild->left;
+	  pred_pred=pred;
+	  pred = pred->right;
 	}
 
-      (*node)->key = rchild->key;
-      if(rchildparent == *node)
+      skey_t tmp = pred->key;
+      (*node)->key = tmp;
+
+      if(pred_pred == *node)
 	{
-	  (*node)->right = rchild->right;
+	  (*node)->left = pred->left;
 	}
       else
 	{
-	  rchildparent->left = rchild->right;
+	  pred_pred->right = pred->left;
 	}
 
-      node_delete(rchild);
+      node_delete(pred);
     }
 }
 
@@ -92,7 +94,7 @@ seq_find(intset_t* set, skey_t key)
   node_t* node = set->head;
   while (unlikely(node != NULL))
     {
-      sval_t node_key = (node)->key;
+      skey_t node_key = (node)->key;
       if (key < node_key)
 	{
 	  node = node->left;
