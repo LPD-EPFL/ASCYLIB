@@ -6,8 +6,14 @@ cores="all"
 res_type=0
 
 uname=$(uname -n);
+ub="bin/$un";
+if [ ! -d "$ub" ];
+then
+    mkdir $ub;
+fi;
 
-if [ $unm = "ol-collab1" ];
+rm bin/*
+if [ $uname = "ol-collab1" ];
 then
     MAKE=gmake
 fi;
@@ -18,6 +24,7 @@ then
     LATENCY=1 INIT=one $MAKE -k tas
     LATENCY=1 INIT=one $MAKE -k lockfree
 fi
+mv bin/* $ub;
 source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
