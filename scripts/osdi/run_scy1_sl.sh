@@ -42,23 +42,32 @@ then
 fi;
 
 
+echo "## Will do measurements for:";
 metrics=2;
 if [ "${skip_thr}0" -eq 10 ];
 then
-    echo "** no througput measurements";
     metrics=$(($metrics-1));
+else
+    printf "  THROUGHPUT";
 fi;
+    printf " / ";
 
 if [ "${skip_lat}0" -eq 10 ];
 then
-    echo "** no latency measurements";
     metrics=$(($metrics-1));
+else
+    printf "  LATENCY";
 fi;
+    printf " / ";
 
+do_ldi=1;
 if [ "${skip_ldi}0" -eq 10 ];
 then
-    echo "** no latency distribution measurements";
+    do_ldi=0;
+else
+    printf "  LATENCY DISTRIBUTION";
 fi;
+echo "";
 
 
 # estimate the time to execute the experiment
@@ -73,7 +82,7 @@ c_num=$(echo "1 "${cores} | wc -w);
 est_time_thr_lat=$(echo "${metrics}*${i_num}*${u_num}*(${sl_num})*${reps}*(${duration}/1000)*${c_num}/3600" | bc -l);
 
 c_num_ldi=$(echo $cores_lat_dist | wc -w);
-est_time_ldi=$(echo "${c_num_ldi}*${i_num}*${u_num}*(${ll_num}+${ht_num})*(${duration}/1000)/3600" | bc -l);
+est_time_ldi=$(echo "${do_ldi}*${c_num_ldi}*${i_num}*${u_num}*(${sl_num})*(${duration}/1000)/3600" | bc -l);
 est_time=$(echo "${est_time_thr_lat}+${est_time_ldi}" | bc -l);
 printf "## Estimated time for the experiment: %6.3f h\n" $est_time;
 printf "   Continue? [Y/n] ";
@@ -94,7 +103,7 @@ then
 
     # sl ##################################################################
     structure=sl;
-    make ${structure};
+    make ${structure} ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -122,7 +131,7 @@ then
 
     # sl ##################################################################
     structure=sl;
-    make ${structure} LATENCY=1;
+    make ${structure} LATENCY=1 ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -149,8 +158,8 @@ then
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
 
     # sl ##################################################################
-    structure=ht;
-    make ${structure} LATENCY=$LATENCY_TYPE;
+    structure=sl;
+    make ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";

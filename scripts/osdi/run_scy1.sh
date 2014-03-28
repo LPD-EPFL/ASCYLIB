@@ -42,23 +42,32 @@ then
 fi;
 
 
+echo "## Will do measurements for:";
 metrics=2;
 if [ "${skip_thr}0" -eq 10 ];
 then
-    echo "** no througput measurements";
     metrics=$(($metrics-1));
+else
+    printf "  THROUGHPUT";
 fi;
+    printf " / ";
 
 if [ "${skip_lat}0" -eq 10 ];
 then
-    echo "** no latency measurements";
     metrics=$(($metrics-1));
+else
+    printf "  LATENCY";
 fi;
+    printf " / ";
 
+do_ldi=1;
 if [ "${skip_ldi}0" -eq 10 ];
 then
-    echo "** no latency distribution measurements";
+    do_ldi=0;
+else
+    printf "  LATENCY DISTRIBUTION";
 fi;
+echo "";
 
 
 # estimate the time to execute the experiment
@@ -73,7 +82,7 @@ c_num=$(echo "1 "${cores} | wc -w);
 est_time_thr_lat=$(echo "${metrics}*${i_num}*${u_num}*(${ll_num}+${ht_num}+${sl_num})*${reps}*(${duration}/1000)*${c_num}/3600" | bc -l);
 
 c_num_ldi=$(echo $cores_lat_dist | wc -w);
-est_time_ldi=$(echo "${c_num_ldi}*${i_num}*${u_num}*(${ll_num}+${ht_num}+${sl_num})*(${duration}/1000)/3600" | bc -l);
+est_time_ldi=$(echo "${do_ldi}*${c_num_ldi}*${i_num}*${u_num}*(${ll_num}+${ht_num}+${sl_num})*(${duration}/1000)/3600" | bc -l);
 est_time=$(echo "${est_time_thr_lat}+${est_time_ldi}" | bc -l);
 printf "## Estimated time for the experiment: %6.3f h\n" $est_time;
 printf "   Continue? [Y/n] ";
@@ -94,7 +103,7 @@ then
 
     # ll ##################################################################
     structure=ll;
-    make ${structure};
+    make ${structure} ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -112,7 +121,7 @@ then
 
     # ht ##################################################################
     structure=ht;
-    make ${structure};
+    make ${structure} ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -130,7 +139,7 @@ then
 
     # sl ##################################################################
     structure=sl;
-    make ${structure};
+    make ${structure} ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -142,7 +151,7 @@ then
 	    params="-i$i -r$r -u$u -d$duration";
 	    dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
 	    echo "~~~~~~~~ $params @ $dat";
-	    ./scripts/scalability_rep.sh "$cores" $reps $keep "bin/sq-sl bin/lb-sl_pugh bin/lb-sl_herlihy bin/lf-sl_fraser  bin/lf-sl_herlihy" $params | tee $dat; 
+	    ./scripts/scalability_rep.sh "$cores" $reps $keep "./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser  ./$ub/lf-sl_herlihy" $params | tee $dat; 
 	done;
     done;
 
@@ -158,7 +167,7 @@ then
 
     # ll ##################################################################
     structure=ll;
-    make ${structure} LATENCY=1;
+    make ${structure} LATENCY=1 ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -177,7 +186,7 @@ then
 
     # ht ##################################################################
     structure=ht;
-    make ${structure} LATENCY=1;
+    make ${structure} LATENCY=1 ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -196,7 +205,7 @@ then
 
     # sl ##################################################################
     structure=sl;
-    make ${structure} LATENCY=1;
+    make ${structure} LATENCY=1 ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -209,7 +218,7 @@ then
 	    params="-i$i -r$r -u$u -d$duration";
 	    dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
 	    echo "~~~~~~~~ $params @ $dat";
-	    ./scripts/latency_rep.sh "$cores" $reps $keep "bin/sq-sl bin/lb-sl_pugh bin/lb-sl_herlihy bin/lf-sl_fraser  bin/lf-sl_herlihy" $params | tee $dat; 
+	    ./scripts/latency_rep.sh "$cores" $reps $keep "./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser  ./$ub/lf-sl_herlihy" $params | tee $dat; 
 	done;
     done;
 
@@ -224,7 +233,7 @@ then
 
     # ll ##################################################################
     structure=ll;
-    make ${structure} LATENCY=$LATENCY_TYPE;
+    make ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -246,7 +255,7 @@ then
 
     # ht ##################################################################
     structure=ht;
-    make ${structure} LATENCY=$LATENCY_TYPE;
+    make ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -267,8 +276,8 @@ then
     done;
 
     # sl ##################################################################
-    structure=ht;
-    make ${structure} LATENCY=$LATENCY_TYPE;
+    structure=sl;
+    make ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
     mv bin/*${structure}* $ub;
 
     echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -283,7 +292,7 @@ then
 		params="-n$c -i$i -r$r -u$u -d$duration";
 		dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_raw_suc.sh $c "bin/sq-sl bin/lb-sl_pugh bin/lb-sl_herlihy bin/lf-sl_fraser  bin/lf-sl_herlihy" $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
+		./scripts/latency_raw_suc.sh $c "./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser  ./$ub/lf-sl_herlihy" $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
 	    done;
 	done;
     done;
