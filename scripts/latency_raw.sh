@@ -35,11 +35,9 @@ do
     get=$(echo "$out" | awk '/#latency_get/ {$1=""; print}' | tr , '\n');
     put=$(echo "$out" | awk '/#latency_put/ {$1=""; print}' | tr , '\n');
     rem=$(echo "$out" | awk '/#latency_rem/ {$1=""; print}' | tr , '\n');
-
     echo "$get" > $tmp_get;
     echo "$put" > $tmp_put;
     echo "$rem" > $tmp_rem;
-
     pr  -m -t $tmp_get $tmp_put $tmp_rem | awk 'NF' > $tmp_p;
 done;
 
@@ -48,8 +46,8 @@ for i in $(seq 1 1 $progs_num);
 do
     tmps="$tmps $(get_tmp $tmp_template $i)";
 done;
-echo $tmps;
-paste $tmps | column -t;
+
+paste $(echo "$tmps") | column -t;
 
 echo "";
 

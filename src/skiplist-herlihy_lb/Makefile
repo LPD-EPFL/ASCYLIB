@@ -4,9 +4,8 @@ include $(ROOT)/common/Makefile.common
 
 ALGO_O = herlihy.o
 ALGO_C = herlihy.c
-ALGO_SUFFIX = "_herlihy"
 
-BINS = "$(BINDIR)/lb-sl$(ALGO_SUFFIX)$(BIN_SUFFIX)"
+BINS = "$(BINDIR)/lb-sl_herlihy$(BIN_SUFFIX)"
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
