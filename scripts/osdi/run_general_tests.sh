@@ -6,7 +6,7 @@ cores="all"
 res_type=0
 
 uname=$(uname -n);
-ub="bin/$un";
+ub="bin/$uname";
 if [ ! -d "$ub" ];
 then
     mkdir $ub;
