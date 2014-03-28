@@ -29,7 +29,7 @@ source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
 
-ll_algos="./${ub}/lb-ll_lazy ./${ub}/lb-ll_coupling ./${ub}_lb-ll_pugh ./${ub}/lb-ll_copy ./${ub}/lf-ll_harris ./${ub}/lf-ll_harris_opt ./${ub}/lf-ll_michael"
+ll_algos="./${ub}/lb-ll_lazy ./${ub}/lb-ll_coupling ./${ub}/lb-ll_pugh ./${ub}/lb-ll_copy ./${ub}/lf-ll_harris ./${ub}/lf-ll_harris_opt ./${ub}/lf-ll_michael"
 do_ll=1
 sl_algos="./${ub}/lb-sl_herlihy ./${ub}/lb-sl_pugh ./${ub}/lf-sl"
 do_sl=1
