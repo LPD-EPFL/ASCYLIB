@@ -10,3 +10,6 @@ updates="5 10 20";
 cores="two";
 
 COMPILE_FLAGS="SET_CPU=0"
+
+skip_thr=1;
+skip_lat=1;
