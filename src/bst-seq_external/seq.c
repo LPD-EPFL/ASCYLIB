@@ -28,23 +28,22 @@ seq_delete(intset_t* set, skey_t key)
 	}
     }
 
-  if (!curr || curr->key != key)
+  if (curr && curr->key == key)
     {
-      return 0;
+      if (pred->left == curr)
+	{
+	  pred->left = NULL;
+	}
+      else
+	{
+	  pred->right = NULL;
+	}
+
+      node_delete(curr);
+      return curr->val;
     }
 
-  if (pred->left == curr)
-    {
-      pred->left = NULL;
-    }
-  else
-    {
-      pred->right = NULL;
-    }
-
-  node_delete(curr);
-
-  return 1;
+  return 0;
 }
 
 sval_t

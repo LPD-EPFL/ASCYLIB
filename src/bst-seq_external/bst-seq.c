@@ -79,9 +79,13 @@ node_size(node_t* n)
     {
       return 0;
     }
+  else if (n->leaf != 0)
+    {
+      return 1;
+    }
   else
     {
-      return !n->leaf + node_size(n->left) + node_size(n->right);
+      return node_size(n->left) + node_size(n->right);
     }
 }
 
