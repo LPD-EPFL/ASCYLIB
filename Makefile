@@ -6,7 +6,7 @@ LFBENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/h
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 NOISE = src/noise
 TESTS = src/tests
-BSTS = src/bst-seq_internal src/bst-seq_external src/bst-lock2 src/bst-drachsler src/bst src/bst-howley src/bst-aravind
+BSTS = src/bst-lock2 src/bst-drachsler src/bst src/bst-howley src/bst-aravind
 
 .PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS) $(SEQBENCHS)
 
@@ -30,7 +30,7 @@ hticket:
 clh:
 	$(MAKE) "LOCK=CLH" $(LBENCHS)
 
-bst:
+bst:	seqbstint seqbstext
 	$(MAKE) "LOCK=TAS" $(BSTS)
 
 sequential:
