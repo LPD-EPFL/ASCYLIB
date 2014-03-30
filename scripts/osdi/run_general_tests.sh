@@ -6,11 +6,11 @@ cores="all"
 res_type=0
 
 uname=$(uname -n);
-ub="bin/$uname";
-if [ ! -d "$ub" ];
-then
-    mkdir $ub;
-fi;
+ub="bin";
+#if [ ! -d "$ub" ];
+#then
+    #mkdir $ub;
+#fi;
 
 rm bin/*
 if [ $uname = "ol-collab1" ];
