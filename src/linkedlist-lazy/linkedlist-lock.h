@@ -51,7 +51,7 @@
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct node_l
+typedef struct node_l
 {
   skey_t key;
   sval_t val;
@@ -59,7 +59,7 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct node_l
   uint8_t marked;
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;
-  #endif
+#endif
   /* char padding[40]; */
 } node_l_t;
 

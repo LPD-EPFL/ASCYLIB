@@ -378,12 +378,6 @@ main(int argc, char **argv)
 
   get_rate = 1 - update_rate;
 
-  /* printf("num_threads = %u\n", num_threads); */
-  /* printf("cap: = %u\n", num_buckets); */
-  /* printf("num elem = %u\n", num_elements); */
-  /* printf("filing rate= %f\n", filling_rate); */
-  /* printf("update = %f (putting = %f)\n", update_rate, put_rate); */
-
 
   rand_max = range - 1;
     
