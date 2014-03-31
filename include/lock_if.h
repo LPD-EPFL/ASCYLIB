@@ -84,7 +84,7 @@ tas_unlock(ptlock_t* l)
 #if defined(__tile__) 
   MEM_BARRIER;
 #endif
-  COMPILER_BARRIER(*l = TAS_FREE;);
+  COMPILER_NO_REORDER(*l = TAS_FREE;);
   return 0;
 }
 
@@ -183,7 +183,7 @@ ticket_trylock(volatile ptlock_t* l)
 
   if (tp->curr == tp->ticket)
     {
-      COMPILER_BARRIER(uint64_t tc_old = tc;);
+      COMPILER_NO_REORDER(uint64_t tc_old = tc;);
       tp->ticket++;
       return CAS_U64((uint64_t*) l, tc_old, tc) == tc_old;
     }
@@ -200,7 +200,7 @@ ticket_unlock(volatile ptlock_t* l)
   MEM_BARRIER;
 #endif
   PREFETCHW(l);
-  COMPILER_BARRIER(l->curr++;);
+  COMPILER_NO_REORDER(l->curr++;);
   return 0;
 }
 
