@@ -147,6 +147,8 @@ test(void* thread)
   ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, ID);
 #endif
 
+  RR_INIT(phys_id);
+
   uint64_t key;
 
   node_t* node = NULL;
@@ -406,9 +408,6 @@ main(int argc, char **argv)
 	case 'l':
 	  load_factor = atoi(optarg);
 	  break;
-	/* case 'b': */
-	/*   num_buckets_param = atoi(optarg); */
-	/*   break; */
 	case 'v':
 	  print_vals_num = atoi(optarg);
 	  break;
@@ -465,12 +464,6 @@ main(int argc, char **argv)
     }
 
   get_rate = 1 - update_rate;
-
-  /* printf("num_threads = %u\n", num_threads); */
-  /* printf("cap: = %u\n", num_buckets); */
-  /* printf("num elem = %u\n", num_elements); */
-  /* printf("filing rate= %f\n", filling_rate); */
-  /* printf("update = %f (putting = %f)\n", update_rate, put_rate); */
 
 
   rand_max = range - 1;
@@ -537,8 +530,8 @@ main(int argc, char **argv)
   barrier_cross(&barrier_global);
   gettimeofday(&start, NULL);
   nanosleep(&timeout, NULL);
-
   stop = 1;
+
   gettimeofday(&end, NULL);
   duration = (end.tv_sec * 1000 + end.tv_usec / 1000) - (start.tv_sec * 1000 + start.tv_usec / 1000);
     
@@ -633,8 +626,8 @@ main(int argc, char **argv)
   double eop = (1e6 * s.power_total[NUMBER_OF_SOCKETS]) / throughput;
   double eop_corrected = (1e6 * pow_tot_corrected) / throughput;
   printf("#Energy per Operation                      : %11f (corrected = %10f) uJ\n", eop, eop_corrected);
-#endif    
-    
+#endif        
+
   pthread_exit(NULL);
     
   return 0;
