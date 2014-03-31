@@ -195,7 +195,9 @@ harris_insert(intset_t *set, skey_t key, sval_t val)
 	{
 	  newnode->next = right_node;
 	}
-
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
       if (ATOMIC_CAS_MB(&left_node->next, right_node, newnode))
 	return 1;
     } 
