@@ -23,5 +23,5 @@ do
     printf "%-10d%-10.2f %f %f \n" $thr $ppw $pow $eop >> $tmp;
 done;
 
-sort -n $tmp | head -n1;
+sort -n $tmp | grep -v "-" | head -n1;
 

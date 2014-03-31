@@ -20,10 +20,10 @@ do
     ppw=$(echo "$thr/$pow" | bc -l);
     eop=$(echo "$out" | awk '/#Energy per Operation/ { print $8 }' | sed 's/)//g');
 
-    printf "%-10d%-10.2f %f %f \n" $thr $ppw $pow $eop >> $tmp;
+    printf "%d %.2f %f %f \n" $thr $ppw $pow $eop >> $tmp;
 done;
 
 med_idx=$(echo "1 + $reps/2" | bc);
-sort -n $tmp | head -${med_idx} | tail -n1;
+sort -n $tmp | grep -v "-" | head -${med_idx} | tail -n1;
 
 

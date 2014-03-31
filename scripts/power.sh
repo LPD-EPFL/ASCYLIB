@@ -41,7 +41,7 @@ params="$@";
 
 print_n "#   " "%-46s" "$progs" "\n"
 
-print_rep "#co " $progs_num "Thrput     Thrput/W   Power      uJ/op        " "\n";
+print_rep "#co " $progs_num "Thrput     Thrput/W     Power      uJ/op        " "\n";
 
 d=0;
 for c in 1 $cores
@@ -61,7 +61,7 @@ do
     do
 	i=$(($i+1));
 	res=$($run_script ./$p $params -n$c);
-	printf "%-11d%-10.2f%-12.6f%-13.6f" $res
+	printf "%-11d%-12.2f%-12.6f%-13.6f" $res
     done;     
     echo "";
 done;
