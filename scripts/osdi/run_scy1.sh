@@ -72,12 +72,21 @@ else
 fi;
 printf " / ";
 
+if [ "${LATENCY_MERGE}0" -eq 10 ];
+then
+    ldi_print="merged";
+    ldi_script=./scripts/latency_raw.sh
+else
+    ldi_print="seprte";
+    ldi_script=./scripts/latency_raw_suc.sh
+fi;
+
 do_ldi=1;
 if [ "${skip_ldi}0" -eq 10 ];
 then
     do_ldi=0;
 else
-    printf "  LATENCY DISTRIBUTION";
+    printf "  LATENCY DISTRIBUTION ($ldi_print)";
 fi;
 printf " / ";
 
@@ -170,7 +179,7 @@ then
 		params="-i$i -r$r -u$u -d$duration";
 		dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/scalability_rep8.sh "$cores" $reps $keep ./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params | tee $dat; 
+		./scripts/scalability_rep.sh "$cores" $reps $keep "./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -192,7 +201,7 @@ then
 		params="-i$i -r$r -u$u -d$duration";
 		dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/scalability_rep9.sh "$cores" $reps $keep ./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht $params | tee $dat; 
+		./scripts/scalability_rep.sh "$cores" $reps $keep "./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -265,7 +274,7 @@ then
 		params="-i$i -r$r -u$u -d$duration";
 		dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep8.sh "$cores" $reps $keep ./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params | tee $dat; 
+		./scripts/latency_rep.sh "$cores" $reps $keep "./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -287,7 +296,7 @@ then
 		params="-i$i -r$r -u$u -d$duration";
 		dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep9.sh "$cores" $reps $keep ./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht $params | tee $dat; 
+		./scripts/latency_rep.sh "$cores" $reps $keep "./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -363,7 +372,7 @@ then
 		    params="-n$c -i$i -r$r -u$u -d$duration";
 		    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		    echo "~~~~~~~~ $params @ $dat";
-		    ./scripts/latency_raw_suc8.sh $c ./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32;
+		    ${ldi_script} $c "./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt" $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32;
 		done;
 	    done;
 	done;
@@ -388,7 +397,7 @@ then
 		    params="-n$c -i$i -r$r -u$u -d$duration";
 		    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		    echo "~~~~~~~~ $params @ $dat";
-		    ./scripts/latency_raw_suc9.sh $c ./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
+		    ${ldi_script} $c "./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb" ./$ub/lf-ht $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
 		done;
 	    done;
 	done;
@@ -413,7 +422,7 @@ then
 		    params="-n$c -i$i -r$r -u$u -d$duration";
 		    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		    echo "~~~~~~~~ $params @ $dat";
-		    ./scripts/latency_raw_suc.sh $c "./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser  ./$ub/lf-sl_herlihy" $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
+		    ${ldi_script} $c "./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser  ./$ub/lf-sl_herlihy" $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
 		done;
 	    done;
 	done;
@@ -438,7 +447,7 @@ then
 		    params="-n$c -i$i -r$r -u$u -d$duration";
 		    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		    echo "~~~~~~~~ $params @ $dat";
-		    ./scripts/latency_raw_suc.sh $c "./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst2 ./$ub/lb-bst-drachsler ./$ub/lf-bst  ./$ub/lf-bst-howley ./$ub/lf-bst-aravind" $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
+		    ${ldi_script} $c "./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst2 ./$ub/lb-bst-drachsler ./$ub/lf-bst  ./$ub/lf-bst-howley ./$ub/lf-bst-aravind" $params -v$LATENCY_POINTS -f$LATENCY_POINTS | tee $dat | head -n32; 
 		done;
 	    done;
 	done;
