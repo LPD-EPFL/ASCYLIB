@@ -608,6 +608,8 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
       tmc_task_die("tmc_cpus_set_my_cpu() failed."); 
     }    
 #  else
+    cpu %= (NUMBER_OF_SOCKETS * CORES_PER_SOCKET);
+
     cpu_set_t mask;
     CPU_ZERO(&mask);
     CPU_SET(cpu, &mask);
