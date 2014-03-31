@@ -101,11 +101,13 @@ typedef struct ticket_st ptlock_t;
 #  define INIT_LOCK(lock)				ticket_init((volatile ptlock_t*) lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					ticket_lock((volatile ptlock_t*) lock)
+#  define TRYLOCK(lock)					ticket_trylock((volatile ptlock_t*) lock)
 #  define UNLOCK(lock)					ticket_unlock((volatile ptlock_t*) lock)
 /* GLOBAL lock */
 #  define GL_INIT_LOCK(lock)				ticket_init((volatile ptlock_t*) lock)
 #  define GL_DESTROY_LOCK(lock)			
 #  define GL_LOCK(lock)					ticket_lock((volatile ptlock_t*) lock)
+#  define GL_TRYLOCK(lock)				ticket_trylock((volatile ptlock_t*) lock)
 #  define GL_UNLOCK(lock)				ticket_unlock((volatile ptlock_t*) lock)
 
 static inline void
@@ -171,6 +173,24 @@ ticket_lock(volatile ptlock_t* l)
 
 #endif
   return 0;
+}
+
+static inline uint32_t
+ticket_trylock(volatile ptlock_t* l)
+{
+  volatile uint64_t tc = *(volatile uint64_t*) l;
+  volatile struct ticket_st* tp = (volatile struct ticket_st*) &tc;
+
+  if (tp->curr == tp->ticket)
+    {
+      COMPILER_BARRIER(uint64_t tc_old = tc;);
+      tp->ticket++;
+      return CAS_U64((uint64_t*) l, tc_old, tc) == tc_old;
+    }
+  else
+    {
+      return 0;
+    }
 }
 
 static inline uint32_t
