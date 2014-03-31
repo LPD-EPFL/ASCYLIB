@@ -1,3 +1,10 @@
+#ifndef _RAPL_READ_H_
+#define _RAPL_READ_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -17,35 +24,35 @@
 #if RAPL_READ_ENABLE != 1
 
 /* initialize the library */
-#  define RR_INIT(core)
+#define RR_INIT(core)
 /* start ALL measurements. Only the responsible (for each socket) core actually does
    measurements. */
-#  define RR_START()			
+#define RR_START()			
 /* stop ALL measurements and update statistics. Only the responsible (for each socket) 
    core actually does measurements. */
-#  define RR_STOP()				
+#define RR_STOP()				
 /* start some measurements (i.e., package, pp0, and dram). Only the responsible 
    (for each socket) core actually does  measurements. */
-#  define RR_START_SIMPLE()			
+#define RR_START_SIMPLE()			
 /* stop some measurements (i.e., package, pp0, and dram) and update the statistics. 
    Only the responsible  (for each socket) core actually does  measurements. */
-#  define RR_STOP_SIMPLE()			
+#define RR_STOP_SIMPLE()			
 /* start some measurements (i.e., package, pp0, and dram), w/o checking if the core
    is the responsible for taking the measurements. To be used, for instance, when
    a main thread takes the measurements for a sockets. */
-#  define RR_START_UNPROTECTED()			
+#define RR_START_UNPROTECTED()			
 /* stop some measurements (i.e., package, pp0, and dram) and update the statistics,
    w/o checking if the core is the responsible for taking the measurements. */
-#  define RR_STOP_UNPROTECTED()			
+#define RR_STOP_UNPROTECTED()			
 /* print the current statistics with `detailed` level of details (only the responsible
    core for printing)*/
-#  define RR_PRINT(detailed)			
+#define RR_PRINT(detailed)			
 /* print the current statistics with `detailed` level of details */
-#  define RR_PRINT_UNPROTECTED(detailed)			
+#define RR_PRINT_UNPROTECTED(detailed)			
 /* terminate the rapl_read library */
-#  define RR_TERM()				
+#define RR_TERM()				
 /* generate stats and store them in s (rapl_stats_t*) */
-#  define RR_STATS(s)				
+#define RR_STATS(s)				
 
 #else  /* RAPL_READ_ENABLE *********************************************************/
 
@@ -200,4 +207,11 @@ typedef uint64_t rapl_read_ticks;
   static inline rapl_read_ticks rapl_read_getticks(){
     return get_cycle_count();
   }
+
 #endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif	/* _RAPL_READ_H_ */
