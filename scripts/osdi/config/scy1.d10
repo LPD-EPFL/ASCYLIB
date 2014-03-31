@@ -8,3 +8,9 @@ duration=10;
 initials="8192";
 updates="0 1 10 20 50";
 cores="socket";
+
+skip_thr=1;
+skip_lat=1;
+skip_ldi=1;
+
+COMPILE_FLAGS="POWER=1"

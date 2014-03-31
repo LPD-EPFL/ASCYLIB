@@ -9,6 +9,7 @@ initials="1024 4096 8192";
 updates="5 10 20";
 cores="two";
 
+COMPILE_FLAGS="SET_CPU=0"
+
 skip_thr=1;
 skip_lat=1;
-skip_ldi=1;
