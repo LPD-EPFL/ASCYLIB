@@ -3,7 +3,7 @@ MAKE=make
 cores="all"
 
 #0 - median; 1 - max; 2 - min; 3 - avg
-res_type=0
+res_type=1
 
 uname=$(uname -n);
 ub="bin";
@@ -74,13 +74,13 @@ compute_val() {
             thr=${array1[mid]}
         fi
         echo $thr
-    elif [ ${res_type} -eq 1]; then
+    elif [ ${res_type} -eq 1 ]; then
         #max
         echo ${array1[${#array1[@]}-1]}
-    elif [ ${res_type} -eq 2]; then
+    elif [ ${res_type} -eq 2 ]; then
         #min
         echo ${array[0]}
-    elif [ ${res_type} -eq 3]; then
+    elif [ ${res_type} -eq 3 ]; then
         #avg
         total=$( IFS="+"; bc <<< "${array1[*]}" )
         thr=$(echo "$total/${#array1[@]}" | bc -l);
