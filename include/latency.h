@@ -15,6 +15,8 @@
 #ifdef __tile__
 #include <arch/atomic.h>
 #define LFENCE arch_atomic_read_barrier()
+#elif defined(__sparc__)
+#define LFENCE  asm volatile("membar #LoadLoad"); 
 #else 
 #define LFENCE asm volatile ("lfence")
 #endif
