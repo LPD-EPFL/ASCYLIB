@@ -31,7 +31,7 @@ clh:
 	$(MAKE) "LOCK=CLH" $(LBENCHS)
 
 bst:	seqbstint seqbstext
-	$(MAKE) "LOCK=TAS" $(BSTS)
+	$(MAKE) "LOCK=TICKET" $(BSTS)
 
 sequential:
 	$(MAKE) "STM=SEQUENTIAL" "GC=0" $(SEQBENCHS)
@@ -64,7 +64,7 @@ tests:
 	$(MAKE) $(TESTS)
 
 tbb:
-	$(MAKE) "LOCK=TAS" src/hashtable-tbb
+	$(MAKE) "LOCK=TICKET" src/hashtable-tbb
 
 lfsl:
 	$(MAKE) "STM=LOCKFREE" src/skiplist
@@ -76,10 +76,10 @@ lfsl_herlihy_lf:
 	$(MAKE) "STM=LOCKFREE" src/skiplist-herlihy_lf
 
 lbsl_pugh:
-	$(MAKE) "LOCK=TAS" src/skiplist-pugh
+	$(MAKE) "LOCK=TICKET" src/skiplist-pugh
 
 lbsl_herlihy_lb:
-	$(MAKE) "LOCK=TAS" src/skiplist-herlihy_lb
+	$(MAKE) "LOCK=TICKET" src/skiplist-herlihy_lb
 
 sl:	seqsl lfsl_fraser lfsl_herlihy_lf lbsl_pugh lbsl_herlihy_lb
 
@@ -105,49 +105,49 @@ lfll: lfll_harris lfll_michael lfll_harris_opt
 ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy
 
 lbhtgl:
-	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lock
+	$(MAKE) "LOCK=TICKET" "G=GL" src/hashtable-lock
 
 lbht:
-	$(MAKE) "LOCK=TAS" src/hashtable-lock
+	$(MAKE) "LOCK=TICKET" src/hashtable-lock
 
 lbht_coupling:
-	$(MAKE) "LOCK=TAS" src/hashtable-coupling
+	$(MAKE) "LOCK=TICKET" src/hashtable-coupling
 
 lbht_pugh:
-	$(MAKE) "LOCK=TAS" src/hashtable-pugh
+	$(MAKE) "LOCK=TICKET" src/hashtable-pugh
 
 lbht_lazy:
-	$(MAKE) "LOCK=TAS" src/hashtable-lazy
+	$(MAKE) "LOCK=TICKET" src/hashtable-lazy
 
 lbht_coupling_gl:
-	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-coupling
+	$(MAKE) "LOCK=TICKET" "G=GL" src/hashtable-coupling
 
 lbht_pugh_gl:
-	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-pugh
+	$(MAKE) "LOCK=TICKET" "G=GL" src/hashtable-pugh
 
 lbht_lazy_gl:
-	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lazy
+	$(MAKE) "LOCK=TICKET" "G=GL" src/hashtable-lazy
 
 lbll_coupling:
-	$(MAKE) "LOCK=TAS" src/linkedlist-coupling
+	$(MAKE) "LOCK=TICKET" src/linkedlist-coupling
 
 lbll_pugh:
-	$(MAKE) "LOCK=TAS" src/linkedlist-pugh
+	$(MAKE) "LOCK=TICKET" src/linkedlist-pugh
 
 lbll_lazy:
-	$(MAKE) "LOCK=TAS" src/linkedlist-lazy
+	$(MAKE) "LOCK=TICKET" src/linkedlist-lazy
 
 lbll:
-	$(MAKE) "LOCK=TAS" src/linkedlist-lock
+	$(MAKE) "LOCK=TICKET" src/linkedlist-lock
 
 lbllclh:
-	$(MAKE) "LOCK=TAS" src/linkedlist-lock
+	$(MAKE) "LOCK=TICKET" src/linkedlist-lock
 
 llcopy:
 	$(MAKE) "LOCK=CLH" src/linkedlist-copy
 
 htcopy:
-	$(MAKE) "LOCK=TAS" src/hashtable-copy
+	$(MAKE) "LOCK=TICKET" src/hashtable-copy
 
 htcopygl:
 	$(MAKE) "LOCK=CLH" "G=GL" src/hashtable-copy
@@ -156,13 +156,13 @@ lfht:
 	$(MAKE) "STM=LOCKFREE" src/hashtable
 
 lbsl:
-	$(MAKE) "LOCK=TAS" src/skiplist-lock
+	$(MAKE) "LOCK=TICKET" src/skiplist-lock
 
 htjava:
-	$(MAKE) "LOCK=TAS" src/hashtable-java
+	$(MAKE) "LOCK=TICKET" src/hashtable-java
 
 htrcu:
-	$(MAKE) "LOCK=TAS" src/hashtable-rcu
+	$(MAKE) "LOCK=TICKET" src/hashtable-rcu
 
 ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl
 

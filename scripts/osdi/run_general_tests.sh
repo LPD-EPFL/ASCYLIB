@@ -17,11 +17,11 @@ if [ $uname = "ol-collab1" ];
 then
     MAKE=gmake
 fi;
-if [ $# -le 1 ];		# pass any param to avoid compilation
+if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
-    LATENCY=1 INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k tas
-    LATENCY=1 INIT=one $MAKE LBSL=pugh -k tas
-    LATENCY=1 INIT=one $MAKE -k tas
+    LATENCY=1 INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k ticket
+    LATENCY=1 INIT=one $MAKE LBSL=pugh -k ticket
+    LATENCY=1 INIT=one $MAKE -k ticket
     LATENCY=1 INIT=one $MAKE -k seq
     LATENCY=1 INIT=one $MAKE -k lockfree
 fi
