@@ -133,6 +133,7 @@ ifeq ($(PC_NAME), parsasrv1.epfl.ch)
 endif
 
 ifeq ($(PC_NAME), lpd48core)
+    CC = gcc-4.8
     CFLAGS += -DOPTERON -DPLATFORM_MCORE 
     PLATFORM_NUMA = 1
 endif
