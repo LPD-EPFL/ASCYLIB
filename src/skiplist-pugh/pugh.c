@@ -90,6 +90,9 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   LOCK(ND_GET_LOCK(n));
 
   n->next[0] = pred->next[0];	/* we already hold the lock for lvl 0 */
+#ifdef __tile__ 
+      MEM_BARRIER;
+#endif
   pred->next[0] = n;
   UNLOCK(ND_GET_LOCK(pred));
 
@@ -97,6 +100,9 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
     {
       pred = get_lock(update[lvl], key, lvl);
       n->next[lvl] = pred->next[lvl];
+#ifdef __tile__
+      MEM_BARRIER;
+#endif
       pred->next[lvl] = n;
       UNLOCK(ND_GET_LOCK(pred));
     }  
