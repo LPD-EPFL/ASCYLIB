@@ -65,6 +65,9 @@ sl_add(sl_intset_t *set, skey_t key, sval_t val)
       for (i = 0; i < l; i++) 
 	{
 	  node->next[i] = succs[i];
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
 	  preds[i]->next[i] = node;
 	}
     }
