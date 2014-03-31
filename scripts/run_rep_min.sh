@@ -17,5 +17,11 @@ do
     $run_script  ./$prog $params | grep "#txs" | cut -d'(' -f2 | cut -d. -f1 >> $tmp;
 done;
 
-sort -n $tmp | head -n1;
+HEAD=head;
+if [ "$(uname -n)" = ol-collab1 ];
+then
+    HEAD=/usr/gnu/bin/head
+fi;
+
+sort -n $tmp | ${HEAD} -n1;
 

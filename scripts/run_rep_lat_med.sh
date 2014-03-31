@@ -20,6 +20,14 @@ do
     printf "%-10d%-10d%-10d%-10d%-10d%-10d%-10d\n" $thr $lat >> $tmp;
 done;
 
+HEAD=head;
+TAIL=tail;
+if [ "$(uname -n)" = ol-collab1 ];
+then
+    HEAD=/usr/gnu/bin/head
+    TAIL=/usr/gnu/bin/tail
+fi;
+
 med_idx=$(echo "1 + $reps/2" | bc);
-sort -n $tmp | head -${med_idx} | tail -n1 | awk '{$1=""; print}';
+sort -n $tmp | ${HEAD} -${med_idx} | ${TAIL} -n1 | awk '{$1=""; print}';
 

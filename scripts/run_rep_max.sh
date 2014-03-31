@@ -17,5 +17,11 @@ do
     $run_script ./$prog $params | grep "#txs" | cut -d'(' -f2 | cut -d. -f1 >> $tmp;
 done;
 
-sort -n $tmp | tail -n1;
+TAIL=tail;
+if [ "$(uname -n)" = ol-collab1 ];
+then
+    TAIL=/usr/gnu/bin/tail
+fi;
+
+sort -n $tmp | ${TAIL} -n1;
 

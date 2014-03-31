@@ -20,5 +20,11 @@ do
     printf "%-10d%-10d%-10d%-10d%-10d%-10d%-10d\n" $thr $lat >> $tmp;
 done;
 
-sort -n $tmp | head -n1 | awk '{$1=""; print}';
+TAIL=tail;
+if [ "$(uname -n)" = ol-collab1 ];
+then
+    TAIL=/usr/gnu/bin/tail
+fi;
+
+sort -n $tmp | ${TAIL} -n1 | awk '{$1=""; print}';
 
