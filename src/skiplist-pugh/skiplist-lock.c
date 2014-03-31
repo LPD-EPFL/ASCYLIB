@@ -2,23 +2,10 @@
  * File:
  *   skiplist-lock.c
  * Author(s):
- *   Vincent Gramoli <vincent.gramoli@epfl.ch>
+ *   Vasileios Trigonakis
  * Description:
  *   Skip list implementation of an integer set
  *
- * Copyright (c) 2009-2010.
- *
- * skiplist-lock.c is part of Synchrobench
- * 
- * Synchrobench is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation, version 2
- * of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
  */
 
 #include "skiplist-lock.h"

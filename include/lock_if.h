@@ -81,10 +81,10 @@ tas_trylock(ptlock_t* l)
 static inline uint32_t
 tas_unlock(ptlock_t* l)
 {
-#if defined(__tile__)
+#if defined(__tile__) 
   MEM_BARRIER;
 #endif
-  *l = TAS_FREE;
+  COMPILER_BARRIER(*l = TAS_FREE;);
   return 0;
 }
 
@@ -180,7 +180,7 @@ ticket_unlock(volatile ptlock_t* l)
   MEM_BARRIER;
 #endif
   PREFETCHW(l);
-  l->curr++;
+  COMPILER_BARRIER(l->curr++;);
   return 0;
 }
 

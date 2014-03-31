@@ -76,6 +76,13 @@ extern "C" {
 #  define ALIGNED(N)
 #endif
 
+#if !defined(COMPILER_BARRIER)
+#  define COMPILER_BARRIER(exec)		\
+  asm volatile ("" ::: "memory");		\
+  exec;						\
+  asm volatile ("" ::: "memory");
+#endif
+
   static inline int
   is_power_of_two (unsigned int x) 
   {
@@ -586,9 +593,9 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
   void set_cpu(int cpu) 
   {
 #ifndef NO_SET_CPU
-#ifdef __sparc__
+#  ifdef __sparc__
     processor_bind(P_LWPID,P_MYID, cpu, NULL);
-#elif defined(__tile__)
+#  elif defined(__tile__)
     if (cpu>=tmc_cpus_grid_total()) {
       perror("Thread id too high");
     }
@@ -596,19 +603,19 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     if (tmc_cpus_set_my_cpu(cpu)<0) {
       tmc_task_die("tmc_cpus_set_my_cpu() failed."); 
     }    
-#else
+#  else
     cpu_set_t mask;
     CPU_ZERO(&mask);
     CPU_SET(cpu, &mask);
-#  if defined(PLATFORM_NUMA)
+#    if defined(PLATFORM_NUMA)
     numa_set_preferred(get_cluster(cpu));
-#  endif
+#    endif
     pthread_t thread = pthread_self();
     if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &mask) != 0) 
       {
 	fprintf(stderr, "Error setting thread affinity\n");
       }
-#endif
+#  endif
 #endif
   }
 
