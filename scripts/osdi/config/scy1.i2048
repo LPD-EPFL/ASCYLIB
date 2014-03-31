@@ -1,0 +1,13 @@
+cores_lat_dist="1 10 20 80";
+LATENCY_TYPE=3			# 2 or 3
+LATENCY_POINTS=512
+LATENCY_MERGE=1
+
+reps=1;
+keep=max 			# min, median, or max
+duration=300;
+initials="2048";
+updates="5";
+cores="to256fast";
+
+COMPILE_FLAGS="SET_CPU=0"
