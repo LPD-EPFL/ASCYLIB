@@ -148,7 +148,7 @@ extern "C" {
 
 #define SSPFD_PRINT(args...) printf("[%02lu] ", sspfd_get_id()); printf(args); printf("\n"); fflush(stdout)
 
-typedef uint64_t ticks;
+//typedef uint64_t ticks;
 
 #if !defined(_GETTICKS_H_) && !defined(_H_GETTICKS_)
 #  if defined(__i386__)

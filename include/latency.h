@@ -12,6 +12,13 @@
 #endif
 #include "sspfd.h"
 
+#ifdef __tile__
+#include <arch/atomic.h>
+#define LFENCE arch_atomic_read_barrier()
+#else 
+#define LFENCE asm volatile ("lfence")
+#endif
+
 #if !defined(COMPUTE_LATENCY)
 #  define START_TS(s)
 #  define END_TS(s, i)
@@ -23,7 +30,7 @@
 #  define START_TS(s)				\
     asm volatile ("");				\
     start_acq = getticks();			\
-    asm volatile ("lfence");
+    LFENCE;
 #  define END_TS(s, i)				\
     asm volatile ("");				\
     end_acq = getticks();			\
@@ -48,14 +55,14 @@
 #  define PF_INIT(s, e, id) SSPFDINIT(PF_NUM_STORES, e, id)
 
 #  if LATENCY_ALL_CORES == 0
-#    define START_TS(s)      SSPFDI_ID_G(0); asm volatile ("lfence");
+#    define START_TS(s)      SSPFDI_ID_G(0); LFENCE;
 #    define END_TS(s, i)     SSPFDO_ID_G(s, i & pf_vals_num, 0)
 #    define END_TS_ELSE(s, i, inc)     else { SSPFDO_ID_G(s, (i) & pf_vals_num, 0); }
 
 #    define ADD_DUR(tar) 
 #    define ADD_DUR_FAIL(tar)
 #  else
-#    define START_TS(s)      SSPFDI_G(); asm volatile ("lfence");
+#    define START_TS(s)      SSPFDI_G(); LFENCE;
 #    define END_TS(s, i)     SSPFDO_G(s, i & pf_vals_num)
 #    define END_TS_ELSE(s, i, inc)     else { SSPFDO_G(s, (i) & pf_vals_num); }
 
