@@ -228,6 +228,18 @@ then
     else
 	cores=$(seq 6 6 48);
     fi;
+elif [ "$cores" = "to64" ];
+then
+    if [ $unm = "lpdxeon2680" ];
+    then
+	cores="$(seq 2 2 40) $(seq 44 4 64)";
+    fi;
+elif [ "$cores" = "to64fast" ];
+then
+    if [ $unm = "lpdxeon2680" ];
+    then
+	cores="$(seq 4 4 64)";
+    fi;
 elif [ "$cores" = "twelve" ];
 then
     cores=$(seq 2 1 12);
