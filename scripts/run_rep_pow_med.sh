@@ -24,6 +24,7 @@ do
 done;
 
 med_idx=$(echo "1 + $reps/2" | bc);
-sort -n $tmp | grep -v "-" | head -${med_idx} | tail -n1;
+sort -n -k4 $tmp | grep -v "-" | head -${med_idx} | tail -n1;
+
 
 
