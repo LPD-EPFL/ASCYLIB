@@ -5,4 +5,4 @@ shift;
 progs=$1;
 shift;
 
-./scripts/scalability_rep.sh $cores 1 max "$progs" $@
+./scripts/scalability_rep.sh "$cores" 1 max "$progs" $@
