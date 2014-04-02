@@ -3,20 +3,18 @@
 config_workload=./scripts/osdi/config/scy1.long
 config_execs=./scripts/osdi/config/all
 
-# example configuration ###################################
+un=$(uname -n);
+ub="bin/$un";
+if [ ! -d "$ub" ];
+then
+    mkdir $ub;
+fi;
 
-# cores_lat_dist="5 10 20"; 
-# LATENCY_TYPE=3			# 2 or 3
-# LATENCY_POINTS=128
-# reps=3;
-# keep=median 			# min, median, or max
-# duration=500;
-# initials="1024 4096 8192";
-# updates="0 1 10 20 50";
-# cores="three";
-# skip_thr=1;
-# skip_lat=1;
-
+# default data structures
+lls="./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt";
+hts="./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht";
+sls="./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser  ./$ub/lf-sl_herlihy";
+bsts="./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst2 ./$ub/lb-bst-drachsler ./$ub/lf-bst  ./$ub/lf-bst-howley ./$ub/lf-bst-aravind";
 
 if [ $# -gt 0 ];
 then
@@ -41,19 +39,18 @@ then
     fi;
 fi;
 
+out_folder=data;
+
 source ${config_workload};
 source ${config_execs};
 
-out_folder=data;
-
-un=$(uname -n);
-ub="bin/$un";
-if [ ! -d "$ub" ];
+if [ "${SCY}0" = "0" ];
 then
-    mkdir $ub;
+    SCY=scy1;
 fi;
 
-printf "## Will do measurements for         : ";
+printf "## Will do measurements for         : $SCY\n";
+printf "## Will measure                     : ";
 
 metrics=3;
 if [ "${skip_thr}0" -eq 10 ];
@@ -128,10 +125,14 @@ echo "";
 
 
 # estimate the time to execute the experiment
-ll_num=$((8*$do_ll));
-ht_num=$((9*$do_ht));
-sl_num=$((5*$do_sl));
-bst_num=$((7*$do_bst));
+lln=$(echo "$lls" | wc -w);
+ll_num=$(($lln*$do_ll));
+htn=$(echo "$hts" | wc -w);
+ht_num=$(($htn*$do_ht));
+sln=$(echo "$sls" | wc -w);
+sl_num=$(($sln*$do_sl));
+bstn=$(echo "$bsts" | wc -w);
+bst_num=$(($bstn*$do_bst));
 exec_num=$((${ll_num}+${ht_num}+${sl_num}+${bst_num}));
 echo "## Number of executables            : $exec_num";
 
@@ -185,9 +186,9 @@ fi;
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.pow.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.pow.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/power.sh "$cores_pow" $reps $keep "./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt" $params | tee $dat; 
+		./scripts/power.sh "$cores_pow" $reps $keep "$lls" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -207,9 +208,9 @@ fi;
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.pow.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.pow.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/power.sh "$cores_pow" $reps $keep "./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht" $params | tee $dat; 
+		./scripts/power.sh "$cores_pow" $reps $keep "$hts" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -228,9 +229,9 @@ fi;
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.pow.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.pow.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/power.sh "$cores_pow" $reps $keep "./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser ./$ub/lf-sl_herlihy" $params | tee $dat; 
+		./scripts/power.sh "$cores_pow" $reps $keep "$sls" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -249,9 +250,9 @@ fi;
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.pow.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.pow.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/power.sh "$cores_pow" $reps $keep "./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst2 ./$ub/lb-bst-drachsler ./$ub/lf-bst  ./$ub/lf-bst-howley ./$ub/lf-bst-aravind" $params | tee $dat; 
+		./scripts/power.sh "$cores_pow" $reps $keep "$bsts" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -280,9 +281,9 @@ then
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.thr.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/scalability_rep.sh "$cores" $reps $keep "./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt" $params | tee $dat; 
+		./scripts/scalability_rep.sh "$cores" $reps $keep "$lls" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -302,9 +303,9 @@ then
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.thr.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/scalability_rep.sh "$cores" $reps $keep "./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht" $params | tee $dat; 
+		./scripts/scalability_rep.sh "$cores" $reps $keep "$hts" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -323,9 +324,9 @@ then
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.thr.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/scalability_rep.sh "$cores" $reps $keep "./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser  ./$ub/lf-sl_herlihy" $params | tee $dat; 
+		./scripts/scalability_rep.sh "$cores" $reps $keep "$sls" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -344,9 +345,9 @@ then
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.thr.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.thr.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/scalability_rep.sh "$cores" $reps $keep "./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst2 ./$ub/lb-bst-drachsler ./$ub/lf-bst  ./$ub/lf-bst-howley ./$ub/lf-bst-aravind" $params | tee $dat; 
+		./scripts/scalability_rep.sh "$cores" $reps $keep "$bsts" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -375,9 +376,9 @@ then
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep.sh "$cores" $reps $keep "./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt" $params | tee $dat; 
+		./scripts/latency_rep.sh "$cores" $reps $keep "$lls" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -397,9 +398,9 @@ then
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep.sh "$cores" $reps $keep "./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht" $params | tee $dat; 
+		./scripts/latency_rep.sh "$cores" $reps $keep "$hts" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -419,9 +420,9 @@ then
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep.sh "$cores" $reps $keep "./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser  ./$ub/lf-sl_herlihy" $params | tee $dat; 
+		./scripts/latency_rep.sh "$cores" $reps $keep "$sls" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -441,9 +442,9 @@ then
 	    for u in $updates;
 	    do
 		params="-i$i -r$r -u$u -d$duration";
-		dat=$out_folder/scy1.${structure}.lat.$un.i$i.u$u.dat;
+		dat=$out_folder/${SCY}.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep.sh "$cores" $reps $keep "./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst2 ./$ub/lb-bst-drachsler ./$ub/lf-bst  ./$ub/lf-bst-howley ./$ub/lf-bst-aravind" $params | tee $dat; 
+		./scripts/latency_rep.sh "$cores" $reps $keep "$bsts" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -473,9 +474,9 @@ then
 		for u in $updates;
 		do
 		    params="-n$c -i$i -r$r -u$u -d$duration";
-		    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
+		    dat=$out_folder/${SCY}.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		    echo "~~~~~~~~ $params @ $dat";
-		    ${ldi_script} $c "./$ub/sq-ll ./$ub/lb-ll_coupling ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy ./$ub/lf-ll_harris ./$ub/lf-ll_michael ./$ub/lf-ll_harris_opt" $params -v$LATENCY_POINTS -f$LATENCY_POINTS > $dat;
+		    ${ldi_script} $c "$lls" $params -v$LATENCY_POINTS -f$LATENCY_POINTS > $dat;
 		    head -n8 $dat; echo "..."; tail -n8 $dat;
 		done;
 	    done;
@@ -499,9 +500,9 @@ then
 		for u in $updates;
 		do
 		    params="-n$c -i$i -r$r -u$u -d$duration";
-		    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
+		    dat=$out_folder/${SCY}.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		    echo "~~~~~~~~ $params @ $dat";
-		    ${ldi_script} $c "./$ub/sq-ht ./$ub/lb-ht_coupling_gl ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_copy ./$ub/lf-ht_rcu ./$ub/lb-ht_java ./$ub/lb-ht_tbb ./$ub/lf-ht" $params -v$LATENCY_POINTS -f$LATENCY_POINTS > $dat;
+		    ${ldi_script} $c "$hts" $params -v$LATENCY_POINTS -f$LATENCY_POINTS > $dat;
 		    head -n8 $dat; echo "..."; tail -n8 $dat; 
 		done;
 	    done;
@@ -525,9 +526,9 @@ then
 		for u in $updates;
 		do
 		    params="-n$c -i$i -r$r -u$u -d$duration";
-		    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
+		    dat=$out_folder/${SCY}.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		    echo "~~~~~~~~ $params @ $dat";
-		    ${ldi_script} $c "./$ub/sq-sl ./$ub/lb-sl_pugh ./$ub/lb-sl_herlihy ./$ub/lf-sl_fraser  ./$ub/lf-sl_herlihy" $params -v$LATENCY_POINTS -f$LATENCY_POINTS > $dat;
+		    ${ldi_script} $c "$sls" $params -v$LATENCY_POINTS -f$LATENCY_POINTS > $dat;
 		    head -n8 $dat; echo "..."; tail -n8 $dat; 
 		done;
 	    done;
@@ -551,9 +552,9 @@ then
 		for u in $updates;
 		do
 		    params="-n$c -i$i -r$r -u$u -d$duration";
-		    dat=$out_folder/scy1.${structure}.ldi.$un.c$c.i$i.u$u.dat;
+		    dat=$out_folder/${SCY}.${structure}.ldi.$un.c$c.i$i.u$u.dat;
 		    echo "~~~~~~~~ $params @ $dat";
-		    ${ldi_script} $c "./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst2 ./$ub/lb-bst-drachsler ./$ub/lf-bst  ./$ub/lf-bst-howley ./$ub/lf-bst-aravind" $params -v$LATENCY_POINTS -f$LATENCY_POINTS > $dat; 
+		    ${ldi_script} $c "$bsts" $params -v$LATENCY_POINTS -f$LATENCY_POINTS > $dat; 
 		    head -n8 $dat; echo "..."; tail -n8 $dat; 
 		done;
 	    done;
