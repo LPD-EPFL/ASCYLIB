@@ -39,7 +39,7 @@ do_ht=1
 bst_algos="./${ub}/lf-bst ./${ub}/lb-bst-drachsler ./${ub}/lf-bst-aravind ./${ub}/lf-bst-howley ./${ub}/lb-bst2 ./${ub}/sq-bst_external ./${ub}/sq-bst_internal"
 do_bst=1
 
-num_repetitions=7
+num_repetitions=21
 
 #default duration
 def_duration=300
@@ -108,6 +108,10 @@ test_structure() {
     struct=$1
     shift
     algos=$@
+    echo "cores " > ./data/common_gp_${struct}_${uname}.txt
+    for c in ${cores}; do
+        echo "$c" >> ./data/common_gp_${struct}_${uname}.txt
+    done
     echo "machine structure cores throughput" > ./data/common_${struct}_${uname}.txt
     echo "machine experiment structure throughput scalability" > ./data/extremes_${struct}_${uname}.txt
     for algo in ${algos}; do
@@ -116,11 +120,15 @@ test_structure() {
 #base case, all cores
         echo "   varying cores..."
         printf "      "
+        echo "${namemap[${algo}]} " > ./data/temp
         for c in ${cores}; do
             printf "${c} "
             throughput=$(run_test ${algo} -d${def_duration} -n${c} -i${base_initial} -r${base_range} -u${base_update}) 
             echo "${uname} ${namemap[${algo}]} ${c} ${throughput}" >> ./data/common_${struct}_${uname}.txt
+            echo "${throughput}" >> ./data/temp
         done
+        paste -d' ' ./data/common_gp_${struct}_${uname}.txt ./data/temp > ./data/temp2
+        mv ./data/temp2 ./data/common_gp_${struct}_${uname}.txt
         printf "\n"
 #hight contention case
         echo "   high contention..."
