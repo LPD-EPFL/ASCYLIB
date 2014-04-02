@@ -412,6 +412,8 @@ extern "C" {
 
 #  define USE_HYPERTRHEADS 0	/* use first all the hyperthreads of one socket if set */
 
+  static __attribute__ ((unused)) double static_power[3] = { 56.623611, 28.667633, 27.955978 };
+
 #  if USE_HYPERTRHEADS == 1
   static uint8_t UNUSED the_cores[] = 
     {
@@ -464,6 +466,7 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     { 34.12928397922275831757, 28.91513972025352938497, 23.18354067760409305115, 5.21414425896922893259, 5.73159904264943633382 },
     { 34.01931977364001659009, 28.78915228904349525819, 23.09106190310396673079, 5.23016748459652133189, 5.69809038593952852740 },
   };
+
 #  else
   static uint8_t UNUSED the_cores[] = 
     {

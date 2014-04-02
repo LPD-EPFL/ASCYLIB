@@ -552,17 +552,7 @@ main(int argc, char **argv)
   printf("#Mops %.3f\n", throughput / 1e6);
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
-#if RAPL_READ_ENABLE == 1
-  rapl_stats_t s;
-  RR_STATS(&s);
-  double pow_tot_correction = (throughput * eng_per_test_iter_nj[num_threads-1][0]) / 1e9;
-  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS] - pow_tot_correction;
-  printf("#Total Power Corrected                     : %11f (correction= %10f) W\n",  pow_tot_corrected, pow_tot_correction);
-
-  double eop = (1e6 * s.power_total[NUMBER_OF_SOCKETS]) / throughput;
-  double eop_corrected = (1e6 * pow_tot_corrected) / throughput;
-  printf("#Energy per Operation                      : %11f (corrected = %10f) uJ\n", eop, eop_corrected);
-#endif    
+  RR_PRINT_CORRECTED();    
 
   pthread_exit(NULL);
     
