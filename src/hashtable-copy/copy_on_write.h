@@ -25,7 +25,7 @@
 #define DEFAULT_EFFECTIVE		1
 #define DEFAULT_LOAD		        1
 
-#define CPY_ON_WRITE_READ_ONLY_FAIL     1
+#define CPY_ON_WRITE_READ_ONLY_FAIL     RO_FAIL
 
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
