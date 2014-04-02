@@ -1,16 +1,17 @@
-SCY=scy1
+SCY=scy4
+
 cores_lat_dist="1 10 20";
-LATENCY_TYPE=2			# 2 or 3
-LATENCY_POINTS=512
+LATENCY_TYPE=3			# 2 or 3
+LATENCY_POINTS=128
 LATENCY_MERGE=1
 
-reps=10;
+reps=3;
 keep=max 			# min, median, or max
-duration=1000;
-initials="2048";
-updates="5";
-cores="to64all";
-cores_pow="all"
+duration=600;
+initials="4096";
+updates="10";
+cores="to64fast";
+cores_pow="socket"
 
 COMPILE_FLAGS="SET_CPU=0"
 # skip_thr=1;
