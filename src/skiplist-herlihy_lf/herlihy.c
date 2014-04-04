@@ -26,6 +26,13 @@
 
 #include "herlihy.h"
 
+#include "latency.h"
+#if LATENCY_PARSING == 1
+__thread size_t lat_parsing_get = 0;
+__thread size_t lat_parsing_put = 0;
+__thread size_t lat_parsing_rem = 0;
+#endif	/* LATENCY_PARSING == 1 */
+
 extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 #define FRASER_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
@@ -150,7 +157,10 @@ sval_t
 fraser_find(sl_intset_t *set, skey_t key)
 {
   sval_t result = 0;
+  PARSE_START_TS(0);
   sl_node_t* left = fraser_left_search(set, key);
+  PARSE_END_TS(0, lat_parsing_get++);
+
   if (left->key == key)
     {
       result = left->val;
@@ -188,7 +198,11 @@ fraser_remove(sl_intset_t *set, skey_t key)
   sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
 
-  if (!fraser_search_no_cleanup(set, key, NULL, succs))
+  PARSE_START_TS(2);
+  int found = fraser_search_no_cleanup(set, key, NULL, succs);
+  PARSE_END_TS(2, lat_parsing_rem++);
+
+  if (!found)
     {
       return false;
     }
@@ -213,11 +227,16 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 {
   sl_node_t *new, *pred, *succ;
   sl_node_t *succs[FRASER_MAX_MAX_LEVEL], *preds[FRASER_MAX_MAX_LEVEL];
-  int i;
+  int i, found;
 
+  PARSE_START_TS(1);
  retry: 	
-  if(fraser_search_no_cleanup(set, key, preds, succs))
+  found = fraser_search_no_cleanup(set, key, preds, succs);
+  PARSE_END_TS(1, lat_parsing_put);
+
+  if(found)
     {
+      PARSE_END_INC(lat_parsing_put);
       return false;
     }
 
@@ -248,6 +267,7 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  succ = succs[i];
 	  if (IS_MARKED(new->next[i]))
 	    {
+	      PARSE_END_INC(lat_parsing_put);
 	      return true;
 	    }
 	  if (ATOMIC_CAS_MB(&pred->next[i], succ, new))
@@ -256,6 +276,7 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  fraser_search(set, key, preds, succs);
 	}
     }
+  PARSE_END_INC(lat_parsing_put);
   return true;
 }
 

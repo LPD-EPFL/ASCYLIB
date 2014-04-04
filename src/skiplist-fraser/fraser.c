@@ -26,6 +26,13 @@
 
 #include "fraser.h"
 
+#include "latency.h"
+#if LATENCY_PARSING == 1
+__thread size_t lat_parsing_get = 0;
+__thread size_t lat_parsing_put = 0;
+__thread size_t lat_parsing_rem = 0;
+#endif	/* LATENCY_PARSING == 1 */
+
 extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 #define FRASER_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
@@ -86,7 +93,10 @@ fraser_find(sl_intset_t *set, skey_t key)
   sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
 
+  PARSE_START_TS(0);
   fraser_search(set, key, NULL, succs);
+  PARSE_END_TS(0, lat_parsing_get++);
+
   if (succs[0]->key == key && !succs[0]->deleted)
     {
       result = succs[0]->val;
@@ -121,7 +131,11 @@ fraser_remove(sl_intset_t *set, skey_t key)
   sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
 
+  PARSE_START_TS(2);
   fraser_search(set, key, NULL, succs);
+  PARSE_END_TS(2, lat_parsing_rem++);
+
+
   if (succs[0]->key != key)
     {
       goto end;
@@ -160,8 +174,11 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
   int result = 0;
 
   new = sl_new_simple_node(key, val, get_rand_level(), 0);
+  PARSE_START_TS(1);
  retry: 	
   fraser_search(set, key, preds, succs);
+  PARSE_END_TS(1, lat_parsing_put);
+
   /* Update the value field of an existing node */
   if (succs[0]->key == key) 
     {				/* Value already in list */
@@ -221,6 +238,7 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
  success:
   result = 1;
  end:
+  PARSE_END_INC(lat_parsing_put);
   return result;
 }
 
