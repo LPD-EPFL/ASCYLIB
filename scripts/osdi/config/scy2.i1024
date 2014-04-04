@@ -1,11 +1,12 @@
 SCY=scy2
 
 cores_lat_dist="1 10 20";
-LATENCY_TYPE=3			# 2 or 3
+LATENCY_TYPE=5			# 2 or 3 / 4 or 5 (for parse)
 LATENCY_POINTS=512
-LATENCY_MERGE=1
 
-reps=11;
+LATENCY_PARSE=0
+
+reps=7;
 keep=median 			# min, median, or max
 duration=1000;
 initials="1024";
@@ -15,7 +16,7 @@ cores_pow="all"
 
 COMPILE_FLAGS="SET_CPU=0"
 skip_thr=1;
-skip_lat=0;
-skip_ldi=1;
+skip_lat=1;
+skip_ldi=0;
 skip_pow=1;
 

@@ -69,6 +69,15 @@ else
 fi;
 printf " / ";
 
+
+if [ "${LATENCY_TYPE}0" != "0" ];
+then
+    if [ $LATENCY_TYPE -ge 4 ];
+    then
+	LATENCY_MERGE=1;
+    fi;
+fi;
+
 if [ "${LATENCY_MERGE}0" -eq 10 ];
 then
     ldi_print="merged";
@@ -77,6 +86,15 @@ else
     ldi_print="seprte";
     ldi_script=./scripts/latency_raw_suc.sh
 fi;
+
+LATENCY_AVG_TYPE=1;
+lat_script=./scripts/latency_rep.sh
+if [ "${LATENCY_PARSE}0" -eq 10 ];
+then
+    LATENCY_AVG_TYPE=4;
+    lat_script=./scripts/latency_parse.sh
+fi;
+
 
 do_ldi=1;
 if [ "${skip_ldi}0" -eq 10 ];
@@ -365,7 +383,7 @@ then
     if [ $do_ll -eq 1 ];
     then
 	structure=ll;
-	make ${structure} LATENCY=1 ${COMPILE_FLAGS};
+	make ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -378,7 +396,7 @@ then
 		params="-i$i -r$r -u$u -d$duration";
 		dat=$out_folder/${SCY}.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep.sh "$cores" $reps $keep "$lls" $params | tee $dat; 
+		${lat_script} "$cores" $reps $keep "$lls" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -387,7 +405,7 @@ then
     if [ $do_ht -eq 1 ];
     then
 	structure=ht;
-	make ${structure} LATENCY=1 ${COMPILE_FLAGS};
+	make ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -400,7 +418,7 @@ then
 		params="-i$i -r$r -u$u -d$duration";
 		dat=$out_folder/${SCY}.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep.sh "$cores" $reps $keep "$hts" $params | tee $dat; 
+		${lat_script} "$cores" $reps $keep "$hts" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -409,7 +427,7 @@ then
     if [ $do_sl -eq 1 ];
     then
 	structure=sl;
-	make ${structure} LATENCY=1 ${COMPILE_FLAGS};
+	make ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -422,7 +440,7 @@ then
 		params="-i$i -r$r -u$u -d$duration";
 		dat=$out_folder/${SCY}.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep.sh "$cores" $reps $keep "$sls" $params | tee $dat; 
+		${lat_script} "$cores" $reps $keep "$sls" $params | tee $dat; 
 	    done;
 	done;
     fi;
@@ -431,7 +449,7 @@ then
     if [ $do_bst -eq 1 ];
     then
 	structure=bst;
-	make ${structure} LATENCY=1 ${COMPILE_FLAGS};
+	make ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -444,7 +462,7 @@ then
 		params="-i$i -r$r -u$u -d$duration";
 		dat=$out_folder/${SCY}.${structure}.lat.$un.i$i.u$u.dat;
 		echo "~~~~~~~~ $params @ $dat";
-		./scripts/latency_rep.sh "$cores" $reps $keep "$bsts" $params | tee $dat; 
+		${lat_script} "$cores" $reps $keep "$bsts" $params | tee $dat; 
 	    done;
 	done;
     fi;

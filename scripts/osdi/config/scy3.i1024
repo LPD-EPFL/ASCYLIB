@@ -8,15 +8,15 @@ LATENCY_MERGE=0
 
 reps=10;
 keep=max 			# min, median, or max
-duration=1000;
+duration=2000;
 initials="1024";
 updates="10";
-cores="all";
-cores_pow="all"
+cores="two";
+cores_pow="two"
 
-COMPILE_FLAGS="SET_CPU=0"
-skip_thr=1;
+COMPILE_FLAGS="SET_CPU=1"
+skip_thr=0;
 skip_lat=1;
-skip_ldi=0;
+skip_ldi=1;
 skip_pow=1;
 
