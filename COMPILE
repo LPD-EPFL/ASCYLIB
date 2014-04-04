@@ -20,5 +20,6 @@ You may pass the following settings to `make`:
     * SET_CPU=0 : does not pin threads to cores (does this by default) 
     * POWER=1 : enable power measurements with rapl_read library (default is 0)      	    
     * RO_FAIL=0 : disables read-only unsuccessful updates in ll_copy and ll_lazy
+    * STATS=1 : enable extra stats (about retries)
 Example:
 	`make` VERSION=DEBUG GC=0

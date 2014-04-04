@@ -53,14 +53,14 @@ extern __thread ssmem_allocator_t* alloc;
 
 typedef struct node_l
 {
-  skey_t key;
-  sval_t val;
-  struct node_l *next;
+  skey_t key;			/* 8 */
+  sval_t val;			/* 16 */
+  struct node_l *next;		/* 24 */
   uint8_t marked;
 #if !defined(LL_GLOBAL_LOCK)
-  volatile ptlock_t lock;
+  volatile ptlock_t lock;	/* 32 */
 #endif
-  /* char padding[40]; */
+  char padding[CACHE_LINE_SIZE - 32];
 } node_l_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset_l 

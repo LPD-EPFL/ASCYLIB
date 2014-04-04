@@ -44,6 +44,8 @@
  * GLOBALS
  * ################################################################### */
 
+RETRY_STATS_VARS_GLOBAL;
+
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
 size_t load_factor;
@@ -541,7 +543,8 @@ main(int argc, char **argv)
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();    
-    
+  RETRY_STATS_PRINT(total, putting_count_total, removing_count_total);
+
   pthread_exit(NULL);
     
   return 0;
