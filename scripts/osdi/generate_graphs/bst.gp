@@ -7,12 +7,12 @@ set key horiz maxrows 1
 
 
 set output "bst.eps"
-set terminal postscript color "Helvetica" 20 eps enhanced
+set terminal postscript color "Helvetica" 22 eps enhanced
 set rmargin 0
-set lmargin 5
+set lmargin 3
 set tmargin 3
-set bmargin 3
-set xlabel "Threads" offset 1.5
+set bmargin 2.5
+set xlabel "Threads" offset 1.5, 0.75
 set xrange [0:]
 set xtics 16 
 #set xtics nomirror scale 2
@@ -41,23 +41,23 @@ set style line 8 lc rgb '#299fff' lt 1 pt 8 ps 1.2 lw 2 pi 5
 set style line 9 lc rgb '#ff299f' lt 2 pt 9 ps 1.2 lw 2 pi 6
 
 set style line 12 lc rgb '#808080' lt 2 lw 1
-title_offset=-0.5
+title_offset=-0.7
 
 # solid lines
 set style line 10 lt 1 lw 2 lc 1
 set style line 20 lt 1 lw 2 lc 2
 set style line 30 lt 1 lw 2 lc 3
 
-set size 2.595, 0.59
+set size 2.595, 0.61
 set multiplot layout 5, 1
-set size 0.5, 0.55
+set size 0.5, 0.6
 set origin 0.05, 0.0
 unset key
 set xrange [0:49]
 set yrange [0:]
-set xtics 6
-set ytics 30
-set ylabel "Throughput (Mops/s)" offset 1.5
+set xtics 6 offset 0,0.4
+set ytics 30 offset 0.7
+set ylabel "Throughput (Mops/s)" offset 2.5
 set title "Opteron" offset 0.2,title_offset
 @YTICS
 plot \
@@ -70,7 +70,8 @@ plot \
      "" using 1:($4) title "aravind" ls 7 with linespoints
 set origin 0.55, 0.0
 unset key
-set size 0.5, 0.55
+set lmargin 4
+set size 0.5, 0.6
 set xrange [0:41]
 set yrange [0:]
 set xtics 10
@@ -88,7 +89,7 @@ plot \
      "" using 1:($5) title "howley" ls 6 with linespoints, \
      "" using 1:($4) title "aravind" ls 7 with linespoints
 set origin 1.05, 0.0
-set size 0.5, 0.55
+set size 0.5, 0.6
 set xrange [0:81]
 set yrange [0:]
 set xtics 20
@@ -106,7 +107,7 @@ plot \
      "" using 1:($5) title "howley" ls 6 with linespoints, \
      "" using 1:($4) title "aravind" ls 7 with linespoints
 set origin 1.55, 0.0
-set size 0.5, 0.55
+set size 0.5, 0.6
 set title "Tilera"
 set xrange [0:35]
 set yrange [0:]
@@ -125,7 +126,7 @@ plot \
      "" using 1:($5) title "howley" ls 6 with linespoints, \
      "" using 1:($4) title "aravind" ls 7 with linespoints
 set origin 2.05, 0.0
-set size 0.5, 0.55
+set size 0.5, 0.6
 set title "Sparc"
 set xrange [0:257]
 set xtics 64
@@ -155,7 +156,7 @@ unset title
 unset object
 
 #Now set the size of this plot to something BIG
-set size 2.595,0.59 #however big you need it
+set size 2.595,0.61 #however big you need it
 set origin 0.0, 0.0
 
 #example key settings
@@ -164,7 +165,7 @@ set key box
 #set key at screen 0.5,screen 0.25 center top
 set key horiz
 
-set key at screen 1.3, screen 0.56 center top
+set key at screen 1.3, screen 0.585 center top
 #We need to set an explicit xrange.  Anything will work really.
 set xrange [-1:1]
 @NOYTICS
