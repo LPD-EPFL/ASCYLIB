@@ -48,7 +48,7 @@ set style line 10 lt 1 lw 2 lc 1
 set style line 20 lt 1 lw 2 lc 2
 set style line 30 lt 1 lw 2 lc 3
 
-set size 2.595, 0.64
+set size 2.595, 0.61
 set multiplot layout 5, 1
 set size 0.5, 0.6
 set origin 0.05, 0.0
@@ -158,16 +158,16 @@ unset title
 unset object
 
 #Now set the size of this plot to something BIG
-set size 2.595,0.64 #however big you need it
+set size 2.595,0.61 #however big you need it
 set origin 0.0, 0.0
 
 #example key settings
 set key box 
 #set key horizontal reverse samplen 1 width -4 maxrows 1 maxcols 12 
 #set key at screen 0.5,screen 0.25 center top
-set key horiz
+set key above width -3 vertical maxrows 1
 
-set key at screen 1.3, screen 0.63 center top
+set key at screen 1.3, screen 0.585 center top
 #We need to set an explicit xrange.  Anything will work really.
 set xrange [-1:1]
 @NOYTICS
