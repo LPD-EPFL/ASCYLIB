@@ -29,6 +29,8 @@
 #include "optimistic.h"
 #include "utils.h"
 
+RETRY_STATS_VARS;
+
 #include "latency.h"
 #if LATENCY_PARSING == 1
 __thread size_t lat_parsing_get = 0;
@@ -55,6 +57,7 @@ ok_to_delete(sl_node_t *node, int found)
 inline int
 optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **succs, int fast)
 {
+  PARSE_TRY();
   int found, i;
   sl_node_t *pred, *curr;
 	
@@ -83,6 +86,7 @@ optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **s
 inline sl_node_t*
 optimistic_left_search(sl_intset_t *set, skey_t key)
 {
+  PARSE_TRY();
   int i;
   sl_node_t *pred, *curr, *nd = NULL;
 	
@@ -172,6 +176,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   PARSE_START_TS(1);
   while (1) 
     {
+      UPDATE_TRY();
       found = optimistic_search(set, key, preds, succs, 1);
       PARSE_END_TS(1, lat_parsing_put);
 
@@ -268,6 +273,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
   PARSE_START_TS(2);
   while(1)
     {
+      UPDATE_TRY();
       found = optimistic_search(set, key, preds, succs, 1);
       PARSE_END_TS(2, lat_parsing_rem);
 

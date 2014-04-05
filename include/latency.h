@@ -3,24 +3,35 @@
 
 #if RETRY_STATS == 1
 #  define RETRY_STATS_VARS						\
-  __thread size_t __parse_try, __update_try, __cleanup_try
+  __thread size_t __parse_try, __update_try, __cleanup_try, __lock_try, __lock_queue
 #  define RETRY_STATS_VARS_GLOBAL					\
-  size_t __parse_try_global, __update_try_global, __cleanup_try_global
+  size_t __parse_try_global, __update_try_global, __cleanup_try_global, __lock_try_global, __lock_queue_global
 
 extern RETRY_STATS_VARS;
 extern RETRY_STATS_VARS_GLOBAL;
 
+#  define RETRY_STATS_ZERO()			\
+  __parse_try = 0;				\
+  __update_try = 0;				\
+  __cleanup_try = 0;				\
+  __lock_try = 0;				\
+  __lock_queue = 0
+
 #  define PARSE_TRY()        __parse_try++
 #  define UPDATE_TRY()       __update_try++
 #  define CLEANUP_TRY()      __cleanup_try++
-#  define RETRY_STATS_PRINT(thr, put, rem)   retry_stats_print(thr, put, rem)
+#  define LOCK_TRY()         __lock_try++;
+#  define LOCK_QUEUE(q)      __lock_queue += (q);
+#  define RETRY_STATS_PRINT(thr, put, rem, upd_suc)   retry_stats_print(thr, put, rem, (upd_suc))
 #  define RETRY_STATS_SHARE()			\
   __parse_try_global +=  __parse_try;		\
   __update_try_global += __update_try;		\
-  __cleanup_try_global += __cleanup_try
+  __cleanup_try_global += __cleanup_try;	\
+  __lock_try_global += __lock_try;		\
+  __lock_queue_global += __lock_queue
 
 static inline void 
-retry_stats_print(size_t thr, size_t put, size_t rem)
+retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
 {
   double ratio_all = 100.0 * (((double) __parse_try_global / thr) - 1);
   printf("#parse_all:    %-10zu %f %%\n", __parse_try_global, ratio_all);
@@ -29,16 +40,23 @@ retry_stats_print(size_t thr, size_t put, size_t rem)
   printf("#update_all:   %-10zu %f %%\n", __update_try_global, ratio_all);
   ratio_all = 100.0 * (__cleanup_try_global / (updates - (double) __cleanup_try_global));
   printf("#cleanup_all:  %-10zu %f %%\n", __cleanup_try_global, ratio_all);
+  ratio_all = (double) __lock_queue_global / __lock_try_global;
+  double ratio_to_succ_upd = (double) __lock_try_global / upd_suc;
+  printf("#lock_all:     %-10zu %f %f\n", __lock_try_global, ratio_all, ratio_to_succ_upd);
 }
 
 #else  /* RETRY_STATS == 0 */
 #  define RETRY_STATS_VARS
 #  define RETRY_STATS_VARS_GLOBAL
+#  define RETRY_STATS_ZERO()
+
 #  define PARSE_TRY()     
 #  define UPDATE_TRY()    
 #  define CLEANUP_TRY()   
-#  define RETRY_STATS_PRINT(thr, put, rem)
+#  define RETRY_STATS_PRINT(thr, put, rem, upd_suc)
 #  define RETRY_STATS_SHARE()
+#  define LOCK_TRY()
+#  define LOCK_QUEUE(q)
 #endif	/* RETRY_STATS */
 
 /* ****************************************************************************************** */
@@ -209,9 +227,6 @@ print_latency_stats(int ID, size_t num_entries, size_t num_entries_print)
 }
 #  endif
 #endif
-
-  /* retry stats */
-  RETRY_STATS_SHARE();
 }
 
 #endif /* _LATENCY_H_ */

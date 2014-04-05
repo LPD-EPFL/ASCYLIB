@@ -26,6 +26,8 @@
 
 #include "herlihy.h"
 
+RETRY_STATS_VARS;
+
 #include "latency.h"
 #if LATENCY_PARSING == 1
 __thread size_t lat_parsing_get = 0;
@@ -44,6 +46,8 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
   sl_node_t *left, *left_next, *right = NULL, *right_next;
 
  retry:
+  PARSE_TRY();
+
   left = set->head;
   for (i = levelmax - 1; i >= 0; i--)
     {
@@ -91,6 +95,8 @@ fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **r
 int				
 fraser_search_no_cleanup(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **right_list)
 {
+  PARSE_TRY();
+
   int i;
   sl_node_t *left, *left_next, *right = NULL;
 
@@ -127,6 +133,7 @@ fraser_search_no_cleanup(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl
 static sl_node_t* 
 fraser_left_search(sl_intset_t *set, skey_t key)
 {
+  PARSE_TRY();
   sl_node_t* left = NULL;
   sl_node_t* left_prev;
   
@@ -195,6 +202,8 @@ mark_node_ptrs(sl_node_t *n)
 sval_t
 fraser_remove(sl_intset_t *set, skey_t key)
 {
+  UPDATE_TRY();
+
   sl_node_t* succs[FRASER_MAX_MAX_LEVEL];
   sval_t result = 0;
 
@@ -231,6 +240,8 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 
   PARSE_START_TS(1);
  retry: 	
+  UPDATE_TRY();
+
   found = fraser_search_no_cleanup(set, key, preds, succs);
   PARSE_END_TS(1, lat_parsing_put);
 

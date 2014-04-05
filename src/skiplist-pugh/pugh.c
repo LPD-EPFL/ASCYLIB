@@ -1,6 +1,8 @@
 #include "optimistic.h"
 #include "utils.h"
 
+RETRY_STATS_VARS;
+
 #include "latency.h"
 #if LATENCY_PARSING == 1
 __thread size_t lat_parsing_get = 0;
@@ -16,6 +18,7 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 sval_t
 optimistic_find(sl_intset_t *set, skey_t key)
 { 
+  PARSE_TRY();
   PARSE_START_TS(0);
   sval_t val = 0;
   sl_node_t* succ = NULL;
@@ -67,6 +70,8 @@ get_lock(sl_node_t* pred, skey_t key, int lvl)
 int
 optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
   PARSE_START_TS(1);
   sl_node_t* update[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t* succ;
@@ -80,7 +85,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  pred = succ;
 	  succ = succ->next[lvl];
 	}
-      if (succ->key == key)	/* at any search level */
+      if (unlikely(succ->key == key))	/* at any search level */
 	{
 	  return false;
 	}
@@ -128,6 +133,8 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 sval_t
 optimistic_delete(sl_intset_t *set, skey_t key)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
   PARSE_START_TS(2);
   sl_node_t* update[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t* succ = NULL;

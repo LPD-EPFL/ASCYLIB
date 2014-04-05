@@ -26,6 +26,8 @@
 
 #include "pugh.h"
 
+RETRY_STATS_VARS;
+
 /********************************************************************************* 
  * help search functions
  *********************************************************************************/
@@ -77,6 +79,7 @@ search_strong(intset_l_t* set, skey_t key, node_l_t** right)
 sval_t
 list_search(intset_l_t* set, skey_t key)
 {
+  PARSE_TRY();
   node_l_t* right = search_weak_right(set, key);
   if (right->key == key)
     {
@@ -89,6 +92,8 @@ list_search(intset_l_t* set, skey_t key)
 int
 list_insert(intset_l_t* set, skey_t key, sval_t val)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
   int result = 1;
   node_l_t* right;
   /* optimize for step-wise strong search:: if found, return before locking! */
@@ -111,6 +116,8 @@ list_insert(intset_l_t* set, skey_t key, sval_t val)
 sval_t
 list_delete(intset_l_t* set, skey_t key)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
   sval_t result = 0;
   node_l_t* right;
   node_l_t* left = search_strong(set, key, &right);   /* TODO:: optimize for step-wise strong search!! */
