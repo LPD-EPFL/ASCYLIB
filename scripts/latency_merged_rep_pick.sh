@@ -41,9 +41,9 @@ shift;
 progs_num=$(echo $progs | wc -w);
 params="$@";
 
-progs_short=$(echo $progs | sed -e 's/\.\/bin\///g');
+progs_short=$(echo $progs | sed -e 's/\.\/bin\///g' -e 's/\/bin\///g');
 
-print_n "#   " "%-20s" "$progs_short" "\n"
+print_n "#   " "%-19s " "$progs_short" "\n"
 
 str="get,put,rem";
 str_pick=$(echo $str | cut -d, -f$pick);
