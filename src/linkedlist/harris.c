@@ -133,7 +133,7 @@ harris_search(intset_t *set, skey_t key, node_t **left_node)
 	    {
 	      node_t* free = cur;
 	      cur = (node_t*) get_unmarked_ref((long) cur->next);
-	      ssmem_free(alloc, free);
+	      ssmem_free(alloc, (void*) free);
 	    }
 	  while (cur != right_node);
 #endif
@@ -186,7 +186,7 @@ harris_insert(intset_t *set, skey_t key, sval_t val)
 #if GC == 1
 	  if (unlikely(newnode != NULL))
 	    {
-	      ssmem_free(alloc, newnode);
+	      ssmem_free(alloc, (void*) newnode);
 	    }
 #endif
 	  return 0;

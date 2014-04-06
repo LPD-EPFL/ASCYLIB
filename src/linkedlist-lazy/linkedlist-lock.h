@@ -51,12 +51,12 @@
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
-typedef struct node_l
+typedef volatile struct node_l
 {
   skey_t key;			/* 8 */
   sval_t val;			/* 16 */
-  struct node_l *next;		/* 24 */
-  uint8_t marked;
+  volatile struct node_l *next;	/* 24 */
+  volatile uint8_t marked;
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;	/* 32 */
 #endif

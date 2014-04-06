@@ -45,7 +45,7 @@ physical_delete_right(node_t* left_node, node_t* right_node)
 #if GC == 1
   if (likely(removed))
     {
-      ssmem_free(alloc, res);
+      ssmem_free(alloc, (void*) res);
     }
 #endif
   return removed;
@@ -68,18 +68,18 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
   node_t* right_node = set->head->next;
   while(1)
     {
-      if (is_marked_ref(right_node->next))
-	{
-	  CLEANUP_TRY();
-	  physical_delete_right(left_node, right_node);
-	}
-      else 
+      if (likely(!is_marked_ref(right_node->next)))
 	{
 	  if (unlikely(right_node->key >= key))
 	    {
 	      break;
 	    }
 	  left_node = right_node;
+	}
+      else 
+	{
+	  CLEANUP_TRY();
+	  physical_delete_right(left_node, right_node);
 	}
       right_node = get_unmarked_ref(right_node->next);
     }
@@ -140,7 +140,7 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
 	}
 
 #if GC == 1
-      ssmem_free(alloc, node_to_add);
+      ssmem_free(alloc, (void*) node_to_add);
 #endif
     } 
   while (1);

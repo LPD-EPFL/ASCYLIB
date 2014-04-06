@@ -145,7 +145,7 @@ parse_delete(intset_l_t *set, skey_t key)
 	      curr->marked = 1;
 	      pred->next = c_nxt;
 #if GC == 1
-	      ssmem_free(alloc, curr);
+	      ssmem_free(alloc, (void*) curr);
 #endif
 	    }
 	  done = 1;

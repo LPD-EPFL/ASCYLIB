@@ -40,11 +40,11 @@ extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   4
 
-typedef struct node 
+typedef volatile struct node 
 {
   skey_t key;
   sval_t val;
-  struct node* next;
+  volatile struct node* next;
 #if defined(DO_PAD)
   uint8_t padding[CACHE_LINE_SIZE - sizeof(sval_t) - sizeof(skey_t) - sizeof(struct node*)];
 #endif
