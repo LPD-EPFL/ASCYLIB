@@ -324,3 +324,7 @@ endif
 ifeq ($(STATS),1)
 	CFLAGS += -DRETRY_STATS=1
 endif
+
+ifeq ($(PAD),1)
+	CFLAGS += -DDO_PAD=1
+endif
