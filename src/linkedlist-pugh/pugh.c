@@ -76,6 +76,30 @@ search_strong(intset_l_t* set, skey_t key, node_l_t** right)
   return pred;
 }
 
+static inline node_l_t*
+search_strong_cond(intset_l_t* set, skey_t key, node_l_t** right, int equal)
+{
+  node_l_t* pred = search_weak_left(set, key);
+  node_l_t* succ = pred->next;
+  if ((succ->key == key) == equal)
+    {
+      return 0;
+    }
+
+  GL_LOCK(set->lock);
+  LOCK(ND_GET_LOCK(pred));
+  succ = pred->next;
+  while (unlikely(succ->key < key))
+    {
+      UNLOCK(ND_GET_LOCK(pred));
+      pred = succ;
+      LOCK(ND_GET_LOCK(pred));
+      succ = pred->next;
+    }
+  *right = succ;
+  return pred;
+}
+
 sval_t
 list_search(intset_l_t* set, skey_t key)
 {
@@ -97,7 +121,16 @@ list_insert(intset_l_t* set, skey_t key, sval_t val)
   int result = 1;
   node_l_t* right;
   /* optimize for step-wise strong search:: if found, return before locking! */
+#if PUGH_RO_FAIL == 1
+  node_l_t* left = search_strong_cond(set, key, &right, 1);
+  if (left == NULL)
+    { 
+      return 0; 
+    }
+#else
   node_l_t* left = search_strong(set, key, &right);
+#endif
+
   if (right->key == key)
     {
       result = 0;
@@ -120,7 +153,17 @@ list_delete(intset_l_t* set, skey_t key)
   UPDATE_TRY();
   sval_t result = 0;
   node_l_t* right;
-  node_l_t* left = search_strong(set, key, &right);   /* TODO:: optimize for step-wise strong search!! */
+
+#if PUGH_RO_FAIL == 1
+  node_l_t* left = search_strong_cond(set, key, &right, 0);
+  if (left == NULL)
+    { 
+      return 0; 
+    }
+#else
+  node_l_t* left = search_strong(set, key, &right);
+#endif
+
   if (right->key == key)
     {
       LOCK(ND_GET_LOCK(right));
@@ -129,7 +172,7 @@ list_delete(intset_l_t* set, skey_t key)
       right->next = left;
       UNLOCK(ND_GET_LOCK(right));
 #if GC == 1
-      ssmem_free(alloc, right);
+      ssmem_free(alloc, (void*) right);
 #endif
     }
   UNLOCK(ND_GET_LOCK(left));
