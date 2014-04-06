@@ -463,7 +463,9 @@ bool_t attempt_unlink_nl(volatile node_t* parent, volatile node_t* node) {
     node->version = UNLINKED_OVL;
     node->value = 0;
 
+#if GC==1
     ssmem_free(alloc, (void*) node);
+#endif
     // hazard.releaseNode(node);
     return TRUE;
 }
