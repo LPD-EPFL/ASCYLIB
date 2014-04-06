@@ -9,6 +9,8 @@
 
 #include "linkedlist.h"
 
+RETRY_STATS_VARS;
+
 /*
  * The five following functions handle the low-order mark bit that indicates
  * whether a node is logically deleted (1) or not (0).
@@ -49,6 +51,7 @@ physical_delete_right(node_t* left_node, node_t* right_node)
   return removed;
 }
 
+
 /*
  * list_search looks for value val, it
  *  - returns right_node owning val (if present) or its immediately higher 
@@ -60,13 +63,14 @@ physical_delete_right(node_t* left_node, node_t* right_node)
 static inline node_t* 
 list_search(intset_t* set, skey_t key, node_t** left_node_ptr) 
 {
+  PARSE_TRY();
   node_t* left_node = set->head;
   node_t* right_node = set->head->next;
   while(1)
     {
-      node_t* right_node_nxt = right_node->next;
-      if (unlikely(is_marked_ref(right_node_nxt)))
+      if (is_marked_ref(right_node->next))
 	{
+	  CLEANUP_TRY();
 	  physical_delete_right(left_node, right_node);
 	}
       else 
@@ -77,7 +81,7 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
 	    }
 	  left_node = right_node;
 	}
-      right_node = get_unmarked_ref(right_node_nxt);
+      right_node = get_unmarked_ref(right_node->next);
     }
   *left_node_ptr = left_node;
   return right_node;
@@ -90,6 +94,7 @@ sval_t
 harris_find(intset_t* the_list, skey_t key)
 {
   node_t* node = the_list->head->next;
+  PARSE_TRY();
   while(likely(node->key < key))
     {
       node = get_unmarked_ref(node->next);
@@ -116,6 +121,7 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
 
   do
     {
+      UPDATE_TRY();
       node_t* left_node;
       right_node = list_search(the_list, key, &left_node);
       if (right_node->key == key) 
@@ -156,6 +162,7 @@ harris_delete(intset_t *the_list, skey_t key)
   
   do
     {
+      UPDATE_TRY();
       right_node = list_search(the_list, key, &left_node);
 
       if (right_node->key != key)

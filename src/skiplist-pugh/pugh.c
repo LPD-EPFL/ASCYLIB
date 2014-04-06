@@ -1,7 +1,16 @@
 #include "optimistic.h"
 #include "utils.h"
 
-unsigned int levelmax;
+RETRY_STATS_VARS;
+
+#include "latency.h"
+#if LATENCY_PARSING == 1
+__thread size_t lat_parsing_get = 0;
+__thread size_t lat_parsing_put = 0;
+__thread size_t lat_parsing_rem = 0;
+#endif	/* LATENCY_PARSING == 1 */
+
+extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 #define MAX_BACKOFF 131071
 #define HERLIHY_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
@@ -9,6 +18,9 @@ unsigned int levelmax;
 sval_t
 optimistic_find(sl_intset_t *set, skey_t key)
 { 
+  PARSE_TRY();
+  PARSE_START_TS(0);
+  sval_t val = 0;
   sl_node_t* succ = NULL;
   sl_node_t* pred = set->head;
   int lvl;
@@ -23,11 +35,13 @@ optimistic_find(sl_intset_t *set, skey_t key)
 
       if (succ->key == key)	/* at any search level */
 	{
-	  return succ->val;
+	  val = succ->val;
+	  break;
 	}
     }
 
-  return false;
+  PARSE_END_TS(0, lat_parsing_get++);
+  return val;
 }
 
 sl_node_t*
@@ -56,6 +70,9 @@ get_lock(sl_node_t* pred, skey_t key, int lvl)
 int
 optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
+  PARSE_START_TS(1);
   sl_node_t* update[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t* succ;
   sl_node_t* pred = set->head;
@@ -68,12 +85,13 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  pred = succ;
 	  succ = succ->next[lvl];
 	}
-      if (succ->key == key)	/* at any search level */
+      if (unlikely(succ->key == key))	/* at any search level */
 	{
 	  return false;
 	}
       update[lvl] = pred;
     }
+  PARSE_END_TS(1, lat_parsing_put++);
 
   int rand_lvl = get_rand_level(); /* do the rand_lvl outside the CS */
 
@@ -115,6 +133,9 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 sval_t
 optimistic_delete(sl_intset_t *set, skey_t key)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
+  PARSE_START_TS(2);
   sl_node_t* update[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t* succ = NULL;
   sl_node_t* pred = set->head;
@@ -129,6 +150,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 	}
       update[lvl] = pred;
     }
+  PARSE_END_TS(2, lat_parsing_rem++);
 
   GL_LOCK(set->lock);
 

@@ -25,6 +25,8 @@
 
 #include "harris.h"
 
+RETRY_STATS_VARS;
+
 /*
  * The five following functions handle the low-order mark bit that indicates
  * whether a node is logically deleted (1) or not (0).
@@ -86,6 +88,7 @@ harris_search(intset_t *set, skey_t key, node_t **left_node)
 	
   do
     {
+      PARSE_TRY();
       node_t *t = set->head;
       node_t *t_next = set->head->next;
 		
@@ -120,6 +123,7 @@ harris_search(intset_t *set, skey_t key, node_t **left_node)
 	    }
 	}
 		
+      CLEANUP_TRY();
       /* Remove one or more marked nodes */
       if (ATOMIC_CAS_MB(&(*left_node)->next, left_node_next, right_node)) 
 	{
@@ -175,6 +179,7 @@ harris_insert(intset_t *set, skey_t key, sval_t val)
 	
   do 
     {
+      UPDATE_TRY();
       right_node = harris_search(set, key, &left_node);
       if (right_node->key == key)
 	{
@@ -218,6 +223,7 @@ harris_delete(intset_t *set, skey_t key)
 	
   do 
     {
+      UPDATE_TRY();
       right_node = harris_search(set, key, &left_node);
       if (right_node->key != key)
 	{

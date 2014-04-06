@@ -29,7 +29,16 @@
 #include "optimistic.h"
 #include "utils.h"
 
-unsigned int levelmax;
+RETRY_STATS_VARS;
+
+#include "latency.h"
+#if LATENCY_PARSING == 1
+__thread size_t lat_parsing_get = 0;
+__thread size_t lat_parsing_put = 0;
+__thread size_t lat_parsing_rem = 0;
+#endif	/* LATENCY_PARSING == 1 */
+
+extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 #define MAX_BACKOFF 131071
 #define HERLIHY_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
@@ -48,6 +57,7 @@ ok_to_delete(sl_node_t *node, int found)
 inline int
 optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **succs, int fast)
 {
+  PARSE_TRY();
   int found, i;
   sl_node_t *pred, *curr;
 	
@@ -76,6 +86,7 @@ optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **s
 inline sl_node_t*
 optimistic_left_search(sl_intset_t *set, skey_t key)
 {
+  PARSE_TRY();
   int i;
   sl_node_t *pred, *curr, *nd = NULL;
 	
@@ -110,7 +121,11 @@ sval_t
 optimistic_find(sl_intset_t *set, skey_t key)
 { 
   sval_t result = 0;
+
+  PARSE_START_TS(0);
   sl_node_t* nd = optimistic_left_search(set, key);
+  PARSE_END_TS(0, lat_parsing_get++);
+
   if (nd != NULL && !nd->marked && nd->fullylinked)
     {
       result = nd->val;
@@ -158,9 +173,13 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   toplevel = get_rand_level();
   backoff = 1;
 	
+  PARSE_START_TS(1);
   while (1) 
     {
+      UPDATE_TRY();
       found = optimistic_search(set, key, preds, succs, 1);
+      PARSE_END_TS(1, lat_parsing_put);
+
       if (found != -1)
 	{
 	  node_found = succs[found];
@@ -170,6 +189,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 		{
 		  PAUSE;
 		}
+	      PARSE_END_INC(lat_parsing_put);
 	      return 0;
 	    }
 	  continue;
@@ -225,6 +245,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
       new_node->fullylinked = 1;
 
       unlock_levels(set, preds, highest_locked);
+      PARSE_END_INC(lat_parsing_put);
       return 1;
     }
 }
@@ -249,9 +270,13 @@ optimistic_delete(sl_intset_t *set, skey_t key)
   toplevel = -1;
   backoff = 1;
 	
+  PARSE_START_TS(2);
   while(1)
     {
+      UPDATE_TRY();
       found = optimistic_search(set, key, preds, succs, 1);
+      PARSE_END_TS(2, lat_parsing_rem);
+
       /* If not marked and ok to delete, then mark it */
       if (is_marked || (found != -1 && ok_to_delete(succs[found], found)))
 	{	
@@ -268,6 +293,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 		{
 		  GL_UNLOCK(set->lock);
 		  UNLOCK(ND_GET_LOCK(node_todel));
+		  PARSE_END_INC(lat_parsing_rem);
 		  return 0;
 		}
 
@@ -317,10 +343,13 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 
 	  UNLOCK(ND_GET_LOCK(node_todel));
 	  unlock_levels(set, preds, highest_locked);
+
+	  PARSE_END_INC(lat_parsing_rem);
 	  return val;
 	}
       else
 	{
+	  PARSE_END_INC(lat_parsing_rem);
 	  return 0;
 	}
     }

@@ -2,12 +2,13 @@
 #define _LOCK_IF_H_
 
 #include "utils.h"
+#include "latency.h"
 
 #define PREFETCHW_LOCK(lock)                            PREFETCHW(lock)
 
 #if defined(MUTEX)
 typedef pthread_mutex_t ptlock_t;
-#define PTLOCK_SIZE sizeof(ptlock_t)
+#  define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL);
 #  define DESTROY_LOCK(lock)			        pthread_mutex_destroy((pthread_mutex_t *) lock)
 #  define LOCK(lock)					pthread_mutex_lock((pthread_mutex_t *) lock)
@@ -19,7 +20,7 @@ typedef pthread_mutex_t ptlock_t;
 #  define GL_UNLOCK(lock)				pthread_mutex_unlock((pthread_mutex_t *) lock)
 #elif defined(SPIN)		/* pthread spinlock */
 typedef pthread_spinlock_t ptlock_t;
-#define PTLOCK_SIZE sizeof(ptlock_t)
+#  define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_spin_init((pthread_spinlock_t *) lock, PTHREAD_PROCESS_PRIVATE);
 #  define DESTROY_LOCK(lock)			        pthread_spin_destroy((pthread_spinlock_t *) lock)
 #  define LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
@@ -30,7 +31,24 @@ typedef pthread_spinlock_t ptlock_t;
 #  define GL_LOCK(lock)					pthread_spin_lock((pthread_spinlock_t *) lock)
 #  define GL_UNLOCK(lock)				pthread_spin_unlock((pthread_spinlock_t *) lock)
 #elif defined(TAS)			/* TAS */
-#  define PTLOCK_SIZE 32		/* choose 8, 16, 32, 64 */
+#  if RETRY_STATS == 1
+extern RETRY_STATS_VARS;
+#    define PTLOCK_SIZE 32		/* choose 8, 16, 32, 64 */
+typedef struct tticket
+{
+  union
+  {
+    volatile uint32_t whole;
+    struct
+    {
+      volatile uint16_t tick;
+      volatile uint16_t curr;
+    };
+  };
+} tticket_t;
+#  else
+#    define PTLOCK_SIZE 32		/* choose 8, 16, 32, 64 */
+#  endif
 #  define PASTER(x, y, z) x ## y ## z
 #  define EVALUATE(sz) PASTER(uint, sz, _t)
 #  define UTYPE  EVALUATE(PTLOCK_SIZE)
@@ -57,18 +75,36 @@ static inline void
 tas_init(ptlock_t* l)
 {
   *l = TAS_FREE;
-#if defined(__tile__)
+#  if defined(__tile__)
   MEM_BARRIER;
-#endif
+#  endif
 }
 
 static inline uint32_t
 tas_lock(ptlock_t* l)
 {
+  LOCK_TRY();
+#if RETRY_STATS == 1
+  volatile tticket_t* t = (volatile tticket_t*) l;
+  volatile uint16_t tick = FAI_U16(&t->tick);
+
+  uint16_t cur = t->curr;
+  int16_t distance = tick - cur;
+  if (distance < 0 ) { printf("distatnce is %d / %u\n", distance, distance); }
+
+  LOCK_QUEUE(distance);
+
+  while (t->curr != tick)
+    {
+      PAUSE;
+    }
+
+#else
   while (CAS_UTYPE(l, TAS_FREE, TAS_LCKD) == TAS_LCKD)
     {
       PAUSE;
     }
+#endif
   return 0;
 }
 
@@ -81,10 +117,17 @@ tas_trylock(ptlock_t* l)
 static inline uint32_t
 tas_unlock(ptlock_t* l)
 {
-#if defined(__tile__) 
+#  if defined(__tile__) 
   MEM_BARRIER;
-#endif
+#  endif
+
+#if RETRY_STATS == 1
+  volatile tticket_t* t = (volatile tticket_t*) l;
+  PREFETCHW(t);
+  COMPILER_NO_REORDER(t->curr++;);
+#else
   COMPILER_NO_REORDER(*l = TAS_FREE;);
+#endif
   return 0;
 }
 
@@ -114,21 +157,21 @@ static inline void
 ticket_init(volatile ptlock_t* l)
 {
   l->ticket = l->curr = 0;
-#if defined(__tile__)
+#  if defined(__tile__)
   MEM_BARRIER;
-#endif
+#  endif
 }
 
-#define TICKET_BASE_WAIT 512
-#define TICKET_MAX_WAIT  4095
-#define TICKET_WAIT_NEXT 128
+#  define TICKET_BASE_WAIT 512
+#  define TICKET_MAX_WAIT  4095
+#  define TICKET_WAIT_NEXT 128
 
 static inline uint32_t
 ticket_lock(volatile ptlock_t* l)
 {
   uint32_t ticket = FAI_U32(&l->ticket);
 
-#if defined(OPTERON_OPTIMIZE)
+#  if defined(OPTERON_OPTIMIZE)
   uint32_t wait = TICKET_BASE_WAIT;
   uint32_t distance_prev = 1;
   while (1)
@@ -163,7 +206,7 @@ ticket_lock(volatile ptlock_t* l)
       	}
     }
 
-#else  /* !OPTERON_OPTIMIZE */
+#  else  /* !OPTERON_OPTIMIZE */
   PREFETCHW(l);
   while (ticket != l->curr)
     {
@@ -171,7 +214,7 @@ ticket_lock(volatile ptlock_t* l)
       PAUSE;
     }
 
-#endif
+#  endif
   return 0;
 }
 
@@ -196,9 +239,9 @@ ticket_trylock(volatile ptlock_t* l)
 static inline uint32_t
 ticket_unlock(volatile ptlock_t* l)
 {
-#if defined(__tile__)
+#  if defined(__tile__)
   MEM_BARRIER;
-#endif
+#  endif
   PREFETCHW(l);
   COMPILER_NO_REORDER(l->curr++;);
   return 0;
