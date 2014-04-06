@@ -99,6 +99,8 @@ harris_find(intset_t* the_list, skey_t key)
     {
       node = get_unmarked_ref(node->next);
     }
+  /* node_t* l; */
+  /* node_t* node = list_search(the_list, key, &l); */
 
   if (node->key == key && !is_marked_ref(node->next)) 
     {
@@ -130,6 +132,7 @@ harris_insert(intset_t *the_list, skey_t key, sval_t val)
 	}
 
       node_to_add = new_node(key, val, right_node, 0);
+
 #ifdef __tile__
       MEM_BARRIER;
 #endif
@@ -179,7 +182,9 @@ harris_delete(intset_t *the_list, skey_t key)
 
   sval_t ret = right_node->val;
 
-  physical_delete_right(left_node, right_node);
+
+  right_node = list_search(the_list, key, &left_node);
+  
 
   return ret;
 }
@@ -187,7 +192,7 @@ harris_delete(intset_t *the_list, skey_t key)
 int
 set_size(intset_t *set)
 {
-  int size = 0;
+  size_t size = 0;
   node_t* node;
 
   /* We have at least 2 elements */
@@ -197,5 +202,6 @@ set_size(intset_t *set)
       if (!is_marked_ref(node->next)) size++;
       node = get_unmarked_ref(node->next);
     }
+
   return size;
 }

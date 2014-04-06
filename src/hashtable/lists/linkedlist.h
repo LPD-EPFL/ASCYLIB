@@ -46,7 +46,7 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct node
   sval_t val;
   struct node* next;
 #if defined(DO_PAD)
-  uint8_t padding[CACHE_LINE_SIZE - sizeof(val_t) - sizeof(key_t)];
+  uint8_t padding[CACHE_LINE_SIZE - sizeof(val_t) - sizeof(key_t) - sizeof(struct node*)];
 #endif
 } node_t;
 

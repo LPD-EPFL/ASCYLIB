@@ -46,7 +46,8 @@ typedef struct node
   sval_t val;
   struct node* next;
 #if defined(DO_PAD)
-  uint8_t padding[CACHE_LINE_SIZE - sizeof(val_t) - sizeof(key_t)];
+@warning We have padding
+uint8_t padding[CACHE_LINE_SIZE - sizeof(val_t) - sizeof(key_t) - sizeof(struct node*)];
 #endif
 } node_t;
 

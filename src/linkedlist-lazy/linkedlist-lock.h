@@ -60,7 +60,9 @@ typedef struct node_l
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;	/* 32 */
 #endif
-  char padding[CACHE_LINE_SIZE - 32];
+#if defined(DO_PAD)
+  uint8_t padding[CACHE_LINE_SIZE - sizeof(skey_t) - sizeof(sval_t) - sizeof(struct node*) - sizeof(uint8_t) - sizeof(ptlock_t)];
+#endif
 } node_l_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset_l 
