@@ -19,11 +19,11 @@ then
 fi;
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
-    LATENCY=1 INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k ticket
-    LATENCY=1 INIT=one $MAKE LBSL=pugh -k ticket
-    LATENCY=1 INIT=one $MAKE -k ticket
-    LATENCY=1 INIT=one $MAKE -k seq
-    LATENCY=1 INIT=one $MAKE -k lockfree
+    INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k ticket
+    INIT=one $MAKE LBSL=pugh -k ticket
+    INIT=one $MAKE -k ticket
+    INIT=one $MAKE -k seq
+    INIT=one $MAKE -k lockfree
 fi
 mv bin/* $ub;
 source scripts/config;
