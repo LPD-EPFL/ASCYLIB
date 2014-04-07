@@ -52,8 +52,8 @@ typedef struct node
 {
   skey_t key;
   sval_t val;
-  struct node *left;
-  struct node *right;
+  volatile struct node *left;
+  volatile struct node *right;
 } node_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset
