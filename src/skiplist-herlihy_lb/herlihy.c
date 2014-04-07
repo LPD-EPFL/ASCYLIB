@@ -338,7 +338,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 
 	  sval_t val = node_todel->val;
 #if GC == 1
-	  ssmem_free(alloc, node_todel);
+	  ssmem_free(alloc, (void*) node_todel);
 #endif
 
 	  UNLOCK(ND_GET_LOCK(node_todel));

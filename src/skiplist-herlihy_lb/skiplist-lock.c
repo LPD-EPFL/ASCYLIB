@@ -137,7 +137,7 @@ void
 sl_delete_node(sl_node_t *n)
 {
   DESTROY_LOCK(ND_GET_LOCK(n));
-  ssfree_alloc(1, n);
+  ssfree_alloc(1, (void*) n);
 }
 
 sl_intset_t*

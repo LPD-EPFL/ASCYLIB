@@ -164,7 +164,7 @@ fraser_remove(sl_intset_t *set, skey_t key)
 
       result = succs[0]->val;
 #if GC == 1
-      ssmem_free(alloc, succs[0]);
+      ssmem_free(alloc, (void*)succs[0]);
 #endif
       /* MEM_BARRIER; */
       fraser_search(set, key, NULL, NULL);

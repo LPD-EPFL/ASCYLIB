@@ -189,7 +189,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
   UNLOCK(ND_GET_LOCK(succ));
   GL_UNLOCK(set->lock);
 #if GC == 1
-      ssmem_free(alloc, succ);
+      ssmem_free(alloc, (void*) succ);
 #endif
 
   return succ->val;

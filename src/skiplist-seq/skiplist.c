@@ -91,6 +91,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
   size_t ns = sizeof(sl_node_t) + (levelmax + 1) * sizeof(sl_node_t *);
   if (transactional)
     {
+      printf(" size  is %u\n", ns);
       size_t ns_rm = ns & 63;
       if (ns_rm)
 	{

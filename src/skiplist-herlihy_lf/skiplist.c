@@ -145,7 +145,7 @@ sl_delete_node(sl_node_t *n)
 {
   /* free(n); */
 #if GC == 1
-  ssmem_free(alloc, n);
+  ssmem_free(alloc, (void*) n);
 #else
   ssfree(n);
 #endif

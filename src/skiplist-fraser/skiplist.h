@@ -54,13 +54,13 @@ extern __thread ssmem_allocator_t* alloc;
 
 typedef intptr_t level_t;
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct sl_node
+typedef volatile struct sl_node
 {
   skey_t key;
   sval_t val;
   uint32_t deleted;
   uint32_t toplevel;
-  struct sl_node* next[1];
+  volatile struct sl_node* next[1];
 #if defined(DO_PAD)
   uint8_t padding[64 - 32];
 #endif 

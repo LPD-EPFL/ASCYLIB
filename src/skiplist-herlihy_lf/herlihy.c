@@ -224,7 +224,7 @@ fraser_remove(sl_intset_t *set, skey_t key)
       result = node_del->val;
       fraser_search(set, key, NULL, NULL);
 #if GC == 1
-      ssmem_free(alloc, succs[0]);
+      ssmem_free(alloc, (void*) succs[0]);
 #endif
     }
 
