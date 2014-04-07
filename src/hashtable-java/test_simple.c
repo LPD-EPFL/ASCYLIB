@@ -222,7 +222,7 @@ test(void* thread)
 
   SSPFDTERM();
 #if GC == 1
-  ssmem_term();
+  /* ssmem_term(); */
   free(alloc);
 #endif
 
