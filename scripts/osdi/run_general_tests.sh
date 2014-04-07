@@ -19,9 +19,9 @@ then
 fi;
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
-    INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k ticket
-    INIT=one $MAKE LBSL=pugh -k ticket
-    INIT=one $MAKE -k ticket
+    INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k tas
+    INIT=one $MAKE LBSL=pugh -k tas
+    INIT=one $MAKE -k tas
     INIT=one $MAKE -k seq
     INIT=one $MAKE -k lockfree
 fi
