@@ -44,6 +44,7 @@ typedef volatile struct node
 {
   skey_t key;
   sval_t val;
+  uint8_t padding32[8];
   volatile struct node* next;
 #if defined(DO_PAD)
   uint8_t padding[CACHE_LINE_SIZE - sizeof(sval_t) - sizeof(skey_t) - sizeof(struct node*)];
