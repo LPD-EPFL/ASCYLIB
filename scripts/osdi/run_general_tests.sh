@@ -30,7 +30,7 @@ source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
 
-cores=$(seq 2 2 48)
+cores=$(seq 2 2 40)
 
 ll_algos="./${ub}/lb-ll_lazy ./${ub}/lb-ll_coupling ./${ub}/lb-ll_pugh ./${ub}/lb-ll_copy ./${ub}/lf-ll_harris ./${ub}/lf-ll_harris_opt ./${ub}/lf-ll_michael ./${ub}/sq-ll"
 do_ll=1

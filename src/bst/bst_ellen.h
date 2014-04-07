@@ -77,8 +77,8 @@ struct node_t {
     skey_t key;
     sval_t value;
     update_t update;
-    node_t* left;
-    node_t* right;
+    volatile node_t* left;
+    volatile node_t* right;
     bool_t leaf;
     uint8_t padding[CACHE_LINE_SIZE - sizeof(sval_t) - sizeof(skey_t) - sizeof(update_t) - 2*sizeof(uintptr_t) - sizeof(bool_t)];
 };

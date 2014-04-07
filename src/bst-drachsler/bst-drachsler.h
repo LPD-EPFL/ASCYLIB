@@ -43,11 +43,11 @@ extern __thread ssmem_allocator_t* alloc;
 typedef ALIGNED(64) struct node_t node_t;
 
 struct node_t {
-    node_t* left;
-    node_t* right;
-    node_t* parent;
-    node_t* succ;
-    node_t* pred;
+    volatile node_t* left;
+    volatile node_t* right;
+    volatile node_t* parent;
+    volatile node_t* succ;
+    volatile node_t* pred;
 #ifdef DO_DRACHSLER_REBALANCE
     int32_t left_height;
     int32_t right_height;
@@ -57,6 +57,7 @@ struct node_t {
     skey_t key;
     sval_t value;
     bool_t mark;
+    char padding[96-5*sizeof(uintptr_t)-2*sizeof(ptlock_t)-sizeof(sval_t)-sizeof(skey_t)-sizeof(bool_t)];
 };
 
 node_t* initialize_tree();
