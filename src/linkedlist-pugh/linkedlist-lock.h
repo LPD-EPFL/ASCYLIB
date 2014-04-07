@@ -48,8 +48,6 @@
 #define DEFAULT_ALTERNATE		0
 #define DEFAULT_EFFECTIVE		1
 
-#define PUGH_RO_FAIL RO_FAIL
-
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 

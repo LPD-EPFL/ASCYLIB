@@ -127,8 +127,14 @@ lbht_coupling_gl:
 lbht_pugh_gl:
 	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-pugh
 
+lbht_pugh_gl_no_ro:
+	$(MAKE) "LOCK=TAS" "G=GL" "RO_FAIL=0" src/hashtable-pugh
+
 lbht_lazy_gl:
 	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lazy
+
+lbht_lazy_gl_no_ro:
+	$(MAKE) "LOCK=TAS" "G=GL" "RO_FAIL=0" src/hashtable-lazy
 
 lbll_coupling:
 	$(MAKE) "LOCK=TAS" src/linkedlist-coupling
@@ -157,6 +163,9 @@ llcopy_no_ro:
 htcopy:
 	$(MAKE) "LOCK=TAS" src/hashtable-copy
 
+htcopy_no_ro:
+	$(MAKE) "LOCK=TAS" "RO_FAIL=0" src/hashtable-copy
+
 htcopygl:
 	$(MAKE) "LOCK=CLH" "G=GL" src/hashtable-copy
 
@@ -169,10 +178,13 @@ lbsl:
 htjava:
 	$(MAKE) "LOCK=TAS" src/hashtable-java
 
+htjava_no_ro:
+	$(MAKE) "LOCK=TAS" "RO_FAIL=0" src/hashtable-java
+
 htrcu:
 	$(MAKE) "LOCK=TAS" src/hashtable-rcu
 
-ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl
+ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl lbht_lazy_gl_no_ro lbht_pugh_gl_no_ro htcopy_no_ro htjava_no_ro
 
 seqbstint:
 	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/bst-seq_internal

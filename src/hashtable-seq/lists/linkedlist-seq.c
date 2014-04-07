@@ -92,7 +92,7 @@ void set_delete(intset_t *set)
   while (node != NULL) 
     {
       next = node->next;
-      ssfree(node);		/* TODO : fix with ssmem */
+      ssfree((void*) node);		/* TODO : fix with ssmem */
       node = next;
     }
   ssfree(set);

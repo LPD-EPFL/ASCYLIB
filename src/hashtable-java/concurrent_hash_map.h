@@ -13,6 +13,7 @@
  * parameters
  */
 
+#define CHM_READ_ONLY_FAIL              RO_FAIL
 #define CHM_NUM_SEGMENTS                128
 
 /* 

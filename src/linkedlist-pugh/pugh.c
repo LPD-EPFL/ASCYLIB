@@ -3,10 +3,6 @@
  *   pugh.c
  * Author(s):
  * Description:
- *   Lazy linked list implementation of an integer set based on Heller et al. algorithm
- *   "A Lazy Concurrent List-Based Set Algorithm"
- *   S. Heller, M. Herlihy, V. Luchangco, M. Moir, W.N. Scherer III, N. Shavit
- *   p.3-16, OPODIS 2005
  *
  * Copyright (c) 2009-2010.
  *
@@ -65,7 +61,7 @@ search_strong(intset_l_t* set, skey_t key, node_l_t** right)
   GL_LOCK(set->lock);
   LOCK(ND_GET_LOCK(pred));
   node_l_t* succ = pred->next;
-  while (unlikely(succ->key < key))
+nnpnp  while (unlikely(succ->key < key))
     {
       UNLOCK(ND_GET_LOCK(pred));
       pred = succ;

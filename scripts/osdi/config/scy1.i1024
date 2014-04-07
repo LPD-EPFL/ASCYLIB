@@ -5,16 +5,15 @@ LATENCY_POINTS=256
 LATENCY_MERGE=1
 
 reps=21;
-keep=max 			# min, median, or max
+keep=median 			# min, median, or max
 duration=1000;
 initials="1024";
 updates="5";
-cores="all";
+cores="two";
 cores_pow="all"
 
 COMPILE_FLAGS="SET_CPU=1"
-skip_thr=0;
-skip_lat=0;
-skip_ldi=0;
+skip_thr=1;
+skip_lat=1;
+skip_ldi=1;
 skip_pow=0;
-

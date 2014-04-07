@@ -60,7 +60,7 @@ void set_delete(intset_t *set)
   node = set->head;
   while (node != NULL) {
     next = node->next;
-    free(node);
+    free((void*) node);
     node = next;
   }
   free(set);

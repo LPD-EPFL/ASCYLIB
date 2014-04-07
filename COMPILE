@@ -19,7 +19,8 @@ You may pass the following settings to `make`:
       	    pugh    : compile with Pugh's lock-based lazy  skip list algo
     * SET_CPU=0 : does not pin threads to cores (does this by default) 
     * POWER=1 : enable power measurements with rapl_read library (default is 0)      	    
-    * RO_FAIL=0 : disables read-only unsuccessful updates in ll_copy and ll_lazy
+    * RO_FAIL=0 : disables read-only unsuccessful updates in linked lists (pugh, lazy, copy) 
+      		  and hash tables (pug, lazy, copy, lea:java)
     * STATS=1 : enable extra stats (about retries)
     * PAD=1 : enabled node padding. NB. not all data structures support this properly for now
 Example:

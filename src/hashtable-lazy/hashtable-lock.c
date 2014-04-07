@@ -42,7 +42,7 @@ ht_delete(ht_intset_t *set)
 	{
 	  next = node->next;
 	  /* free(node); */
-	  ssfree(node);		/* TODO: fix with ssmem */
+	  ssfree((void*) node);		/* TODO: fix with ssmem */
 	  node = next;
 	}
     }
