@@ -398,6 +398,11 @@ main(int argc, char **argv)
   stop = 0;
     
   levelmax = floor_log_2((unsigned int) initial);
+  size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
+  while (size_pad_32 & 31)
+    {
+      size_pad_32++;
+    }
 
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);

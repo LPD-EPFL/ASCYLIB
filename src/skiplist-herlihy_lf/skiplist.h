@@ -47,7 +47,7 @@
 #define DEFAULT_ALTERNATE               0
 #define DEFAULT_EFFECTIVE               1
 
-extern unsigned int levelmax;
+extern unsigned int levelmax, size_pad_32;
 extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   DEFAULT_ELASTICITY

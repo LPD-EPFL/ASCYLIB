@@ -49,7 +49,7 @@
 extern unsigned int global_seed;
 extern __thread ssmem_allocator_t* alloc;
 
-extern unsigned int levelmax;
+extern unsigned int levelmax, size_pad_32;
 
 typedef volatile struct sl_node
 {

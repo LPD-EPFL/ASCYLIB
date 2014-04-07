@@ -47,14 +47,14 @@
 #define DEFAULT_ALTERNATE               0
 #define DEFAULT_EFFECTIVE               1
 
-extern unsigned int levelmax;
+extern unsigned int levelmax, size_pad_32;
 extern __thread ssmem_allocator_t* alloc;
 
 #define TRANSACTIONAL                   DEFAULT_ELASTICITY
 
 typedef intptr_t level_t;
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct sl_node
+typedef struct sl_node
 {
   skey_t key;
   sval_t val;

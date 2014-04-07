@@ -2,6 +2,7 @@
 #include "utils.h"
 
 unsigned int levelmax;
+unsigned int size_pad_32;
 
 #define MAX_BACKOFF 131071
 #define HERLIHY_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
