@@ -30,7 +30,7 @@ source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
 
-cores=$(seq 2 2 40)
+cores=$(seq 2 2 48)
 
 ll_algos="./${ub}/lb-ll_lazy ./${ub}/lb-ll_coupling ./${ub}/lb-ll_pugh ./${ub}/lb-ll_copy ./${ub}/lf-ll_harris ./${ub}/lf-ll_harris_opt ./${ub}/lf-ll_michael ./${ub}/sq-ll"
 do_ll=1
@@ -41,7 +41,7 @@ do_ht=1
 bst_algos="./${ub}/lf-bst ./${ub}/lb-bst-drachsler ./${ub}/lf-bst-aravind ./${ub}/lf-bst-howley ./${ub}/lb-bst2 ./${ub}/sq-bst_external ./${ub}/sq-bst_internal"
 do_bst=1
 
-num_repetitions=15
+num_repetitions=25
 
 #default duration
 def_duration=300
@@ -52,14 +52,14 @@ base_range=8192
 base_update=10
 
 #parameters for the high contention experiment
-high_initial=256
-high_range=512
-high_update=50
+high_initial=512
+high_range=1024
+high_update=25
 high_cores=20
 
 #parameters for the low contention experiment
-low_initial=8192
-low_range=16384
+low_initial=16384
+low_range=32768
 low_update=10
 low_cores=20
 
