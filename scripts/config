@@ -173,7 +173,7 @@ then
     else
 	cores=$(seq 5 1 8);
     fi;
-elif [ "$cores" = "eights" ];
+elif [ "$cores" = "eight" ];
 then
     cores=$(seq 8 8 $max_cores);
 elif [ "$cores" = "to256" ];
