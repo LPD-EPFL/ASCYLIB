@@ -78,7 +78,7 @@ void
 node_delete(node_t *node) 
 {
 #if GC == 1
-  ssmem_free(alloc, node);
+  ssmem_free(alloc, (void*) node);
 #else
 
 #endif
