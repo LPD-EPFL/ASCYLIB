@@ -24,6 +24,7 @@
 #include "skiplist.h"	
 
 unsigned int levelmax;
+unsigned int size_pad_32;
 __thread ssmem_allocator_t* alloc;
 
 inline int
@@ -66,19 +67,19 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
   if (unlikely(transactional))
     {
       /* use levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
-      size_t ns = sizeof(sl_node_t) + (levelmax + 1) * sizeof(sl_node_t *);
+      size_t ns = size_pad_32;
       size_t ns_rm = ns & 63;
       if (ns_rm)
-	{
-	  ns += 64 - ns_rm;
-	}
-      node = (sl_node_t *)ssalloc(ns);
+      	{
+      	  ns += 64 - ns_rm;
+      	}
+      node = (sl_node_t*) ssalloc(ns);
     }
   else 
     {
-      size_t ns = sizeof(sl_node_t) + (levelmax + 1) * sizeof(sl_node_t *);
+      size_t ns = size_pad_32;
 #  if defined(DO_PAD)
-      size_t ns_rm = ns & 63;
+      size_t ns_rm = size_pad_32;
       if (ns_rm)
 	{
 	  ns += 64 - ns_rm;
@@ -88,7 +89,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
     }
 #else
   /* use levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
-  size_t ns = sizeof(sl_node_t) + (levelmax + 1) * sizeof(sl_node_t *);
+  size_t ns = size_pad_32;
   if (transactional)
     {
       size_t ns_rm = ns & 63;
@@ -145,7 +146,7 @@ sl_delete_node(sl_node_t *n)
 {
   /* free(n); */
 #if GC == 1
-  ssmem_free(alloc, n);
+  ssmem_free(alloc, (void*) n);
 #else
   ssfree(n);
 #endif

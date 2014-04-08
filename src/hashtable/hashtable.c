@@ -37,7 +37,7 @@ void ht_delete(ht_intset_t *set)
       while (node != NULL) 
 	{
 	  next = node->next;
-	  free(node);
+	  free((void*) node);
 	  node = next;
 	}
     }

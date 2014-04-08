@@ -31,12 +31,12 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(k,r)  bst_find(k,r)
-#define DS_ADD(k,r)       bst_insert(k,(k+4),r)
-#define DS_REMOVE(k,r)    bst_delete(k,r)
+#define DS_CONTAINS(k,r,t)  bst_find(r,k)
+#define DS_ADD(k,r,t)       bst_insert(r,(r+4),k)
+#define DS_REMOVE(k,r,t)    bst_delete(r,k)
 #define DS_SIZE(s)          bst_size(s)
-#define DS_NEW()           bst_initialize()
-#define DS_LOCAL()         bst_init_local()
+#define DS_NEW()            bst_initialize()
+#define DS_LOCAL()          bst_init_local()
 
 #define DS_TYPE             node_t
 #define DS_NODE             node_t
@@ -165,7 +165,7 @@ test(void* thread)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(key,set) == false)
+      if(DS_ADD(set,key,NULL) == false)
 	{
 	  i--;
 	}
@@ -179,57 +179,13 @@ test(void* thread)
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
-  DS_NODE* search_res;
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
 
   while (stop == 0) 
     {
-      c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
-      key = (c & rand_max) + rand_min;
-
-      if (unlikely(c <= scale_put))
-	{
-      bool_t res;
-	  START_TS(1);
-	  res = DS_ADD(key, set);
-	  END_TS(1, my_putting_count);
-	  if(res)
-	    {
-	      ADD_DUR(my_putting_succ);
-	      my_putting_count_succ++;
-	    }
-	  ADD_DUR_FAIL(my_putting_fail);
-	  my_putting_count++;
-	} 
-      else if(unlikely(c <= scale_rem))
-	{
-	  sval_t removed;
-	  START_TS(2);
-	  removed = DS_REMOVE(key,set);
-	  END_TS(2, my_removing_count);
-	  if(removed != 0) 
-	    {
-	      ADD_DUR(my_removing_succ);
-	      my_removing_count_succ++;
-	    }
-	  ADD_DUR_FAIL(my_removing_fail);
-	  my_removing_count++;
-	}
-      else
-	{ 
-	  START_TS(0);
-	  search_res = DS_CONTAINS(key, set);
-	  END_TS(0, my_getting_count);
-	  if(search_res!=NULL) 
-	    {
-	      ADD_DUR(my_getting_succ);
-	      my_getting_count_succ++;
-	    }
-	  ADD_DUR_FAIL(my_getting_fail);
-	  my_getting_count++;
-	}
+      TEST_LOOP(NULL);
     }
 
   barrier_cross(&barrier);

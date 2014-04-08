@@ -17,7 +17,7 @@
 #define CHM_LOAD_FACTOR                 0.75
 #define CHM_TRY_PREFETCH                0
 #define CHM_MAX_SCAN_RETRIES            64
-
+#define CHM_READ_ONLY_FAIL              RO_FAIL
 /* 
  * structures
  */

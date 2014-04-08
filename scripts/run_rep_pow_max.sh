@@ -20,8 +20,8 @@ do
     ppw=$(echo "$thr/$pow" | bc -l);
     eop=$(echo "$out" | awk '/#Energy per Operation/ { print $8 }' | sed 's/)//g');
 
-    printf "%d %.2f %f %f \n" $thr $s$ppw $s$pow $s$eop >> $tmp;
+    printf "%d %.2f %f %f \n" $thr $ppw $pow $eop >> $tmp;
 done;
 
-sort -n $tmp | grep -v "-" | tail -n1
+sort -n -k4 $tmp | grep -v "-" | head -n1
 

@@ -13,9 +13,9 @@
 __thread ssmem_allocator_t* alloc;
 
 node_t*
-new_node(skey_t key, sval_t val, node_t *next, int initializing)
+new_node(skey_t key, sval_t val, node_t* next, int initializing)
 {
-  volatile node_t *node;
+  volatile node_t* node;
 
 #if GC == 1
   if (unlikely(initializing))
@@ -69,7 +69,7 @@ void set_delete(intset_t *set)
   node = set->head;
   while (node != NULL) {
     next = node->next;
-    free(node);
+    free((void*) node);
     node = next;
   }
   free(set);

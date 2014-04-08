@@ -1,0 +1,1 @@
+./bin/sq-bst_internal ./bin/sq-bst_external ./bin/lb-bst2 ./bin/lb-bst-drachsler ./bin/lf-bst  ./bin/lf-bst-howley ./bin/lf-bst-aravind

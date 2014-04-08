@@ -53,16 +53,17 @@ extern __thread ssmem_allocator_t* alloc;
 
 #define ALGO_TYPE                   algo_type
 
-typedef struct node_l
+typedef ALIGNED(32) volatile struct node_l
 {
   skey_t key;
   sval_t val;
-  struct node_l* next;
-  uint8_t marked;
+  volatile struct node_l* next;
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;
 #endif
 } node_l_t;
+
+STATIC_ASSERT(sizeof(node_l_t) % 32 == 0, "sizeof(node_l_t) should be 32bytes aligned");
 
 typedef struct intset_l 
 {
@@ -70,7 +71,7 @@ typedef struct intset_l
 #if defined(LL_GLOBAL_LOCK)
   volatile ptlock_t* lock;
 #endif
-}intset_l_t;
+} intset_l_t;
 
 node_l_t* new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing);
 void bucket_set_init_l(intset_l_t* set, ptlock_t* lock);

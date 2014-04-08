@@ -19,8 +19,8 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _H_LINKEDLIST_LOCK_
-#define _H_LINKEDLIST_LOCK_
+#ifndef _H_LINKEDLIST_SEQ_
+#define _H_LINKEDLIST_SEQ_
 
 #include <assert.h>
 #include <getopt.h>
@@ -48,11 +48,12 @@
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct node
+typedef struct node
 {
   skey_t key;
   sval_t val;
-  struct node *next;
+  uint8_t padding32[8];
+  struct node* next;
 } node_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset
@@ -66,4 +67,4 @@ void set_delete(intset_t* set);
 int set_size(intset_t* set);
 void node_delete(node_t* node);
 
-#endif	/* _H_LINKEDLIST_LOCK_ */
+#endif	/* _H_LINKEDLIST_SEQ_ */

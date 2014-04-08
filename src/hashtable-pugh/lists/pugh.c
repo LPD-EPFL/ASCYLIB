@@ -3,10 +3,6 @@
  *   pugh.c
  * Author(s):
  * Description:
- *   Lazy linked list implementation of an integer set based on Heller et al. algorithm
- *   "A Lazy Concurrent List-Based Set Algorithm"
- *   S. Heller, M. Herlihy, V. Luchangco, M. Moir, W.N. Scherer III, N. Shavit
- *   p.3-16, OPODIS 2005
  *
  * Copyright (c) 2009-2010.
  *
@@ -25,6 +21,8 @@
 
 
 #include "pugh.h"
+
+RETRY_STATS_VARS;
 
 /********************************************************************************* 
  * help search functions
@@ -74,9 +72,34 @@ search_strong(intset_l_t* set, skey_t key, node_l_t** right)
   return pred;
 }
 
+static inline node_l_t*
+search_strong_cond(intset_l_t* set, skey_t key, node_l_t** right, int equal)
+{
+  node_l_t* pred = search_weak_left(set, key);
+  node_l_t* succ = pred->next;
+  if (((succ != NULL) && (succ->key == key)) == equal)
+    {
+      return 0;
+    }
+
+  GL_LOCK(set->lock);
+  LOCK(ND_GET_LOCK(pred));
+  succ = pred->next;
+  while (succ != NULL && unlikely(succ->key < key))
+    {
+      UNLOCK(ND_GET_LOCK(pred));
+      pred = succ;
+      LOCK(ND_GET_LOCK(pred));
+      succ = pred->next;
+    }
+  *right = succ;
+  return pred;
+}
+
 sval_t
 list_search(intset_l_t* set, skey_t key)
 {
+  PARSE_TRY();
   node_l_t* right = search_weak_right(set, key);
   if (right != NULL && right->key == key)
     {
@@ -89,10 +112,21 @@ list_search(intset_l_t* set, skey_t key)
 int
 list_insert(intset_l_t* set, skey_t key, sval_t val)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
   int result = 1;
   node_l_t* right;
   /* optimize for step-wise strong search:: if found, return before locking! */
+#if PUGH_RO_FAIL == 1
+  node_l_t* left = search_strong_cond(set, key, &right, 1);
+  if (left == NULL)
+    { 
+      return 0; 
+    }
+#else
   node_l_t* left = search_strong(set, key, &right);
+#endif
+
   if (right != NULL && right->key == key)
     {
       result = 0;
@@ -111,9 +145,21 @@ list_insert(intset_l_t* set, skey_t key, sval_t val)
 sval_t
 list_delete(intset_l_t* set, skey_t key)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
   sval_t result = 0;
   node_l_t* right;
-  node_l_t* left = search_strong(set, key, &right);   /* TODO:: optimize for step-wise strong search!! */
+
+#if PUGH_RO_FAIL == 1
+  node_l_t* left = search_strong_cond(set, key, &right, 0);
+  if (left == NULL)
+    { 
+      return 0; 
+    }
+#else
+  node_l_t* left = search_strong(set, key, &right);
+#endif
+
   if (right != NULL && right->key == key)
     {
       LOCK(ND_GET_LOCK(right));
@@ -122,7 +168,7 @@ list_delete(intset_l_t* set, skey_t key)
       right->next = left;
       UNLOCK(ND_GET_LOCK(right));
 #if GC == 1
-      ssmem_free(alloc, right);
+      ssmem_free(alloc, (void*) right);
 #endif
     }
   UNLOCK(ND_GET_LOCK(left));

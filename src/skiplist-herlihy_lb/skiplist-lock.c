@@ -25,6 +25,7 @@
 #include "utils.h"
 
 unsigned int levelmax;
+unsigned int size_pad_32;
 __thread ssmem_allocator_t* alloc;
 
 inline int
@@ -66,7 +67,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
   if (unlikely(transactional))
     {
       /* use levelmax instead of toplevel in order to be able to use the ssalloc allocator */
-      size_t ns = sizeof(sl_node_t) + (levelmax + 1) * sizeof(sl_node_t *);
+      size_t ns = size_pad_32;
       size_t ns_rm = ns & 63;
       if (ns_rm)
 	{
@@ -76,7 +77,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
     }
   else 
     {
-      size_t ns = sizeof(sl_node_t) + (levelmax + 1) * sizeof(sl_node_t *);
+      size_t ns = size_pad_32;
 #  if defined(DO_PAD)
       size_t ns_rm = ns & 63;
       if (ns_rm)
@@ -87,7 +88,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
       node = (sl_node_t*) ssmem_alloc(alloc, ns);
     }
 #else
-  size_t ns = sizeof(sl_node_t) + (levelmax + 1) * sizeof(sl_node_t *);
+  size_t ns = size_pad_32;
   if (transactional)
     {
       size_t ns_rm = ns & 63;
@@ -137,7 +138,7 @@ void
 sl_delete_node(sl_node_t *n)
 {
   DESTROY_LOCK(ND_GET_LOCK(n));
-  ssfree_alloc(1, n);
+  ssfree_alloc(1, (void*) n);
 }
 
 sl_intset_t*

@@ -44,15 +44,16 @@ typedef struct node
     sval_t val;
     int leaf;
   };
-  struct node *left;
-  struct node *right;
+  volatile struct node *left;
+  volatile struct node *right;
 } node_t;
 
 typedef struct rnode
 {
   skey_t key;
-  struct node *left;
-  struct node *right;
+  volatile struct node *left;
+  volatile struct node *right;
+  char padding[32-2*sizeof(uintptr_t)-sizeof(key_t)];
 } rnode_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset

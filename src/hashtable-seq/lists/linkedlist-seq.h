@@ -51,17 +51,20 @@
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
-typedef struct node
+typedef ALIGNED(32) volatile struct node
 {
   skey_t key;
   sval_t val;
-  struct node* next;
+  uint8_t padding32[8];
+  volatile struct node* next;
+  /* uint8_t padding[32]; */
 } node_t;
 
 typedef struct intset 
 {
   node_t* head;
-}intset_t;
+  /* uint8_t padding[CACHE_LINE_SIZE - sizeof(node_t*)]; */
+} intset_t;
 
 node_t* new_node(skey_t key, sval_t val, node_t* next, int initializing);
 void bucket_set_init(intset_t* set);

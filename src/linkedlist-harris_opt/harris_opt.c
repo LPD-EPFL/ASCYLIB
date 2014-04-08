@@ -9,6 +9,8 @@
 
 #include "linkedlist.h"
 
+RETRY_STATS_VARS;
+
 /*
  * The five following functions handle the low-order mark bit that indicates
  * whether a node is logically deleted (1) or not (0).
@@ -43,11 +45,12 @@ physical_delete_right(node_t* left_node, node_t* right_node)
 #if GC == 1
   if (likely(removed))
     {
-      ssmem_free(alloc, res);
+      ssmem_free(alloc, (void*) res);
     }
 #endif
   return removed;
 }
+
 
 /*
  * list_search looks for value val, it
@@ -60,16 +63,12 @@ physical_delete_right(node_t* left_node, node_t* right_node)
 static inline node_t* 
 list_search(intset_t* set, skey_t key, node_t** left_node_ptr) 
 {
+  PARSE_TRY();
   node_t* left_node = set->head;
   node_t* right_node = set->head->next;
   while(1)
     {
-      node_t* right_node_nxt = right_node->next;
-      if (unlikely(is_marked_ref(right_node_nxt)))
-	{
-	  physical_delete_right(left_node, right_node);
-	}
-      else 
+      if (likely(!is_marked_ref(right_node->next)))
 	{
 	  if (unlikely(right_node->key >= key))
 	    {
@@ -77,7 +76,12 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
 	    }
 	  left_node = right_node;
 	}
-      right_node = get_unmarked_ref(right_node_nxt);
+      else 
+	{
+	  CLEANUP_TRY();
+	  physical_delete_right(left_node, right_node);
+	}
+      right_node = get_unmarked_ref(right_node->next);
     }
   *left_node_ptr = left_node;
   return right_node;
@@ -90,10 +94,13 @@ sval_t
 harris_find(intset_t* the_list, skey_t key)
 {
   node_t* node = the_list->head->next;
+  PARSE_TRY();
   while(likely(node->key < key))
     {
       node = get_unmarked_ref(node->next);
     }
+  /* node_t* l; */
+  /* node_t* node = list_search(the_list, key, &l); */
 
   if (node->key == key && !is_marked_ref(node->next)) 
     {
@@ -110,32 +117,30 @@ harris_find(intset_t* the_list, skey_t key)
 int
 harris_insert(intset_t *the_list, skey_t key, sval_t val)
 {
-  node_t* cas_result;
-  node_t* right_node;
-  node_t* node_to_add = NULL;
-
   do
     {
+      UPDATE_TRY();
       node_t* left_node;
-      right_node = list_search(the_list, key, &left_node);
+      node_t* right_node = list_search(the_list, key, &left_node);
       if (right_node->key == key) 
 	{
 	  return 0;
 	}
 
-      node_to_add = new_node(key, val, right_node, 0);
+      node_t* node_to_add = new_node(key, val, right_node, 0);
+
 #ifdef __tile__
       MEM_BARRIER;
 #endif
       // Try to swing left_node's unmarked next pointer to a new node
-      cas_result = CAS_PTR(&left_node->next, right_node, node_to_add);
-      if (likely(cas_result == right_node))
+
+      if (CAS_PTR(&left_node->next, right_node, node_to_add) == right_node)
 	{
 	  return 1;
 	}
 
 #if GC == 1
-      ssmem_free(alloc, node_to_add);
+      ssmem_free(alloc, (void*) node_to_add);
 #endif
     } 
   while (1);
@@ -156,6 +161,7 @@ harris_delete(intset_t *the_list, skey_t key)
   
   do
     {
+      UPDATE_TRY();
       right_node = list_search(the_list, key, &left_node);
 
       if (right_node->key != key)
@@ -180,7 +186,7 @@ harris_delete(intset_t *the_list, skey_t key)
 int
 set_size(intset_t *set)
 {
-  int size = 0;
+  size_t size = 0;
   node_t* node;
 
   /* We have at least 2 elements */
@@ -190,5 +196,6 @@ set_size(intset_t *set)
       if (!is_marked_ref(node->next)) size++;
       node = get_unmarked_ref(node->next);
     }
+
   return size;
 }

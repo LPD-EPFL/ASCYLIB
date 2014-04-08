@@ -211,8 +211,26 @@ chm_get(chm_t* set, skey_t key)
   return 0;
 }
 
+static inline int
+chm_contains(chm_t* set, chm_seg_t* seg, skey_t key)
+{
+  chm_node_t** bucket = &seg->table[hash(key, set->hash_seed) & seg->hash];
+  chm_node_t* curr = *bucket;
 
-static void
+  while (curr != NULL)
+    {
+      if (curr->key == key)
+	{
+	  return 1;
+	}
+      curr = curr->next;
+    }
+
+  return 0;
+}
+
+
+static void UNUSED
 chm_put_prefetch(chm_seg_t* seg, int hash_seed,skey_t key)
 {
   chm_node_t** bucket =  &seg->table[hash(key, hash_seed) & seg->hash];
@@ -242,10 +260,17 @@ chm_put_prefetch(chm_seg_t* seg, int hash_seed,skey_t key)
 int
 chm_put(chm_t* set, skey_t key, sval_t val)
 {
-  int seg_num = key & set->hash;
-
   volatile chm_seg_t* seg;
   volatile ptlock_t* seg_lock;
+  int seg_num = key & set->hash;
+
+#if CHM_READ_ONLY_FAIL == 1
+  seg = set->segments[seg_num];
+  if (chm_contains(set, seg, key) != 0)
+    {
+      return 0;
+    }
+#endif
 
 #if CHM_TRY_PREFETCH == 1
   int walks = 0;
@@ -307,7 +332,7 @@ chm_put(chm_t* set, skey_t key, sval_t val)
 }
 
 
-static void
+static void UNUSED
 chm_rem_prefetch(chm_seg_t* seg, int hash_seed, skey_t key)
 {
   chm_node_t** bucket =  &seg->table[hash(key, hash_seed) & seg->hash];
@@ -335,10 +360,18 @@ chm_rem_prefetch(chm_seg_t* seg, int hash_seed, skey_t key)
 sval_t
 chm_rem(chm_t* set, skey_t key)
 {
-  int seg_num = key & set->hash;
-
   volatile chm_seg_t* seg;
   volatile ptlock_t* seg_lock;
+  int seg_num = key & set->hash;
+
+#if CHM_READ_ONLY_FAIL == 1
+  seg = set->segments[seg_num];
+  if (chm_contains(set, seg, key) == 0)
+    {
+      return 0;
+    }
+#else
+#endif
 
 #if CHM_TRY_PREFETCH == 1
   int walks = 0;

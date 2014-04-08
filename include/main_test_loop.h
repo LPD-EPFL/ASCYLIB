@@ -120,11 +120,14 @@
 	  static_pow += static_power[si + 1];				\
 	}								\
     }									\
-  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS] - pow_tot_correction - static_pow; \
+  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS] - 0; \
   printf("#Total Power Corrected                     : %11f (correction= %10f) W\n",  pow_tot_corrected, pow_tot_correction + static_pow); \
   double eop = (1e6 * s.power_total[NUMBER_OF_SOCKETS]) / throughput;	\
   double eop_corrected = (1e6 * pow_tot_corrected) / throughput;	\
   printf("#Energy per Operation                      : %11f (corrected = %10f) uJ\n", eop, eop_corrected);
+
+  /* double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS] - pow_tot_correction - static_pow; \ */
+
 
 #else
 #  define RR_PRINT_CORRECTED()

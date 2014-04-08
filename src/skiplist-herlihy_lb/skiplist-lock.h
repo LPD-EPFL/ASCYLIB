@@ -49,9 +49,9 @@
 extern unsigned int global_seed;
 extern __thread ssmem_allocator_t* alloc;
 
-extern unsigned int levelmax;
+extern unsigned int levelmax, size_pad_32;
 
-typedef ALIGNED(64) struct sl_node
+typedef volatile struct sl_node
 {
   skey_t key;
   sval_t val; 
@@ -64,10 +64,10 @@ typedef ALIGNED(64) struct sl_node
 #if !defined(LL_GLOBAL_LOCK)
   ptlock_t lock;
 #endif
-  struct sl_node* next[1];
+  volatile struct sl_node* next[1];
 } sl_node_t;
 
-typedef ALIGNED(64) struct sl_intset 
+typedef ALIGNED(CACHE_LINE_SIZE) struct sl_intset 
 {
   sl_node_t *head;
 #if defined(LL_GLOBAL_LOCK)

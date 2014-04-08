@@ -287,6 +287,17 @@ ifeq ($(LATENCY),3)
 	LDFLAGS += $(SSPFD) -lm
 endif
 
+ifeq ($(LATENCY),4)
+	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS -DUSE_SSPFD -DLATENCY_PARSING=1
+	LDFLAGS += $(SSPFD) -lm
+endif
+
+ifeq ($(LATENCY),5)
+	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS -DUSE_SSPFD -DLATENCY_PARSING=1 -DLATENCY_ALL_CORES=1
+	LDFLAGS += $(SSPFD) -lm
+endif
+
+
 ifeq ($(INIT),all)
 	CFLAGS += -DINITIALIZE_FROM_ONE=0
 else
@@ -308,4 +319,12 @@ endif
 ifeq ($(POWER),1)
 	CFLAGS += -DRAPL_READ_ENABLE=1
 	LDFLAGS += -lraplread -lm
+endif
+
+ifeq ($(STATS),1)
+	CFLAGS += -DRETRY_STATS=1
+endif
+
+ifeq ($(PAD),1)
+	CFLAGS += -DDO_PAD=1
 endif

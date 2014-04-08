@@ -36,8 +36,8 @@ typedef ALIGNED(64) struct node_t node_t;
 struct node_t{
     skey_t key;
     sval_t value;
-    node_t* right;
-    node_t* left;
+    volatile node_t* right;
+    volatile node_t* left;
 };
 
 #ifndef __tile__

@@ -28,7 +28,7 @@
 #define _H_LAZY_
 #include "linkedlist-lock.h"
 
-#define LAZY_RO_FAIL 1
+#define LAZY_RO_FAIL RO_FAIL
 
 
 /* linked list accesses */

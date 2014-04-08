@@ -44,6 +44,8 @@
  * GLOBALS
  * ################################################################### */
 
+RETRY_STATS_VARS_GLOBAL;
+
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
 size_t update = DEFAULT_UPDATE;
@@ -177,6 +179,8 @@ test(void* thread)
     }
 
 
+  RETRY_STATS_ZERO();
+
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
@@ -216,6 +220,7 @@ test(void* thread)
   EXEC_IN_DEC_ID_ORDER(ID, num_threads)
     {
       print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
+      RETRY_STATS_SHARE();
     }
   EXEC_IN_DEC_ID_ORDER_END(&barrier);
 
@@ -393,6 +398,11 @@ main(int argc, char **argv)
   stop = 0;
     
   levelmax = floor_log_2((unsigned int) initial);
+  size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
+  while (size_pad_32 & 31)
+    {
+      size_pad_32++;
+    }
 
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
@@ -531,17 +541,8 @@ main(int argc, char **argv)
   printf("#Mops %.3f\n", throughput / 1e6);
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
-#if RAPL_READ_ENABLE == 1
-  rapl_stats_t s;
-  RR_STATS(&s);
-  double pow_tot_correction = (throughput * eng_per_test_iter_nj[num_threads-1][0]) / 1e9;
-  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS] - pow_tot_correction;
-  printf("#Total Power Corrected                     : %11f (correction= %10f) W\n",  pow_tot_corrected, pow_tot_correction);
-
-  double eop = (1e6 * s.power_total[NUMBER_OF_SOCKETS]) / throughput;
-  double eop_corrected = (1e6 * pow_tot_corrected) / throughput;
-  printf("#Energy per Operation                      : %11f (corrected = %10f) uJ\n", eop, eop_corrected);
-#endif    
+  RR_PRINT_CORRECTED();
+  RETRY_STATS_PRINT(total, putting_count_total, removing_count_total, putting_count_total_succ + removing_count_total_succ);    
     
   pthread_exit(NULL);
     

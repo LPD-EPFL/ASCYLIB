@@ -9,6 +9,8 @@
 
 #include "linkedlist.h"
 
+RETRY_STATS_VARS;
+
 /*
  * The five following functions handle the low-order mark bit that indicates
  * whether a node is logically deleted (1) or not (0).
@@ -57,7 +59,7 @@ physical_delete_right(node_t* left_node, node_t* right_node)
 #if GC == 1
   if (removed)
     {
-      ssmem_free(alloc, res);
+      ssmem_free(alloc, (void*) res);
     }
 #endif
   return removed;
@@ -77,6 +79,8 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
   node_t* left_node;
   node_t* right_node;
  retry:
+  PARSE_TRY();
+
   left_node = set->head;
   right_node = set->head->next;
   while(1)
@@ -88,6 +92,7 @@ list_search(intset_t* set, skey_t key, node_t** left_node_ptr)
 
       if (is_marked_ref((long)right_node->next)) 
 	{
+	  CLEANUP_TRY();
 	  if (!physical_delete_right(left_node, right_node))
 	    {
 	      goto retry;
@@ -136,6 +141,7 @@ michael_insert(intset_t *the_list, skey_t key, sval_t val)
 
   do
     {
+      UPDATE_TRY();
       node_t* left_node;
       right_node = list_search(the_list, key, &left_node);
       if (right_node->key == key) 
@@ -143,7 +149,7 @@ michael_insert(intset_t *the_list, skey_t key, sval_t val)
 #if GC == 1
 	  if (unlikely(node_to_add != NULL))
 	    {
-	      ssmem_free(alloc, node_to_add);
+	      ssmem_free(alloc, (void*) node_to_add);
 	    }
 #endif
 	  return 0;
@@ -182,6 +188,7 @@ michael_delete(intset_t *the_list, skey_t key)
   
   do
     {
+      UPDATE_TRY();
       right_node = list_search(the_list, key, &left_node);
 
       if (right_node->key != key)
@@ -199,7 +206,7 @@ michael_delete(intset_t *the_list, skey_t key)
   sval_t ret = right_node->val;
 
   physical_delete_right(left_node, right_node);
-
+  
   return ret;
 }
 

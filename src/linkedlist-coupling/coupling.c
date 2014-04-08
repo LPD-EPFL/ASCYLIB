@@ -23,6 +23,8 @@
 
 #include "coupling.h"
 
+RETRY_STATS_VARS;
+
 /* 
  * Similar algorithm for the delete, find, and insert:
  * Lock the first two elements (locking each before getting the copy of the element)
@@ -31,6 +33,9 @@
 sval_t
 lockc_delete(intset_l_t *set, skey_t key)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
+
   node_l_t *curr, *next;
   sval_t res = 0;
 	
@@ -69,6 +74,8 @@ lockc_delete(intset_l_t *set, skey_t key)
 sval_t
 lockc_find(intset_l_t *set, skey_t key) 
 {
+  PARSE_TRY();
+
   node_l_t *curr, *next; 
   sval_t res = 0;
 	
@@ -98,6 +105,9 @@ lockc_find(intset_l_t *set, skey_t key)
 int
 lockc_insert(intset_l_t *set, skey_t key, sval_t val) 
 {
+  PARSE_TRY();
+  UPDATE_TRY();
+
   node_l_t *curr, *next, *newnode;
   int found;
 	

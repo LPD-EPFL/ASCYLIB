@@ -52,7 +52,6 @@ new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
   node->key = key;
   node->val = val;
   node->next = next;
-  node->marked = 0;
 
   INIT_LOCK(ND_GET_LOCK(node));
 
@@ -86,7 +85,7 @@ node_delete_l(node_l_t *node)
 {
   DESTROY_LOCK(&node->lock);
 #if GC == 1
-  ssfree(node);
+  ssfree((void*) node);
 #endif
 }
 
@@ -100,7 +99,7 @@ void set_delete_l(intset_l_t *set)
       next = node->next;
       DESTROY_LOCK(&node->lock);
       /* free(node); */
-      ssfree(node);		/* TODO : fix with ssmem */
+      ssfree((void*) node);		/* TODO : fix with ssmem */
       node = next;
     }
   ssfree(set);

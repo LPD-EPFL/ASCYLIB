@@ -78,7 +78,7 @@ void
 node_delete(node_t *node) 
 {
 #if GC == 1
-  ssmem_free(alloc, node);
+  ssmem_free(alloc, (void*) node);
 #else
 
 #endif
@@ -92,7 +92,7 @@ void set_delete(intset_t *set)
   while (node != NULL) 
     {
       next = node->next;
-      ssfree(node);		/* TODO : fix with ssmem */
+      ssfree((void*) node);		/* TODO : fix with ssmem */
       node = next;
     }
   ssfree(set);

@@ -26,11 +26,13 @@
 
 #include "lazy.h"
 
+RETRY_STATS_VARS;
+
 /*
  * Checking that both curr and pred are both unmarked and that pred's next pointer
  * points to curr to verify that the entries are adjacent and present in the list.
  */
-static inline int
+inline int
 parse_validate(node_l_t* pred, node_l_t* curr) 
 {
   return (!pred->marked && (curr == NULL || (!curr->marked)) && (pred->next == curr));
@@ -39,14 +41,15 @@ parse_validate(node_l_t* pred, node_l_t* curr)
 sval_t
 parse_find(intset_l_t *set, skey_t key)
 {
+  PARSE_TRY();
   node_l_t* curr = set->head;
-  while (curr != NULL && (curr->key < key || curr->marked))
+  while (curr != NULL && (curr->key < key))
     {
       curr = curr->next;
     }
 
   sval_t res = 0;
-  if (curr != NULL && curr->key == key)
+  if (curr != NULL && curr->key == key && !curr->marked)
     {
       res = curr->val;
     }
@@ -70,10 +73,14 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
 	  curr = curr->next;
 	}
 
+      UPDATE_TRY();
+
+#if LAZY_RO_FAIL ==1 
       if (curr != NULL && curr->key == key && !curr->marked)
 	{
 	  return false;
 	}
+#endif
 
       GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
       PREFETCHW_LOCK(curr);
@@ -123,10 +130,13 @@ parse_delete(intset_l_t *set, skey_t key)
 	  curr = curr->next;
 	}
 
+      UPDATE_TRY();
+#if LAZY_RO_FAIL ==1 
       if (curr != NULL && curr->key != key && !curr->marked)
 	{
 	  return false;
 	}
+#endif
 
       GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
       PREFETCHW_LOCK(curr);
@@ -145,7 +155,7 @@ parse_delete(intset_l_t *set, skey_t key)
 	      curr->marked = 1;
 	      pred->next = c_nxt;
 #if GC == 1
-	      ssmem_free(alloc, curr);
+	      ssmem_free(alloc, (void*) curr);
 #endif
 	    }
 	  done = 1;

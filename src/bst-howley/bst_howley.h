@@ -66,8 +66,8 @@ struct node_t {
 	skey_t /*volatile*/ key; 
     sval_t value;
 	operation_t* /*volatile*/ op;
-	node_t* /*volatile*/ left;
-	node_t* /*volatile*/ right;
+	volatile node_t* /*volatile*/ left;
+	volatile node_t* /*volatile*/ right;
     uint8_t padding[CACHE_LINE_SIZE-sizeof(sval_t)-sizeof(skey_t)-3*sizeof(uintptr_t)];
 	// char padding[32];
 };

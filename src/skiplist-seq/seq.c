@@ -5,12 +5,19 @@
  */
 
 #include "seq.h"
+#include "latency.h"
+#if LATENCY_PARSING == 1
+__thread size_t lat_parsing_get = 0;
+__thread size_t lat_parsing_put = 0;
+__thread size_t lat_parsing_rem = 0;
+#endif	/* LATENCY_PARSING == 1 */
 
 #define MAXLEVEL    32
 
 sval_t
 sl_contains(sl_intset_t *set, skey_t key)
 {
+  PARSE_START_TS(0);
   sval_t result = 0;
 
   int i;
@@ -27,6 +34,7 @@ sl_contains(sl_intset_t *set, skey_t key)
 	}
     }
   node = node->next[0];
+  PARSE_END_TS(0, lat_parsing_get++);
 
   if (node->key == key)
     {
@@ -40,6 +48,7 @@ sl_contains(sl_intset_t *set, skey_t key)
 int
 sl_add(sl_intset_t *set, skey_t key, sval_t val)
 {
+  PARSE_START_TS(1);
   int i, l, result;
   sl_node_t *node, *next;
   sl_node_t *preds[MAXLEVEL], *succs[MAXLEVEL];
@@ -57,6 +66,8 @@ sl_add(sl_intset_t *set, skey_t key, sval_t val)
       succs[i] = node->next[i];
     }
   node = node->next[0];
+  PARSE_END_TS(1, lat_parsing_put++);
+
   result = (node->key != key);
   if (result == 1)
     {
@@ -77,6 +88,7 @@ sl_add(sl_intset_t *set, skey_t key, sval_t val)
 sval_t
 sl_remove(sl_intset_t *set, skey_t key)
 {
+  PARSE_START_TS(2);
   sval_t result = 0;
   int i;
   sl_node_t *node, *next = NULL;
@@ -95,6 +107,7 @@ sl_remove(sl_intset_t *set, skey_t key)
       succs[i] = node->next[i];
     }
 
+  PARSE_END_TS(2, lat_parsing_rem++);
   if (next->key == key)
     {
       result = next->val;

@@ -1,0 +1,22 @@
+lls="./$ub/sq-ll  ./$ub/lb-ll_lazy_no_ro ./$ub/lb-ll_lazy ./$ub/lb-ll_pugh ./$ub/lb-ll_copy_no_ro ./$ub/lb-ll_copy ./$ub/lf-ll_harris_opt";
+SCY=scy3
+
+cores_lat_dist="1 10 20";
+LATENCY_TYPE=3			# 2 or 3
+LATENCY_POINTS=256
+LATENCY_MERGE=0
+
+reps=10;
+keep=max 			# min, median, or max
+duration=2000;
+initials="1024";
+updates="10";
+cores="two";
+cores_pow="two"
+
+COMPILE_FLAGS="SET_CPU=1"
+skip_thr=0;
+skip_lat=1;
+skip_ldi=1;
+skip_pow=1;
+
