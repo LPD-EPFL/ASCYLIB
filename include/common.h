@@ -14,7 +14,6 @@
 #  define STATIC_ASSERT(a, msg)           _Static_assert ((a), msg);
 #else 
 #  define STATIC_ASSERT(a, msg)           
-#  warning STATIC_ASSERT not defined (old GCC)
 #endif
 
 typedef intptr_t skey_t;
