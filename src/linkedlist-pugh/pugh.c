@@ -61,7 +61,7 @@ search_strong(intset_l_t* set, skey_t key, node_l_t** right)
   GL_LOCK(set->lock);
   LOCK(ND_GET_LOCK(pred));
   node_l_t* succ = pred->next;
-nnpnp  while (unlikely(succ->key < key))
+  while (unlikely(succ->key < key))
     {
       UNLOCK(ND_GET_LOCK(pred));
       pred = succ;
