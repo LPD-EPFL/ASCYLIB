@@ -7,25 +7,21 @@ res_type=1
 
 uname=$(uname -n);
 ub="bin";
-#if [ ! -d "$ub" ];
-#then
-    #mkdir $ub;
-#fi;
 
-rm bin/*
+LOCK=tas
 if [ $uname = "ol-collab1" ];
 then
     MAKE=gmake
+    LOCK=ticket
 fi;
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
-    INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k tas
-    INIT=one $MAKE LBSL=pugh -k tas
-    INIT=one $MAKE -k tas
+    INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k $LOCK
+    INIT=one $MAKE -k $LOCK
     INIT=one $MAKE -k seq
     INIT=one $MAKE -k lockfree
 fi
-mv bin/* $ub;
+
 source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
