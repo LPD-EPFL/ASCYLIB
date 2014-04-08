@@ -22,7 +22,7 @@
 #define SSALLOC_NUM_ALLOCATORS 2
 
 #if defined(__sparc__)
-#  define SSALLOC_SIZE (128 * 1024 * 1024)
+#  define SSALLOC_SIZE (128LL * 1024 * 1024)
 #elif defined(__tile__)
 #  define SSALLOC_SIZE (100 * 1024 * 1024)
 #elif defined(LAPTOP) | defined(IGORLAPTOPLINUX) | defined(OANALAPTOPLINUX)

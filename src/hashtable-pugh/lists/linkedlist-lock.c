@@ -52,7 +52,6 @@ new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
   node->key = key;
   node->val = val;
   node->next = next;
-  node->marked = 0;
 
   INIT_LOCK(ND_GET_LOCK(node));
 

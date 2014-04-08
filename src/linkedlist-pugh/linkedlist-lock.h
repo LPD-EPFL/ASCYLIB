@@ -56,7 +56,6 @@ typedef volatile struct node_l
   skey_t key;
   sval_t val;
   volatile struct node_l *next;
-  volatile uint8_t marked;
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;
 #endif
@@ -64,6 +63,8 @@ typedef volatile struct node_l
   uint8_t padding[CACHE_LINE_SIZE - sizeof(skey_t) - sizeof(sval_t) - sizeof(struct node*) - sizeof(uint8_t) - sizeof(ptlock_t)];
 #endif
 } node_l_t;
+
+STATIC_ASSERT(sizeof(node_l_t) % 32 == 0, "sizeof(node_l_t) should be 32bytes aligned");
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset_l 
 {
