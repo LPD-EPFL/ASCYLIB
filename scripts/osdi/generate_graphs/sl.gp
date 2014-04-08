@@ -61,10 +61,11 @@ set ylabel "Throughput (Mops/s)" offset 1.5
 set title "Opteron" offset 0.2,title_offset
 @YTICS
 plot \
-     "common_gp_sl_lpd48core.txt" using 1:($5) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_lpd48core.txt" using 1:($6) title "seq" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
-     "" using 1:($4) title "fraser" ls 4 with linespoints
+     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($4) title "fraser" ls 4 with linespoints, \
+     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
 set origin 0.55, 0.0
 unset key
 set size 0.5, 0.6
@@ -78,10 +79,11 @@ set ylabel ""
 unset ylabel
 set title "Xeon20"
 plot \
-     "common_gp_sl_lpdxeon2680.txt" using 1:($5) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_lpdxeon2680.txt" using 1:($6) title "seq" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
-     "" using 1:($4) title "fraser" ls 4 with linespoints
+     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($4) title "fraser" ls 4 with linespoints, \
+     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
 set origin 1.05, 0.0
 set size 0.5, 0.6
 set xrange [0:81]
@@ -93,10 +95,11 @@ set ylabel ""
 unset ylabel
 set title "Xeon80"
 plot \
-     "common_gp_sl_diassrv8.txt" using 1:($5) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_diassrv8.txt" using 1:($6) title "seq" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
-     "" using 1:($4) title "fraser" ls 4 with linespoints
+     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($4) title "fraser" ls 4 with linespoints, \
+     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
 set origin 1.55, 0.0
 set size 0.5, 0.6
 set title "Tilera"
@@ -109,10 +112,11 @@ set ylabel ""
 unset ylabel
 #set key bottom right
 plot \
-     "common_gp_sl_parsasrv1.epfl.ch.txt" using 1:($5) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_parsasrv1.epfl.ch.txt" using 1:($6) title "seq" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
-     "" using 1:($4) title "fraser" ls 4 with linespoints
+     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($4) title "fraser" ls 4 with linespoints, \
+     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
 set origin 2.05, 0.0
 set size 0.5, 0.6
 set title "Sparc"
@@ -125,10 +129,11 @@ set yrange [0:]
 set ylabel ""
 unset ylabel
 plot \
-     "common_gp_sl_ol-collab1.txt" using 1:($5) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_ol-collab1.txt" using 1:($6) title "seq" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
-     "" using 1:($4) title "fraser" ls 4 with linespoints
+     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($4) title "fraser" ls 4 with linespoints, \
+     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
 unset origin
 unset border
 unset tics
@@ -156,7 +161,8 @@ set yrange [-1:1]
 plot \
      NaN title "seq" ls 1 with linespoints, \
      NaN title "pugh" ls 2 with linespoints, \
-     NaN title "herlihy" ls 3 with linespoints, \
-     NaN title "fraser" ls 4 with linespoints
+     NaN title "herlihy-lb" ls 3 with linespoints, \
+     NaN title "fraser" ls 4 with linespoints, \
+     NaN title "herlihy-lf" ls 5 with linespoints
 #</null>
 unset multiplot  #<--- Necessary for some terminals, but not postscript I don't thin

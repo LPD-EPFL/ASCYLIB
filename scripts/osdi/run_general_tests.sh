@@ -34,7 +34,7 @@ cores=$(seq 2 2 40)
 
 ll_algos="./${ub}/lb-ll_lazy ./${ub}/lb-ll_coupling ./${ub}/lb-ll_pugh ./${ub}/lb-ll_copy ./${ub}/lf-ll_harris ./${ub}/lf-ll_harris_opt ./${ub}/lf-ll_michael ./${ub}/sq-ll"
 do_ll=1
-sl_algos="./${ub}/lb-sl_herlihy ./${ub}/lb-sl_pugh ./${ub}/lf-sl-fraser ./${ub}/lf-sl-herlihy  ./${ub}/sq-sl"
+sl_algos="./${ub}/lb-sl_herlihy ./${ub}/lb-sl_pugh ./${ub}/lf-sl_fraser ./${ub}/lf-sl_herlihy  ./${ub}/sq-sl"
 do_sl=1
 ht_algos="./${ub}/lb-ht_tbb ./${ub}/lb-ht_java ./${ub}/lb-ht_copy_gl ./${ub}/lb-ht_lazy_gl ./${ub}/lb-ht_coupling_gl ./${ub}/lb-ht_pugh_gl ./${ub}/lf-ht ./${ub}/lf-ht_rcu ./${ub}/sq-ht"
 do_ht=1
