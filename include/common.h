@@ -10,6 +10,8 @@
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
 
+#define STATIC_ASSERT(a, msg)           _Static_assert ((a), msg);
+
 typedef intptr_t skey_t;
 typedef intptr_t sval_t;
 
