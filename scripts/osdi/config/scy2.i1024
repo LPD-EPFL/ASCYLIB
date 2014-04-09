@@ -1,6 +1,6 @@
 SCY=scy2
 
-cores_lat_dist="1 10 20";
+cores_lat_dist="40";
 LATENCY_TYPE=5			# 2 or 3 / 4 or 5 (for parse)
 LATENCY_POINTS=512
 

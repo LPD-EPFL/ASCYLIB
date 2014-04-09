@@ -1,0 +1,30 @@
+SCY=clht
+
+hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lf-ht_rcu ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+
+CLHT_PATH=~/code/hyht
+MAKE_CLHT=1;
+
+cores_lat_dist="1 10 20";
+LATENCY_TYPE=3			# 2 or 3
+LATENCY_POINTS=256
+LATENCY_MERGE=0
+
+reps=1;
+keep=max; 			# min, median, or max
+duration=1000;
+initials="1024 2048 4096 8192 16384 32768 65536";
+updates="5 10 20";
+cores="socket";
+cores_pow="two"
+
+COMPILE_FLAGS="SET_CPU=1"
+skip_thr=0;
+skip_lat=1;
+skip_ldi=1;
+skip_pow=1;
+
+do_ll=0;
+do_ht=1;
+do_sl=0;
+do_bst=0;

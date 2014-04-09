@@ -1,0 +1,20 @@
+SCY=scy4
+cores_lat_dist="20";
+LATENCY_TYPE=3			# 2 or 3
+LATENCY_POINTS=1024
+LATENCY_MERGE=0
+
+reps=10;
+keep=max; 			# min, median, or max
+duration=10000;
+initials="2048";
+updates="20";
+cores="all";
+cores_pow="all"
+
+COMPILE_FLAGS="SET_CPU=1"
+skip_thr=1;
+skip_lat=1;
+skip_ldi=0;
+skip_pow=1;
+
