@@ -2,7 +2,14 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS  = $(BINDIR)/lb-bst-drachsler
+ifeq ($(RO_FAIL),0)
+	CFLAGS += -DRO_FAIL=0
+	SUFFIX = _no_ro
+else
+	CFLAGS += -DRO_FAIL=1
+endif
+
+BINS  = $(BINDIR)/lb-bst-drachsler$(SUFFIX)
 PROF = $(ROOT)/src
 
 .PHONY:	all clean

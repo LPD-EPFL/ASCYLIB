@@ -23,6 +23,7 @@
 #include "ssmem.h"
 
 //#define DO_DRACHSLER_REBALANCE 1
+#define DRACHSLER_RO_FAIL RO_FAIL
 
 #define TRUE 1
 #define FALSE 0

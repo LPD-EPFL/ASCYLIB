@@ -45,6 +45,9 @@ bst_ellen:
 bst_drachsler:
 	$(MAKE) "LOCK=TAS" src/bst-drachsler
 
+bst_drachsler_no_ro:
+	$(MAKE) "LOCK=TAS" "RO_FAIL=0" src/bst-drachsler
+
 bst_bronson:
 	$(MAKE) "LOCK=TAS" src/bst-lock2
 

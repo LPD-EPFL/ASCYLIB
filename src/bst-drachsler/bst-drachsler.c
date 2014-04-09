@@ -96,6 +96,23 @@ bool_t bst_insert(skey_t k, sval_t v, node_t* root) {
         } else {
             p = (node_t*) node;
         }
+
+#if DRACHSLER_RO_FAIL == 1
+	node_t* n = node;
+	while (n->key > k)
+	  {
+	    n = (node_t*) n->pred;
+	  }
+	while (n->key < k)
+	  {
+	    n = (node_t*) n->succ;
+	  }
+	if ((n->key == k) && (n->mark == FALSE)) 
+	  {
+	    return FALSE;
+	  }
+#endif
+
         LOCK(&(p->succ_lock));
         node_t* s = (node_t*) p->succ;
         if ((k > p->key) && (k <= s->key) && (p->mark == FALSE)) {
@@ -193,6 +210,23 @@ sval_t bst_remove(skey_t k, node_t* root) {
         } else {
             p = (node_t*) node;
         }
+
+#if DRACHSLER_RO_FAIL == 1
+	node_t* n = node;
+	while (n->key > k)
+	  {
+	    n = (node_t*) n->pred;
+	  }
+	while (n->key < k)
+	  {
+	    n = (node_t*) n->succ;
+	  }
+	if ((n->key != k) && (n->mark == FALSE)) 
+	  {
+	    return FALSE;
+	  }
+#endif
+
         LOCK(&(p->succ_lock));
         node_t* s = (node_t*) p->succ;
         if ((k > p->key) && (k <= s->key) && (p->mark == FALSE)) {
