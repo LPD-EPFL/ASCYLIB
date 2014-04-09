@@ -1,5 +1,7 @@
 #include "bst_ellen.h"
 
+RETRY_STATS_VARS;
+
 __thread search_result_t * last_result;
 __thread ssmem_allocator_t* alloc;
 
@@ -48,6 +50,8 @@ void bst_init_local(){
 }
 
 search_result_t* bst_search(skey_t key, node_t* root) {
+  PARSE_TRY();
+
     search_result_t * result = last_result;
 
     result->l = root;
@@ -57,9 +61,9 @@ search_result_t* bst_search(skey_t key, node_t* root) {
         result->gpupdate = result->pupdate;
         result->pupdate = result->p->update;
         if (key < result->l->key) {
-            result->l = result->p->left;
+	  result->l = (node_t*) result->p->left;
         } else {
-            result->l = result->p->right;
+            result->l = (node_t*) result->p->right;
         }
     }
     return result;
@@ -69,7 +73,7 @@ search_result_t* bst_search(skey_t key, node_t* root) {
 node_t* bst_find(skey_t key, node_t* root) {
     search_result_t * result = bst_search(key,root);
     if (result->l->key == key) {
-        return result->l;
+      return (node_t*) result->l;
     }
     return NULL;
 }
@@ -126,6 +130,7 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
     search_result_t* search_result;
 
     while(1) {
+      UPDATE_TRY();
         search_result = bst_search(key,root);
         if (search_result->l->key == key) {
             return FALSE;
@@ -184,6 +189,7 @@ sval_t bst_delete(skey_t key, node_t* root) {
     search_result_t* search_result;
 
     while (1) {
+      UPDATE_TRY();
         search_result = bst_search(key,root); 
         if (search_result->l->key!=key) {
             return 0;
@@ -232,9 +238,9 @@ bool_t bst_help_delete(info_t* op) {
 void bst_help_marked(info_t* op) {
     node_t* other;
     if (op->dinfo.p->right == op->dinfo.l) {
-        other = op->dinfo.p->left;
+        other = (node_t*) op->dinfo.p->left;
     } else {
-        other = op->dinfo.p->right; 
+        other = (node_t*) op->dinfo.p->right; 
     }
     int i = bst_cas_child(op->dinfo.gp,op->dinfo.p,other);
     void* UNUSED dummy = CAS_PTR(&(op->dinfo.gp->update), FLAG(op,STATE_DFLAG),FLAG(op,STATE_CLEAN));
@@ -276,8 +282,8 @@ void bst_print(node_t* node){
         }
         if (node->leaf==FALSE) {
             fprintf(stderr, "internal; left child %lu; right child %lu\n",node->left->key,node->right->key);
-            bst_print(node->left);
-            bst_print(node->right);
+            bst_print((node_t*) node->left);
+            bst_print((node_t*) node->right);
         } else {
             fprintf(stderr, "leaf\n");
         }
@@ -285,7 +291,7 @@ void bst_print(node_t* node){
 
 size_t bst_size_rec(node_t* node){
         if (node->leaf==FALSE) {
-            return (bst_size_rec(node->right) + bst_size_rec(node->left));
+            return (bst_size_rec((node_t*) node->right) + bst_size_rec((node_t*) node->left));
         } else {
             return 1;
         }

@@ -38,7 +38,7 @@
     {									\
       int res;								\
       START_TS(0);							\
-      res = DS_CONTAINS(set, key, algo_type);				\
+      res = (sval_t) DS_CONTAINS(set, key, algo_type);			\
       if(res != 0)							\
 	{								\
 	  END_TS(0, my_getting_count_succ);				\

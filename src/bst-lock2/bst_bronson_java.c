@@ -1,6 +1,8 @@
 #include "bst_bronson_java.h"
 #include <pthread.h>
 
+RETRY_STATS_VARS;
+
 __thread ssmem_allocator_t* alloc;
 
 volatile node_t* bst_initialize() {
@@ -48,6 +50,7 @@ volatile node_t* bst_initialize() {
 sval_t bst_contains(skey_t key, volatile node_t* root) {
 	// printf("Bst contains (key %d)\n", key);
     while(TRUE) {
+      PARSE_TRY();
 		volatile node_t* right = root->right;
 
 		if (right == NULL) {
@@ -159,6 +162,8 @@ sval_t bst_remove(skey_t key, volatile node_t* root) {
 sval_t update_under_root(skey_t key, function_t func, sval_t new_value, volatile node_t* holder) {
 
 	while(TRUE){
+	  PARSE_TRY();
+	  UPDATE_TRY();
 
         volatile node_t* right = holder->right;
 
@@ -415,20 +420,20 @@ void wait_until_not_changing(volatile node_t* node) {
     int i;
 
     //if ((version & 1)) {
-	if (IS_SHRINKING(version)) {
+    if (IS_SHRINKING(version)) {
 
-        for (i = 0; i < SPIN_COUNT; ++i) {
-			if (version != node->version) {
-				return;
-			}
-		}
-
-        skey_t UNUSED node_key = node->key;
-		volatile ptlock_t* node_lock = &node->lock;
-
-		LOCK(node_lock);
-		UNLOCK(node_lock);
+      for (i = 0; i < SPIN_COUNT; ++i) {
+	if (version != node->version) {
+	  return;
 	}
+      }
+
+      skey_t UNUSED node_key = node->key;
+      volatile ptlock_t* node_lock = &node->lock;
+
+      LOCK(node_lock);
+      UNLOCK(node_lock);
+    }
 }
 
 bool_t attempt_unlink_nl(volatile node_t* parent, volatile node_t* node) {

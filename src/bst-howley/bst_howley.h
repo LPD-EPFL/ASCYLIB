@@ -94,7 +94,7 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* root);
 void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* curr_op, node_t* root );
 unsigned long bst_size(node_t* node);
-void bst_print(node_t* node); 
+void bst_print(volatile node_t* node); 
 
 //Helper functions
 
@@ -112,11 +112,11 @@ static inline uint64_t UNFLAG(operation_t* ptr) {
 
 
 //Last bit of the node pointer will be set to 1 if the pointer is null 
-static inline uint64_t ISNULL(node_t* node){
+static inline uint64_t ISNULL(volatile node_t* node){
 	return (node == NULL) || (((uint64_t)node) & 1);
 }
 
-static inline uint64_t SETNULL(node_t* node){
+static inline uint64_t SETNULL(volatile node_t* node){
 	return (((uint64_t)node) & 0xfffffffffffffffe) | 1;
 }
 

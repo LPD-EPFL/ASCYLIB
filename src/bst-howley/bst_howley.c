@@ -1,5 +1,7 @@
 #include "bst_howley.h"
 
+RETRY_STATS_VARS;
+
 __thread ssmem_allocator_t* alloc;
 
 const sval_t val_mask = ~(0x3);
@@ -75,6 +77,8 @@ sval_t bst_find(skey_t k, node_t** pred, operation_t** pred_op, node_t** curr, o
 	operation_t* last_right_op;
 
 retry:
+	PARSE_TRY();
+
 	result = NOT_FOUND_R;
 	*curr = aux_root;
 	*curr_op = (*curr)->op;
@@ -90,7 +94,7 @@ retry:
 	}
 
 
-	next = (*curr)->right;
+	next = (node_t*) (*curr)->right;
 	last_right = *curr;
 	last_right_op = *curr_op;
 
@@ -108,10 +112,10 @@ retry:
 		curr_key = (*curr)->key;
 		if(k < curr_key){
 			result = NOT_FOUND_L;
-			next = (*curr)->left;
+			next = (node_t*) (*curr)->left;
 		} else if(k > curr_key) {
 			result = NOT_FOUND_R;
-			next = (*curr)->right;
+			next = (node_t*) (*curr)->right;
 			last_right = *curr;
 			last_right_op = *curr_op;
 		} else{
@@ -142,6 +146,7 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 	sval_t  result;
 
 	while(TRUE) {
+	  UPDATE_TRY();
 
 		result = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
 		if (result & val_mask) {
@@ -153,9 +158,9 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 		bool_t is_left = (result == NOT_FOUND_L);
 		node_t* old;
 		if (is_left) {
-			old = curr->left;
+			old = (node_t*) curr->left;
 		} else {
-			old = curr->right;
+			old = (node_t*) curr->right;
 		}
 
 		cas_op = alloc_op();
@@ -185,9 +190,9 @@ void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 
 	node_t** address = NULL;
 	if (op->child_cas_op.is_left) {
-		address = &(dest->left);
+	  address = (node_t**) &(dest->left);
 	} else {
-		address = &(dest->right);
+		address = (node_t**) &(dest->right);
 	}
 	void* UNUSED dummy0 = CAS_PTR(address, op->child_cas_op.expected, op->child_cas_op.update);
 #ifdef __tile__
@@ -208,12 +213,14 @@ sval_t bst_remove(skey_t k, node_t* root){
 	operation_t* reloc_op;
 
 	while(TRUE) {
+	  UPDATE_TRY();
+
         sval_t res = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
 		if (!(res & val_mask)) {
 			return 0;
 		}
 
-		if (ISNULL(curr->right) || ISNULL(curr->left)) { // node has less than two children
+		if (ISNULL((node_t*) curr->right) || ISNULL((node_t*) curr->left)) { // node has less than two children
 			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
 				bst_help_marked(pred, pred_op, curr, root);
 #if GC == 1
@@ -305,14 +312,14 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
 
 	node_t* new_ref;
-	if (ISNULL(curr->left)) {
-		if (ISNULL(curr->right)) {
+	if (ISNULL((node_t*) curr->left)) {
+		if (ISNULL((node_t*) curr->right)) {
 			new_ref = (node_t*)SETNULL(curr);
 		} else {
-			new_ref = curr->right;
+			new_ref = (node_t*) curr->right;
 		}
 	} else {
-		new_ref = curr->left;
+		new_ref = (node_t*) curr->left;
 	}
 	operation_t* cas_op = alloc_op();
 	cas_op->child_cas_op.is_left = (curr == pred->left);
@@ -346,21 +353,21 @@ void bst_help(node_t* pred, operation_t* pred_op, node_t* curr, operation_t* cur
 	}
 }
 
-unsigned long bst_size_rec(node_t* node) {
-	if (ISNULL(node)) {
-		return 0;
-	} else if (GETFLAG(node->op) != STATE_OP_MARK) {
-		return 1 + bst_size_rec(node->right) + bst_size_rec(node->left);
-	} else {
-		return bst_size_rec(node->right) + bst_size_rec(node->left);
-	}
+unsigned long bst_size_rec(volatile node_t* node) {
+  if (ISNULL((node_t*) node)) {
+    return 0;
+  } else if (GETFLAG(node->op) != STATE_OP_MARK) {
+    return 1 + bst_size_rec(node->right) + bst_size_rec(node->left);
+  } else {
+    return bst_size_rec(node->right) + bst_size_rec(node->left);
+  }
 }
 
 unsigned long bst_size(node_t* node) {
     return bst_size_rec(node) - 1; //do not count the root
 }
 
-void bst_print(node_t* node){
+void bst_print(volatile node_t* node){
 	if (ISNULL(node)) {
 		return;
 	}

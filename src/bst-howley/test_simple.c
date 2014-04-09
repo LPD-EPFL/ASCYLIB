@@ -46,6 +46,8 @@
  * GLOBALS
  * ################################################################### */
 
+RETRY_STATS_VARS_GLOBAL;
+
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
 size_t update = DEFAULT_UPDATE;
@@ -177,6 +179,8 @@ test(void* thread)
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
+  RETRY_STATS_ZERO();
+
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
@@ -216,6 +220,7 @@ test(void* thread)
   EXEC_IN_DEC_ID_ORDER(ID, num_threads)
     {
       print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
+      RETRY_STATS_SHARE();
     }
   EXEC_IN_DEC_ID_ORDER_END(&barrier);
 
@@ -528,7 +533,9 @@ main(int argc, char **argv)
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();    
-    
+  RETRY_STATS_PRINT(total, putting_count_total, removing_count_total, putting_count_total_succ + removing_count_total_succ);    
+
+
   pthread_exit(NULL);
     
   return 0;

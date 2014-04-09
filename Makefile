@@ -33,6 +33,21 @@ clh:
 bst:	seqbstint seqbstext
 	$(MAKE) "LOCK=TAS" $(BSTS)
 
+bst_aravind:
+	$(MAKE) "STM=LOCKFREE" src/bst-aravind
+
+bst_howley:
+	$(MAKE) "STM=LOCKFREE" src/bst-howley
+
+bst_ellen:
+	$(MAKE) "STM=LOCKFREE" src/bst
+
+bst_drachsler:
+	$(MAKE) "LOCK=TAS" src/bst-drachsler
+
+bst_bronson:
+	$(MAKE) "LOCK=TAS" src/bst-lock2
+
 sequential:
 	$(MAKE) "STM=SEQUENTIAL" "GC=0" $(SEQBENCHS)
 
