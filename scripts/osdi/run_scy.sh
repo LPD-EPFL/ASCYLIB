@@ -41,14 +41,15 @@ fi;
 
 out_folder=data;
 
-source ${config_workload};
 source ${config_execs};
+source ${config_workload};
 
 if [ "${SCY}0" = "0" ];
 then
     SCY=scy1;
 fi;
 
+printf "## Will compile with                : $COMPILE_FLAGS\n";
 printf "## Will do measurements for         : $SCY\n";
 printf "## Will measure                     : ";
 
@@ -216,6 +217,16 @@ fi;
     if [ $do_ht -eq 1 ];
     then
 	structure=ht;
+
+	if [ ! "${MAKE_CLHT}0" = 0 ];
+	then
+	    echo "~~~~~~ Compiling CLHT";
+	    cd ${CLHT_PATH};
+	    make clean hyht_res lfht_res;
+	    cd -;
+	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
+	fi;
+
 	make ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
 	mv bin/*${structure}* $ub;
 
@@ -311,6 +322,16 @@ then
     if [ $do_ht -eq 1 ];
     then
 	structure=ht;
+
+	if [ ! "${MAKE_CLHT}0" = 0 ];
+	then
+	    echo "~~~~~~ Compiling CLHT";
+	    cd ${CLHT_PATH};
+	    make clean hyht_res lfht_res;
+	    cd -;
+	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
+	fi;
+
 	make ${structure} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
@@ -405,6 +426,16 @@ then
     if [ $do_ht -eq 1 ];
     then
 	structure=ht;
+
+	if [ ! "${MAKE_CLHT}0" = 0 ];
+	then
+	    echo "~~~~~~ Compiling CLHT";
+	    cd ${CLHT_PATH};
+	    make clean hyht_res lfht_res;
+	    cd -;
+	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
+	fi;
+
 	make ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
@@ -505,6 +536,16 @@ then
     if [ $do_ht -eq 1 ];
     then
 	structure=ht;
+
+	if [ ! "${MAKE_CLHT}0" = 0 ];
+	then
+	    echo "~~~~~~ Compiling CLHT";
+	    cd ${CLHT_PATH};
+	    make clean hyht_res lfht_res;
+	    cd -;
+	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
+	fi;
+
 	make ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
