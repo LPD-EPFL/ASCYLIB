@@ -111,7 +111,26 @@ tas_lock(ptlock_t* l)
 static inline uint32_t
 tas_trylock(ptlock_t* l)
 {
+#if RETRY_STATS == 1
+  LOCK_TRY();
+  volatile uint32_t tc = *(volatile uint32_t*) l;
+  volatile tticket_t* tp = (volatile tticket_t*) &tc;
+
+  if (tp->curr == tp->tick)
+    {
+      COMPILER_NO_REORDER(uint64_t tc_old = tc;);
+      tp->tick++;
+      return CAS_U32((uint32_t*) l, tc_old, tc) == tc_old;
+    }
+  else
+    {
+      LOCK_QUEUE(tp->curr - tp->tick);
+      return 0;
+    }
+#else
   return (CAS_UTYPE(l, TAS_FREE, TAS_LCKD) == TAS_FREE);
+#endif
+
 }
 
 static inline uint32_t
