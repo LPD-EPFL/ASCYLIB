@@ -78,7 +78,7 @@ set_delete_l(intset_t *set)
 }
 
 static int
-node_size(node_t* n)
+node_size(volatile node_t* n)
 {
   if (n == NULL)
     {

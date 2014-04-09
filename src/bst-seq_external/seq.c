@@ -20,11 +20,11 @@ seq_delete(intset_t* set, skey_t key)
       skey_t curr_key = curr->key;
       if (key < curr_key)
 	{
-	  curr = curr->left;
+	  curr = (node_t*) curr->left;
 	}
       else
 	{
-	  curr = curr->right;
+	  curr = (node_t*) curr->right;
 	}
     }
 
@@ -56,11 +56,11 @@ seq_find(intset_t* set, skey_t key)
       skey_t curr_key = curr->key;
       if (key < curr_key)
 	{
-	  curr = curr->left;
+	  curr = (node_t*) curr->left;
 	}
       else
 	{
-	  curr = curr->right;
+	  curr = (node_t*) curr->right;
 	}
     }
 
@@ -84,11 +84,11 @@ seq_insert(intset_t* set, skey_t key, sval_t val)
       skey_t curr_key = curr->key;
       if (key < curr_key)
 	{
-	  curr = curr->left;
+	  curr = (node_t*) curr->left;
 	}
       else
 	{
-	  curr = curr->right;
+	  curr = (node_t*) curr->right;
 	}
     }
 

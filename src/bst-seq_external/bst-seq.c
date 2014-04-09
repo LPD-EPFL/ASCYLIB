@@ -85,7 +85,7 @@ node_size(node_t* n)
     }
   else
     {
-      return node_size(n->left) + node_size(n->right);
+      return node_size((node_t*) n->left) + node_size((node_t*) n->right);
     }
 }
 
