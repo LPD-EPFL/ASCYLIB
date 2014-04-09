@@ -1,5 +1,7 @@
 #include "bst-aravind.h"
 
+RETRY_STATS_VARS;
+
 __thread seek_record_t* seek_record;
 __thread ssmem_allocator_t* alloc;
 
@@ -53,14 +55,16 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
 }
 
 seek_record_t * bst_seek(skey_t key, node_t* node_r){
+  PARSE_TRY();
+
     node_t* node_s = ADDRESS(node_r->left);
     seek_record->ancestor = node_r;
     seek_record->successor = node_s; 
     seek_record->parent = node_s;
     seek_record->leaf = ADDRESS(node_s->left);
 
-    node_t* parent_field = seek_record->parent->left;
-    node_t* current_field = seek_record->leaf->left;
+    node_t* parent_field = (node_t*) seek_record->parent->left;
+    node_t* current_field = (node_t*) seek_record->leaf->left;
     node_t* current = ADDRESS(current_field);
 
 
@@ -74,9 +78,9 @@ seek_record_t * bst_seek(skey_t key, node_t* node_r){
 
         parent_field = current_field;
         if (key < current->key) {
-            current_field=current->left;
+            current_field= (node_t*) current->left;
         } else {
-            current_field=current->right;
+            current_field= (node_t*) current->right;
         }
         current=ADDRESS(current_field);
     }
@@ -95,6 +99,8 @@ sval_t bst_search(skey_t key, node_t* node_r) {
 
 bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
     while (1) {
+      UPDATE_TRY();
+
         bst_seek(key, node_r);
         if (seek_record->leaf->key == key) return FALSE;
         node_t* parent = seek_record->parent;
@@ -102,9 +108,9 @@ bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
 
         node_t** child_addr;
         if (key < parent->key) {
-           child_addr=&(parent->left); 
+	  child_addr= (node_t**) &(parent->left); 
         } else {
-            child_addr=&(parent->right);
+            child_addr= (node_t**) &(parent->right);
         }
         //TODO check this
         node_t* new_internal=create_node(max(key,leaf->key),0,0);
@@ -135,15 +141,17 @@ sval_t bst_remove(skey_t key, node_t* node_r) {
     node_t* leaf;
     sval_t val = 0;
     while (1) {
+      UPDATE_TRY();
+
         bst_seek(key, node_r);
         val = seek_record->leaf->value;
         node_t* parent = seek_record->parent;
 
         node_t** child_addr;
         if (key < parent->key) {
-            child_addr = &(parent->left);
+            child_addr = (node_t**) &(parent->left);
         } else {
-            child_addr = &(parent->right);
+            child_addr = (node_t**) &(parent->right);
         }
 
         if (injecting == TRUE) {
@@ -187,19 +195,19 @@ bool_t bst_cleanup(skey_t key) {
 
     node_t** succ_addr;
     if (key < ancestor->key) {
-        succ_addr = &(ancestor->left);
+        succ_addr = (node_t**) &(ancestor->left);
     } else {
-        succ_addr = &(ancestor->right);
+        succ_addr = (node_t**) &(ancestor->right);
     }
 
     node_t** child_addr;
     node_t** sibling_addr;
     if (key < parent->key) {
-       child_addr = &(parent->left);
-       sibling_addr = &(parent->right);
+       child_addr = (node_t**) &(parent->left);
+       sibling_addr = (node_t**) &(parent->right);
     } else {
-       child_addr = &(parent->right);
-       sibling_addr = &(parent->left);
+       child_addr = (node_t**) &(parent->right);
+       sibling_addr = (node_t**) &(parent->left);
     }
 
     node_t* chld = *(child_addr);
@@ -230,7 +238,7 @@ bool_t bst_cleanup(skey_t key) {
     return FALSE;
 }
 
-uint32_t bst_size(node_t* node) {
+uint32_t bst_size(volatile node_t* node) {
     if (node == NULL) return 0; 
     if ((node->left == NULL) && (node->right == NULL)) {
        if (node->key < INF0 ) return 1;

@@ -74,13 +74,13 @@ sval_t bst_search(skey_t key, node_t* node_r);
 bool_t bst_insert(skey_t key, sval_t val, node_t* node_r);
 sval_t bst_remove(skey_t key, node_t* node_r);
 bool_t bst_cleanup(skey_t key);
-uint32_t bst_size(node_t* r);
+uint32_t bst_size(volatile node_t* r);
 
-static inline uint64_t GETFLAG(node_t* ptr) {
+static inline uint64_t GETFLAG(volatile node_t* ptr) {
     return ((uint64_t)ptr) & 1;
 }
 
-static inline uint64_t GETTAG(node_t* ptr) {
+static inline uint64_t GETTAG(volatile node_t* ptr) {
     return ((uint64_t)ptr) & 2;
 }
 
@@ -100,7 +100,7 @@ static inline uint64_t UNFLAG(node_t* ptr) {
     return (((uint64_t)ptr) & 0xfffffffffffffffe);
 }
 
-static inline node_t* ADDRESS(node_t* ptr) {
+static inline node_t* ADDRESS(volatile node_t* ptr) {
     return (node_t*) (((uint64_t)ptr) & 0xfffffffffffffffc);
 }
 
