@@ -33,6 +33,7 @@ new_node(skey_t key, sval_t val, node_t* l, node_t* r, int initializing)
     }
 
   node->key = key;
+  node->leaf = 0;
   node->val = val;
   node->left = l;
   node->right = r;
@@ -58,7 +59,7 @@ intset_t *set_new()
     }
 
   set->head = new_node(1024, 0, NULL, NULL, 1);
-
+  set->head->leaf = 1;
   MEM_BARRIER;
   return set;
 }
