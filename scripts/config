@@ -17,7 +17,7 @@ then
 	echo 36;
 elif [ $1 = "diassrv8" ];
 then
-	echo 80;
+	echo 160;
 elif [ $1 = "lpdpc34" ];
 then
 	echo 8;
@@ -47,7 +47,7 @@ then
 	max_cores=36;
 elif [ $unm = "diassrv8" ];
 then
-	max_cores=80;
+	max_cores=160;
 elif [ $unm = "lpdpc34" ];
 then
 	max_cores=8;
@@ -87,7 +87,7 @@ then
 	cores=$(seq 6 6 36);
     elif [ $unm = "diassrv8" ];
     then
-	cores=$(seq 10 10 80);
+	cores=$(seq 10 10 $max_cores);
     elif [ $unm = "lpdpc34" ];
     then
 	cores=$(seq 2 1 8);

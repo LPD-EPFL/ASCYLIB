@@ -60,6 +60,8 @@ parse_find(intset_l_t *set, skey_t key)
 int
 parse_insert(intset_l_t *set, skey_t key, sval_t val)
 {
+  PARSE_TRY();
+
   node_l_t *curr, *pred, *newnode;
   int result = -1;
 	
@@ -120,6 +122,8 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
 sval_t
 parse_delete(intset_l_t *set, skey_t key)
 {
+  PARSE_TRY();
+
   node_l_t *pred, *curr;
   sval_t result = 0;
   int done = 0;
