@@ -59,12 +59,12 @@ floor_log_2(unsigned int n)
  * Create a new node without setting its next fields. 
  */
 sl_node_t*
-sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
+sl_new_simple_node(skey_t key, sval_t val, int toplevel, int initializing)
 {
   sl_node_t *node;
 
 #if GC == 1
-  if (unlikely(transactional))
+  if (unlikely(initializing))
     {
       /* use levelmax instead of toplevel in order to be able to use the ssalloc allocator*/
       size_t ns = size_pad_32;
@@ -73,7 +73,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
 	{
 	  ns += 64 - ns_rm;
 	}
-      node = (sl_node_t *)ssalloc(ns);
+      node = (sl_node_t*) ssalloc(ns);
     }
   else 
     {

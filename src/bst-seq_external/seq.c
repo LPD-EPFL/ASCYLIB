@@ -97,7 +97,7 @@ seq_insert(intset_t* set, skey_t key, sval_t val)
       return 0;
     }
 
-  node_t* node = new_node(key, val, NULL, NULL);
+  node_t* node = new_node(key, val, NULL, NULL, 0);
   node_t* ins = node;
 
   if (curr != NULL)
@@ -105,11 +105,11 @@ seq_insert(intset_t* set, skey_t key, sval_t val)
       node_t* rnode;
       if (key < curr->key)
 	{
-	  rnode = new_node(curr->key, 0, node, curr);
+	  rnode = new_node(curr->key, 0, node, curr, 0);
 	}
       else
 	{
-	  rnode = new_node(key, 0, curr, node);
+	  rnode = new_node(key, 0, curr, node, 0);
 	}
       ins = rnode;
     }

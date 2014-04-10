@@ -14,7 +14,7 @@ new_node(skey_t key, sval_t val, int initializing)
 {
   volatile node_t* node;
 #if GC == 1
-  if (initializing)		/* for initialization AND the coupling algorithm */
+  if (unlikely(initializing))		/* for initialization AND the coupling algorithm */
     {
       node = (volatile node_t*) ssalloc(sizeof(node_t));
     }

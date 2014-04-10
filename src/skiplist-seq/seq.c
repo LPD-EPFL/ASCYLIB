@@ -72,7 +72,7 @@ sl_add(sl_intset_t *set, skey_t key, sval_t val)
   if (result == 1)
     {
       l = get_rand_level();
-      node = sl_new_simple_node(key, val, l, 1);
+      node = sl_new_simple_node(key, val, l, 0);
       for (i = 0; i < l; i++) 
 	{
 	  node->next[i] = succs[i];

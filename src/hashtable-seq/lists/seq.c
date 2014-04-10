@@ -70,7 +70,7 @@ seq_insert(intset_t *set, skey_t key, sval_t val)
   found = (next != NULL && key == next->key);
   if (!found) 
     {
-      newnode =  new_node(key, val, next, 1);
+      newnode = new_node(key, val, next, 0);
       curr->next = newnode;
     }
   return !found;

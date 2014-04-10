@@ -10,11 +10,18 @@
 __thread ssmem_allocator_t* alloc;
 
 node_t*
-new_node(skey_t key, sval_t val, node_t* l, node_t* r)
+new_node(skey_t key, sval_t val, node_t* l, node_t* r, int initializing)
 {
-  node_t* node;
+  volatile node_t* node;
 #if GC == 1
-  node = (node_t*) ssmem_alloc(alloc, sizeof(node_t));
+  if (unlikely(initializing))		/* for initialization AND the coupling algorithm */
+    {
+      node = (volatile node_t*) ssalloc(sizeof(node_t));
+    }
+  else
+    {
+      node = (volatile node_t*) ssmem_alloc(alloc, sizeof(node_t));
+    }
 #else
   node = (node_t*) ssalloc(sizeof(node_t));
 #endif
@@ -50,7 +57,7 @@ intset_t *set_new()
       exit(1);
     }
 
-  set->head = new_node(1024, 0, NULL, NULL);
+  set->head = new_node(1024, 0, NULL, NULL, 1);
 
   MEM_BARRIER;
   return set;
