@@ -28,20 +28,18 @@ seq_delete(intset_t* set, skey_t key)
 	}
     }
 
-    node_t* x= pred;
   if (curr && curr->key == key)
     {
       if (pred->left == curr)
 	{
-	  pred=pred->right;
+	  pred->left = NULL;
 	}
       else
 	{
-	  pred=pred->left;
+	  pred->right = NULL;
 	}
 
       node_delete(curr);
-      node_delete(x);
       return curr->val;
     }
 
@@ -100,7 +98,6 @@ seq_insert(intset_t* set, skey_t key, sval_t val)
     }
 
   node_t* node = new_node(key, val, NULL, NULL, 0);
-  node->leaf =1;
   node_t* ins = node;
 
   if (curr != NULL)
@@ -114,7 +111,6 @@ seq_insert(intset_t* set, skey_t key, sval_t val)
 	{
 	  rnode = new_node(key, 0, curr, node, 0);
 	}
-      rnode->leaf=0;
       ins = rnode;
     }
 
