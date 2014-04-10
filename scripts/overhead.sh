@@ -11,7 +11,7 @@ shift;
 progs_num=$(echo $progs | wc -w);
 params="$@";
 
-print_n "#   " "%-60s" "$progs" "\n"
+print_n "#   " "%-30s" "$progs" "\n"
 
 print_rep "#co " $progs_num "throughput parsing  update   queue    lock/upd  " "\n"
 

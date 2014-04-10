@@ -171,6 +171,8 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
 }
 
 void bst_help_insert(info_t * op) {
+  CLEANUP_TRY();
+
     int i = bst_cas_child(op->iinfo.p,op->iinfo.l,op->iinfo.new_internal);
     //iinfo_t* cl = (iinfo_t*) UNFLAG(op);
     void* UNUSED dummy = CAS_PTR(&(op->iinfo.p->update),FLAG(op,STATE_IFLAG),FLAG(op,STATE_CLEAN));
@@ -220,6 +222,8 @@ sval_t bst_delete(skey_t key, node_t* root) {
 }
 
 bool_t bst_help_delete(info_t* op) {
+  CLEANUP_TRY();
+
    update_t result; 
     result = CAS_PTR(&(op->dinfo.p->update), op->dinfo.pupdate, FLAG(op,STATE_MARK));
     if ((result == op->dinfo.pupdate) || (result == ((info_t*)FLAG(op,STATE_MARK)))) {
@@ -236,6 +240,8 @@ bool_t bst_help_delete(info_t* op) {
 
 
 void bst_help_marked(info_t* op) {
+  CLEANUP_TRY();
+
     node_t* other;
     if (op->dinfo.p->right == op->dinfo.l) {
         other = (node_t*) op->dinfo.p->left;

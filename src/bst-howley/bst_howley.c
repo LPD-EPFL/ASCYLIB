@@ -188,6 +188,8 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 
 void bst_help_child_cas(operation_t* op, node_t* dest, node_t* root){
 
+  CLEANUP_TRY();
+
 	node_t** address = NULL;
 	if (op->child_cas_op.is_left) {
 	  address = (node_t**) &(dest->left);
@@ -268,6 +270,7 @@ sval_t bst_remove(skey_t k, node_t* root){
 }
 
 bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
+  CLEANUP_TRY();
 
 	int seen_state = op->relocate_op.state;
 	if (seen_state == STATE_OP_ONGOING) {
@@ -310,6 +313,8 @@ bool_t bst_help_relocate(operation_t* op, node_t* pred, operation_t* pred_op, no
 }
 
 void bst_help_marked(node_t* pred, operation_t* pred_op, node_t* curr, node_t* root){
+
+  CLEANUP_TRY();
 
 	node_t* new_ref;
 	if (ISNULL((node_t*) curr->left)) {
