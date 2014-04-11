@@ -54,6 +54,5 @@ test.o: bst_bronson_java.h
 main: measurements.o ssalloc.o  bst_bronson_java.o test.o 
 	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/bst_bronson_java.o  $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
-
 clean:
 	rm -f $(BINS)

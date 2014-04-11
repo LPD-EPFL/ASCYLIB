@@ -416,6 +416,8 @@ sval_t attempt_node_update(function_t func, sval_t new_value, volatile node_t* p
 }
 
 void wait_until_not_changing(volatile node_t* node) {
+  CLEANUP_TRY();
+
 	volatile uint64_t version = node->version;	
     int i;
 
@@ -428,11 +430,11 @@ void wait_until_not_changing(volatile node_t* node) {
 	}
       }
 
-      skey_t UNUSED node_key = node->key;
-      volatile ptlock_t* node_lock = &node->lock;
-
-      LOCK(node_lock);
-      UNLOCK(node_lock);
+      MEM_BARRIER;
+      /* skey_t UNUSED node_key = node->key; */
+      /* volatile ptlock_t* node_lock = &node->lock; */
+      /* LOCK(node_lock); */
+      /* UNLOCK(node_lock); */
     }
 }
 

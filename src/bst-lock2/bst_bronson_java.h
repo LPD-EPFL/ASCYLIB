@@ -56,6 +56,8 @@ union node_t {
 	char padding[64*((48+sizeof(ptlock_t))/64+1)];
 };
 
+STATIC_ASSERT(sizeof(node_t) == 64, "sizeof(node_t) == 64");
+
 // bst interface functions
 volatile node_t* bst_initialize();
 sval_t bst_contains(skey_t k, volatile node_t* root);
