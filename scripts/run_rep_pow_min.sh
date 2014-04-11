@@ -23,5 +23,5 @@ do
     printf "%d %.2f %f %f \n" $thr $ppw $pow $eop >> $tmp;
 done;
 
-sort -n -k4 $tmp | grep -v "-" | tail -n1
+sort -n $tmp | grep -v "-" | tail -n1
 
