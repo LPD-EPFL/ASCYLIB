@@ -58,6 +58,7 @@ typedef ALIGNED(32) volatile struct node_l
   skey_t key;
   sval_t val;
   volatile struct node_l* next;
+  uint8_t padding32[8];
 #if !defined(LL_GLOBAL_LOCK)
   volatile ptlock_t lock;
 #endif
