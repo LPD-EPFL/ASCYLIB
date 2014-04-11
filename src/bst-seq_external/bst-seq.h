@@ -42,7 +42,7 @@ typedef struct node
   union
   {
     sval_t val;
-    int leaf;
+    uint64_t leaf;
   };
   volatile struct node *left;
   volatile struct node *right;
