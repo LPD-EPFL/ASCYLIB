@@ -38,15 +38,16 @@ retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
   size_t updates = put + rem;
   ratio_all = 100.0 * (((double) __update_try_global / updates) - 1);
   printf("#update_all:   %-10zu %f %%\n", __update_try_global, ratio_all);
-  ratio_all = 100.0 * (__cleanup_try_global / (updates - (double) __cleanup_try_global));
-  printf("#cleanup_all:  %-10zu %f %%\n", __cleanup_try_global, ratio_all);
+  ratio_all = 100.0 * (__cleanup_try_global / (thr - (double) __cleanup_try_global));
+  double ratio_upd = 100.0 * (__cleanup_try_global / (updates - (double) __cleanup_try_global));
+  printf("#cleanup_all:  %-10zu %f %% %f %%\n", __cleanup_try_global, ratio_upd, ratio_all);
   ratio_all = (double) __lock_queue_global / __lock_try_global;
   if (__lock_try_global == 0)
     {
       ratio_all = 0;
     }
   double ratio_to_succ_upd = (double) __lock_try_global / upd_suc;
-  printf("#lock_all:     %-10zu %f %f\n", __lock_try_global, ratio_all, ratio_to_succ_upd);
+  printf("#lock_all:     %-10zu %f   %f\n", __lock_try_global, ratio_all, ratio_to_succ_upd);
 }
 
 #else  /* RETRY_STATS == 0 */

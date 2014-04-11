@@ -10,7 +10,7 @@
 #define XSTR(s)                         STR(s)
 #define STR(s)                          #s
 
-#if GCC_VERSION > 46000
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
 #  define STATIC_ASSERT(a, msg)           _Static_assert ((a), msg);
 #else 
 #  define STATIC_ASSERT(a, msg)           

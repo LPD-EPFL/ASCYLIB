@@ -64,6 +64,8 @@ typedef ALIGNED(32) volatile struct node_l
 #endif
 } node_l_t;
 
+STATIC_ASSERT(sizeof(node_l_t) % 32 == 0, "sizeof(node_l_t) should be 32bytes aligned");
+
 typedef struct intset_l 
 {
   node_l_t* head;
