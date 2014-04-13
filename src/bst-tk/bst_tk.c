@@ -7,6 +7,7 @@
 
 #include "bst_tk.h"
 
+RETRY_STATS_VARS;
 
 sval_t
 bst_tk_delete(intset_t* set, skey_t key)
@@ -17,6 +18,9 @@ bst_tk_delete(intset_t* set, skey_t key)
   uint32_t curr_ver = 0, pred_ver = 0, ppred_ver = 0, left = 0, pleft = 0;
 
  retry:
+  PARSE_TRY();
+  UPDATE_TRY();
+
   curr = set->head;
 
   do
@@ -48,7 +52,6 @@ bst_tk_delete(intset_t* set, skey_t key)
     {
       return 0;
     }
-
 
 
   if (unlikely(!tl_trylock_version(&ppred->lock, ppred_ver)))
@@ -102,12 +105,13 @@ bst_tk_delete(intset_t* set, skey_t key)
 sval_t
 bst_tk_find(intset_t* set, skey_t key) 
 {
+  PARSE_TRY();
+
   node_t* curr = set->head;
 
   while (likely(!curr->leaf))
     {
-      skey_t curr_key = curr->key;
-      if (key < curr_key)
+      if (key < curr->key)
 	{
 	  curr = (node_t*) curr->left;
 	}
@@ -133,6 +137,9 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
   uint32_t curr_ver = 0, pred_ver = 0, left = 0;
 
  retry:
+  PARSE_TRY();
+  UPDATE_TRY();
+
   curr = set->head;
 
   do
