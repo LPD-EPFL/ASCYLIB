@@ -9,7 +9,7 @@
 
 
 sval_t
-seq_delete(intset_t* set, skey_t key)
+bst_tk_delete(intset_t* set, skey_t key)
 {
   node_t* curr;
   node_t* pred = NULL;
@@ -100,7 +100,7 @@ seq_delete(intset_t* set, skey_t key)
 }
 
 sval_t
-seq_find(intset_t* set, skey_t key) 
+bst_tk_find(intset_t* set, skey_t key) 
 {
   node_t* curr = set->head;
 
@@ -126,7 +126,7 @@ seq_find(intset_t* set, skey_t key)
 }
 
 int
-seq_insert(intset_t* set, skey_t key, sval_t val) 
+bst_tk_insert(intset_t* set, skey_t key, sval_t val) 
 {
   node_t* curr;
   node_t* pred = NULL;

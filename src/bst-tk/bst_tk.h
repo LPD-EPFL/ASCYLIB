@@ -6,6 +6,6 @@
 
 #include "bst.h"
 
-sval_t seq_delete(intset_t* set, skey_t key);
-sval_t seq_find(intset_t* set, skey_t key);
-int seq_insert(intset_t* set, skey_t key, sval_t val);
+sval_t bst_tk_delete(intset_t* set, skey_t key);
+sval_t bst_tk_find(intset_t* set, skey_t key);
+int bst_tk_insert(intset_t* set, skey_t key, sval_t val);
