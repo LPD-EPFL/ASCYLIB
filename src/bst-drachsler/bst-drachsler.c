@@ -258,6 +258,7 @@ bool_t acquire_tree_locks(node_t* n) {
         node_t* right = (node_t*) n->right;
         //lock_parent(n);
         if ((right == NULL) || (left == NULL)) {
+#ifdef DO_DRACHSLER_REBALANCE
             if (right != NULL) {
                 if(!TRYLOCK(&(right->tree_lock))) {
                     UNLOCK(&(n->tree_lock));
@@ -271,6 +272,7 @@ bool_t acquire_tree_locks(node_t* n) {
                     continue;
                 }
             }
+#endif
             return FALSE;
         } else {
             node_t* s = (node_t*) n->succ;
@@ -300,18 +302,20 @@ bool_t acquire_tree_locks(node_t* n) {
                 }
                 continue;
             }
+#ifdef DO_DRACHSLER_REBALANCE
             node_t* sr = (node_t*) s->right;
             if (sr != NULL) {
                 if (!TRYLOCK(&(sr->tree_lock))) {
                     UNLOCK(&(n->tree_lock));
                     UNLOCK(&(s->tree_lock));
-                    if (l) { 
+                    if (l) {
                         UNLOCK(&(parent->tree_lock));
                     }
                     //UNLOCK(&(n->parent->tree_lock));
                     continue;
                 }
             }
+#endif
             return TRUE;
         }
     }
@@ -362,11 +366,12 @@ void remove_from_tree(node_t* n, bool_t has_two_children,node_t* root) {
             UNLOCK(&(s->tree_lock));
         }
         UNLOCK(&(parent->tree_lock));
+#ifdef DO_DRACHSLER_REBALANCE
+        if (child) {
+            UNLOCK(&(child->tree_lock));
+         }
+#endif
     }
-    if (child) {
-       UNLOCK(&(child->tree_lock));
-    }
-
 #ifdef DO_DRACHSLER_REBALANCE
     bst_rebalance(parent,child,root);
     if (violated) {
