@@ -18,6 +18,7 @@
 #define CHM_TRY_PREFETCH                0
 #define CHM_MAX_SCAN_RETRIES            64
 #define CHM_READ_ONLY_FAIL              RO_FAIL
+
 /* 
  * structures
  */
@@ -26,6 +27,7 @@ typedef volatile struct chm_node
 {
   skey_t key;
   sval_t val;
+  uint8_t padding32[8];
   volatile struct chm_node* next;
 } chm_node_t;
 
@@ -48,7 +50,7 @@ typedef volatile struct chm_seg
   };
 } chm_seg_t;
 
-typedef struct ALIGNED(64) chm
+typedef struct ALIGNED(CACHE_LINE_SIZE) chm
 {
   union
   {

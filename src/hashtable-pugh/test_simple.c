@@ -34,11 +34,11 @@
 #define DS_CONTAINS(s,k)  ht_contains(s, k)
 #define DS_ADD(s,k)       ht_add(s, k, k)
 #define DS_REMOVE(s,k)    ht_remove(s, k)
-#define DS_SIZE(s)          ht_size(s)
-#define DS_NEW()            ht_new()
+#define DS_SIZE(s)        ht_size(s)
+#define DS_NEW()          ht_new()
 
-#define DS_TYPE             ht_intset_t
-#define DS_NODE             node_l_t
+#define DS_TYPE           ht_intset_t
+#define DS_NODE           node_l_t
 
 /* ################################################################### *
  * GLOBALS

@@ -1,5 +1,7 @@
 #include "concurrent_hash_map2.h"
 
+RETRY_STATS_VARS;
+
 __thread ssmem_allocator_t* alloc = NULL;
 
 
@@ -195,6 +197,8 @@ chm_seg_rehash(chm_t* set, int seg_num, chm_node_t* new)
 sval_t
 chm_get(chm_t* set, skey_t key)
 {
+  PARSE_TRY();
+
   chm_seg_t* seg = set->segments[key & set->hash];
   chm_node_t** bucket = &seg->table[hash(key, set->hash_seed) & seg->hash];
   chm_node_t* curr = *bucket;
@@ -214,6 +218,8 @@ chm_get(chm_t* set, skey_t key)
 static inline int
 chm_contains(chm_t* set, chm_seg_t* seg, skey_t key)
 {
+  PARSE_TRY();
+
   chm_node_t** bucket = &seg->table[hash(key, set->hash_seed) & seg->hash];
   chm_node_t* curr = *bucket;
 
@@ -260,6 +266,9 @@ chm_put_prefetch(chm_seg_t* seg, int hash_seed,skey_t key)
 int
 chm_put(chm_t* set, skey_t key, sval_t val)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
+
   volatile chm_seg_t* seg;
   volatile ptlock_t* seg_lock;
   int seg_num = key & set->hash;
@@ -276,6 +285,7 @@ chm_put(chm_t* set, skey_t key, sval_t val)
   int walks = 0;
 #endif
 
+  LOCK_TRY_ONCE_CLEAR();
   do 
     {
       seg = set->segments[seg_num];
@@ -360,6 +370,9 @@ chm_rem_prefetch(chm_seg_t* seg, int hash_seed, skey_t key)
 sval_t
 chm_rem(chm_t* set, skey_t key)
 {
+  PARSE_TRY();
+  UPDATE_TRY();
+
   volatile chm_seg_t* seg;
   volatile ptlock_t* seg_lock;
   int seg_num = key & set->hash;
@@ -377,6 +390,7 @@ chm_rem(chm_t* set, skey_t key)
   int walks = 0;
 #endif
 
+  LOCK_TRY_ONCE_CLEAR();
   do 
     {
       seg = set->segments[seg_num];
