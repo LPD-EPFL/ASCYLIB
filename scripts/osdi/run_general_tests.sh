@@ -9,11 +9,19 @@ uname=$(uname -n);
 ub="bin";
 
 LOCK=tas
+
+timeout="timeout 180"
+
 if [ $uname = "ol-collab1" ];
 then
     MAKE=gmake
     LOCK=ticket
 fi;
+if [ $uname = "parsasrv1.epfl.ch" ];
+then
+    timeout=""
+fi;
+
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
     INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k $LOCK
@@ -95,10 +103,13 @@ run_test() {
     params=$@
     array=()
     for i in `seq 1 ${num_repetitions}`; do 
-        thr=$(${run_script} ${executable} ${params} | grep "Mops" | cut -d' ' -f2);
-        array+=("$thr")
+        thr=$(${timeout} ${run_script} ${executable} ${params} | grep "Mops" | cut -d' ' -f2);
+        if [ $? -eq 0 ]
+        then
+            array+=("$thr")
+        fi
     done
-    res=$(compute_val $array)
+   res=$(compute_val $array)
     echo $res
 }
 
