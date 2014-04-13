@@ -235,6 +235,7 @@ clean:
 	$(MAKE) -C src/bst-aravind clean
 	$(MAKE) -C src/bst-drachsler clean
 	$(MAKE) -C src/bst-lock2 clean
+	$(MAKE) -C src/bst-tk clean
 	$(MAKE) -C src/deque clean
 	$(MAKE) -C src/noise clean
 	$(MAKE) -C src/tests clean

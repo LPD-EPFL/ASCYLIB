@@ -22,7 +22,7 @@
  */
 
 #include "bst.h"
-#include "bst_ss.h"
+#include "bst_tk.h"
 
 sval_t
 set_contains(intset_t* set, skey_t key)
