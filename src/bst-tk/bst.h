@@ -45,13 +45,17 @@ typedef struct tl
       volatile uint32_t version;
       volatile uint32_t ticket;
     };
-    volatile uint64_t to_uint64;
+    uint64_t to_uint64;
   };
 } tl_t;
 
 static inline int
 tl_trylock_version(volatile tl_t* tl, uint32_t version)
 {
+  if (tl->version != version)
+    {
+      return 0;
+    }
   tl_t tlo = { .version = version, .ticket = version };
   tl_t tln = { .version = version, .ticket = version + 1 };
   return CAS_U64((uint64_t*) tl, tlo.to_uint64, tln.to_uint64) == tlo.to_uint64;
@@ -60,9 +64,17 @@ tl_trylock_version(volatile tl_t* tl, uint32_t version)
 static inline void
 tl_unlock(volatile tl_t* tl)
 {
-  PREFETCHW(tl);
+  /* PREFETCHW(tl); */
   COMPILER_NO_REORDER(tl->version++);
 }
+
+static inline void
+tl_revert(volatile tl_t* tl)
+{
+  /* PREFETCHW(tl); */
+  COMPILER_NO_REORDER(tl->ticket--);
+}
+
 
 typedef struct node
 {
@@ -75,6 +87,8 @@ typedef struct node
   volatile struct node* left;
   volatile struct node* right;
   volatile tl_t lock;
+
+  uint8_t padding[CACHE_LINE_SIZE - 40];
 } node_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset

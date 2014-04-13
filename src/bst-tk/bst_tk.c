@@ -15,7 +15,8 @@ bst_tk_delete(intset_t* set, skey_t key)
   node_t* curr;
   node_t* pred = NULL;
   node_t* ppred = NULL;
-  uint32_t curr_ver = 0, pred_ver = 0, ppred_ver = 0, left = 0, pleft = 0;
+  volatile uint32_t curr_ver = 0;
+  uint32_t pred_ver = 0, ppred_ver = 0, left = 0, pleft = 0;
 
  retry:
   PARSE_TRY();
@@ -25,14 +26,14 @@ bst_tk_delete(intset_t* set, skey_t key)
 
   do
     {
-      COMPILER_NO_REORDER(curr_ver = curr->lock.version;);
+      curr_ver = curr->lock.version;
 
       ppred = pred;
-      COMPILER_NO_REORDER(ppred_ver = pred_ver;);
+      ppred_ver = pred_ver;
       pleft = left;
 
       pred = curr;
-      COMPILER_NO_REORDER(pred_ver = curr_ver;);
+      pred_ver = curr_ver;
 
       if (key < curr->key)
 	{
@@ -54,14 +55,14 @@ bst_tk_delete(intset_t* set, skey_t key)
     }
 
 
-  if (unlikely(!tl_trylock_version(&ppred->lock, ppred_ver)))
+  if ((!tl_trylock_version(&ppred->lock, ppred_ver)))
     {
       goto retry;
     }
 
-  if (unlikely(!tl_trylock_version(&pred->lock, pred_ver)))
+  if ((!tl_trylock_version(&pred->lock, pred_ver)))
     {
-      tl_unlock(&ppred->lock);
+      tl_revert(&ppred->lock);
       goto retry;
     }
 
@@ -134,7 +135,8 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
 {
   node_t* curr;
   node_t* pred = NULL;
-  uint32_t curr_ver = 0, pred_ver = 0, left = 0;
+  volatile uint32_t curr_ver = 0;
+  uint32_t pred_ver = 0, left = 0;
 
  retry:
   PARSE_TRY();
@@ -144,10 +146,10 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
 
   do
     {
-      COMPILER_NO_REORDER(curr_ver = curr->lock.version;);
+      curr_ver = curr->lock.version;
 
       pred = curr;
-      COMPILER_NO_REORDER(pred_ver = curr_ver;);
+      pred_ver = curr_ver;
 
       if (key < curr->key)
 	{
@@ -168,7 +170,7 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
       return 0;
     }
 
-  if (unlikely(!tl_trylock_version(&pred->lock, pred_ver)))
+  if ((!tl_trylock_version(&pred->lock, pred_ver)))
     {
       goto retry;
     }
