@@ -21,14 +21,14 @@ bst_tk_delete(intset_t* set, skey_t key)
 
   do
     {
-      curr_ver = curr->lock.version;
+      COMPILER_NO_REORDER(curr_ver = curr->lock.version;);
 
       ppred = pred;
-      ppred_ver = pred_ver;
+      COMPILER_NO_REORDER(ppred_ver = pred_ver;);
       pleft = left;
 
       pred = curr;
-      pred_ver = curr_ver;
+      COMPILER_NO_REORDER(pred_ver = curr_ver;);
 
       if (key < curr->key)
 	{
@@ -130,31 +130,28 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
 {
   node_t* curr;
   node_t* pred = NULL;
-  node_t* ppred = NULL;
-  uint32_t curr_ver = 0, pred_ver = 0, ppred_ver = 0, left = 0;
+  uint32_t curr_ver = 0, pred_ver = 0, left = 0;
 
  retry:
   curr = set->head;
 
   do
     {
-        curr_ver = curr->lock.version;
+      COMPILER_NO_REORDER(curr_ver = curr->lock.version;);
 
-	ppred = pred;
-	ppred_ver = pred_ver;
+      pred = curr;
+      COMPILER_NO_REORDER(pred_ver = curr_ver;);
 
-	pred = curr;
-	pred_ver = curr_ver;
-	if (key < curr->key)
-	  {
-	    left = 1;
-	    curr = (node_t*) curr->left;
-	  }
-	else
-	  {
-	    left = 0;
-	    curr = (node_t*) curr->right;
-	  }
+      if (key < curr->key)
+	{
+	  left = 1;
+	  curr = (node_t*) curr->left;
+	}
+      else
+	{
+	  left = 0;
+	  curr = (node_t*) curr->right;
+	}
     }
   while(likely(!curr->leaf));
 
@@ -164,17 +161,8 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
       return 0;
     }
 
-  if (likely(ppred != NULL) && unlikely(!tl_trylock_version(&ppred->lock, ppred_ver)))
-    {
-      goto retry;
-    }
-
   if (unlikely(!tl_trylock_version(&pred->lock, pred_ver)))
     {
-      if (likely(ppred != NULL))
-	{
-	  tl_unlock(&ppred->lock);
-	}
       goto retry;
     }
 
@@ -200,10 +188,6 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
     }
 
   tl_unlock(&pred->lock);
-  if (likely(ppred != NULL))
-    {
-      tl_unlock(&ppred->lock);
-    }
 
   return 1;
 }
