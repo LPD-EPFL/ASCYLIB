@@ -47,7 +47,7 @@ then
 	max_cores=36;
 elif [ $unm = "diassrv8" ];
 then
-	max_cores=160;
+	max_cores=80;
 elif [ $unm = "lpdpc34" ];
 then
 	max_cores=8;

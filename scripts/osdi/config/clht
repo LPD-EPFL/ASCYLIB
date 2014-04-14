@@ -1,6 +1,13 @@
 SCY=clht
 
-hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lf-ht_rcu ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+un=$(uname -n);
+
+if [ $un = "diassrv8" ];
+then
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+else
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lf-ht_rcu ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+fi;
 
 CLHT_PATH=~/code/hyht
 MAKE_CLHT=1;
@@ -18,7 +25,7 @@ updates="10";
 cores="all";
 cores_pow="two"
 
-COMPILE_FLAGS="SET_CPU=1"
+COMPILE_FLAGS="SET_CPU=0"
 skip_thr=0;
 skip_lat=1;
 skip_ldi=1;
