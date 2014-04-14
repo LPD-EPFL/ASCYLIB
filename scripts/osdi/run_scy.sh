@@ -3,6 +3,15 @@
 config_workload=./scripts/osdi/config/scy1.long
 config_execs=./scripts/osdi/config/all
 
+
+skip=0;
+if [ "$1" = "skip" ];
+then
+    skip=1;
+    echo "** Skipping check and proceeding to the experiment!";
+    shift;
+fi;
+
 un=$(uname -n);
 ub="bin/$un";
 if [ ! -d "$ub" ];
@@ -167,12 +176,17 @@ est_time_ldi=$(echo "${do_ldi}*${c_num_ldi}*${i_num}*${u_num}*${exec_num}*(${dur
 
 est_time=$(echo "${est_time_thr_lat}+${est_time_ldi}" | bc -l);
 printf "## Estimated time for the experiment: %6.3f h\n" $est_time;
-printf "   Continue? [Y/n] ";
-read cont;
-if [ "$cont" = "n" ];
+
+if [ $skip -eq 0 ];
 then
-    exit;
+    printf "   Continue? [Y/n] ";
+    read cont;
+    if [ "$cont" = "n" ];
+    then
+	exit;
+    fi;
 fi;
+
 #############################################
 
 
