@@ -23,13 +23,17 @@ if [ $uname = "parsasrv1.epfl.ch" ];
 then
     timeout=""
 fi;
+if [ $uname = "diassrv8" ];
+then
+    setcpu="SET_CPU=0";
+fi
 
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
-    INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k $LOCK
-    INIT=one $MAKE -k $LOCK
-    INIT=one $MAKE -k $sq
-    INIT=one $MAKE -k lockfree
+    INIT=one GRANULARITY=GLOBAL_LOCK ${setcpu} $MAKE -k $LOCK
+    INIT=one ${setcpu} $MAKE -k $LOCK
+    INIT=one ${setcpu} $MAKE -k $sq
+    INIT=one ${setcpu} $MAKE -k lockfree
 fi
 
 source scripts/config;
@@ -42,7 +46,7 @@ sl_algos="./${ub}/lb-sl_herlihy ./${ub}/lb-sl_pugh ./${ub}/lf-sl_fraser ./${ub}/
 do_sl=1
 ht_algos="./${ub}/lb-ht_tbb ./${ub}/lb-ht_java ./${ub}/lb-ht_copy ./${ub}/lb-ht_lazy_gl ./${ub}/lb-ht_coupling_gl ./${ub}/lb-ht_pugh_gl ./${ub}/lf-ht ./${ub}/lf-ht_rcu ./${ub}/sq-ht"
 do_ht=1
-bst_algos="./${ub}/lf-bst ./${ub}/lb-bst-drachsler ./${ub}/lb-bst_tk ./${ub}/lf-bst-aravind ./${ub}/lf-bst-howley ./${ub}/lb-bst2 ./${ub}/sq-bst_external ./${ub}/sq-bst_internal"
+bst_algos="./${ub}/lf-bst ./${ub}/lb-bst-drachsler ./${ub}/lf-bst-aravind ./${ub}/lf-bst-howley ./${ub}/lb-bst2 ./${ub}/sq-bst_external ./${ub}/sq-bst_internal"
 do_bst=1
 
 num_repetitions=25
