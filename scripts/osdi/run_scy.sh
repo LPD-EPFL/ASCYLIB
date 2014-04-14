@@ -209,7 +209,7 @@ fi;
     if [ $do_ll -eq 1 ];
     then
 	structure=ll;
-	make ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
+	make -k ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -236,12 +236,12 @@ fi;
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    make clean hyht_res lfht_res;
+	    make -k clean hyht_res lfht_res;
 	    cd -;
 	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
 	fi;
 
-	make ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
+	make -k ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -262,7 +262,7 @@ fi;
     if [ $do_sl -eq 1 ];
     then
 	structure=sl;
-	make ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
+	make -k ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -283,7 +283,7 @@ fi;
     if [ $do_bst -eq 1 ];
     then
 	structure=bst;
-	make ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
+	make -k ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -314,7 +314,7 @@ then
     if [ $do_ll -eq 1 ];
     then
 	structure=ll;
-	make ${structure} ${COMPILE_FLAGS};
+	make -k ${structure} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -341,12 +341,12 @@ then
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    make clean hyht_res lfht_res;
+	    make -k clean hyht_res lfht_res;
 	    cd -;
 	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
 	fi;
 
-	make ${structure} ${COMPILE_FLAGS};
+	make -k ${structure} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -367,7 +367,7 @@ then
     if [ $do_sl -eq 1 ];
     then
 	structure=sl;
-	make ${structure} ${COMPILE_FLAGS};
+	make -k ${structure} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -388,7 +388,7 @@ then
     if [ $do_bst -eq 1 ];
     then
 	structure=bst;
-	make ${structure} ${COMPILE_FLAGS};
+	make -k ${structure} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -418,7 +418,7 @@ then
     if [ $do_ll -eq 1 ];
     then
 	structure=ll;
-	make ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
+	make -k ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -445,12 +445,12 @@ then
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    make clean hyht_res lfht_res;
+	    make -k clean hyht_res lfht_res;
 	    cd -;
 	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
 	fi;
 
-	make ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
+	make -k ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -472,7 +472,7 @@ then
     if [ $do_sl -eq 1 ];
     then
 	structure=sl;
-	make ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
+	make -k ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -494,7 +494,7 @@ then
     if [ $do_bst -eq 1 ];
     then
 	structure=bst;
-	make ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
+	make -k ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -524,7 +524,7 @@ then
     if [ $do_ll -eq 1 ];
     then
 	structure=ll;
-	make ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
+	make -k ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -555,7 +555,7 @@ then
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    make clean hyht_res lfht_res;
+	    make -k clean hyht_res lfht_res;
 	    cd -;
 	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
 	fi;
@@ -586,7 +586,7 @@ then
     if [ $do_sl -eq 1 ];
     then
 	structure=sl;
-	make ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
+	make -k ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
@@ -612,7 +612,7 @@ then
     if [ $do_bst -eq 1 ];
     then
 	structure=bst;
-	make ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
+	make -k ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
 	mv bin/*${structure}* $ub;
 
 	echo "~~~~~~~~~~~~ Working on ${structure}";
