@@ -4,7 +4,7 @@ LATENCY_TYPE=3			# 2 or 3
 LATENCY_POINTS=1024
 LATENCY_MERGE=0
 
-reps=51;
+reps=41;
 keep=median; 			# min, median, or max
 duration=1000;
 initials="2048";

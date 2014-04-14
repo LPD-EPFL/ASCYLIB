@@ -3,6 +3,7 @@ unm=$(uname -n);
 if [ $unm = "parsasrv1.epfl.ch" ];
 then
     run_script="./run"
+    run_script_timeout="./run_timeout"
 fi;
 
 max_cores(){
@@ -47,7 +48,7 @@ then
 	max_cores=36;
 elif [ $unm = "diassrv8" ];
 then
-	max_cores=160;
+	max_cores=80;
 elif [ $unm = "lpdpc34" ];
 then
 	max_cores=8;
@@ -107,27 +108,27 @@ elif [ "$cores" = "osdi" ];
 then
     if [ $unm = "maglite" ];
     then
-	cores=$(seq 2 4 64);
+	cores=$(seq 1 4 64);
     elif [ $unm = "parsasrv1.epfl.ch" ];
     then
-	cores=$(seq 2 2 36);
+	cores=$(seq 1 2 36);
     elif [ $unm = "diassrv8" ];
     then
-	cores=$(seq 2 8 160);
+	cores=$(seq 1 8 160);
     elif [ $unm = "lpdpc34" ];
     then
-	cores=$(seq 2 1 8);
+	cores=$(seq 1 1 8);
     elif [ $unm = "lpdpc4" ];
     then
-	cores=$(seq 2 1 8);
+	cores=$(seq 1 1 8);
     elif [ $unm = "lpdxeon2680" ];
     then
-	cores=$(seq 2 2 40);
+	cores=$(seq 1 2 40);
     elif [ $unm = "ol-collab1" ];
     then
-	cores=$(seq 2 8 256);
+	cores=$(seq 1 8 256);
     else
-	cores=$(seq 2 2 48);
+	cores=$(seq 1 2 48);
     fi;
 elif [ "$cores" = "socketandone" ];
 then

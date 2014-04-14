@@ -1,0 +1,30 @@
+SCY=bsttk
+
+bsts="./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst-drachsler ./$ub/lf-bst-aravind ./$ub/lb-bst_tk";
+
+CLHT_PATH=~/code/hyht
+MAKE_CLHT=1;
+
+cores_lat_dist="1 10 20";
+LATENCY_TYPE=3			# 2 or 3
+LATENCY_POINTS=256
+LATENCY_MERGE=0
+
+reps=1;
+keep=median; 			# min, median, or max
+duration=1000;
+initials="4096";
+updates="10";
+cores="socket";
+cores_pow="two"
+
+COMPILE_FLAGS="SET_CPU=1"
+skip_thr=0;
+skip_lat=1;
+skip_ldi=1;
+skip_pow=1;
+
+do_ll=0;
+do_ht=0;
+do_sl=0;
+do_bst=1;

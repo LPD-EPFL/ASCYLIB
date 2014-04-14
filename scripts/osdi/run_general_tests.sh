@@ -107,7 +107,7 @@ run_test() {
     params=$@
     array=()
     for i in `seq 1 ${num_repetitions}`; do 
-        thr=$(${timeout} ${run_script} ${executable} ${params} | grep "Mops" | cut -d' ' -f2);
+        thr=$(${timeout} ${run_script_timeout} ${executable} ${params} | grep "Mops" | cut -d' ' -f2);
         if [ $? -eq 0 ]
         then
             array+=("$thr")

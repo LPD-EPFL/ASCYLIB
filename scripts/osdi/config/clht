@@ -1,6 +1,16 @@
 SCY=clht
 
-hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lf-ht_rcu ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+un=$(uname -n);
+
+if [ $un = "diassrv8" ];
+then
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+elif [ $un = "parsasrv1.epfl.ch" ];
+then
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+else
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lf-ht_rcu ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+fi;
 
 CLHT_PATH=~/code/hyht
 MAKE_CLHT=1;
@@ -10,12 +20,12 @@ LATENCY_TYPE=3			# 2 or 3
 LATENCY_POINTS=256
 LATENCY_MERGE=0
 
-reps=1;
-keep=max; 			# min, median, or max
+reps=5;
+keep=median; 			# min, median, or max
 duration=1000;
-initials="1024 2048 4096 8192 16384 32768 65536";
-updates="5 10 20";
-cores="socket";
+initials="4096";
+updates="10";
+cores="all";
 cores_pow="two"
 
 COMPILE_FLAGS="SET_CPU=1"
