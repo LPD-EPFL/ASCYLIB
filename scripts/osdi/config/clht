@@ -5,6 +5,9 @@ un=$(uname -n);
 if [ $un = "diassrv8" ];
 then
 	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+elif [ $un = "parsasrv1.epfl.ch" ];
+then
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
 else
 	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lf-ht_rcu ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
 fi;
