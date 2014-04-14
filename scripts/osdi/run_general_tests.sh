@@ -1,9 +1,9 @@
 #!/bin/bash
 MAKE=make
-cores="all"
+cores="osdi"
 
 #0 - median; 1 - max; 2 - min; 3 - avg
-res_type=1
+res_type=0
 
 uname=$(uname -n);
 ub="bin";
@@ -11,11 +11,13 @@ ub="bin";
 LOCK=tas
 
 timeout="timeout 180"
+sq="seq"
 
 if [ $uname = "ol-collab1" ];
 then
     MAKE=gmake
     LOCK=ticket
+    sq="seqgc"
 fi;
 if [ $uname = "parsasrv1.epfl.ch" ];
 then
@@ -26,7 +28,7 @@ if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
     INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k $LOCK
     INIT=one $MAKE -k $LOCK
-    INIT=one $MAKE -k seq
+    INIT=one $MAKE -k $sq
     INIT=one $MAKE -k lockfree
 fi
 
@@ -34,21 +36,19 @@ source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
 
-cores=$(seq 2 2 48)
-
 ll_algos="./${ub}/lb-ll_lazy ./${ub}/lb-ll_coupling ./${ub}/lb-ll_pugh ./${ub}/lb-ll_copy ./${ub}/lf-ll_harris ./${ub}/lf-ll_harris_opt ./${ub}/lf-ll_michael ./${ub}/sq-ll"
 do_ll=1
 sl_algos="./${ub}/lb-sl_herlihy ./${ub}/lb-sl_pugh ./${ub}/lf-sl_fraser ./${ub}/lf-sl_herlihy  ./${ub}/sq-sl"
 do_sl=1
 ht_algos="./${ub}/lb-ht_tbb ./${ub}/lb-ht_java ./${ub}/lb-ht_copy ./${ub}/lb-ht_lazy_gl ./${ub}/lb-ht_coupling_gl ./${ub}/lb-ht_pugh_gl ./${ub}/lf-ht ./${ub}/lf-ht_rcu ./${ub}/sq-ht"
 do_ht=1
-bst_algos="./${ub}/lf-bst ./${ub}/lb-bst-drachsler ./${ub}/lf-bst-aravind ./${ub}/lf-bst-howley ./${ub}/lb-bst2 ./${ub}/sq-bst_external ./${ub}/sq-bst_internal"
+bst_algos="./${ub}/lf-bst ./${ub}/lb-bst-drachsler ./${ub}/lb-bst_tk ./${ub}/lf-bst-aravind ./${ub}/lf-bst-howley ./${ub}/lb-bst2 ./${ub}/sq-bst_external ./${ub}/sq-bst_internal"
 do_bst=1
 
 num_repetitions=25
 
 #default duration
-def_duration=300
+def_duration=1000
 
 #parameters for the common case experiment
 base_initial=4096
