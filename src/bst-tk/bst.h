@@ -52,13 +52,19 @@ typedef struct tl
 static inline int
 tl_trylock_version(volatile tl_t* tl, uint32_t version)
 {
-  if (tl->version != version)
+  if (likely(tl->version == version))
     {
-      return 0;
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
+      tl_t tlo = { .version = version, .ticket = version };
+      tl_t tln = { .version = version, .ticket = (version + 1) };
+#else
+      tl_t tlo = { version, version };
+      tl_t tln = { version, (version + 1) };
+#endif
+      return CAS_U64((uint64_t*) tl, tlo.to_uint64, tln.to_uint64) == tlo.to_uint64;
     }
-  tl_t tlo = { version, version };
-  tl_t tln = { version, (version + 1) };
-  return CAS_U64((uint64_t*) tl, tlo.to_uint64, tln.to_uint64) == tlo.to_uint64;
+
+  return 0 ;
 }
 
 static inline void
