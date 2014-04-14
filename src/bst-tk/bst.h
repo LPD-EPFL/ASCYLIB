@@ -56,8 +56,8 @@ tl_trylock_version(volatile tl_t* tl, uint32_t version)
     {
       return 0;
     }
-  tl_t tlo = { .version = version, .ticket = version };
-  tl_t tln = { .version = version, .ticket = version + 1 };
+  tl_t tlo = { version, version };
+  tl_t tln = { version, (version + 1) };
   return CAS_U64((uint64_t*) tl, tlo.to_uint64, tln.to_uint64) == tlo.to_uint64;
 }
 
