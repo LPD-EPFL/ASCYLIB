@@ -3,6 +3,7 @@ unm=$(uname -n);
 if [ $unm = "parsasrv1.epfl.ch" ];
 then
     run_script="./run"
+    run_script_timeout="./run_timeout"
 fi;
 
 max_cores(){
