@@ -252,6 +252,8 @@ sval_t bst_remove(skey_t k, node_t* root) {
 }
 
 bool_t acquire_tree_locks(node_t* n) {
+  LOCK_TRY_ONCE_CLEAR();
+
     while (1) {
         LOCK(&(n->tree_lock));
         node_t* left = (node_t*) n->left;
