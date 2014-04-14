@@ -236,7 +236,7 @@ fi;
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    make -k clean hyht_res lfht_res;
+	    make -k clean hyht_res lfht_res ${COMPILE_FLAGS};
 	    cd -;
 	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
 	fi;
@@ -341,7 +341,7 @@ then
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    make -k clean hyht_res lfht_res;
+	    make -k clean hyht_res lfht_res ${COMPILE_FLAGS};
 	    cd -;
 	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
 	fi;
@@ -445,7 +445,7 @@ then
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    make -k clean hyht_res lfht_res;
+	    make -k clean hyht_res lfht_res ${COMPILE_FLAGS};
 	    cd -;
 	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
 	fi;
@@ -555,7 +555,7 @@ then
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    make -k clean hyht_res lfht_res;
+	    make -k clean hyht_res lfht_res ${COMPILE_FLAGS};
 	    cd -;
 	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
 	fi;
