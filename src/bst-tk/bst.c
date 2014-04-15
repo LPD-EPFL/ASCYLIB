@@ -38,12 +38,6 @@ new_node(skey_t key, sval_t val, node_t* l, node_t* r, int initializing)
   node->right = r;
   node->lock.to_uint64 = 0;
 
-#if defined(__tile__)
-  /* on tilera you may have store reordering causing the pointer to a new node
-     to become visible, before the contents of the node are visible */
-  MEM_BARRIER;
-#endif	/* __tile__ */
-
   return (node_t*) node;
 }
 
@@ -64,12 +58,6 @@ new_node_no_init()
 
   node->val = 0;
   node->lock.to_uint64 = 0;
-
-#if defined(__tile__)
-  /* on tilera you may have store reordering causing the pointer to a new node
-     to become visible, before the contents of the node are visible */
-  MEM_BARRIER;
-#endif	/* __tile__ */
 
   return (node_t*) node;
 }

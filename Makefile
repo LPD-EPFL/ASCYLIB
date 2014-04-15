@@ -213,6 +213,12 @@ seqbstint:
 seqbstext:
 	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/bst-seq_external
 
+seqbstintgc:
+	$(MAKE) "STM=SEQUENTIAL" "GC=1" src/bst-seq_internal
+
+seqbstextgc:
+	$(MAKE) "STM=SEQUENTIAL" "GC=1" src/bst-seq_external
+
 
 clean:
 	$(MAKE) -C src/linkedlist clean	

@@ -41,10 +41,10 @@ typedef union tl32
 {
   struct
   {
-    uint16_t version;
-    uint16_t ticket;
+    volatile uint16_t version;
+    volatile uint16_t ticket;
   };
-  uint32_t to_uint32;
+  volatile uint32_t to_uint32;
 } tl32_t;
 
 
