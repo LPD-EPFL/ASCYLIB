@@ -47,6 +47,34 @@ new_node(skey_t key, sval_t val, node_t* l, node_t* r, int initializing)
   return (node_t*) node;
 }
 
+node_t*
+new_node_no_init()
+{
+  node_t* node;
+#if GC == 1
+  node = (node_t*) ssmem_alloc(alloc, sizeof(node_t));
+#else
+  node = (node_t*) ssalloc(sizeof(node_t));
+#endif
+  if (unlikely(node == NULL))
+    {
+      perror("malloc @ new_node");
+      exit(1);
+    }
+
+  node->val = 0;
+  node->lock.to_uint64 = 0;
+
+#if defined(__tile__)
+  /* on tilera you may have store reordering causing the pointer to a new node
+     to become visible, before the contents of the node are visible */
+  MEM_BARRIER;
+#endif	/* __tile__ */
+
+  return (node_t*) node;
+}
+
+
 
 intset_t* set_new()
 {

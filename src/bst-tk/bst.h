@@ -36,49 +36,85 @@
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
-typedef struct tl 
+
+typedef struct tl32
 {
   union
   {
     struct
     {
-      volatile uint32_t version;
-      volatile uint32_t ticket;
+      uint16_t version;
+      uint16_t ticket;
     };
+    uint32_t to_uint32;
+  };
+} tl32_t;
+
+
+typedef struct tl 
+{
+  union
+  {
+    tl32_t lr[2];
     uint64_t to_uint64;
   };
 } tl_t;
 
 static inline int
-tl_trylock_version(volatile tl_t* tl, uint32_t version)
+tl_trylock_version(volatile tl_t* tl, volatile tl_t* tl_old, int right)
 {
-  if (likely(tl->version == version))
+  uint16_t version = tl_old->lr[right].version;
+  if (unlikely(version != tl_old->lr[right].ticket))
     {
-#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
-      tl_t tlo = { .version = version, .ticket = version };
-      tl_t tln = { .version = version, .ticket = (version + 1) };
-#else
-      tl_t tlo = { version, version };
-      tl_t tln = { version, (version + 1) };
-#endif
-      return CAS_U64((uint64_t*) tl, tlo.to_uint64, tln.to_uint64) == tlo.to_uint64;
+      return 0;
     }
 
-  return 0 ;
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
+  tl32_t tlo = { .version = version, .ticket = version };
+  tl32_t tln = { .version = version, .ticket = (version + 1) };
+#else
+  tl_t tlo = { version, version };
+  tl_t tln = { version, (version + 1) };
+#endif
+  return CAS_U32(&tl->lr[right].to_uint32, tlo.to_uint32, tln.to_uint32) == tlo.to_uint32;
+
+}
+
+#define TLN_REMOVED  0x0000FFFF0000FFFF0000LL
+
+static inline int
+tl_trylock_version_both(volatile tl_t* tl, volatile tl_t* tl_old)
+{
+  uint16_t v0 = tl_old->lr[0].version;
+  uint16_t v1 = tl_old->lr[1].version;
+  if (unlikely(v0 != tl_old->lr[0].ticket || v1 != tl_old->lr[1].ticket))
+    {
+      return 0;
+    }
+
+#if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
+  tl_t tlo = { .to_uint64 = tl_old->to_uint64 };
+#else
+  tl_t tlo;
+  tlo.uint64_t = tl_old->to_uint64;
+#endif
+
+  return CAS_U64(&tl->to_uint64, tlo.to_uint64, TLN_REMOVED) == tlo.to_uint64;
+}
+
+
+static inline void
+tl_unlock(volatile tl_t* tl, int right)
+{
+  /* PREFETCHW(tl); */
+  COMPILER_NO_REORDER(tl->lr[right].version++);
 }
 
 static inline void
-tl_unlock(volatile tl_t* tl)
+tl_revert(volatile tl_t* tl, int right)
 {
   /* PREFETCHW(tl); */
-  COMPILER_NO_REORDER(tl->version++);
-}
-
-static inline void
-tl_revert(volatile tl_t* tl)
-{
-  /* PREFETCHW(tl); */
-  COMPILER_NO_REORDER(tl->ticket--);
+  COMPILER_NO_REORDER(tl->lr[right].ticket--);
 }
 
 
@@ -103,6 +139,7 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct intset
 } intset_t;
 
 node_t* new_node(skey_t key, sval_t val, node_t* l, node_t* r, int initializing);
+node_t* new_node_no_init();
 intset_t* set_new();
 void set_delete(intset_t* set);
 int set_size(intset_t* set);

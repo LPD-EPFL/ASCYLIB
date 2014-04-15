@@ -203,6 +203,9 @@ then
 elif [ "$cores" = "eight" ];
 then
     cores=$(seq 8 8 $max_cores);
+elif [ "$cores" = "ten" ];
+then
+    cores=$(seq 10 10 $max_cores);
 elif [ "$cores" = "to256" ];
 then
     if [ $unm = "maglite" ];
@@ -263,10 +266,7 @@ then
     fi;
 elif [ "$cores" = "to64fast" ];
 then
-    if [ $unm = "lpdxeon2680" ];
-    then
 	cores="$(seq 4 4 64)";
-    fi;
 elif [ "$cores" = "to64all" ];
 then
     if [ $unm = "lpdxeon2680" ];
