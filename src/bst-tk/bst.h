@@ -37,27 +37,21 @@ static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
 
-typedef struct tl32
+typedef union tl32
 {
-  union
+  struct
   {
-    struct
-    {
-      uint16_t version;
-      uint16_t ticket;
-    };
-    uint32_t to_uint32;
+    uint16_t version;
+    uint16_t ticket;
   };
+  uint32_t to_uint32;
 } tl32_t;
 
 
-typedef struct tl 
+typedef union tl
 {
-  union
-  {
-    tl32_t lr[2];
-    uint64_t to_uint64;
-  };
+  tl32_t lr[2];
+  uint64_t to_uint64;
 } tl_t;
 
 static inline int
@@ -72,12 +66,12 @@ tl_trylock_version(volatile tl_t* tl, volatile tl_t* tl_old, int right)
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
   tl32_t tlo = { .version = version, .ticket = version };
   tl32_t tln = { .version = version, .ticket = (version + 1) };
+  return CAS_U32(&tl->lr[right].to_uint32, tlo.to_uint32, tln.to_uint32) == tlo.to_uint32;
 #else
-  tl_t tlo = { version, version };
-  tl_t tln = { version, (version + 1) };
+  tl32_t tlo = { version, version };
+  tl32_t tln = { version, (version + 1) };
 #endif
   return CAS_U32(&tl->lr[right].to_uint32, tlo.to_uint32, tln.to_uint32) == tlo.to_uint32;
-
 }
 
 #define TLN_REMOVED  0x0000FFFF0000FFFF0000LL
@@ -94,12 +88,15 @@ tl_trylock_version_both(volatile tl_t* tl, volatile tl_t* tl_old)
 
 #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
   tl_t tlo = { .to_uint64 = tl_old->to_uint64 };
+  return CAS_U64(&tl->to_uint64, tlo.to_uint64, TLN_REMOVED) == tlo.to_uint64;
 #else
-  tl_t tlo;
-  tlo.uint64_t = tl_old->to_uint64;
+  /* tl_t tlo; */
+  /* tlo.uint64_t = tl_old->to_uint64; */
+  uint64_t tlo = *(uint64_t*) tl_old;
+
+  return CAS_U64((uint64_t*) tl, tlo, TLN_REMOVED) == tlo;
 #endif
 
-  return CAS_U64(&tl->to_uint64, tlo.to_uint64, TLN_REMOVED) == tlo.to_uint64;
 }
 
 
