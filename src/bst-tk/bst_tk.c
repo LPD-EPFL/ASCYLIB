@@ -15,8 +15,8 @@ bst_tk_delete(intset_t* set, skey_t key)
   node_t* curr;
   node_t* pred = NULL;
   node_t* ppred = NULL;
-  volatile uint32_t curr_ver = 0;
-  uint32_t pred_ver = 0, ppred_ver = 0, left = 0, pleft = 0;
+  volatile uint64_t curr_ver = 0;
+  uint64_t pred_ver = 0, ppred_ver = 0, right = 0, pright = 0;
 
  retry:
   PARSE_TRY();
@@ -26,23 +26,23 @@ bst_tk_delete(intset_t* set, skey_t key)
 
   do
     {
-      curr_ver = curr->lock.version;
+      curr_ver = curr->lock.to_uint64;
 
       ppred = pred;
       ppred_ver = pred_ver;
-      pleft = left;
+      pright = right;
 
       pred = curr;
       pred_ver = curr_ver;
 
       if (key < curr->key)
 	{
-	  left = 1;
+	  right = 0;
 	  curr = (node_t*) curr->left;
 	}
       else
 	{
-	  left = 0;
+	  right = 1;
 	  curr = (node_t*) curr->right;
 	}
     }
@@ -54,45 +54,41 @@ bst_tk_delete(intset_t* set, skey_t key)
       return 0;
     }
 
-
-  if ((!tl_trylock_version(&ppred->lock, ppred_ver)))
+  if ((!tl_trylock_version(&ppred->lock, (volatile tl_t*) &ppred_ver, pright)))
     {
       goto retry;
     }
 
-  if ((!tl_trylock_version(&pred->lock, pred_ver)))
+  if ((!tl_trylock_version_both(&pred->lock, (volatile tl_t*) &pred_ver)))
     {
-      tl_revert(&ppred->lock);
+      tl_revert(&ppred->lock, pright);
       goto retry;
     }
 
-
-  if (pleft)
+  if (pright)
     {
-      if (left)
+      if (right)
 	{
-	  ppred->left = pred->right;
+	  ppred->right = pred->left;
 	}
       else
 	{
-	  ppred->left = pred->left;
+	  ppred->right = pred->right;
 	}
     }
   else
     {
-      if (left)
+      if (right)
 	{
-	  ppred->right = pred->right;
+	  ppred->left = pred->left;
 	}
       else
 	{
-	  ppred->right = pred->left;
+	  ppred->left = pred->right;
 	}
     }
 
-
-  tl_unlock(&ppred->lock);
-
+  tl_unlock(&ppred->lock, pright);
 
 #if GC == 1
   ssmem_free(alloc, curr);
@@ -100,7 +96,6 @@ bst_tk_delete(intset_t* set, skey_t key)
 #endif
 
   return curr->val;
-
 }
 
 sval_t
@@ -135,8 +130,8 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
 {
   node_t* curr;
   node_t* pred = NULL;
-  volatile uint32_t curr_ver = 0;
-  uint32_t pred_ver = 0, left = 0;
+  volatile uint64_t curr_ver = 0;
+  uint64_t pred_ver = 0, right = 0;
 
  retry:
   PARSE_TRY();
@@ -146,19 +141,19 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
 
   do
     {
-      curr_ver = curr->lock.version;
+      curr_ver = curr->lock.to_uint64;
 
       pred = curr;
       pred_ver = curr_ver;
 
       if (key < curr->key)
 	{
-	  left = 1;
+	  right = 0;
 	  curr = (node_t*) curr->left;
 	}
       else
 	{
-	  left = 0;
+	  right = 1;
 	  curr = (node_t*) curr->right;
 	}
     }
@@ -170,33 +165,39 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
       return 0;
     }
 
-  if ((!tl_trylock_version(&pred->lock, pred_ver)))
+  node_t* nn = new_node(key, val, NULL, NULL, 0);
+  node_t* nr = new_node_no_init();
+
+  if ((!tl_trylock_version(&pred->lock, (volatile tl_t*) &pred_ver, right)))
     {
+      ssmem_free(alloc, nn);
+      ssmem_free(alloc, nr);
       goto retry;
     }
 
-  node_t* nn = new_node(key, val, NULL, NULL, 0);
-  node_t* nr;
-  
   if (key < curr->key)
     {
-      nr = new_node(curr->key, 0, nn, curr, 0);
+      nr->key = curr->key;
+      nr->left = nn;
+      nr->right = curr;
     }
   else
     {
-      nr = new_node(key, 0, curr, nn, 0);
+      nr->key = key;
+      nr->left = curr;
+      nr->right = nn;
     }
 
-  if (left)
-    {
-      pred->left = nr;
-    }
-  else
+  if (right)
     {
       pred->right = nr;
     }
+  else
+    {
+      pred->left = nr;
+    }
 
-  tl_unlock(&pred->lock);
+  tl_unlock(&pred->lock, right);
 
   return 1;
 }
