@@ -10,30 +10,24 @@ ub="bin";
 
 LOCK=tas
 
-timeout="timeout 180"
-sq="seq"
+timeout="timeout 30"
 
 if [ $uname = "ol-collab1" ];
 then
     MAKE=gmake
     LOCK=ticket
-    sq="seqgc"
 fi;
 if [ $uname = "parsasrv1.epfl.ch" ];
 then
     timeout=""
 fi;
-if [ $uname = "diassrv8" ];
-then
-    setcpu="SET_CPU=0";
-fi
 
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
-    INIT=one GRANULARITY=GLOBAL_LOCK ${setcpu} $MAKE -k $LOCK
-    INIT=one ${setcpu} $MAKE -k $LOCK
-    INIT=one ${setcpu} $MAKE -k $sq
-    INIT=one ${setcpu} $MAKE -k lockfree
+    INIT=one GRANULARITY=GLOBAL_LOCK SET_CPU=0 $MAKE -k $LOCK
+    INIT=one SET_CPU=0 $MAKE -k $LOCK
+    INIT=one SET_CPU=0 $MAKE -k seqgc
+    INIT=one SET_CPU=0 $MAKE -k lockfree
 fi
 
 source scripts/config;
