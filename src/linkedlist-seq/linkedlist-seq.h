@@ -48,12 +48,12 @@
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
 
-typedef struct node
+typedef volatile struct node
 {
   skey_t key;
   sval_t val;
   uint8_t padding32[8];
-  struct node* next;
+  volatile struct node* next;
 } node_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset
