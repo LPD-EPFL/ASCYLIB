@@ -98,11 +98,22 @@ sval_t bst_search(skey_t key, node_t* node_r) {
 
 
 bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
+    node_t* new_internal = NULL;
+    node_t* new_node = NULL;
+    uint created = 0;
     while (1) {
       UPDATE_TRY();
 
         bst_seek(key, node_r);
-        if (seek_record->leaf->key == key) return FALSE;
+        if (seek_record->leaf->key == key) {
+#if GC == 1
+            if (created) {
+                ssmem_free(alloc, new_internal);
+                ssmem_free(alloc, new_node);
+            }
+#endif
+            return FALSE;
+        }
         node_t* parent = seek_record->parent;
         node_t* leaf = seek_record->leaf;
 
@@ -113,8 +124,13 @@ bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
             child_addr= (node_t**) &(parent->right);
         }
         //TODO check this
-        node_t* new_internal=create_node(max(key,leaf->key),0,0);
-        node_t* new_node = create_node(key,val,0);
+        if (likely(created==0)) {
+            new_internal=create_node(max(key,leaf->key),0,0);
+            new_node = create_node(key,val,0);
+            created=1;
+        } else {
+            new_internal->key=max(key,leaf->key);
+        }
         if ( key < leaf->key) {
             new_internal->left = new_node;
             new_internal->right = leaf; 
@@ -191,7 +207,7 @@ bool_t bst_cleanup(skey_t key) {
     node_t* ancestor = seek_record->ancestor;
     node_t* successor = seek_record->successor;
     node_t* parent = seek_record->parent;
-    node_t* leaf = seek_record->leaf;
+    //node_t* leaf = seek_record->leaf;
 
     node_t** succ_addr;
     if (key < ancestor->key) {
@@ -212,6 +228,8 @@ bool_t bst_cleanup(skey_t key) {
 
     node_t* chld = *(child_addr);
     if (!GETFLAG(chld)) {
+        chld = *(sibling_addr);
+        asm volatile("");
         sibling_addr = child_addr;
     }
 //#if defined(__tile__) || defined(__sparc__)
@@ -230,7 +248,7 @@ bool_t bst_cleanup(skey_t key) {
     node_t* sibl = *sibling_addr;
     if ( CAS_PTR(succ_addr, ADDRESS(successor), UNTAG(sibl)) == ADDRESS(successor)) {
 #if GC == 1
-    ssmem_free(alloc, ADDRESS(leaf));
+    ssmem_free(alloc, ADDRESS(chld));
     ssmem_free(alloc, ADDRESS(successor));
 #endif
         return TRUE;
