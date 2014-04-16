@@ -77,7 +77,7 @@ bucket_set_init(intset_t* set)
 void
 node_delete(node_t *node) 
 {
-#if GC == 1
+#if GC == 1 && SEQ_SSMEM_NO_FREE != 1
   ssmem_free(alloc, (void*) node);
 #else
 

@@ -68,7 +68,7 @@ intset_t *set_new()
 void
 node_delete(node_t *node) 
 {
-#if GC == 1
+#if GC == 1 && SEQ_SSMEM_NO_FREE != 1
   ssmem_free(alloc, (void*) node);
 #else
   /* ssfree(node); */
