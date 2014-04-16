@@ -12,10 +12,12 @@ sval_t
 seq_delete(intset_t* set, skey_t key)
 {
   node_t* curr = set->head;
-  node_t* pred = curr;
+  node_t* ppred = NULL;
+  node_t* pred = NULL;
 
   while (likely(curr != NULL && !curr->leaf))
     {
+      ppred = pred;
       pred = curr;
       skey_t curr_key = curr->key;
       if (key < curr_key)
@@ -28,15 +30,31 @@ seq_delete(intset_t* set, skey_t key)
 	}
     }
 
+  node_t* other;
   if (curr && curr->key == key)
     {
       if (pred->left == curr)
 	{
 	  pred->left = NULL;
+	  other = (node_t*) pred->right;
 	}
       else
 	{
 	  pred->right = NULL;
+	  other = (node_t*) pred->left;
+	}
+
+      if (ppred != NULL && other == NULL)
+	{
+	  if (ppred->left == pred)
+	    {
+	      ppred->left = NULL;
+	    }
+	  else
+	    {
+	      ppred->right = NULL;
+	    }
+	  node_delete(pred);
 	}
 
       node_delete(curr);
