@@ -5,13 +5,17 @@ shift;
 
 pwd=$(pwd);
 
- 
-
 tile-monitor --net 192.168.9.12 --resume \
     --mkdir $pwd \
     --cd $pwd \
     --upload $pwd"/"$prog $pwd"/"$prog \
     --run -+- $pwd"/"$prog $@ -+- --quit
+
+# tile-monitor --net 192.168.9.12 --resume \
+#     --mkdir $pwd \
+#     --cd $pwd \
+#     --upload $pwd"/"$prog $pwd"/"$prog \
+#     --run -+- perf list $pwd"/"$prog $@ -+- --quit
 
  
 # tile-monitor --net 192.168.10.11 --resume \

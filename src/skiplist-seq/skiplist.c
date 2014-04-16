@@ -135,8 +135,10 @@ void
 sl_delete_node(sl_node_t *n)
 {
 #if GC == 1
-#  warning ssmem_free() is never called in sl_delete_node
-  /* ssmem_free(alloc, (void*) n); */
+#  if SEQ_SSMEM_NO_FREE != 1
+#    warning ssmem_free() is never called in sl_delete_node
+  /* ssmem_free(alloc, (void*) n); *\/ */
+#  endif
 #else
 #endif
 }

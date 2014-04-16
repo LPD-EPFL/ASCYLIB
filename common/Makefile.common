@@ -328,3 +328,8 @@ endif
 ifeq ($(PAD),1)
 	CFLAGS += -DDO_PAD=1
 endif
+
+ifeq ($(SEQ_NO_FREE),1)
+	CFLAGS += -DSEQ_SSMEM_NO_FREE=1
+endif
+
