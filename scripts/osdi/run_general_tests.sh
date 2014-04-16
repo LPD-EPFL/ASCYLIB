@@ -24,10 +24,10 @@ fi;
 
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
-    INIT=one GRANULARITY=GLOBAL_LOCK SET_CPU=0 $MAKE -k $LOCK
-    INIT=one SET_CPU=0 $MAKE -k $LOCK
-    INIT=one SET_CPU=0 $MAKE -k seqgc
-    INIT=one SET_CPU=0 $MAKE -k lockfree
+    INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k $LOCK
+    INIT=one $MAKE -k $LOCK
+    INIT=one SEQ_NO_FREE=1 $MAKE -k seqgc
+    INIT=one $MAKE -k lockfree
 fi
 
 source scripts/config;
@@ -43,10 +43,10 @@ do_ht=1
 bst_algos="./${ub}/lf-bst ./${ub}/lb-bst-drachsler ./${ub}/lf-bst-aravind ./${ub}/lf-bst-howley ./${ub}/lb-bst2 ./${ub}/sq-bst_external ./${ub}/sq-bst_internal"
 do_bst=1
 
-num_repetitions=25
+num_repetitions=11
 
 #default duration
-def_duration=1000
+def_duration=3000
 
 #parameters for the common case experiment
 base_initial=4096
