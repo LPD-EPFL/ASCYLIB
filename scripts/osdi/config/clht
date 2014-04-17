@@ -2,8 +2,11 @@ SCY=clht
 
 un=$(uname -n);
 
+CPU=1;
+
 if [ $un = "diassrv8" ];
 then
+	CPU=1;
 	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
 elif [ $un = "parsasrv1.epfl.ch" ];
 then
@@ -31,7 +34,7 @@ updates="10";
 cores="all";
 cores_pow="two"
 
-COMPILE_FLAGS="SET_CPU=1"
+COMPILE_FLAGS="SET_CPU=${CPU}"
 skip_thr=0;
 skip_lat=1;
 skip_ldi=1;
