@@ -4,15 +4,15 @@ un=$(uname -n);
 
 if [ $un = "diassrv8" ];
 then
-	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
 elif [ $un = "parsasrv1.epfl.ch" ];
 then
-	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
 elif [ $un = "ol-collab1" ];
 then
-	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
 else
-	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lf-ht_rcu ./$ub/lf-ht ./$ub/hyht ./$ub/lfht_res";
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lf-ht_rcu ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
 fi;
 
 CLHT_PATH=~/code/hyht

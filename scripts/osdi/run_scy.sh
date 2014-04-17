@@ -242,9 +242,9 @@ fi;
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    ${MAKE} -k clean hyht_res lfht_res ${COMPILE_FLAGS};
+	    ${MAKE} -k clean hyht_res lfht_res hyht_mem lfht_mem ${COMPILE_FLAGS};
 	    cd -;
-	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
+	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res ${CLHT_PATH}/hyhtm ${CLHT_PATH}/lfhtm $ub;
 	fi;
 
 	${MAKE} -k ${structure} POWER=1 ${COMPILE_FLAGS} SET_CPU=1;
@@ -347,9 +347,9 @@ then
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    ${MAKE} -k clean hyht_res lfht_res ${COMPILE_FLAGS};
+	    ${MAKE} -k clean hyht_res lfht_res hyht_mem lfht_mem ${COMPILE_FLAGS};
 	    cd -;
-	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
+	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res ${CLHT_PATH}/hyhtm ${CLHT_PATH}/lfhtm $ub;
 	fi;
 
 	${MAKE} -k ${structure} ${COMPILE_FLAGS};
@@ -451,9 +451,9 @@ then
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    ${MAKE} -k clean hyht_res lfht_res ${COMPILE_FLAGS};
+	    ${MAKE} -k clean hyht_res lfht_res hyht_mem lfht_mem ${COMPILE_FLAGS};
 	    cd -;
-	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
+	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res ${CLHT_PATH}/hyhtm ${CLHT_PATH}/lfhtm $ub;
 	fi;
 
 	${MAKE} -k ${structure} LATENCY=${LATENCY_AVG_TYPE} ${COMPILE_FLAGS};
@@ -561,9 +561,9 @@ then
 	then
 	    echo "~~~~~~ Compiling CLHT";
 	    cd ${CLHT_PATH};
-	    ${MAKE} -k clean hyht_res lfht_res ${COMPILE_FLAGS};
+	    ${MAKE} -k clean hyht_res lfht_res hyht_mem lfht_mem ${COMPILE_FLAGS};
 	    cd -;
-	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res $ub;
+	    cp ${CLHT_PATH}/hyht ${CLHT_PATH}/lfht_res ${CLHT_PATH}/hyhtm ${CLHT_PATH}/lfhtm $ub;
 	fi;
 
 	make ${structure} LATENCY=$LATENCY_TYPE ${COMPILE_FLAGS};
