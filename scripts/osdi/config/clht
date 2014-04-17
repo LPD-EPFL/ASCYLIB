@@ -25,10 +25,10 @@ LATENCY_MERGE=0
 
 reps=3;
 keep=median; 			# min, median, or max
-duration=1000;
+duration=2000;
 initials="4096";
 updates="10";
-cores="eight";
+cores="all";
 cores_pow="two"
 
 COMPILE_FLAGS="SET_CPU=0"
