@@ -24,10 +24,10 @@ fi;
 
 if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
-    INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k $LOCK
-    INIT=one $MAKE -k $LOCK
-    INIT=one SEQ_NO_FREE=1 $MAKE -k seqgc
-    INIT=one $MAKE -k lockfree
+    INIT=one SET_CPU=0 GRANULARITY=GLOBAL_LOCK $MAKE -k $LOCK
+    INIT=one SET_CPU=0 $MAKE -k $LOCK
+    INIT=one SET_CPU=0 SEQ_NO_FREE=1 $MAKE -k seqgc
+    INIT=one SET_CPU=0 $MAKE -k lockfree
 fi
 
 source scripts/config;
@@ -37,13 +37,13 @@ source scripts/lock_exec;
 cores=$(seq 1 10 200)
 
 ll_algos="./${ub}/lb-ll_lazy ./${ub}/lb-ll_coupling ./${ub}/lb-ll_pugh ./${ub}/lb-ll_copy ./${ub}/lf-ll_harris ./${ub}/lf-ll_harris_opt ./${ub}/lf-ll_michael ./${ub}/sq-ll"
-do_ll=0
+do_ll=1
 sl_algos="./${ub}/lb-sl_herlihy ./${ub}/lb-sl_pugh ./${ub}/lf-sl_fraser ./${ub}/lf-sl_herlihy  ./${ub}/sq-sl"
-do_sl=0
+do_sl=1
 ht_algos="./${ub}/lb-ht_tbb ./${ub}/lb-ht_java ./${ub}/lb-ht_copy ./${ub}/lb-ht_lazy_gl ./${ub}/lb-ht_coupling_gl ./${ub}/lb-ht_pugh_gl ./${ub}/lf-ht ./${ub}/lf-ht_rcu ./${ub}/sq-ht"
-do_ht=1
+do_ht=0
 bst_algos="./${ub}/lf-bst ./${ub}/lb-bst-drachsler ./${ub}/lf-bst-aravind ./${ub}/lf-bst-howley ./${ub}/lb-bst2 ./${ub}/sq-bst_external ./${ub}/sq-bst_internal"
-do_bst=0
+do_bst=1
 
 num_repetitions=11
 
