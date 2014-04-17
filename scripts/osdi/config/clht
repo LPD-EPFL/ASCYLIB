@@ -6,7 +6,7 @@ CPU=1;
 
 if [ $un = "diassrv8" ];
 then
-	CPU=1;
+	CPU=0;
 	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
 elif [ $un = "parsasrv1.epfl.ch" ];
 then
@@ -28,10 +28,10 @@ LATENCY_MERGE=0
 
 reps=3;
 keep=median; 			# min, median, or max
-duration=2000;
+duration=10000;
 initials="4096";
 updates="10";
-cores="all";
+cores="four";
 cores_pow="two"
 
 COMPILE_FLAGS="SET_CPU=${CPU}"
