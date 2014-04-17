@@ -114,7 +114,7 @@ then
 	cores=$(seq 1 2 36);
     elif [ $unm = "diassrv8" ];
     then
-	cores=$(seq 1 8 160);
+	cores=$(seq 1 8 80);
     elif [ $unm = "lpdpc34" ];
     then
 	cores=$(seq 1 1 8);
