@@ -95,7 +95,7 @@ barrier_t barrier, barrier_global;
 
 typedef struct thread_data
 {
-  uint8_t id;
+  uint32_t id;
   DS_TYPE* set;
 } thread_data_t;
 
@@ -103,7 +103,7 @@ void*
 test(void* thread) 
 {
   thread_data_t* td = (thread_data_t*) thread;
-  uint8_t ID = td->id;
+  uint32_t ID = td->id;
   int phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();
