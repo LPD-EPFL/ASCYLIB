@@ -64,7 +64,7 @@ seq:	sequential
 
 
 seqht:
-	$(MAKE) "STM=SEQUENTIAL" "GC=0" src/hashtable-seq
+	$(MAKE) "STM=SEQUENTIAL" "SEQ_NO_FREE=1" src/hashtable-seq
 
 seqhtgc:
 	$(MAKE) "STM=SEQUENTIAL" "GC=1" src/hashtable-seq
