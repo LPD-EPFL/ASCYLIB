@@ -31,7 +31,7 @@ updates="10";
 cores="all";
 cores_pow="two"
 
-COMPILE_FLAGS="SET_CPU=0"
+COMPILE_FLAGS="SET_CPU=1"
 skip_thr=0;
 skip_lat=1;
 skip_ldi=1;
