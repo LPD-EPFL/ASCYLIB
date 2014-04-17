@@ -9,7 +9,11 @@
 /* parameters */
 /* **************************************************************************************** */
 
-#define SSMEM_GC_FREE_SET_SIZE 507
+#if defined(__sparc__)
+#  define SSMEM_GC_FREE_SET_SIZE 16379
+#else
+#  define SSMEM_GC_FREE_SET_SIZE 507
+#endif
 #define SSMEM_DEFAULT_MEM_SIZE (32 * 1024 * 1024L)
 
 /* **************************************************************************************** */
