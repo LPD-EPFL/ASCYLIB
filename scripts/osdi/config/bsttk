@@ -1,5 +1,19 @@
 SCY=bsttk
 
+CPU=1;
+CORES=four;
+
+un=$(uname -n);
+if [ $un = "diassrv8" ];
+then
+	CPU=0;
+elif [ $un = "ol-collab1" ];
+then
+	CPU=0;
+	CORES=eight
+fi;
+
+
 bsts="./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst-drachsler ./$ub/lf-bst-aravind ./$ub/lb-bst_tk";
 
 CLHT_PATH=~/code/hyht
@@ -10,15 +24,15 @@ LATENCY_TYPE=3			# 2 or 3
 LATENCY_POINTS=256
 LATENCY_MERGE=0
 
-reps=5;
+reps=3;
 keep=median; 			# min, median, or max
-duration=1000;
+duration=5000;
 initials="4096";
 updates="10";
-cores="two";
+cores="${CORES}";
 cores_pow="two"
 
-COMPILE_FLAGS="SET_CPU=1"
+COMPILE_FLAGS="SET_CPU=${CPU}"
 skip_thr=0;
 skip_lat=1;
 skip_ldi=1;
