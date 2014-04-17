@@ -142,7 +142,7 @@ test(void* thread)
 #if GC == 1
   alloc = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
   assert(alloc != NULL);
-  ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, ID);
+  ssmem_alloc_init_fs_size(alloc, SSMEM_DEFAULT_MEM_SIZE, SSMEM_GC_FREE_SET_SIZE, ID);
 #endif
 
   RR_INIT(phys_id);
