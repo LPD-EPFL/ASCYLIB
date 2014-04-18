@@ -26,7 +26,7 @@ if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
     INIT=one SET_CPU=0 GRANULARITY=GLOBAL_LOCK $MAKE -k $LOCK
     INIT=one SET_CPU=0 $MAKE -k $LOCK
-    INIT=one SET_CPU=0 SEQ_NO_FREE=1 $MAKE -k seqgc
+    INIT=one SET_CPU=0 $MAKE -k seq
     INIT=one SET_CPU=0 $MAKE -k lockfree
 fi
 
@@ -34,7 +34,7 @@ source scripts/config;
 source scripts/namemap.config
 source scripts/lock_exec;
 
-cores=$(seq 1 10 200)
+cores=$(seq 1 10 201)
 
 ll_algos="./${ub}/lb-ll_lazy ./${ub}/lb-ll_coupling ./${ub}/lb-ll_pugh ./${ub}/lb-ll_copy ./${ub}/lf-ll_harris ./${ub}/lf-ll_harris_opt ./${ub}/lf-ll_michael ./${ub}/sq-ll"
 do_ll=1
