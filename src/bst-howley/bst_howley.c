@@ -236,7 +236,7 @@ sval_t bst_remove(skey_t k, node_t* root){
 			if (CAS_PTR(&(curr->op), curr_op, FLAG(curr_op, STATE_OP_MARK)) == curr_op) {
 				bst_help_marked(pred, pred_op, curr, root);
 #if GC == 1
-                if (reloc_op!=NULL) ssmem_free(alloc,reloc_op);
+                //if (reloc_op!=NULL) ssmem_free(alloc,reloc_op);
                 if (UNFLAG(curr->op)!=0) ssmem_free(alloc,(void*)UNFLAG(curr->op));
                 ssmem_free(alloc,curr);
 #endif
