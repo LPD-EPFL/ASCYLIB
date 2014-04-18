@@ -31,7 +31,7 @@ clh:
 	$(MAKE) "LOCK=CLH" $(LBENCHS)
 
 bst:	seqbstint seqbstext
-	$(MAKE) "LOCK=TAS" $(BSTS)
+	$(MAKE) $(BSTS)
 
 bst_tk:
 	$(MAKE) "LOCK=TAS" src/bst-tk/

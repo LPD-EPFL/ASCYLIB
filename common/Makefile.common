@@ -67,7 +67,7 @@ endif
 LIBSSMEM = $(ROOT)/external
 
 ifndef STM
-  LOCK          ?= MUTEX
+  LOCK          ?= TAS
 endif
 
 ifeq ($(STM),SEQUENTIAL)
@@ -163,6 +163,9 @@ ifeq ($(PC_NAME), maglite)
 endif
 
 ifeq ($(PC_NAME), ol-collab1)
+ifdef LOCK
+    LOCK = TICKET
+endif
     CC = $(SOLARIS_CC2)
     CFLAGS += -DT44
 endif

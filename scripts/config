@@ -100,7 +100,7 @@ then
 	cores=$(seq 5 5 40);
     elif [ $unm = "ol-collab1" ];
     then
-	cores=$(seq 32 32 256);
+	cores=$(seq 64 64 256);
     else
 	cores=$(seq 6 6 48);
     fi;

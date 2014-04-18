@@ -29,9 +29,9 @@ LATENCY_TYPE=3			# 2 or 3
 LATENCY_POINTS=256
 LATENCY_MERGE=0
 
-reps=3;
+reps=5;
 keep=median; 			# min, median, or max
-duration=10000;
+duration=5000;
 initials="4096";
 updates="10";
 cores="${CORES}";

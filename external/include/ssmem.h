@@ -10,11 +10,15 @@
 /* **************************************************************************************** */
 
 #if defined(__sparc__)
-#  define SSMEM_GC_FREE_SET_SIZE 16379
+#  define SSMEM_GC_FREE_SET_SIZE 507
+#  define SSMEM_DEFAULT_MEM_SIZE (2 * 1024 * 1024L)
+#elif defined(__tile__)
+
 #else
 #  define SSMEM_GC_FREE_SET_SIZE 507
+#  define SSMEM_DEFAULT_MEM_SIZE (256 * 1024L)
 #endif
-#define SSMEM_DEFAULT_MEM_SIZE (32 * 1024 * 1024L)
+
 
 /* **************************************************************************************** */
 /* help definitions */
