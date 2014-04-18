@@ -148,6 +148,7 @@ test(void* thread)
 #endif
 
   RR_INIT(phys_id);
+  barrier_cross(&barrier);
 
   uint64_t key;
 
