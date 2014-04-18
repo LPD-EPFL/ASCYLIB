@@ -26,7 +26,7 @@ if [ $# -eq 0 ];		# pass any param to avoid compilation
 then
     INIT=one GRANULARITY=GLOBAL_LOCK $MAKE -k $LOCK
     INIT=one $MAKE -k $LOCK
-    INIT=one SEQ_NO_FREE=1 $MAKE -k seqgc
+    INIT=one $MAKE -k seq
     INIT=one $MAKE -k lockfree
 fi
 
