@@ -227,7 +227,7 @@ sval_t bst_remove(skey_t k, node_t* root){
         sval_t res = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
 		if (!(res & val_mask)) {
 #if GC == 1
-            if (reloc_op!=NULL) ssmem_free(alloc,reloc_op);
+            //if (reloc_op!=NULL) ssmem_free(alloc,reloc_op);
 #endif
 			return 0;
 		}
@@ -248,9 +248,9 @@ sval_t bst_remove(skey_t k, node_t* root){
 				continue;
 			} 
             
-            if (reloc_op==NULL) {
+            //if (reloc_op==NULL) {
 			    reloc_op = alloc_op(); 
-            }
+            //}
 			reloc_op->relocate_op.state = STATE_OP_ONGOING;
 			reloc_op->relocate_op.dest = curr;
 			reloc_op->relocate_op.dest_op = curr_op;
@@ -269,13 +269,14 @@ sval_t bst_remove(skey_t k, node_t* root){
 				if (bst_help_relocate(reloc_op, pred, pred_op, replace, root)) {
                     //if (UNFLAG(replace->op)!=0) ssmem_free(alloc,(void*)UNFLAG(replace->op));
 #if GC == 1
-                    ssmem_free(alloc,replace);
+                    //ssmem_free(alloc,replace);
 #endif
 					return res;
 				}
 			} else {
 #if GC == 1
-                ssmem_free(alloc,reloc_op);
+               ssmem_free(alloc,reloc_op);
+             //   reloc_op=NULL;
 #endif
             }
 		}
