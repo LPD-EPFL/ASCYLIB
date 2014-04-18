@@ -143,7 +143,9 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
         if (GETFLAG(search_result->pupdate) != STATE_CLEAN) {
             bst_help(search_result->pupdate);
         } else {
-            new_node = create_node(key, value, TRUE, 0); 
+            if (new_node==NULL){
+                new_node = create_node(key, value, TRUE, 0); 
+            }
             new_sibling = create_node(search_result->l->key, search_result->l->value, TRUE, 0);
             new_internal = create_node(max(key,search_result->l->key), 0, FALSE, 0);
 
