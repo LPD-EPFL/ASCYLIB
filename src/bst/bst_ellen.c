@@ -122,7 +122,7 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
     node_t * new_internal;
     node_t *new_sibling;
 
-    node_t * new_node = create_node(key, value, TRUE, 0); 
+    node_t * new_node = NULL; 
    
     update_t result;
 
@@ -134,13 +134,15 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
         search_result = bst_search(key,root);
         if (search_result->l->key == key) {
 #if GC == 1
-            ssmem_free(alloc,new_node);
+            if (new_node!=NULL)
+                ssmem_free(alloc,new_node);
 #endif
             return FALSE;
         }
         if (GETFLAG(search_result->pupdate) != STATE_CLEAN) {
             bst_help(search_result->pupdate);
         } else {
+            new_node = create_node(key, value, TRUE, 0); 
             new_sibling = create_node(search_result->l->key, search_result->l->value, TRUE, 0);
             new_internal = create_node(max(key,search_result->l->key), 0, FALSE, 0);
 
@@ -156,7 +158,7 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
             if (result == search_result->pupdate) {
                 bst_help_insert(op);
 #if GC == 1
-                if (UNFLAG(search_result->pupdate)!=0) {
+                if (UNFLAG(result)!=0) {
                     ssmem_free(alloc, (void*) UNFLAG(search_result->pupdate));
                 }
 #endif
@@ -181,7 +183,8 @@ void bst_help_insert(info_t * op) {
     void* UNUSED dummy = CAS_PTR(&(op->iinfo.p->update),FLAG(op,STATE_IFLAG),FLAG(op,STATE_CLEAN));
 #if GC == 1
    if (i){
-        ssmem_free(alloc,op->iinfo.l);
+        info_t* uop=UNFLAG(op);
+        ssmem_free(alloc,uop->iinfo.l);
     }
 #endif
 }
@@ -210,7 +213,7 @@ sval_t bst_delete(skey_t key, node_t* root) {
             if (result == search_result->gpupdate) {
                 if (bst_help_delete(op)==TRUE) {
 #if GC == 1
-                    ssmem_free(alloc,search_result->gpupdate);
+                    ssmem_free(alloc,UNFLAG(search_result->gpupdate));
 #endif
                     return found_value;
                 }
@@ -259,8 +262,9 @@ void bst_help_marked(info_t* op) {
 
 #if GC == 1
     if (i){
-        ssmem_free(alloc,op->dinfo.l);
-        ssmem_free(alloc,op->dinfo.p);
+        info_t* opu=UNFLAG(op);
+        ssmem_free(alloc,opu->dinfo.l);
+        ssmem_free(alloc,opu->dinfo.p);
     }
 #endif
 }
