@@ -143,6 +143,7 @@ test(void* thread)
     
 
   RR_INIT(phys_id);
+  barrier_cross(&barrier);
 
   DS_KEY key;
   int c = 0;

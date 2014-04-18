@@ -142,6 +142,7 @@ test(void* thread)
     
 
   RR_INIT(phys_id);
+  barrier_cross(&barrier);
 
   uint64_t key;
   int c = 0;
