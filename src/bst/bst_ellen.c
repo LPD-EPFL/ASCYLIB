@@ -134,8 +134,9 @@ bool_t bst_insert(skey_t key, sval_t value,  node_t* root) {
         search_result = bst_search(key,root);
         if (search_result->l->key == key) {
 #if GC == 1
-            if (new_node!=NULL)
+            if (new_node!=NULL) {
                 ssmem_free(alloc,new_node);
+            }
 #endif
             return FALSE;
         }
