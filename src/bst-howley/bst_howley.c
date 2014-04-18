@@ -139,7 +139,7 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 
 	node_t* pred;
 	node_t* curr;
-	node_t* new_node;
+	node_t* new_node = NULL;
 	operation_t* pred_op;
 	operation_t* curr_op;
 	operation_t* cas_op;
@@ -150,10 +150,17 @@ bool_t bst_add(skey_t k,sval_t v,  node_t* root){
 
 		result = bst_find(k, &pred, &pred_op, &curr, &curr_op, root, root);
 		if (result & val_mask) {
+#if GC == 1
+            if (new_node!=NULL) {
+                ssmem_free(alloc,new_node);
+            }
+#endif
 			return FALSE;
 		}
-
-		new_node = create_node(k,v,0);
+        
+        if (new_node == NULL) {
+		    new_node = create_node(k,v,0);
+        }
 
 		bool_t is_left = (result == NOT_FOUND_L);
 		node_t* old;
