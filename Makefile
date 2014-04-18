@@ -219,6 +219,7 @@ seqbstintgc:
 seqbstextgc:
 	$(MAKE) "STM=SEQUENTIAL" "GC=1" src/bst-seq_external
 
+seqbstgc: seqbstextgc seqbstintgc
 
 clean:
 	$(MAKE) -C src/linkedlist clean	
