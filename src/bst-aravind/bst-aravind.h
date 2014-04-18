@@ -38,6 +38,7 @@ struct node_t{
     sval_t value;
     volatile node_t* right;
     volatile node_t* left;
+  uint8_t padding[32];
 };
 
 #ifndef __tile__
