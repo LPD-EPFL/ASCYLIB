@@ -230,13 +230,16 @@ bool_t bst_help_delete(info_t* op) {
    update_t result; 
     result = CAS_PTR(&(op->dinfo.p->update), op->dinfo.pupdate, FLAG(op,STATE_MARK));
     if ((result == op->dinfo.pupdate) || (result == ((info_t*)FLAG(op,STATE_MARK)))) {
+#if GC == 1
+        if ((result == op->dinfo.pupdate) && (UNFLAG(result)!=NULL)) {
+            ssmem_free(alloc,UNFLAG(result));
+        }
+#endif
         bst_help_marked(op);
-        //free op
         return TRUE;
     } else {
         bst_help(result);
         void* UNUSED dummy = CAS_PTR(&(op->dinfo.gp->update), FLAG(op,STATE_DFLAG), FLAG(op,STATE_CLEAN));
-        //free op
         return FALSE;
     }
 }
