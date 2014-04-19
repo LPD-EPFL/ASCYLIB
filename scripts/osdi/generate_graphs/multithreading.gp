@@ -46,6 +46,8 @@ set style line 40 lt 1 lw 2 lc 9
 set size xsize, ysize
 set multiplot
 
+set xrange[0:201]
+set xtics 40
 #nomirror - no tics on the right and top
 #scale - the size of the tics
 # set xtics 6 nomirror scale 2
@@ -80,7 +82,7 @@ unset key
 
 unset title
 # set title "Total Throughput" offset 0,title_offset
-set ylabel "Throughput (Mops/s)" offset 1.5
+set ylabel "Throughput\n(Mops/s)" offset 1.5
 set origin 0,0
 
 DIV=1			# Mops
