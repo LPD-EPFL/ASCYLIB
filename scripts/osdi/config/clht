@@ -2,19 +2,19 @@ SCY=clht
 
 
 CPU=1;
-CORES=four;
+CORES=two;
 
 un=$(uname -n);
 if [ $un = "diassrv8" ];
 then
-	CPU=0;
+	CPU=1;
 	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
 elif [ $un = "parsasrv1.epfl.ch" ];
 then
 	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
 elif [ $un = "ol-collab1" ];
 then
-	CPU=0;
+	CPU=1;
 	CORES=eight
 	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
 else
@@ -29,7 +29,7 @@ LATENCY_TYPE=3			# 2 or 3
 LATENCY_POINTS=256
 LATENCY_MERGE=0
 
-reps=5;
+reps=11;
 keep=median; 			# min, median, or max
 duration=5000;
 initials="4096";

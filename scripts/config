@@ -97,7 +97,7 @@ then
 	cores=$(seq 2 1 8);
     elif [ $unm = "lpdxeon2680" ];
     then
-	cores=$(seq 5 5 40);
+	cores=$(seq 10 10 40);
     elif [ $unm = "ol-collab1" ];
     then
 	cores=$(seq 64 64 256);

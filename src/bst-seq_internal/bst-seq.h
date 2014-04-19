@@ -54,6 +54,7 @@ typedef struct node
   sval_t val;
   volatile struct node *left;
   volatile struct node *right;
+  uint8_t padding[32];
 } node_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset
