@@ -7,17 +7,21 @@ LATENCY_TYPE=3			# 2 or 3
 LATENCY_POINTS=256
 LATENCY_MERGE=0
 
-reps=13;
-keep=max; 			# min, median, or max
-duration=800;
+reps=5;
+keep=median; 			# min, median, or max
+duration=5000;
 initials="8192";
 updates="10";
-cores="all";
-cores_pow="all"
+cores="two";
+cores_pow="two"
 
-COMPILE_FLAGS="SET_CPU=0"
+COMPILE_FLAGS="SET_CPU=1"
 skip_thr=1;
 skip_lat=0;
 skip_ldi=0;
 skip_pow=0;
 
+do_ll=0;
+do_ht=1;
+do_sl=0;
+do_bst=0;
