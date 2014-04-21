@@ -22,6 +22,16 @@ for f in ${datadir}extremes_${s}* ;do
    fi
    tail -n +2 "$f" >> ${efile}
 done
+done
+
+find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/parsasrv1.epfl.ch/Tilera/g'
+find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/diassrv8/Xeon80/g'
+find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/lpd48core/Opteron/g'
+find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/lpdxeon2680/Xeon20/g'
+find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ol-collab1/T4-4/g'
+
+
+for f in ${datadir}extremes_${s}* ;do
 #R -f ${graphdir}general_data.r --args ${graphdir}extremes_${s}.txt ${graphdir}common_${s}.txt ${graphdir}${s}.pdf
-R -f ${graphdir}bar_ratio.r --args ${graphdir}extremes_${s}.txt ${graphdir}common_${s}.txt ${graphdir}${s}.pdf
+R -f ${graphdir}bar_ratio.r --args ${graphdir}extremes_${s}.txt ${graphdir}common_${s}.txt ${graphdir}${s}_bar.pdf
 done

@@ -67,7 +67,7 @@ plot \
      "" using 1:($3) title "drachsler" ls 4 with linespoints, \
      "" using 1:($2) title "ellen" ls 5 with linespoints, \
      "" using 1:($5) title "howley" ls 6 with linespoints, \
-     "" using 1:($4) title "aravind" ls 7 with linespoints
+     "" using 1:($4) title "natarajan" ls 7 with linespoints
 set origin 0.55, 0.0
 unset key
 set lmargin 4
@@ -87,7 +87,7 @@ plot \
      "" using 1:($3) title "drachsler" ls 4 with linespoints, \
      "" using 1:($2) title "ellen" ls 5 with linespoints, \
      "" using 1:($5) title "howley" ls 6 with linespoints, \
-     "" using 1:($4) title "aravind" ls 7 with linespoints
+     "" using 1:($4) title "natarajan" ls 7 with linespoints
 set origin 1.05, 0.0
 set size 0.5, 0.6
 set xrange [0:81]
@@ -105,7 +105,7 @@ plot \
      "" using 1:($3) title "drachsler" ls 4 with linespoints, \
      "" using 1:($2) title "ellen" ls 5 with linespoints, \
      "" using 1:($5) title "howley" ls 6 with linespoints, \
-     "" using 1:($4) title "aravind" ls 7 with linespoints
+     "" using 1:($4) title "natarajan" ls 7 with linespoints
 set origin 1.55, 0.0
 set size 0.5, 0.6
 set title "Tilera"
@@ -124,7 +124,7 @@ plot \
      "" using 1:($3) title "drachsler" ls 4 with linespoints, \
      "" using 1:($2) title "ellen" ls 5 with linespoints, \
      "" using 1:($5) title "howley" ls 6 with linespoints, \
-     "" using 1:($4) title "aravind" ls 7 with linespoints
+     "" using 1:($4) title "natarajan" ls 7 with linespoints
 set origin 2.05, 0.0
 set size 0.5, 0.6
 set title "Sparc"
@@ -143,7 +143,7 @@ plot \
      "" using 1:($3) title "drachsler" ls 4 with linespoints, \
      "" using 1:($2) title "ellen" ls 5 with linespoints, \
      "" using 1:($5) title "howley" ls 6 with linespoints, \
-     "" using 1:($4) title "aravind" ls 7 with linespoints
+     "" using 1:($4) title "natarajan" ls 7 with linespoints
 
 
 unset origin
@@ -177,7 +177,7 @@ NaN title "bronson" ls 3 with linespoints, \
 NaN title "drachsler" ls 4 with linespoints, \
 NaN title "ellen" ls 5 with linespoints, \
 NaN title "howley" ls 6 with linespoints, \
-NaN title "aravind" ls 7 with linespoints
+NaN title "natarajan" ls 7 with linespoints
 
 
 #</null>

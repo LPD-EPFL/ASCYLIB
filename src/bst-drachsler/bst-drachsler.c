@@ -89,8 +89,8 @@ sval_t bst_contains(skey_t k, node_t* root) {
 bool_t bst_insert(skey_t k, sval_t v, node_t* root) {
     while(1) {
       UPDATE_TRY();
-        node_t* node = bst_search(k, root);
-        node_t* p;
+         node_t* node = bst_search(k, root);
+        volatile node_t* p;
         if (node->key >= k) {
             p = (node_t*) node->pred;
         } else {
@@ -98,7 +98,7 @@ bool_t bst_insert(skey_t k, sval_t v, node_t* root) {
         }
 
 #if DRACHSLER_RO_FAIL == 1
-	node_t* n = node;
+	 node_t* n = node;
 	while (n->key > k)
 	  {
 	    n = (node_t*) n->pred;
@@ -114,17 +114,20 @@ bool_t bst_insert(skey_t k, sval_t v, node_t* root) {
 #endif
 
         LOCK(&(p->succ_lock));
-        node_t* s = (node_t*) p->succ;
+        volatile node_t* s = (node_t*) p->succ;
         if ((k > p->key) && (k <= s->key) && (p->mark == FALSE)) {
             if (s->key == k) {
                 UNLOCK(&(p->succ_lock)); 
                 return FALSE;
             }
-            volatile node_t* new_node = create_node(k,v,0);
-            node_t* parent = choose_parent(p, s, node);
+            node_t* new_node = create_node(k,v,0);
+            volatile node_t* parent = choose_parent(p, s, node);
             new_node->succ = s;
             new_node->pred = p;
             new_node->parent = parent;
+#ifdef __tile__
+            MEM_BARRIER;
+#endif
             s->pred = new_node;
             p->succ = new_node;
             UNLOCK(&(p->succ_lock));

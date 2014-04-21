@@ -11,7 +11,7 @@ tile-monitor --net 192.168.9.12 --resume \
     --mkdir $pwd \
     --cd $pwd \
     --upload $pwd"/"$prog $pwd"/"$prog \
-    --run -+- timeout 30 $pwd"/"$prog $@ -+- --quit
+    --debug -+- $pwd"/"$prog $@ -+- --wait
 
  
 # tile-monitor --net 192.168.10.11 --resume \
