@@ -14,7 +14,7 @@ printf '' > $tmp;
 
 for r in $(seq 1 1 $reps);
 do
-    out=$($run_script ./$prog $params);
+    out=$(timeout 20 $run_script ./$prog $params);
     thr=$(echo "$out" | grep "#txs" | cut -d'(' -f2 | cut -d. -f1);
     pow=$(echo "$out" | awk '/#Total Power Corrected/ { print $5 };' );
     ppw=$(echo "$thr/$pow" | bc -l);

@@ -14,7 +14,7 @@ printf "" > $tmp;
 
 for r in $(seq 1 1 $reps);
 do
-    $run_script ./$prog $params | grep "#txs" | cut -d'(' -f2 | cut -d. -f1 >> $tmp;
+    timeout 20 $run_script ./$prog $params | grep "#txs" | cut -d'(' -f2 | cut -d. -f1 >> $tmp;
 done;
 
 HEAD=head;
