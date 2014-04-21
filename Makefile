@@ -203,7 +203,7 @@ htjava_no_ro:
 	$(MAKE) "LOCK=TAS" "RO_FAIL=0" src/hashtable-java
 
 htrcu:
-	$(MAKE) "LOCK=TAS" src/hashtable-rcu
+	$(MAKE) "LOCK=TAS" "GC=0" src/hashtable-rcu
 
 ht:	seqht lfht lbht lbhtgl htjava tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl lbht_lazy_gl_no_ro lbht_pugh_gl_no_ro htcopy_no_ro htjava_no_ro
 

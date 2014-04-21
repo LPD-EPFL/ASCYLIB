@@ -64,9 +64,8 @@ cds_lfht_size(cds_lfht_t* ht)
 /*******************************************************************************/
 /* mem management **************************************************************/
 /*******************************************************************************/
-#define USE_RCU_GC 0
-#define RCU_WAIT() rcu_barrier();
-/* #define RCU_WAIT() synchronize_rcu(); */
+#define USE_RCU_GC 1
+#define RCU_WAIT() synchronize_rcu();
 
 
 extern __thread ssmem_allocator_t *alloc, *alloc_data;
@@ -101,26 +100,22 @@ static inline void
 node_free(struct cds_lfht_node* ht_node)
 {
   UNUSED node_t* node = caa_container_of(ht_node, node_t, node);
-#if GC == 1
 #if USE_RCU_GC == 1
   RCU_WAIT();
   ssfree(node);
 #else
   ssmem_free(alloc, node);
 #endif
-#endif
 }
 
 static inline void
 value_free(size_t* val)
 {
-#if GC == 1
 #if USE_RCU_GC == 1
   RCU_WAIT();
   ssfree_alloc(1, val);
 #else
   ssmem_free(alloc_data, val);
-#endif
 #endif
 }
 
