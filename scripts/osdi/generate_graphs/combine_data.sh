@@ -23,5 +23,5 @@ for f in ${datadir}extremes_${s}* ;do
    tail -n +2 "$f" >> ${efile}
 done
 #R -f ${graphdir}general_data.r --args ${graphdir}extremes_${s}.txt ${graphdir}common_${s}.txt ${graphdir}${s}.pdf
-R -f ${graphdir}bar_ratio.r --args ${graphdir}extremes_${s}.txt ${graphdir}common_${s}.txt ${graphdir}${s}.pdf
+R -f ${graphdir}bar_ratio.r --args ${graphdir}extremes_${s}.txt ${graphdir}common_${s}.txt ${graphdir}${s}_bar.pdf
 done
