@@ -65,6 +65,8 @@ typedef volatile struct node_l
 #endif
 } node_l_t;
 
+STATIC_ASSERT(sizeof(node_l_t) == 32, "sizeof(node_l_t) == 32");
+
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset_l 
 {
   node_l_t* head;
