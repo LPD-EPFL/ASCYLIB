@@ -39,7 +39,7 @@ ht_size(ht_intset_t *set)
   for (i=0; i < maxhtlength; i++) 
     {
       node = set->buckets[i].head;
-      while (node != NULL) 
+      while (node->next) 
 	{
 	  size++;
 	  node = node->next;

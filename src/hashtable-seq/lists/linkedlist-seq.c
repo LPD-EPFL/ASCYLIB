@@ -66,10 +66,10 @@ new_node(skey_t key, sval_t val, node_t* next, int initializing)
 void
 bucket_set_init(intset_t* set)
 {
-/*   node_t *min; */
+  node_t *min;
 
-/*   min = new_node(KEY_MIN, 0, NULL, 1); */
-  set->head = NULL;
+  min = new_node(KEY_MIN, 0, NULL, 1);
+  set->head = min;
 
   MEM_BARRIER;
 }
