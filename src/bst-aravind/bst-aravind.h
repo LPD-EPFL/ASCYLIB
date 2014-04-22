@@ -58,11 +58,12 @@ static inline bool_t set_bit2(volatile uintptr_t *array, int bit) {
 #endif
 
 
-typedef struct seek_record_t{
+typedef ALIGNED(CACHE_LINE_SIZE) struct seek_record_t{
     node_t* ancestor;
     node_t* successor;
     node_t* parent;
     node_t* leaf;
+  uint8_t padding[32];
 } seek_record_t;
 
 //extern __thread seek_record_t* seek_record;

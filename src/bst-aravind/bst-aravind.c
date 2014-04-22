@@ -28,7 +28,8 @@ node_t* initialize_tree(){
 }
 
 void bst_init_local() {
-    seek_record = (seek_record_t*) malloc (sizeof(seek_record_t));
+  seek_record = (seek_record_t*) memalign(CACHE_LINE_SIZE, sizeof(seek_record_t));
+  assert(seek_record != NULL);
 }
 
 node_t* create_node(skey_t k, sval_t value, int initializing) {
