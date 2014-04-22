@@ -57,25 +57,25 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
 
 seek_record_t * bst_seek(skey_t key, node_t* node_r){
   PARSE_TRY();
-
+    seek_record_t seek_record_l;
     node_t* node_s = ADDRESS(node_r->left);
-    seek_record->ancestor = node_r;
-    seek_record->successor = node_s; 
-    seek_record->parent = node_s;
-    seek_record->leaf = ADDRESS(node_s->left);
+    seek_record_l.ancestor = node_r;
+    seek_record_l.successor = node_s; 
+    seek_record_l.parent = node_s;
+    seek_record_l.leaf = ADDRESS(node_s->left);
 
-    node_t* parent_field = (node_t*) seek_record->parent->left;
-    node_t* current_field = (node_t*) seek_record->leaf->left;
+    node_t* parent_field = (node_t*) seek_record_l.parent->left;
+    node_t* current_field = (node_t*) seek_record_l.leaf->left;
     node_t* current = ADDRESS(current_field);
 
 
     while (current != NULL) {
         if (!GETTAG(parent_field)) {
-            seek_record->ancestor = seek_record->parent;
-            seek_record->successor = seek_record->leaf;
+            seek_record_l.ancestor = seek_record_l.parent;
+            seek_record_l.successor = seek_record_l.leaf;
         }
-        seek_record->parent = seek_record->leaf;
-        seek_record->leaf = current;
+        seek_record_l.parent = seek_record_l.leaf;
+        seek_record_l.leaf = current;
 
         parent_field = current_field;
         if (key < current->key) {
@@ -85,6 +85,10 @@ seek_record_t * bst_seek(skey_t key, node_t* node_r){
         }
         current=ADDRESS(current_field);
     }
+    seek_record->ancestor=seek_record_l.ancestor;
+    seek_record->successor=seek_record_l.successor;
+    seek_record->parent=seek_record_l.parent;
+    seek_record->leaf=seek_record_l.leaf;
     return seek_record;
 }
 

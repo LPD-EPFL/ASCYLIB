@@ -52,21 +52,27 @@ void bst_init_local(){
 search_result_t* bst_search(skey_t key, node_t* root) {
   PARSE_TRY();
 
-    search_result_t * result = last_result;
+    search_result_t res;
 
-    result->l = root;
-    while (!(result->l->leaf)) {
-        result->gp = result->p;
-        result->p = result->l;
-        result->gpupdate = result->pupdate;
-        result->pupdate = result->p->update;
-        if (key < result->l->key) {
-	  result->l = (node_t*) result->p->left;
+    res.l = root;
+    while (!(res.l->leaf)) {
+        res.gp = res.p;
+        res.p = res.l;
+        res.gpupdate = res.pupdate;
+        res.pupdate = res.p->update;
+        if (key < res.l->key) {
+	  res.l = (node_t*) res.p->left;
         } else {
-            result->l = (node_t*) result->p->right;
+            res.l = (node_t*) res.p->right;
         }
+    
     }
-    return result;
+    last_result->gp=res.gp;
+    last_result->p=res.p;
+    last_result->l=res.l;
+    last_result->gpupdate=res.gpupdate;
+    last_result->pupdate=res.pupdate;
+    return last_result;
 }
 
 
