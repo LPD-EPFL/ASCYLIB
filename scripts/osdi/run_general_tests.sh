@@ -28,6 +28,7 @@ then
     INIT=one $MAKE -k $LOCK
     INIT=one $MAKE -k seq
     INIT=one $MAKE -k lockfree
+    INIT=one $MAKE -k htrcu
 fi
 
 source scripts/config;
