@@ -9,24 +9,31 @@
 sval_t
 seq_delete(intset_t *set, skey_t key)
 {
-  node_t *curr, *next;
+  node_t *curr, *pred;
   sval_t res = 0;
 	
   curr = set->head;
-  next = curr->next;
+  pred = NULL;
 	
-  while (next != NULL && next->key < key) 
+  while (curr != NULL)
     {
-      curr = next;
-      next = next->next;
+      if (curr->key == key)
+	{
+	  res = curr->val;
+	  if (pred != NULL)
+	    {
+	      pred->next = curr->next;
+	    }
+	  else
+	    {
+	      set->head = curr->next;
+	    }
+	  node_delete(curr);
+	  return res;
+	}
+      pred = curr;
+      curr = curr->next;
     }
-
-  if (next != NULL && key == next->key)
-    {
-      res = next->val;
-      curr->next = next->next;
-      node_delete(next);
-    } 
 
   return res;
 }
@@ -34,44 +41,50 @@ seq_delete(intset_t *set, skey_t key)
 sval_t
 seq_find(intset_t *set, skey_t key) 
 {
-  node_t *curr, *next; 
+  node_t *curr; 
   sval_t res = 0;
 	
   curr = set->head;
-  next = curr->next;
-	
-  while (next != NULL && next->key < key) 
+  while (curr != NULL)
     {
-      curr = next;
-      next = curr->next;
+      if (curr->key == key)
+	{
+	  res = curr->val;
+	  break;
+	}
+      curr = curr->next;
     }	
-  if (next != NULL && key == next->key)
-    {
-      res = next->val;
-    }
   return res;
 }
 
 int
 seq_insert(intset_t *set, skey_t key, sval_t val) 
 {
-  node_t *next, *newnode;
+  node_t *pred, *newnode;
   volatile node_t* curr;
-  int found;
 	
   curr = set->head;
-  next = curr->next;
+  pred = NULL;
 	
-  while (next != NULL && next->key < key) 
+  while (curr != NULL)
     {
-      curr = next;
-      next = curr->next;
+      if (curr->key == key)
+	{
+	  return 0;
+	}
+      pred = curr;
+      curr = curr->next;
     }
-  found = (next != NULL && key == next->key);
-  if (!found) 
+
+  newnode = new_node(key, val, NULL, 0);
+  if (pred != NULL)
     {
-      newnode = new_node(key, val, next, 0);
-      curr->next = newnode;
+      pred->next = newnode;
     }
-  return !found;
+  else
+    {
+      set->head = newnode;
+    }
+
+  return 1;
 }
