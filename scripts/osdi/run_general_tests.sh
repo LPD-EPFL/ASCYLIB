@@ -47,7 +47,7 @@ do_bst=1
 num_repetitions=11
 
 #default duration
-def_duration=3000
+def_duration=5000
 
 #parameters for the common case experiment
 base_initial=4096

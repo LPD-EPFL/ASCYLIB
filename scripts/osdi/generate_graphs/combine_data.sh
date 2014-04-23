@@ -25,7 +25,7 @@ done
 done
 
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/parsasrv1.epfl.ch/Tilera/g'
-find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/diassrv8/Xeon80/g'
+find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/diassrv8/Xeon40/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/lpd48core/Opteron/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/lpdxeon2680/Xeon20/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ol-collab1/T4-4/g'
