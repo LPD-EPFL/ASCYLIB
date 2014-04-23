@@ -14,7 +14,12 @@
  */
 
 #define CHM_NUM_SEGMENTS                512
-#define CHM_LOAD_FACTOR                 0.75
+#if defined(__tile__)
+/* on the tilera we need to keep the ht small to avoid the TLB issues */
+#  define CHM_LOAD_FACTOR                 3
+#else
+#  define CHM_LOAD_FACTOR                 0.75
+#endif
 #define CHM_TRY_PREFETCH                0
 #define CHM_MAX_SCAN_RETRIES            64
 #define CHM_READ_ONLY_FAIL              RO_FAIL
