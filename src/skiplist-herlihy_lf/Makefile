@@ -5,6 +5,8 @@ include $(ROOT)/common/Makefile.common
 BINS = $(BINDIR)/lf-sl_herlihy
 PROF = $(ROOT)/src
 
+CFLAGS += -O2
+
 .PHONY:	all clean
 
 all:	main
