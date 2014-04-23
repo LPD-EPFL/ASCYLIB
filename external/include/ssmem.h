@@ -20,6 +20,10 @@
 #  define SSMEM_DEFAULT_MEM_SIZE (256 * 1024L)
 #endif
 
+#if defined(SSMEM_GC_FREE_SET_SIZE_OVERRIDE)
+#  undef SSMEM_GC_FREE_SET_SIZE
+#  define SSMEM_GC_FREE_SET_SIZE SSMEM_GC_FREE_SET_SIZE_OVERRIDE
+#endif
 
 /* **************************************************************************************** */
 /* help definitions */

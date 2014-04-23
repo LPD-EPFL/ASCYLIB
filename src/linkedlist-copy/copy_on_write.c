@@ -5,6 +5,16 @@ __thread ssmem_allocator_t* alloc;
 
 size_t array_ll_fixed_size;
 
+inline void 
+cpy_delete_copy(ssmem_allocator_t* alloc, array_ll_t* a)
+{
+#if CPY_ON_WRITE_USE_MEM_RELEAS == 1
+  ssmem_release(alloc, (void*) a);
+#else
+  ssmem_free(alloc, (void*) a);
+#endif
+}
+
 static inline volatile array_ll_t*
 array_ll_new_init(size_t size)
 {
@@ -105,11 +115,11 @@ cpy_delete(copy_on_write_t* set, skey_t key)
   if (removed)
     {
       set->array = all_new;
-      ssmem_free(alloc, (void*) all_old);
+      cpy_delete_copy(alloc, (void*) all_old);
     }
   else
     {
-      ssmem_free(alloc, (void*) all_new);
+      cpy_delete_copy(alloc, (void*) all_new);
     }
 
   UNLOCK_A(set->lock);
@@ -138,7 +148,7 @@ cpy_insert(copy_on_write_t* set, skey_t key, sval_t val)
     {
       if (unlikely(all_old->kvs[i].key == key))
 	{
-	  ssmem_free(alloc, all_new);
+	  cpy_delete_copy(alloc, all_new);
 	  UNLOCK_A(set->lock);
 	  return 0;
 	}
@@ -150,7 +160,7 @@ cpy_insert(copy_on_write_t* set, skey_t key, sval_t val)
   all_new->kvs[i].val = val;
   
   set->array = all_new;
-  ssmem_free(alloc, (void*) all_old);
+  cpy_delete_copy(alloc, (void*) all_old);
 
   UNLOCK_A(set->lock);
   return 1;

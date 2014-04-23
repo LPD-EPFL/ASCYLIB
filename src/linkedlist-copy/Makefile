@@ -9,6 +9,8 @@ else
 	CFLAGS += -DRO_FAIL=1
 endif
 
+CFLAGS += -DSSMEM_GC_FREE_SET_SIZE_OVERRIDE=2
+
 BINS = $(BINDIR)/lb-ll_copy$(SUFFIX)
 PROF = $(ROOT)/src
 
