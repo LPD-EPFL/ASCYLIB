@@ -1,0 +1,33 @@
+SCY=clhtb
+
+CPU=1;
+CORES=osdi_bar;
+
+hts="./$ub/lb-ht_pugh_gl ./$ub/hyhtm ./$ub/lfhtm";
+
+CLHT_PATH=~/code/hyht
+MAKE_CLHT=1;
+
+cores_lat_dist="1 10 20";
+LATENCY_TYPE=3			# 2 or 3
+LATENCY_POINTS=256
+LATENCY_MERGE=0
+
+reps=11;
+keep=median; 			# min, median, or max
+duration=5000;
+initials="4096";
+updates="0 1 10 20 100";
+cores="${CORES}";
+cores_pow="two"
+
+COMPILE_FLAGS="SET_CPU=${CPU}"
+skip_thr=0;
+skip_lat=1;
+skip_ldi=1;
+skip_pow=1;
+
+do_ll=0;
+do_ht=1;
+do_sl=0;
+do_bst=0;
