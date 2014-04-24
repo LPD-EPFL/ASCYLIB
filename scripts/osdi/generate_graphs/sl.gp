@@ -12,7 +12,7 @@ set rmargin 0
 set lmargin 3
 set tmargin 3
 set bmargin 2.5
-set xlabel "Threads" offset 1.5, 0.75
+set xlabel "# Threads" offset 1.5, 0.75
 set xrange [0:]
 set xtics 16 
 #set xtics nomirror scale 2
@@ -61,7 +61,7 @@ set ylabel "Throughput (Mops/s)" offset 1.5
 set title "Opteron" offset 0.2,title_offset
 @YTICS
 plot \
-     "common_gp_sl_lpd48core.txt" using 1:($6) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_lpd48core.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
@@ -79,7 +79,7 @@ set ylabel ""
 unset ylabel
 set title "Xeon20"
 plot \
-     "common_gp_sl_lpdxeon2680.txt" using 1:($6) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_lpdxeon2680.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
@@ -95,7 +95,7 @@ set ylabel ""
 unset ylabel
 set title "Xeon40"
 plot \
-     "common_gp_sl_diassrv8.txt" using 1:($6) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_diassrv8.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
@@ -106,20 +106,20 @@ set title "Tilera"
 set xrange [0:35]
 set yrange [0:]
 set xtics 6
-set ytics 2
+set ytics 10
 @YTICS
 set ylabel ""
 unset ylabel
 #set key bottom right
 plot \
-     "common_gp_sl_parsasrv1.epfl.ch.txt" using 1:($6) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_parsasrv1.epfl.ch.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
      "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
 set origin 2.05, 0.0
 set size 0.5, 0.6
-set title "Sparc"
+set title "T4-4"
 set xrange [0:257]
 set xtics 64
 set ytics 40
@@ -129,7 +129,7 @@ set yrange [0:]
 set ylabel ""
 unset ylabel
 plot \
-     "common_gp_sl_ol-collab1.txt" using 1:($6) title "seq" ls 1 with linespoints, \
+     "common_gp_sl_ol-collab1.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
@@ -159,7 +159,7 @@ set xrange [-1:1]
 @NOYTICS
 set yrange [-1:1]
 plot \
-     NaN title "seq" ls 1 with linespoints, \
+     NaN title "async" ls 1 with linespoints, \
      NaN title "pugh" ls 2 with linespoints, \
      NaN title "herlihy-lb" ls 3 with linespoints, \
      NaN title "fraser" ls 4 with linespoints, \
