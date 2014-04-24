@@ -127,7 +127,7 @@ plot \
      "" using 1:($4) title "natarajan" ls 7 with linespoints
 set origin 2.05, 0.0
 set size 0.5, 0.6
-set title "Sparc"
+set title "T4-4"
 set xrange [0:257]
 set xtics 64
 set ytics 90
