@@ -1,0 +1,45 @@
+SCY=bsttk
+
+CPU=1;
+CORES=two;
+
+bsts="./$ub/lf-bst-aravind ./$ub/lb-bst_tk";
+
+un=$(uname -n);
+if [ $un = "diassrv8" ];
+then
+	CPU=1;
+elif [ $un = "parsasrv1.epfl.ch" ];
+then
+	hts="./$ub/sq-ht ./$ub/lb-ht_lazy_gl ./$ub/lb-ht_pugh_gl ./$ub/lb-ht_coupling_gl ./$ub/lf-ht ./$ub/hyhtm ./$ub/lfhtm";
+elif [ $un = "ol-collab1" ];
+then
+	CORES=eight
+fi;
+
+CLHT_PATH=~/code/hyht
+MAKE_CLHT=1;
+
+cores_lat_dist="1 10 20";
+LATENCY_TYPE=3			# 2 or 3
+LATENCY_POINTS=256
+LATENCY_MERGE=0
+
+reps=1;
+keep=median; 			# min, median, or max
+duration=500;
+initials="4096 16384";
+updates="10";
+cores="${CORES}";
+cores_pow="two"
+
+COMPILE_FLAGS="SET_CPU=${CPU}"
+skip_thr=0;
+skip_lat=1;
+skip_ldi=1;
+skip_pow=1;
+
+do_ll=0;
+do_ht=0;
+do_sl=0;
+do_bst=1;

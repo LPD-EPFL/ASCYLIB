@@ -114,7 +114,7 @@ then
 	cores=$(seq 1 2 36);
     elif [ $unm = "diassrv8" ];
     then
-	cores=$(seq 1 8 80);
+	cores=$(seq 1 4 80);
     elif [ $unm = "lpdpc34" ];
     then
 	cores=$(seq 1 1 8);
@@ -129,6 +129,32 @@ then
 	cores=$(seq 1 8 256);
     else
 	cores=$(seq 1 2 48);
+    fi;
+elif [ "$cores" = "osdi_bar" ];
+then
+    if [ $unm = "maglite" ];
+    then
+	cores=
+    elif [ $unm = "parsasrv1.epfl.ch" ];
+    then
+	cores="1 9 20 36"
+    elif [ $unm = "diassrv8" ];
+    then
+	cores="1 10 20 80"
+    elif [ $unm = "lpdpc34" ];
+    then
+	cores=
+    elif [ $unm = "lpdpc4" ];
+    then
+	cores=
+    elif [ $unm = "lpdxeon2680" ];
+    then
+	cores="1 10 20 40"
+    elif [ $unm = "ol-collab1" ];
+    then
+	cores="1 20 64 256"
+    else
+	cores="1 6 20 48"
     fi;
 elif [ "$cores" = "socketandone" ];
 then

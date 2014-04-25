@@ -12,7 +12,7 @@ set rmargin 0
 set lmargin 3
 set tmargin 3
 set bmargin 2.5
-set xlabel "Threads" offset 1.5, 0.75
+set xlabel "# Threads" offset 1.5, 0.75
 set xrange [0:]
 set xtics 16 
 #set xtics nomirror scale 2
@@ -30,15 +30,15 @@ set xtics 16
 #set style line 6 lc rgb '#cc6600' lt 1 pt 15 ps 1.2 lw 2 pi 13
 #set style line 1 lc rgb '#4d2600' lt 1 pt 7 ps 1.2 lw 2 pi 14
 
-set style line 1 lc rgb '#0060ad' lt 1 pt 2 ps 1.2 lw 2 pi 6 
-set style line 2 lc rgb '#dd181f' lt 1 pt 5 ps 1.2 lw 2 pi 6
-set style line 3 lc rgb '#8b1a0e' lt 2 pt 1 ps 1.2 lw 2 pi 5
-set style line 4 lc rgb '#5e9c36' lt 1 pt 6 ps 1.2 lw 2 pi 5
-set style line 5 lc rgb '#663399' lt 2 pt 3 ps 1.2 lw 2 pi 6
-set style line 6 lc rgb '#cd1eff' lt 1 pt 4 ps 1.2 lw 2 pi 6
-set style line 7 lc rgb '#cc6600' lt 2 pt 7 ps 1.2 lw 2 pi 5
-set style line 8 lc rgb '#299fff' lt 1 pt 8 ps 1.2 lw 2 pi 5
-set style line 9 lc rgb '#ff299f' lt 2 pt 9 ps 1.2 lw 2 pi 6
+set style line 1 lc rgb '#0060ad' lt 1 pt 2 ps 1.6 lw 5 pi 3 
+set style line 2 lc rgb '#dd181f' lt 1 pt 5 ps 1.6 lw 5 pi 3
+set style line 3 lc rgb '#8b1a0e' lt 2 pt 1 ps 1.6 lw 5 pi 3
+set style line 4 lc rgb '#5e9c36' lt 1 pt 6 ps 1.6 lw 5 pi 3
+set style line 5 lc rgb '#663399' lt 2 pt 3 ps 1.6 lw 5 pi 3
+set style line 6 lc rgb '#cd1eff' lt 1 pt 4 ps 1.6 lw 5 pi 3
+set style line 7 lc rgb '#cc6600' lt 2 pt 7 ps 1.6 lw 5 pi 3
+set style line 8 lc rgb '#299fff' lt 1 pt 8 ps 1.6 lw 5 pi 3
+set style line 9 lc rgb '#ff299f' lt 2 pt 9 ps 1.6 lw 5 pi 3
 
 set style line 12 lc rgb '#808080' lt 2 lw 1
 title_offset=-0.7
@@ -61,7 +61,7 @@ set ylabel "Throughput (Mops/s)" offset 2.5
 set title "Opteron" offset 0.2,title_offset
 @YTICS
 plot \
-     "common_gp_ll_lpd48core.txt" using 1:($9) title "seq" ls 1 with linespoints, \
+     "common_gp_ll_lpd48core.txt" using 1:($9) title "async" ls 1 with linespoints, \
      "" using 1:($2) title "lazy" ls 2 with linespoints, \
      "" using 1:($4) title "pugh" ls 3 with linespoints, \
      "" using 1:($5) title "copy" ls 4 with linespoints, \
@@ -82,7 +82,7 @@ set ylabel ""
 unset ylabel
 set title "Xeon20"
 plot \
-     "common_gp_ll_lpdxeon2680.txt" using 1:($9) title "seq" ls 1 with linespoints, \
+     "common_gp_ll_lpdxeon2680.txt" using 1:($9) title "async" ls 1 with linespoints, \
      "" using 1:($2) title "lazy" ls 2 with linespoints, \
      "" using 1:($4) title "pugh" ls 3 with linespoints, \
      "" using 1:($5) title "copy" ls 4 with linespoints, \
@@ -99,9 +99,9 @@ set ytics 1
 @YTICS
 set ylabel ""
 unset ylabel
-set title "Xeon80"
+set title "Xeon40"
 plot \
-     "common_gp_ll_diassrv8.txt" using 1:($9) title "seq" ls 1 with linespoints, \
+     "common_gp_ll_diassrv8.txt" using 1:($9) title "async" ls 1 with linespoints, \
      "" using 1:($2) title "lazy" ls 2 with linespoints, \
      "" using 1:($4) title "pugh" ls 3 with linespoints, \
      "" using 1:($5) title "copy" ls 4 with linespoints, \
@@ -121,7 +121,7 @@ set ylabel ""
 unset ylabel
 #set key bottom right
 plot \
-     "common_gp_ll_parsasrv1.epfl.ch.txt" using 1:($9) title "seq" ls 1 with linespoints, \
+     "common_gp_ll_parsasrv1.epfl.ch.txt" using 1:($9) title "async" ls 1 with linespoints, \
      "" using 1:($2) title "lazy" ls 2 with linespoints, \
      "" using 1:($4) title "pugh" ls 3 with linespoints, \
      "" using 1:($5) title "copy" ls 4 with linespoints, \
@@ -131,7 +131,7 @@ plot \
      "" using 1:($7) title "harris-opt" ls 7 with linespoints
 set origin 2.05, 0.0
 set size 0.5, 0.6
-set title "Sparc"
+set title "T4-4"
 set xrange [0:257]
 set xtics 64
 set ytics 1
@@ -141,7 +141,7 @@ set yrange [0:]
 set ylabel ""
 unset ylabel
 plot \
-     "common_gp_ll_ol-collab1.txt" using 1:($9) title "seq" ls 1 with linespoints, \
+     "common_gp_ll_ol-collab1.txt" using 1:($9) title "async" ls 1 with linespoints, \
      "" using 1:($2) title "lazy" ls 2 with linespoints, \
      "" using 1:($4) title "pugh" ls 3 with linespoints, \
      "" using 1:($5) title "copy" ls 4 with linespoints, \
@@ -175,7 +175,7 @@ set xrange [-1:1]
 @NOYTICS
 set yrange [-1:1]
 plot \
-     NaN title "seq" ls 1 with linespoints, \
+     NaN title "async" ls 1 with linespoints, \
      NaN title "lazy" ls 2 with linespoints, \
      NaN title "pugh" ls 3 with linespoints, \
      NaN title "copy" ls 4 with linespoints, \
