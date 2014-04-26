@@ -52,7 +52,7 @@ find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ht-tbb/tbb/g'
 #skip-list
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/sl-seq/async/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/sl-lf-fraser/fraser/g'
-find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/sl-lf-herlihy/herlihy-lf/g'
+find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/sl-lf-herlihy/fraser-opt/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/sl-herlihy/herlihy-lb/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/sl-pugh/pugh/g'
 #bst

@@ -65,7 +65,7 @@ plot \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
-     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
+     "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 set origin 0.55, 0.0
 unset key
 set size 0.5, 0.6
@@ -83,7 +83,7 @@ plot \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
-     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
+     "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 set origin 1.05, 0.0
 set size 0.5, 0.6
 set xrange [0:81]
@@ -99,7 +99,7 @@ plot \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
-     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
+     "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 set origin 1.55, 0.0
 set size 0.5, 0.6
 set title "Tilera"
@@ -116,7 +116,7 @@ plot \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
-     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
+     "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 set origin 2.05, 0.0
 set size 0.5, 0.6
 set title "T4-4"
@@ -133,7 +133,7 @@ plot \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
      "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
-     "" using 1:($5) title "herlihy-lf" ls 5 with linespoints
+     "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 unset origin
 unset border
 unset tics
@@ -163,6 +163,6 @@ plot \
      NaN title "pugh" ls 2 with linespoints, \
      NaN title "herlihy-lb" ls 3 with linespoints, \
      NaN title "fraser" ls 4 with linespoints, \
-     NaN title "herlihy-lf" ls 5 with linespoints
+     NaN title "fraser-opt" ls 5 with linespoints
 #</null>
 unset multiplot  #<--- Necessary for some terminals, but not postscript I don't thin
