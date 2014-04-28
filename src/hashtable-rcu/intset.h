@@ -26,7 +26,9 @@
 #include "common.h"
 #include "ssmem.h"
 
+#define RCU_SIGNAL
 #include <urcu.h>		/* RCU flavor */
+/* #include <urcu-qsbr.h> */
 #include <urcu/rculfhash.h>	/* RCU Lock-free hash table */
 
 typedef struct node
@@ -67,6 +69,14 @@ cds_lfht_size(cds_lfht_t* ht)
 #define USE_RCU_GC 1
 #define RCU_WAIT() synchronize_rcu();
 
+
+#if USE_RCU_GC == 1
+#  define RCU_RLOCK()  rcu_read_lock()
+#  define RCU_RUNLOCK()  rcu_read_unlock()
+#else
+#  define RCU_RLOCK()
+#  define RCU_RUNLOCK()
+#endif
 
 extern __thread ssmem_allocator_t *alloc, *alloc_data;
 
