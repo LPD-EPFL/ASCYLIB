@@ -54,7 +54,7 @@ set size 0.5, 0.6
 set origin 0.05, 0.0
 unset key
 set xrange [0:49]
-set yrange [0:]
+set yrange [0:3.5]
 set xtics 6 offset 0,0.4
 set ytics 1 offset 0.7
 set ylabel "Throughput (Mops/s)" offset 2.5
@@ -74,7 +74,7 @@ unset key
 set size 0.5, 0.6
 set lmargin 4
 set xrange [0:41]
-set yrange [0:]
+set yrange [0:2.3]
 set xtics 10
 set ytics 1
 @YTICS
@@ -93,7 +93,7 @@ plot \
 set origin 1.05, 0.0
 set size 0.5, 0.6
 set xrange [0:81]
-set yrange [0:]
+set yrange [0:5]
 set xtics 20
 set ytics 1
 @YTICS
@@ -113,7 +113,7 @@ set origin 1.55, 0.0
 set size 0.5, 0.6
 set title "Tilera"
 set xrange [0:35]
-set yrange [0:]
+set yrange [0:0.5]
 set xtics 6
 set ytics 0.2
 @YTICS
@@ -135,7 +135,7 @@ set title "T4-4"
 set xrange [0:257]
 set xtics 64
 set ytics 1
-set yrange [0:]
+set yrange [0:9]
 @YTICS
 #set key bottom right
 set ylabel ""
