@@ -65,6 +65,7 @@ uint32_t rand_max;
 #define rand_min 1
 
 static volatile int stop;
+TEST_VARS_GLOBAL;
 
 volatile ticks *putting_succ;
 volatile ticks *putting_fail;

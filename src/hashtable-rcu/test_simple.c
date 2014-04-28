@@ -50,7 +50,7 @@ unsigned int maxhtlength;
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
 size_t load_factor = DEFAULT_LOAD;
-size_t update = DEFAULT_UPDATE;
+double update = DEFAULT_UPDATE;
 size_t num_threads = DEFAULT_NB_THREADS; 
 size_t duration = DEFAULT_DURATION;
 
@@ -66,6 +66,7 @@ uint32_t rand_max;
 #define rand_min 1
 
 static volatile int stop;
+TEST_VARS_GLOBAL;
 
 volatile ticks *putting_succ;
 volatile ticks *putting_fail;
@@ -216,9 +217,9 @@ test(void* thread)
 
 	  int res;
 	  START_TS(1);
-	  rcu_read_lock();
+	  RCU_RLOCK();
 	  res = DS_ADD(set, node);
-	  rcu_read_unlock();
+	  RCU_RUNLOCK();
 	  if(res)
 	    {
 	      END_TS(1, my_putting_count_succ);				
@@ -235,10 +236,10 @@ test(void* thread)
 	  int removed;
 	  struct cds_lfht_iter iter;
 	  START_TS(2);
-	  rcu_read_lock();
+	  RCU_RLOCK();
 	  DS_CONTAINS(set, key, iter);
 	  removed = DS_REMOVE(set, iter.node);
-	  rcu_read_unlock();
+	  RCU_RUNLOCK();
 	  if(removed != 0) 
 	    {
 	      END_TS(2, my_removing_count_succ);				
@@ -254,11 +255,11 @@ test(void* thread)
 	{ 
 	  int res;
 	  START_TS(0);
-	  rcu_read_lock();
+	  RCU_RLOCK();
 	  struct cds_lfht_iter iter;
 	  DS_CONTAINS(set, key, iter);
 	  res = (iter.node != NULL);
-	  rcu_read_unlock();
+	  RCU_RUNLOCK();
 	  if(res != 0) 
 	    {
 	      END_TS(0, my_getting_count_succ);				
@@ -400,7 +401,7 @@ main(int argc, char **argv)
 	  range = atol(optarg);
 	  break;
 	case 'u':
-	  update = atoi(optarg);
+	  update = atof(optarg);
 	  break;
 	case 'p':
 	  put_explicit = 1;

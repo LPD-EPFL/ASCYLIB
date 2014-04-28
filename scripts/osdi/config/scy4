@@ -1,16 +1,16 @@
 SCY=scy4
 cores_lat_dist="20";
 LATENCY_TYPE=3			# 2 or 3
-LATENCY_POINTS=1024
+LATENCY_POINTS=128
 LATENCY_MERGE=0
 
-reps=5;
+reps=11;
 keep=median; 			# min, median, or max
 duration=5000;
 initials="2048";
 updates="20";
-cores="two";
-cores_pow="two"
+cores="all";
+cores_pow="all"
 
 COMPILE_FLAGS="SET_CPU=1"
 skip_thr=1;

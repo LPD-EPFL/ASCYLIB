@@ -6,7 +6,7 @@ BINS  = $(BINDIR)/lf-ht_rcu
 PROF = $(ROOT)/src
 
 URCU_PATH = /home/trigonak/code/urcu
-LDFLAGS += -lurcu-cds -lurcu
+LDFLAGS += -lurcu-cds  -lurcu-qsbr -lurcu-signal -lurcu
 CFLAGS += -I$(URCU_PATH)/
 
 .PHONY:	all clean

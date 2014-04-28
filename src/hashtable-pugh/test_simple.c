@@ -31,14 +31,14 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k)  ht_contains(s, k)
-#define DS_ADD(s,k)       ht_add(s, k, k)
-#define DS_REMOVE(s,k)    ht_remove(s, k)
-#define DS_SIZE(s)        ht_size(s)
-#define DS_NEW()          ht_new()
+#define DS_CONTAINS(s,k,t)  ht_contains(s, k)
+#define DS_ADD(s,k,t)       ht_add(s, k, k)
+#define DS_REMOVE(s,k,t)    ht_remove(s, k)
+#define DS_SIZE(s)          ht_size(s)
+#define DS_NEW()            ht_new()
 
-#define DS_TYPE           ht_intset_t
-#define DS_NODE           node_l_t
+#define DS_TYPE             ht_intset_t
+#define DS_NODE             node_l_t
 
 /* ################################################################### *
  * GLOBALS
@@ -63,6 +63,7 @@ uint32_t rand_max;
 #define rand_min 1
 
 static volatile int stop;
+TEST_VARS_GLOBAL;
 
 volatile ticks *putting_succ;
 volatile ticks *putting_fail;
@@ -162,7 +163,7 @@ test(void* thread)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(set, key) == false)
+      if(DS_ADD(set, key, NULL) == false)
 	{
 	  i--;
 	}
@@ -183,7 +184,7 @@ test(void* thread)
 
   while (stop == 0) 
     {
-      TEST_LOOP_NA();
+      TEST_LOOP(NULL);
     }
 
   barrier_cross(&barrier);

@@ -33,9 +33,9 @@
 
 RETRY_STATS_VARS_GLOBAL;
 
-#define DS_CONTAINS(s,k)  set_contains_l(s, k)
-#define DS_ADD(s,k)       set_add_l(s, k, k)
-#define DS_REMOVE(s,k)    set_remove_l(s, k)
+#define DS_CONTAINS(s,k,t)  set_contains_l(s, k)
+#define DS_ADD(s,k,t)       set_add_l(s, k, k)
+#define DS_REMOVE(s,k,t)    set_remove_l(s, k)
 #define DS_SIZE(s)          set_size_l(s)
 #define DS_NEW()            set_new_l()
 
@@ -66,6 +66,7 @@ uint32_t rand_max;
 #define rand_min 1
 
 static volatile int stop;
+TEST_VARS_GLOBAL;
 
 volatile ticks *putting_succ;
 volatile ticks *putting_fail;
@@ -165,7 +166,7 @@ test(void* thread)
   for(i = 0; i < num_elems_thread; i++) 
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
-      if(DS_ADD(set, key) == false)
+      if(DS_ADD(set, key, NULL) == false)
 	{
 	  i--;
 	}
@@ -188,7 +189,7 @@ test(void* thread)
 
   while (stop == 0) 
     {
-      TEST_LOOP_NA();
+      TEST_LOOP(NULL);
     }
 
   barrier_cross(&barrier);
