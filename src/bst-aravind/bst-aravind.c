@@ -57,7 +57,7 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
 
 seek_record_t * bst_seek(skey_t key, node_t* node_r){
   PARSE_TRY();
-    seek_record_t seek_record_l;
+    volatile seek_record_t seek_record_l;
     node_t* node_s = ADDRESS(node_r->left);
     seek_record_l.ancestor = node_r;
     seek_record_l.successor = node_s; 

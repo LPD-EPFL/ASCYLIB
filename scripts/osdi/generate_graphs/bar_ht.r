@@ -12,6 +12,7 @@ g_legend <- function(p){
    return(legend)
 }
 mydata$structure <- factor(mydata$structure, levels =c("async","coupling","lazy","pugh","copy","urcu","lea","tbb","harris-opt"))
+mydata$machine <- factor(mydata$machine, levels=c("Opteron","Xeon20","Xeon40","Tilera","T4-4"))
 
 high=subset(mydata,experiment=="high")
 low=subset(mydata,experiment=="low")
