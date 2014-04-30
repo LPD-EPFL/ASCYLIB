@@ -69,7 +69,7 @@ plot \
      "" using 1:($9) title "urcu" ls 5 with linespoints, \
      "" using 1:($3) title "java" ls 6 with linespoints, \
      "" using 1:($2) title "tbb" ls 8 with linespoints, \
-     "" using 1:($8) title "harris-opt" ls 7 with linespoints
+     "" using 1:($8) title "harris" ls 7 with linespoints
 set origin 0.55, 0.0
 unset key
 set lmargin 4
@@ -91,7 +91,7 @@ plot \
      "" using 1:($9) title "urcu" ls 5 with linespoints, \
      "" using 1:($3) title "java" ls 6 with linespoints, \
      "" using 1:($2) title "tbb" ls 8 with linespoints, \
-     "" using 1:($8) title "harris-opt" ls 7 with linespoints
+     "" using 1:($8) title "harris" ls 7 with linespoints
 set origin 1.05, 0.0
 set size 0.5, 0.6
 set xrange [0:81]
@@ -109,7 +109,7 @@ plot \
      "" using 1:($6) title "pugh" ls 3 with linespoints, \
      "" using 1:($3) title "copy" ls 4 with linespoints, \
      "" using 1:($2) title "java" ls 6 with linespoints, \
-     "" using 1:($7) title "harris-opt" ls 7 with linespoints
+     "" using 1:($7) title "harris" ls 7 with linespoints
 set origin 1.55, 0.0
 set size 0.5, 0.6
 set title "Tilera"
@@ -128,7 +128,7 @@ plot \
      "" using 1:($6) title "pugh" ls 3 with linespoints, \
      "" using 1:($3) title "copy" ls 4 with linespoints, \
      "" using 1:($2) title "java" ls 6 with linespoints, \
-     "" using 1:($7) title "harris-opt" ls 7 with linespoints
+     "" using 1:($7) title "harris" ls 7 with linespoints
 set origin 2.05, 0.0
 set size 0.5, 0.6
 set title "T4-4"
@@ -147,7 +147,7 @@ plot \
      "" using 1:($6) title "pugh" ls 3 with linespoints, \
      "" using 1:($3) title "copy" ls 4 with linespoints, \
      "" using 1:($2) title "java" ls 6 with linespoints, \
-     "" using 1:($7) title "harris-opt" ls 7 with linespoints
+     "" using 1:($7) title "harris" ls 7 with linespoints
 unset origin
 unset border
 unset tics
@@ -181,6 +181,6 @@ plot \
      NaN title "urcu" ls 5 with linespoints, \
      NaN title "java" ls 6 with linespoints, \
      NaN title "tbb" ls 8 with linespoints, \
-     NaN title "harris-opt" ls 7 with linespoints
+     NaN title "harris" ls 7 with linespoints
 #</null>
 unset multiplot  #<--- Necessary for some terminals, but not postscript I don't thin

@@ -42,7 +42,7 @@ find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ll-michael/michael
 #hash table
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ht-seq/async/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ht-coupling/coupling/g'
-find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ht-harris/harris-opt/g'
+find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ht-harris/harris/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ht-lazy/lazy/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ht-lea/java/g'
 find ${graphdir} -name "extremes*.txt" | xargs perl -pi -e 's/ht-pugh/pugh/g'
