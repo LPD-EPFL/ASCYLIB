@@ -67,7 +67,7 @@ plot \
      "" using 1:($7) title "pugh" ls 3 with linespoints, \
      "" using 1:($4) title "copy" ls 4 with linespoints, \
      "" using 1:($9) title "urcu" ls 5 with linespoints, \
-     "" using 1:($3) title "lea" ls 6 with linespoints, \
+     "" using 1:($3) title "java" ls 6 with linespoints, \
      "" using 1:($2) title "tbb" ls 8 with linespoints, \
      "" using 1:($8) title "harris-opt" ls 7 with linespoints
 set origin 0.55, 0.0
@@ -89,7 +89,7 @@ plot \
      "" using 1:($7) title "pugh" ls 3 with linespoints, \
      "" using 1:($4) title "copy" ls 4 with linespoints, \
      "" using 1:($9) title "urcu" ls 5 with linespoints, \
-     "" using 1:($3) title "lea" ls 6 with linespoints, \
+     "" using 1:($3) title "java" ls 6 with linespoints, \
      "" using 1:($2) title "tbb" ls 8 with linespoints, \
      "" using 1:($8) title "harris-opt" ls 7 with linespoints
 set origin 1.05, 0.0
@@ -108,7 +108,7 @@ plot \
      "" using 1:($4) title "lazy" ls 2 with linespoints, \
      "" using 1:($6) title "pugh" ls 3 with linespoints, \
      "" using 1:($3) title "copy" ls 4 with linespoints, \
-     "" using 1:($2) title "lea" ls 6 with linespoints, \
+     "" using 1:($2) title "java" ls 6 with linespoints, \
      "" using 1:($7) title "harris-opt" ls 7 with linespoints
 set origin 1.55, 0.0
 set size 0.5, 0.6
@@ -127,7 +127,7 @@ plot \
      "" using 1:($4) title "lazy" ls 2 with linespoints, \
      "" using 1:($6) title "pugh" ls 3 with linespoints, \
      "" using 1:($3) title "copy" ls 4 with linespoints, \
-     "" using 1:($2) title "lea" ls 6 with linespoints, \
+     "" using 1:($2) title "java" ls 6 with linespoints, \
      "" using 1:($7) title "harris-opt" ls 7 with linespoints
 set origin 2.05, 0.0
 set size 0.5, 0.6
@@ -146,7 +146,7 @@ plot \
      "" using 1:($4) title "lazy" ls 2 with linespoints, \
      "" using 1:($6) title "pugh" ls 3 with linespoints, \
      "" using 1:($3) title "copy" ls 4 with linespoints, \
-     "" using 1:($2) title "lea" ls 6 with linespoints, \
+     "" using 1:($2) title "java" ls 6 with linespoints, \
      "" using 1:($7) title "harris-opt" ls 7 with linespoints
 unset origin
 unset border
@@ -179,7 +179,7 @@ plot \
      NaN title "pugh" ls 3 with linespoints, \
      NaN title "copy" ls 4 with linespoints, \
      NaN title "urcu" ls 5 with linespoints, \
-     NaN title "lea" ls 6 with linespoints, \
+     NaN title "java" ls 6 with linespoints, \
      NaN title "tbb" ls 8 with linespoints, \
      NaN title "harris-opt" ls 7 with linespoints
 #</null>

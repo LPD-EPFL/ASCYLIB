@@ -11,7 +11,7 @@ g_legend <- function(p){
    legend <- tmp$grobs[[leg]]
    return(legend)
 }
-mydata$structure <- factor(mydata$structure, levels =c("async","coupling","lazy","pugh","copy","urcu","lea","tbb","harris-opt"))
+mydata$structure <- factor(mydata$structure, levels =c("async","coupling","lazy","pugh","copy","urcu","java","tbb","harris-opt"))
 mydata$machine <- factor(mydata$machine, levels=c("Opteron","Xeon20","Xeon40","Tilera","T4-4"))
 
 high=subset(mydata,experiment=="high")
