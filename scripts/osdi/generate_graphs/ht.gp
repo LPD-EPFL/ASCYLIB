@@ -103,13 +103,15 @@ set ylabel ""
 unset ylabel
 set title "Xeon40"
 plot \
-     "common_gp_ht_diassrv8.txt" using 1:($8) title "async" ls 1 with linespoints, \
-     "" using 1:($5) title "coupling" ls 9 with linespoints, \
-     "" using 1:($4) title "lazy" ls 2 with linespoints, \
-     "" using 1:($6) title "pugh" ls 3 with linespoints, \
-     "" using 1:($3) title "copy" ls 4 with linespoints, \
-     "" using 1:($2) title "java" ls 6 with linespoints, \
-     "" using 1:($7) title "harris" ls 7 with linespoints
+     "common_gp_ht_diassrv8.txt" using 1:($10) title "async" ls 1 with linespoints, \
+     "" using 1:($6) title "coupling" ls 9 with linespoints, \
+     "" using 1:($5) title "lazy" ls 2 with linespoints, \
+     "" using 1:($7) title "pugh" ls 3 with linespoints, \
+     "" using 1:($4) title "copy" ls 4 with linespoints, \
+     "" using 1:($9) title "urcu" ls 5 with linespoints, \
+     "" using 1:($3) title "java" ls 6 with linespoints, \
+     "" using 1:($2) title "tbb" ls 8 with linespoints, \
+     "" using 1:($8) title "harris" ls 7 with linespoints
 set origin 1.55, 0.0
 set size 0.5, 0.6
 set title "Tilera"
