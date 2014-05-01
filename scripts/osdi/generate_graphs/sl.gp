@@ -63,7 +63,7 @@ set title "Opteron" offset 0.2,title_offset
 plot \
      "common_gp_sl_lpd48core.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
      "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 set origin 0.55, 0.0
@@ -81,7 +81,7 @@ set title "Xeon20"
 plot \
      "common_gp_sl_lpdxeon2680.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
      "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 set origin 1.05, 0.0
@@ -97,7 +97,7 @@ set title "Xeon40"
 plot \
      "common_gp_sl_diassrv8.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
      "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 set origin 1.55, 0.0
@@ -114,7 +114,7 @@ unset ylabel
 plot \
      "common_gp_sl_parsasrv1.epfl.ch.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
      "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 set origin 2.05, 0.0
@@ -131,7 +131,7 @@ unset ylabel
 plot \
      "common_gp_sl_ol-collab1.txt" using 1:($6) title "async" ls 1 with linespoints, \
      "" using 1:($3) title "pugh" ls 2 with linespoints, \
-     "" using 1:($2) title "herlihy-lb" ls 3 with linespoints, \
+     "" using 1:($2) title "herlihy" ls 3 with linespoints, \
      "" using 1:($4) title "fraser" ls 4 with linespoints, \
      "" using 1:($5) title "fraser-opt" ls 5 with linespoints
 unset origin
@@ -161,7 +161,7 @@ set yrange [-1:1]
 plot \
      NaN title "async" ls 1 with linespoints, \
      NaN title "pugh" ls 2 with linespoints, \
-     NaN title "herlihy-lb" ls 3 with linespoints, \
+     NaN title "herlihy" ls 3 with linespoints, \
      NaN title "fraser" ls 4 with linespoints, \
      NaN title "fraser-opt" ls 5 with linespoints
 #</null>
