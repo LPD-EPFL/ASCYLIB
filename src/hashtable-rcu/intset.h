@@ -85,11 +85,11 @@ node_init(node_t** node)
 {
   if (*node == NULL)
     {
-#if GC == 1 && USE_RCU_GC != 1
+/* #if GC == 1 && USE_RCU_GC != 1 */
       *node = (node_t*) ssmem_alloc(alloc, sizeof(node_t));
-#else
-      *node = (node_t*) ssalloc(sizeof(node_t));
-#endif
+/* #else */
+/*       *node = (node_t*) ssalloc(sizeof(node_t)); */
+/* #endif */
     }
 }
 
@@ -98,11 +98,11 @@ value_init(size_t** val, size_t size)
 {
   if (*val == NULL)
     {
-#if GC == 1 && USE_RCU_GC != 1
+/* #if GC == 1 && USE_RCU_GC != 1 */
       *val = (size_t*) ssmem_alloc(alloc_data, size);
-#else
-      *val = (size_t*) ssalloc_alloc(1, size);
-#endif
+/* #else */
+/*       *val = (size_t*) ssalloc_alloc(1, size); */
+/* #endif */
     }
 }
 
@@ -110,23 +110,23 @@ static inline void
 node_free(struct cds_lfht_node* ht_node)
 {
   UNUSED node_t* node = caa_container_of(ht_node, node_t, node);
-#if USE_RCU_GC == 1
+/* #if USE_RCU_GC == 1 */
   RCU_WAIT();
-  ssfree(node);
-#else
+/*   ssfree(node); */
+/* #else */
   ssmem_free(alloc, node);
-#endif
+/* #endif */
 }
 
 static inline void
 value_free(size_t* val)
 {
-#if USE_RCU_GC == 1
+/* #if USE_RCU_GC == 1 */
   RCU_WAIT();
-  ssfree_alloc(1, val);
-#else
+/*   ssfree_alloc(1, val); */
+/* #else */
   ssmem_free(alloc_data, val);
-#endif
+/* #endif */
 }
 
 #define DEFAULT_LOAD 1
