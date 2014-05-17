@@ -1,12 +1,12 @@
 .PHONY:	all
 
-BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh  src/bst src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/
-LBENCHS = src/linkedlist-lock src/hashtable-lock src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/bst-lock2 src/bst-drachsler src/bst-tk/
+BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh  src/bst src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/ src/bst-tong/
+LBENCHS = src/linkedlist-lock src/hashtable-lock src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/bst-lock2 src/bst-drachsler src/bst-tk/ src/bst-tong/
 LFBENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-rcu src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/bst src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 NOISE = src/noise
 TESTS = src/tests
-BSTS = src/bst-lock2 src/bst-drachsler src/bst src/bst-howley src/bst-aravind src/bst-tk/
+BSTS = src/bst-lock2 src/bst-drachsler src/bst src/bst-howley src/bst-aravind src/bst-tk/ src/bst-tong
 
 .PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS) $(SEQBENCHS)
 
@@ -35,6 +35,9 @@ bst:	seqbstint seqbstext
 
 bst_tk:
 	$(MAKE) "LOCK=TAS" src/bst-tk/
+
+bst-tong:
+	$(MAKE) "LOCK=TAS" src/bst-tong/
 
 bst_aravind:
 	$(MAKE) "STM=LOCKFREE" src/bst-aravind
@@ -246,6 +249,7 @@ clean:
 	$(MAKE) -C src/bst-drachsler clean
 	$(MAKE) -C src/bst-lock2 clean
 	$(MAKE) -C src/bst-tk clean
+	$(MAKE) -C src/bst-tong clean
 	$(MAKE) -C src/deque clean
 	$(MAKE) -C src/noise clean
 	$(MAKE) -C src/tests clean

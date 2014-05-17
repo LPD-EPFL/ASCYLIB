@@ -136,7 +136,7 @@ bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
 #endif
 
         LOCK(&(parent->lock));
-        LOCK(&(leaf->lock));
+        //LOCK(&(leaf->lock));
         if (!(parent->marked) && ((leaf==parent->left) || (leaf==parent->right))) {
             if (key < parent->key) {
 	            parent->left = new_internal;
@@ -144,11 +144,11 @@ bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
 	            parent->right =  new_internal;
             }
             UNLOCK(&(parent->lock));
-            UNLOCK(&(leaf->lock));
+         //   UNLOCK(&(leaf->lock));
             return TRUE; 
         }
        UNLOCK(&(parent->lock));
-       UNLOCK(&(leaf->lock));
+    //   UNLOCK(&(leaf->lock));
     }
 }
 
@@ -174,8 +174,12 @@ sval_t bst_remove(skey_t key, node_t* node_r) {
 
         LOCK(&(gp->lock));
         LOCK(&(parent->lock));
-        LOCK(&(leaf->lock));
+       // LOCK(&(leaf->lock));
         if (leaf->marked) {
+            UNLOCK(&(gp->lock));
+            UNLOCK(&(parent->lock));
+         //   UNLOCK(&(leaf->lock));
+
             return 0;
         }
         if (is_parent(gp,parent) && is_parent(parent,leaf) && (gp->marked==0)){
@@ -194,7 +198,7 @@ sval_t bst_remove(skey_t key, node_t* node_r) {
             }
             UNLOCK(&(gp->lock));
             UNLOCK(&(parent->lock));
-            UNLOCK(&(leaf->lock));
+         //   UNLOCK(&(leaf->lock));
 #if GC == 1
             ssmem_free(alloc, parent);
             ssmem_free(alloc, leaf);
@@ -204,7 +208,7 @@ sval_t bst_remove(skey_t key, node_t* node_r) {
         }
         UNLOCK(&(gp->lock));
         UNLOCK(&(parent->lock));
-        UNLOCK(&(leaf->lock));
+        //UNLOCK(&(leaf->lock));
     }
 }
 
@@ -217,10 +221,10 @@ uint32_t bst_size(volatile node_t* node) {
     }
     uint32_t l = 0;
     uint32_t r = 0;
-    if ( !(node->left->marked)) {
+    if ((node->left!=NULL) &&  !(node->left->marked)) {
         l = bst_size(node->left);
     }
-    if ( !(node->right->marked)) {
+    if ((node->right!=NULL) &&  !(node->right->marked)) {
         r = bst_size(node->right);
     }
     return l+r;
