@@ -17,20 +17,14 @@ measurements.o:
 ssalloc.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/ssalloc.o $(PROF)/ssalloc.c
 
-linkedlist.o: 
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist.o linkedlist.c
-
-timnat.o: linkedlist.h linkedlist.o
+timnat.o: 
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/timnat.o $(LIST_IMPL).c
 
-intset.o: linkedlist.h timnat.h
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/intset.o intset.c
-
-test.o: linkedlist.h timnat.h intset.h
+test.o: timnat.h 
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
-main: measurements.o ssalloc.o linkedlist.o timnat.o timnat.o intset.o test.o $(TMILB)
-	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/linkedlist.o $(BUILDIR)/timnat.o $(BUILDIR)/intset.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
+main: measurements.o ssalloc.o timnat.o test.o $(TMILB)
+	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/timnat.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
 	-rm -f $(BINS)

@@ -47,20 +47,16 @@ node_t *new_node(skey_t key, sval_t val, node_t *next, int initializing);
 intset_t *set_new();
 void set_delete(intset_t *set);
 
-inline int is_marked_ref(long i);
-inline long unset_mark(long i);
-inline long set_mark(long i);
-inline long get_unmarked_ref(long w);
-inline long get_marked_ref(long w);
+//inline int is_marked_ref(long i);
+//inline long unset_mark(long i);
+//inline long set_mark(long i);
+//inline long get_unmarked_ref(long w);
+//inline long get_marked_ref(long w);
 
 node_t* timnat_search(intset_t *set, skey_t key, node_t** left_node);
 sval_t timnat_find(intset_t *set, skey_t key);
 int timnat_insert(intset_t *set, skey_t key, sval_t val);
 sval_t timnat_delete(intset_t *set, skey_t key);
 int set_size(intset_t *set);
-
-sval_t set_contains(intset_t *set, skey_t key);
-int set_add(intset_t *set, skey_t key, skey_t val);
-sval_t set_remove(intset_t *set, skey_t key);
 
 #endif

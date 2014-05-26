@@ -30,9 +30,9 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k)  set_contains(s, k)
-#define DS_ADD(s,k,v)     set_add(s, k, (sval_t) v)
-#define DS_REMOVE(s,k)    set_remove(s, k)
+#define DS_CONTAINS(s,k)  timnat_find(s, k)
+#define DS_ADD(s,k,v)     timnat_insert(s, k, (sval_t) v)
+#define DS_REMOVE(s,k)    timnat_delete(s, k)
 #define DS_SIZE(s)        set_size(s)
 #define DS_NEW()          set_new()
 

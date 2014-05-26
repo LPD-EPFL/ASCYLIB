@@ -25,15 +25,15 @@
 #  include <sys/procset.h>
 #endif
 
-#include "intset.h"
+#include "timnat.h"
 
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k,t)  set_contains(s, k)
-#define DS_ADD(s,k,t)       set_add(s, k, k)
-#define DS_REMOVE(s,k,t)    set_remove(s, k)
+#define DS_CONTAINS(s,k,t)  timnat_find(s, k)
+#define DS_ADD(s,k,t)       timnat_insert(s, k, k)
+#define DS_REMOVE(s,k,t)    timnat_delete(s, k)
 #define DS_SIZE(s)          set_size(s)
 #define DS_NEW()            set_new()
 
