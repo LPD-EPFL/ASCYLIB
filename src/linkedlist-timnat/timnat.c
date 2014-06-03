@@ -212,6 +212,20 @@ timnat_delete(intset_t *the_list, skey_t key)
   return ret;
 }
 
+cas_descriptor* insert_generator(key_t key){
+}
+
+cas_descriptor* remove_generator(key_t key){
+}
+
+bool_t update_wrapup() {
+
+}
+
+bool_t search_wrapup() {
+    
+}       
+
 int
 set_size(intset_t *set)
 {
