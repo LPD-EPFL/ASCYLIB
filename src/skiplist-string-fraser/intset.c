@@ -27,22 +27,19 @@
 
 strval_t
 sl_contains(sl_intset_t *set, strkey_t key)
-{
-
+{	
   return fraser_find(set, key);
 }
 
 int
 sl_add(sl_intset_t *set, strkey_t key, strval_t val)
 {
-
   return fraser_insert(set, key, val);
 }
 
 strval_t
 sl_remove(sl_intset_t *set, strkey_t key)
-{
-
+{	
   return fraser_remove(set, key);
 }
 

@@ -1,14 +1,17 @@
 /*
  * File:
- *   intset.c
+ *   fraser.h
  * Author(s):
  *   Vincent Gramoli <vincent.gramoli@epfl.ch>
  * Description:
- *   Skip list integer set operations 
+ *   Lock-based skip list implementation of the Fraser algorithm
+ *   "Practical Lock Freedom", K. Fraser, 
+ *   PhD dissertation, September 2003
+ *   Cambridge University Technical Report UCAM-CL-TR-579 
  *
  * Copyright (c) 2009-2010.
  *
- * intset.c is part of Synchrobench
+ * fraser.h is part of Synchrobench
  * 
  * Synchrobench is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,29 +24,9 @@
  * GNU General Public License for more details.
  */
 
-#include "intset.h"
+#include "skiplist.h"
+#include "ssalloc.h"
 
-#define MAXLEVEL    32
-
-strval_t
-sl_contains(sl_intset_t *set, strkey_t key)
-{
-
-  return fraser_find(set, key);
-}
-
-int
-sl_add(sl_intset_t *set, strkey_t key, strval_t val)
-{
-
-  return fraser_insert(set, key, val);
-}
-
-strval_t
-sl_remove(sl_intset_t *set, strkey_t key)
-{
-
-  return fraser_remove(set, key);
-}
-
-
+strval_t fraser_find(sl_intset_t *set, strkey_t key);
+strval_t fraser_remove(sl_intset_t *set, strkey_t key);
+int fraser_insert(sl_intset_t *set, strkey_t key, strval_t val);

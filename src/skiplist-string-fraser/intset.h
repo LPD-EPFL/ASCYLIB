@@ -1,6 +1,6 @@
 /*
  * File:
- *   intset.c
+ *   intset.h
  * Author(s):
  *   Vincent Gramoli <vincent.gramoli@epfl.ch>
  * Description:
@@ -8,7 +8,7 @@
  *
  * Copyright (c) 2009-2010.
  *
- * intset.c is part of Synchrobench
+ * intset.h is part of Synchrobench
  * 
  * Synchrobench is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,29 +21,8 @@
  * GNU General Public License for more details.
  */
 
-#include "intset.h"
+#include "fraser.h"
 
-#define MAXLEVEL    32
-
-strval_t
-sl_contains(sl_intset_t *set, strkey_t key)
-{
-
-  return fraser_find(set, key);
-}
-
-int
-sl_add(sl_intset_t *set, strkey_t key, strval_t val)
-{
-
-  return fraser_insert(set, key, val);
-}
-
-strval_t
-sl_remove(sl_intset_t *set, strkey_t key)
-{
-
-  return fraser_remove(set, key);
-}
-
-
+strval_t sl_contains(sl_intset_t *set, strkey_t key);
+int sl_add(sl_intset_t *set, strkey_t key, strval_t val);
+strval_t sl_remove(sl_intset_t *set, strkey_t key);
