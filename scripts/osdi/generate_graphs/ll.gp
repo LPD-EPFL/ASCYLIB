@@ -57,7 +57,7 @@ set xrange [0:49]
 set yrange [0:3.5]
 set xtics 6 offset 0,0.4
 set ytics 1 offset 0.7
-set ylabel "Throughput (Mops/s)" offset 2.5
+set ylabel "Throughput (Mops/s)" offset 0.5
 set title "Opteron" offset 0.2,title_offset
 @YTICS
 plot \
@@ -96,6 +96,17 @@ set xrange [0:81]
 set yrange [0:5]
 set xtics 20
 set ytics 1
+set style line 1 lc rgb '#0060ad' lt 1 pt 2 ps 1.6 lw 5 pi 1 
+set style line 2 lc rgb '#dd181f' lt 1 pt 5 ps 1.6 lw 5 pi 1
+set style line 3 lc rgb '#8b1a0e' lt 2 pt 1 ps 1.6 lw 5 pi 1
+set style line 4 lc rgb '#5e9c36' lt 1 pt 6 ps 1.6 lw 5 pi 1
+set style line 5 lc rgb '#663399' lt 2 pt 3 ps 1.6 lw 5 pi 1
+set style line 6 lc rgb '#cd1eff' lt 1 pt 4 ps 1.6 lw 5 pi 1
+set style line 7 lc rgb '#cc6600' lt 2 pt 7 ps 1.6 lw 5 pi 1
+set style line 8 lc rgb '#299fff' lt 1 pt 8 ps 1.6 lw 5 pi 1
+set style line 9 lc rgb '#ff299f' lt 2 pt 9 ps 1.6 lw 5 pi 1
+
+
 @YTICS
 set ylabel ""
 unset ylabel
@@ -116,6 +127,17 @@ set xrange [0:35]
 set yrange [0:0.5]
 set xtics 6
 set ytics 0.2
+set style line 1 lc rgb '#0060ad' lt 1 pt 2 ps 1.6 lw 5 pi 3 
+set style line 2 lc rgb '#dd181f' lt 1 pt 5 ps 1.6 lw 5 pi 3
+set style line 3 lc rgb '#8b1a0e' lt 2 pt 1 ps 1.6 lw 5 pi 3
+set style line 4 lc rgb '#5e9c36' lt 1 pt 6 ps 1.6 lw 5 pi 3
+set style line 5 lc rgb '#663399' lt 2 pt 3 ps 1.6 lw 5 pi 3
+set style line 6 lc rgb '#cd1eff' lt 1 pt 4 ps 1.6 lw 5 pi 3
+set style line 7 lc rgb '#cc6600' lt 2 pt 7 ps 1.6 lw 5 pi 3
+set style line 8 lc rgb '#299fff' lt 1 pt 8 ps 1.6 lw 5 pi 3
+set style line 9 lc rgb '#ff299f' lt 2 pt 9 ps 1.6 lw 5 pi 3
+
+
 @YTICS
 set ylabel ""
 unset ylabel
