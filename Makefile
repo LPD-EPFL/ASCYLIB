@@ -125,7 +125,7 @@ lfll: lfll_harris lfll_michael lfll_harris_opt
 
 # ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy
 
-ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro llcopy_no_ro
+ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro llcopy_no_ro lbll_pugh_no_ro
 
 lbhtgl:
 	$(MAKE) "LOCK=TAS" "G=GL" src/hashtable-lock
@@ -162,6 +162,9 @@ lbll_coupling:
 
 lbll_pugh:
 	$(MAKE) "LOCK=TAS" src/linkedlist-pugh
+
+lbll_pugh_no_ro:
+	$(MAKE) "LOCK=TAS" "RO_FAIL=0" src/linkedlist-pugh
 
 lbll_lazy:
 	$(MAKE) "LOCK=TAS" src/linkedlist-lazy
