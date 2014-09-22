@@ -358,9 +358,17 @@ main(int argc, char **argv)
   printf("Pugh's algorithm\n");
 #endif
 
-  double kb = initial * sizeof(DS_NODE) / 1024.0;
+  levelmax = floor_log_2((unsigned int) initial);
+  size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
+  while (size_pad_32 & 31)
+    {
+      size_pad_32++;
+    }
+
+  printf("lvl max = %d\n", levelmax);
+  double kb = (initial * size_pad_32) / 1024.0;
   double mb = kb / 1024.0;
-  printf("Sizeof initial: %.2f KB = %.2f MB\n", kb, mb);
+  printf("Sizeof initial: %.2f KB = %.2f MB = %.2f GB\n", kb, mb, mb / 1024);
 
   if (!is_power_of_two(range))
     {
@@ -402,13 +410,7 @@ main(int argc, char **argv)
   timeout.tv_nsec = (duration % 1000) * 1000000;
     
   stop = 0;
-    
-  levelmax = floor_log_2((unsigned int) initial);
-  size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
-  while (size_pad_32 & 31)
-    {
-      size_pad_32++;
-    }
+   
 
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
