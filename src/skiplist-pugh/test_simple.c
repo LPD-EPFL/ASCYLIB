@@ -164,7 +164,8 @@ test(void* thread)
     
   for(i = 0; i < num_elems_thread; i++) 
     {
-      key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
+      // key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
+      key = i;
       
       if(DS_ADD(set, key, NULL) == false)
 	{
