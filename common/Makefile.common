@@ -301,11 +301,13 @@ ifeq ($(LATENCY),5)
 endif
 
 
-ifeq ($(INIT),all)
-	CFLAGS += -DINITIALIZE_FROM_ONE=0
-else
-	CFLAGS += -DINITIALIZE_FROM_ONE=1
-endif
+#ifeq ($(INIT),all)
+#	CFLAGS += -DINITIALIZE_FROM_ONE=0
+#else
+#	CFLAGS += -DINITIALIZE_FROM_ONE=1
+#endif
+
+CFLAGS += -DINITIALIZE_FROM_ONE=0
 
 ifeq ($(SET_CPU),0)
 	CFLAGS += -DNO_SET_CPU
