@@ -359,12 +359,13 @@ main(int argc, char **argv)
 #endif
 
   levelmax = floor_log_2((unsigned int) initial);
-  if (levelmax % 2 == 0){
-    levelmax ++;
-  }
+  //OANA
+  //Set reduction factor here
+  reducelevelby = 4;
+  levelmax = levelmax - (levelmax % reducelevelby) + 1;
+
   printf("Levelmax: %d\n", levelmax);
 
-  reducelevelby = 2;
   //levelmax = 14;
   size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
   while (size_pad_32 & 31)

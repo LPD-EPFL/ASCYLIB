@@ -28,7 +28,7 @@ optimistic_find(sl_intset_t *set, skey_t key)
   sl_node_t* pred = set->head;
   int lvl;
   //OANA
-  for (lvl = levelmax - 1; lvl >= 0; lvl -=2)//lvl--)
+  for (lvl = levelmax - 1; lvl >= 0; lvl -=reducelevelby)//lvl--)
     {
       succ = pred->next[lvl];
       while (succ->key < key)
@@ -82,7 +82,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   sl_node_t* pred = set->head;
   int lvl;
   //OANA
-  for (lvl = levelmax - 1; lvl >= 0; lvl -=2)//lvl--)
+  for (lvl = levelmax - 1; lvl >= 0; lvl -=reducelevelby)//lvl--)
     {
       succ = pred->next[lvl];
       while (succ->key < key)
@@ -100,8 +100,8 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 
   int rand_lvl = get_rand_level(); /* do the rand_lvl outside the CS */
   //OANA
-  if (rand_lvl != 0 && rand_lvl % 2 == 0){
-    rand_lvl++;
+  if (rand_lvl != 0){
+    rand_lvl = rand_lvl - (rand_lvl % reducelevelby) + 1;
   }
 
 
@@ -126,7 +126,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 
   //printf("n->toplevel: %d\n", n->toplevel);
   //OANA
-  for (lvl = 2; lvl < n->toplevel ; lvl +=2)//lvl++)
+  for (lvl = reducelevelby; lvl < n->toplevel ; lvl +=reducelevelby)//lvl++)
     {
       //printf("Optimistic insert lvl is: %d\n", lvl);
       pred = get_lock(update[lvl], key, lvl);
@@ -155,7 +155,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
   sl_node_t* pred = set->head;
   int lvl;
   //OANA
-  for (lvl = levelmax - 1; lvl >= 0; lvl -=2)//lvl--)
+  for (lvl = levelmax - 1; lvl >= 0; lvl -=reducelevelby)//lvl--)
     {
       succ = pred->next[lvl];
       while (succ->key < key)
@@ -194,7 +194,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
   while(true);
 
   //OANA
-  for (lvl = succ->toplevel - 1; lvl >= 0; lvl -=2)//lvl--)
+  for (lvl = succ->toplevel - 1; lvl >= 0; lvl -=reducelevelby)//lvl--)
     {
       pred = get_lock(update[lvl], key, lvl);
       pred->next[lvl] = succ->next[lvl];
