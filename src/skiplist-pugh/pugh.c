@@ -124,11 +124,11 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   pred->next[0] = n;
   UNLOCK(ND_GET_LOCK(pred));
 
-  printf("n->toplevel: %d\n", n->toplevel);
+  //printf("n->toplevel: %d\n", n->toplevel);
   //OANA
   for (lvl = 2; lvl < n->toplevel ; lvl +=2)//lvl++)
     {
-      printf("Optimistic insert lvl is: %d\n", lvl);
+      //printf("Optimistic insert lvl is: %d\n", lvl);
       pred = get_lock(update[lvl], key, lvl);
       n->next[lvl] = pred->next[lvl];
 #ifdef __tile__
