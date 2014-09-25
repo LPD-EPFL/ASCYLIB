@@ -360,6 +360,7 @@ main(int argc, char **argv)
 #endif
 
   levelmax = floor_log_2((unsigned int) initial);
+  levelmax = 14;
   size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
   while (size_pad_32 & 31)
     {

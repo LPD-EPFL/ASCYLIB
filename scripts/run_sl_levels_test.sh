@@ -1,6 +1,6 @@
 #!/bin/sh
 
-out_file="../data/sl_28_levels_"$(date | gawk '// {print $2"_"$3}');
+out_file="../data/sl_14_trunc_levels_"$(date | gawk '// {print $2"_"$3}');
 echo "Will write results in"$out_file;
 updates="0 1 10";
 iterations="1 2 3 4";
