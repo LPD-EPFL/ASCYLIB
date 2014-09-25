@@ -12,6 +12,7 @@
 #include "utils.h"
 
 unsigned int levelmax;
+unsigned int reducelevelby;
 unsigned int size_pad_32;
 __thread ssmem_allocator_t* alloc;
 

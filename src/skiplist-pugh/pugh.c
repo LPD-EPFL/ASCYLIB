@@ -11,6 +11,8 @@ __thread size_t lat_parsing_rem = 0;
 #endif	/* LATENCY_PARSING == 1 */
 
 extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
+extern ALIGNED(CACHE_LINE_SIZE) unsigned int reducelevelby;
+
 
 #define MAX_BACKOFF 131071
 #define HERLIHY_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
@@ -18,13 +20,15 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 sval_t
 optimistic_find(sl_intset_t *set, skey_t key)
 { 
+
   PARSE_TRY();
   PARSE_START_TS(0);
   sval_t val = 0;
   sl_node_t* succ = NULL;
   sl_node_t* pred = set->head;
   int lvl;
-  for (lvl = levelmax - 1; lvl >= 0; lvl--)
+  //OANA
+  for (lvl = levelmax - 1; lvl >= 0; lvl -=2)//lvl--)
     {
       succ = pred->next[lvl];
       while (succ->key < key)
@@ -77,7 +81,8 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   sl_node_t* succ;
   sl_node_t* pred = set->head;
   int lvl;
-  for (lvl = levelmax - 1; lvl >= 0; lvl--)
+  //OANA
+  for (lvl = levelmax - 1; lvl >= 0; lvl -=2)//lvl--)
     {
       succ = pred->next[lvl];
       while (succ->key < key)
@@ -94,6 +99,11 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   PARSE_END_TS(1, lat_parsing_put++);
 
   int rand_lvl = get_rand_level(); /* do the rand_lvl outside the CS */
+  //OANA
+  if (rand_lvl != 0 && rand_lvl % 2 == 0){
+    rand_lvl++;
+  }
+
 
   GL_LOCK(set->lock);
   pred = get_lock(pred, key, 0);
@@ -114,8 +124,11 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   pred->next[0] = n;
   UNLOCK(ND_GET_LOCK(pred));
 
-  for (lvl = 1; lvl < n->toplevel; lvl++)
+  printf("n->toplevel: %d\n", n->toplevel);
+  //OANA
+  for (lvl = 2; lvl < n->toplevel ; lvl +=2)//lvl++)
     {
+      printf("Optimistic insert lvl is: %d\n", lvl);
       pred = get_lock(update[lvl], key, lvl);
       n->next[lvl] = pred->next[lvl];
 #ifdef __tile__
@@ -123,6 +136,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 #endif
       pred->next[lvl] = n;
       UNLOCK(ND_GET_LOCK(pred));
+    
     }  
   UNLOCK(ND_GET_LOCK(n));
   GL_UNLOCK(set->lock);
@@ -140,7 +154,8 @@ optimistic_delete(sl_intset_t *set, skey_t key)
   sl_node_t* succ = NULL;
   sl_node_t* pred = set->head;
   int lvl;
-  for (lvl = levelmax - 1; lvl >= 0; lvl--)
+  //OANA
+  for (lvl = levelmax - 1; lvl >= 0; lvl -=2)//lvl--)
     {
       succ = pred->next[lvl];
       while (succ->key < key)
@@ -178,7 +193,8 @@ optimistic_delete(sl_intset_t *set, skey_t key)
     }
   while(true);
 
-  for (lvl = succ->toplevel - 1; lvl >= 0; lvl--)
+  //OANA
+  for (lvl = succ->toplevel - 1; lvl >= 0; lvl -=2)//lvl--)
     {
       pred = get_lock(update[lvl], key, lvl);
       pred->next[lvl] = succ->next[lvl];

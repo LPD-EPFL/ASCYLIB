@@ -28,7 +28,6 @@
 #include "intset.h"
 
 /* ################################################################### *
- * Definition of macros: per data structure
  * ################################################################### */
 
 #define DS_CONTAINS(s,k,t)  sl_contains(s, k)
@@ -360,7 +359,13 @@ main(int argc, char **argv)
 #endif
 
   levelmax = floor_log_2((unsigned int) initial);
-  levelmax = 14;
+  if (levelmax % 2 == 0){
+    levelmax ++;
+  }
+  printf("Levelmax: %d\n", levelmax);
+
+  reducelevelby = 2;
+  //levelmax = 14;
   size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
   while (size_pad_32 & 31)
     {
