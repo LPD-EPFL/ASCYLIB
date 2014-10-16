@@ -281,6 +281,10 @@ else
 
 endif
 
+ifeq ($(MALLOC), 1)
+    CFLAGS += -DSSALLOC_USE_MALLOC
+endif
+
 ifeq ($(LATENCY),1)
 	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS
 endif

@@ -111,6 +111,9 @@ lfll_harris:
 lfll_harris_opt:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-harris_opt
 
+lfll_harris_opt_malloc:
+	$(MAKE) "STM=LOCKFREE" "GC=0" "MALLOC=1" src/linkedlist-harris_opt
+
 lfll_harris_opt_tcmalloc:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-harris_opt_tcmalloc
 
