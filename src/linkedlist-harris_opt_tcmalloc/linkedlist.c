@@ -58,7 +58,7 @@ set_new()
   //     exit(1);
   //   }
 
-  if ((set = (intset_t*)malloc(sizeof(intset_t))) == NULL) {
+  if ((set = (intset_t*)memalign(CACHE_LINE_SIZE, sizeof(intset_t))) == NULL) {
       perror("malloc");
       exit(1);
   }
