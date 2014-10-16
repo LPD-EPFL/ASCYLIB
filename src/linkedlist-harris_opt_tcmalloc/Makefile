@@ -22,7 +22,7 @@ measurements.o:
 # 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/ssalloc.o $(PROF)/ssalloc.c
 
 linkedlist.o: 
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist.o linkedlist.c
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/linkedlist.o linkedlist.c $(LDFLAGS)
 
 harris.o: linkedlist.h linkedlist.o
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/harris.o $(LIST_IMPL).c
