@@ -245,7 +245,7 @@ clean:
 	$(MAKE) -C src/hashtable-coupling clean
 	$(MAKE) -C src/hashtable-lazy clean
 	$(MAKE) -C src/skiplist-lock clean
-	$(MAKE) -C src/sftree clean
+	# $(MAKE) -C src/sftree clean
 	$(MAKE) -C src/bst clean
 	$(MAKE) -C src/bst-howley clean
 	$(MAKE) -C src/bst-aravind clean
