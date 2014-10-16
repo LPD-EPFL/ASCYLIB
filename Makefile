@@ -1,8 +1,8 @@
 .PHONY:	all
 
-BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/hashtable-java src/hashtable-copy src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/
+BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-harris_opt_tcmalloc src/linkedlist-michael src/hashtable src/hashtable-java src/hashtable-copy src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/
 LBENCHS = src/linkedlist-lock src/hashtable-lock src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst-lock2 src/bst-drachsler src/bst-tk/
-LFBENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-michael src/hashtable src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/bst src/bst-howley src/bst-aravind
+LFBENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-harris_opt_tcmalloc src/linkedlist-michael src/hashtable src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/bst src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 NOISE = src/noise
 TESTS = src/tests
@@ -110,6 +110,9 @@ lfll_harris:
 
 lfll_harris_opt:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-harris_opt
+
+lfll_harris_opt_tcmalloc:
+	$(MAKE) "STM=LOCKFREE" src/linkedlist-harris_opt_tcmalloc
 
 lfll_michael:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-michael

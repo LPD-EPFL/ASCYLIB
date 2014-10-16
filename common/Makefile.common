@@ -65,6 +65,8 @@ else
 endif
 
 LIBSSMEM = $(ROOT)/external
+TCMALLOC_PATH = /usr/local
+JEMALLOC_PATH = /usr/local
 
 ifndef STM
   LOCK          ?= TAS
@@ -137,9 +139,12 @@ ifeq ($(PC_NAME), lpd48core)
     CFLAGS += -DOPTERON -DPLATFORM_MCORE 
     PLATFORM_NUMA = 1
 endif
+
 ifeq ($(PC_NAME), lpdxeon2680)
     CFLAGS += -DLPDXEON -DPLATFORM_MCORE
     PLATFORM_NUMA = 1
+    TCMALLOC_PATH = /home/zablotch
+    JEMALLOC_PATH = /home/zablotch
 endif
 
 ifeq ($(PC_NAME), lpdpc34)
