@@ -11,9 +11,10 @@ all:	main
 
 LIST_IMPL = harris_opt
 
-CFLAGS += -fno-omit-frame-pointer -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+CFLAGS += -fno-omit-frame-pointer -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -I${TCMALLOC_PATH}/include
 
 LDFLAGS += -L${TCMALLOC_PATH}/lib -Wl,-rpath,${TCMALLOC_PATH}/lib -ltcmalloc 
+
 
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
