@@ -42,6 +42,12 @@ physical_delete_right(node_t* left_node, node_t* right_node)
   node_t* new_next = get_unmarked_ref(right_node->next);
   node_t* res = CAS_PTR(&left_node->next, right_node, new_next);
   int removed = (res == right_node);
+
+  if (likely(removed)) {
+    free((void *) res);
+  }
+
+
 // #if GC == 1
 //   if (likely(removed))
 //     {
@@ -49,7 +55,6 @@ physical_delete_right(node_t* left_node, node_t* right_node)
 //     }
 // #endif
   
-  free((void*) res);
   return removed;
 }
 
