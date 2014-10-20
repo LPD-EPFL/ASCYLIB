@@ -1,7 +1,7 @@
 .PHONY:	all
 
-BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-harris_opt_tcmalloc src/linkedlist-harris_opt_jemalloc src/linkedlist-michael src/hashtable src/hashtable-java src/hashtable-copy src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/ src/linkedlist-smr-hart src/linkedlist-qsbr-hart
-LBENCHS = src/linkedlist-lock src/hashtable-lock src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst-lock2 src/bst-drachsler src/bst-tk/ src/linkedlist-qsbr-hart
+BENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-harris_opt_tcmalloc src/linkedlist-harris_opt_jemalloc src/linkedlist-michael src/hashtable src/hashtable-java src/hashtable-copy src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/ src/linkedlist-smr-hart src/linkedlist-qsbr-hart src/linkedlist-qsbr-smr-hybrid
+LBENCHS = src/linkedlist-lock src/hashtable-lock src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-lock src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst-lock2 src/bst-drachsler src/bst-tk/ src/linkedlist-qsbr-hart src/linkedlist-qsbr-smr-hybrid
 LFBENCHS = src/linkedlist src/linkedlist-harris_opt src/linkedlist-harris_opt_tcmalloc src/linkedlist-harris_opt_jemalloc src/linkedlist-michael src/hashtable src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/bst src/bst-howley src/bst-aravind src/linkedlist-smr-hart
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 NOISE = src/noise
@@ -129,7 +129,10 @@ lfll_hart_smr:
 	$(MAKE) "STM=LOCKFREE" "GC=0" src/linkedlist-smr-hart	
 
 lfll_hart_qsbr:
-	$(MAKE) "GC=0" "LOCK=TICKET" src/linkedlist-qsbr-hart	
+	$(MAKE) "GC=0" "LOCK=TICKET" src/linkedlist-qsbr-hart
+
+lfll_qsbr_smr_hybrid:
+	$(MAKE) "GC=0" "LOCK=TICKET" src/linkedlist-qsbr-smr-hybrid	
 
 seqll:
 	$(MAKE) "STM=SEQUENTIAL" "SEQ_NO_FREE=1" src/linkedlist-seq

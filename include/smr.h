@@ -48,6 +48,7 @@
  
 struct hazard_pointer {
     void *p;
+    char padding[CACHE_LINE_SIZE - sizeof(void *)];
 };
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct hazard_pointer hazard_pointer_t;
