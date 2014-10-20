@@ -1,5 +1,5 @@
-/* 
- * QSBR Functions.
+/*
+ * Linked list API.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +15,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
- * Copyright (c) Thomas E. Hart.
+ * Copyright (c) 2005 Tom Hart.
  */
- 
-#ifndef __RCU_H
-#define __RCU_H
 
-#include "mr.h"
+#ifndef LIST_H
+#define LIST_H 
 
-#define FUZZY 0
-#define NOT_FUZZY 1
+struct list;
 
-#define N_EPOCHS 3
-#define QUIESCENCE_THRESHOLD 100
+void list_init(struct list **l);
+void list_destroy(struct list **l);
 
-void quiescent_state (int flag);
+int search(struct list *l, long key);
+int delete(struct list *l, long key);
+int insert(struct list *l, long key);
+int size(struct list *l);
 
-void free_node_later(void * q);
 
 #endif

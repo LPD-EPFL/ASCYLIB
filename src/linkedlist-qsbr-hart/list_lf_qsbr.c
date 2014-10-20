@@ -1,6 +1,6 @@
 /*
  * Implementation of a lock-free list-based set based on Michael's 
- * modification of Harris' original algorithm using hazard pointers.
+ * modification of Harris' original algorithm, but using QSBR.
  *
  * Follows the pseudocode given in :
  *  M. M. Michael. Hazard Pointers: Safe Memory Reclamation for Lock-Free 
@@ -24,20 +24,13 @@
  * Copyright (c) Thomas E. Hart.
  */
  
-#include "smr.h"
+#include "qsbr.h"
 #include "list.h"
-// #include "test.h"
-//#include "arch/atomic.h"
 #include "atomic_ops_if.h"
 #include "utils.h"
-#include "ssalloc.h"
 #include "node.h"
-// #include "util.h"
-// #include "backoff.h"
+#include "ssalloc.h"
 #include <stdio.h>
-
-extern __thread smr_data_t sd;
-
 
 struct list_aux_data {
     /* 
@@ -56,18 +49,19 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct list_aux_data list_aux_data_t;
 
 __thread list_aux_data_t list_data;
 
+
 struct list {
     node_t *list_head;
 };
 
 void list_init(struct list **l) {
-    // IGOR OANA potential problem here: allocating different size with 0 allocator
+    // *l = (struct list *)mapmem(sizeof(struct list));
     *l = (struct list *)ssalloc_aligned_alloc(0, CACHE_LINE_SIZE, sizeof(struct list));
     (*l)->list_head = NULL;
 }
 
 void list_destroy(struct list **l) {
-    ssfree_alloc(0,*l);
+    ssfree_alloc(0, *l);
 }
 
 /* 
@@ -86,31 +80,24 @@ void list_destroy(struct list **l) {
  *       use two levels of indirection for the head: we need prev to point to 
  *       the right thing in the calling function, not a local head variable.
  */
+
+ //OANA Why do we have search AND find? Search is callable from the interface, Find is used internally (why?)
 int find (node_t **head, long key)
 {
-    node_t **prev, *cur, *next = NULL;
-    int base = sd.thread_index*K;
-    int off = 0;
+      node_t **prev, *cur, *next=NULL;
 
  try_again:
     prev = head;
-    
+    cur = *prev;
     for (cur = *prev; cur != NULL; cur = next) {
         
-        /* Protect cur with a hazard pointer. */
-        HP[base+off].p = cur;
-        // memory_barrier();
-        MEM_BARRIER;
         if (*prev != cur) goto try_again;
-        
         next = cur->next;
     
         /* If the bit is marked... */
         if ((uint64_t)next & 1) {
-            
             /* ... update the link and retire the element. */
             if (!CAS_PTR_bool(prev, cur, (node_t *)((uint64_t)next-1))) {
-                // IGOR OANA potential source of problems
                 // backoff_delay();
                 goto try_again;
             }
@@ -118,17 +105,16 @@ int find (node_t **head, long key)
             next = (node_t *)((uint64_t)next-1);
 
         } else {
-            
+            long ckey = cur->key;
             if (*prev != cur) goto try_again;
-            if (cur->key >= key) {
+            if (ckey >= key) {
                 list_data.cur = cur;
                 list_data.prev = prev;
                 list_data.next = next;
-                return (cur->key == key);
+                return (ckey == key);
             }
             
             prev = &cur->next;
-            off = !off;
         }
     }
 
@@ -141,12 +127,15 @@ int find (node_t **head, long key)
 int insert(struct list *l, long key)
 {
     node_t **head = &l->list_head;
-    //node_t *n = new_node();
-
+    // node_t *n = new_node();
     node_t *n = ssalloc_alloc(0, sizeof(node_t));
 
-
     // backoff_reset();
+
+    while (n == NULL) {
+        quiescent_state(NOT_FUZZY);
+        UNUSED node_t *n = ssalloc_alloc(0, sizeof(node_t));
+    }
 
     while (1) {
         if (find(head, key)) {
@@ -157,6 +146,7 @@ int insert(struct list *l, long key)
         n->next = list_data.cur;
         // write_barrier();
         MEM_BARRIER;
+
         if (CAS_PTR_bool(list_data.prev, list_data.cur, n)) {
             return (1);
         }
@@ -169,7 +159,6 @@ int insert(struct list *l, long key)
 int delete(struct list *l, long key)
 {
     node_t **head = &l->list_head;
-    // uint64_t myTID = getTID();
     
     // backoff_reset();
 
@@ -181,17 +170,18 @@ int delete(struct list *l, long key)
         
         /* Mark if needed. */
         if (!CAS_PTR_bool(&(list_data.cur->next), 
-                        list_data.next, 
-                        (node_t *)((uint64_t)list_data.next+1))) {
+                list_data.next, 
+                (node_t *)((uint64_t)list_data.next+1))) {
             // backoff_delay();
             continue; /* Another thread interfered. */
         }
-        
+
         // write_barrier();
         MEM_BARRIER;
         if (CAS_PTR_bool(list_data.prev, 
-               list_data.cur, list_data.next)) /* Unlink */
+               list_data.cur, list_data.next))
             free_node_later(list_data.cur); /* Reclaim */
+
         /* 
          * If we want to revent the possibility of there being an 
          * unbounded number of unmarked nodes, add "else _find(head,key)."
@@ -203,23 +193,15 @@ int delete(struct list *l, long key)
 
 int search (struct list *l, long key)
 {
-    node_t **prev, *cur, *next;
-    int base = sd.thread_index*K;
-    int off = 0;
+      node_t **prev, *cur, *next;
 
     // backoff_reset();
-    
+
  try_again:
     prev = &l->list_head;
     
     for (cur = *prev; cur != NULL; cur = next) {
-        
-        /* Protect cur with a hazard pointer. */
-        HP[base+off].p = cur;
-        // memory_barrier();
-        MEM_BARRIER;
         if (*prev != cur) goto try_again;
-        
         next = cur->next;
     
         /* If the bit is marked... */
@@ -241,7 +223,6 @@ int search (struct list *l, long key)
             }
             
             prev = &cur->next;
-            off = !off;
         }
     }
 

@@ -237,8 +237,9 @@ uint8_t oldval;
 //Test-and-set
 #  define TAS_U8(a) tas_uint8(a)
 //Memory barrier
- #define MEM_BARRIER __sync_synchronize() 
-// #  define MEM_BARRIER //nop on the opteron for these benchmarks
+// OANA IGOR maybe try other memory barrier instructions, this one is super slow
+#define MEM_BARRIER __sync_synchronize() 
+//#  define MEM_BARRIER //nop on the opteron for these benchmarks
 //Relax CPU
 //#define PAUSE _mm_pause()
 

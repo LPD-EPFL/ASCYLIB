@@ -32,7 +32,7 @@ __thread smr_data_t sd;
 void mr_init_global(uint64_t nthreads){
   /* Allocate HP array. Over-allocate since the parent has pid 32. */
   // HP = (hazard_pointer *)mapmem(sizeof(hazard_pointer) * K*(MAX_THREADS+1));
-  HP = (hazard_pointer_t *)malloc(sizeof(hazard_pointer_t) * nthreads);
+  HP = (hazard_pointer_t *)malloc(sizeof(hazard_pointer_t) * K*nthreads);
   if (HP == NULL) {
     fprintf(stderr, "SMR mr_init: out of memory\n");
     exit(-1);
@@ -40,7 +40,7 @@ void mr_init_global(uint64_t nthreads){
 
   /* Initialize the hazard pointers. */
   int i;
-  for (i = 0; i < K*(nthreads+1); i++)
+  for (i = 0; i < K*(nthreads); i++)
     HP[i].p = NULL;
 }
 
