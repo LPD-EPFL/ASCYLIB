@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include <malloc.h>
 #include "utils.h"
+#include "common.h"
 #include "atomic_ops.h"
 #include "rapl_read.h"
 #ifdef __sparc__
@@ -25,19 +26,21 @@
 #  include <sys/procset.h>
 #endif
 
-#include "intset.h"
+#include "list.h"
+#include "node.h"
+#include "smr.h"
 
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k,t)  set_contains(s, k)
-#define DS_ADD(s,k,t)       set_add(s, k, k)
-#define DS_REMOVE(s,k,t)    set_remove(s, k)
-#define DS_SIZE(s)          set_size(s)
-#define DS_NEW()            set_new()
+#define DS_CONTAINS(s,k,t)  search(s, k)
+#define DS_ADD(s,k,t)       insert(s, k)
+#define DS_REMOVE(s,k,t)    delete(s, k)
+#define DS_SIZE(s)          size(s)
+// #define DS_NEW()            set_new()
 
-#define DS_TYPE             intset_t
+#define DS_TYPE             struct list
 #define DS_NODE             node_t
 
 /* ################################################################### *
@@ -108,6 +111,8 @@ test(void* thread)
   int phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();
+  mr_init_local(ID, num_threads);
+  printf("[%d] there are %d threads\n", ID, (int)num_threads);
 
   DS_TYPE* set = td->set;
 
@@ -399,7 +404,11 @@ main(int argc, char **argv)
     
   stop = 0;
     
-  DS_TYPE* set = DS_NEW();
+  // DS_TYPE* set = DS_NEW();
+  mr_init_global(num_threads);
+  DS_TYPE* set;
+  list_init(&set);
+
   assert(set != NULL);
 
   /* Initializes the local data */

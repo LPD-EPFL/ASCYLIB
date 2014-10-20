@@ -237,8 +237,8 @@ uint8_t oldval;
 //Test-and-set
 #  define TAS_U8(a) tas_uint8(a)
 //Memory barrier
-/* #define MEM_BARRIER __sync_synchronize() */
-#  define MEM_BARRIER //nop on the opteron for these benchmarks
+ #define MEM_BARRIER __sync_synchronize() 
+// #  define MEM_BARRIER //nop on the opteron for these benchmarks
 //Relax CPU
 //#define PAUSE _mm_pause()
 
@@ -250,7 +250,7 @@ uint8_t oldval;
 /* start --generic code */
 
 #define CAS_U64_bool(addr, old, new) (old == CAS_U64(addr, old, new))
-
+#define CAS_PTR_bool(addr, old, new) (old == CAS_PTR(addr, old, new))
 /* static inline uint8_t */
 /* CAS_U64_bool(volatile AO_t* addr, AO_t old, AO_t new) */
 /* { */

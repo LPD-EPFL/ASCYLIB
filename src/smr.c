@@ -27,16 +27,6 @@
 // 0 is for actual nodes
 // 1 is for m_nodes
 
-struct smr_data {
-  mr_node_t *rlist;
-  mr_node_t **plist;
-  uint64_t rcount;
-  uint64_t nthreads;
-  uint64_t thread_index;
-};
-
-typedef ALIGNED(CACHE_LINE_SIZE) struct smr_data smr_data_t;
-
 __thread smr_data_t sd;
 
 void mr_init_global(uint64_t nthreads){
@@ -49,7 +39,8 @@ void mr_init_global(uint64_t nthreads){
   }
 
   /* Initialize the hazard pointers. */
-  for (i = 0; i < K*(MAX_THREADS+1); i++)
+  int i;
+  for (i = 0; i < K*(nthreads+1); i++)
     HP[i].p = NULL;
 }
 
@@ -58,7 +49,7 @@ void mr_init_local(uint64_t thread_index, uint64_t nthreads){
   sd.rcount = 0;
   sd.thread_index = thread_index;
   sd.nthreads = nthreads;
-  sd.plist = (node_t **) malloc(sizeof(mr_node_t *) * K * sd.nthreads);
+  sd.plist = (mr_node_t **) malloc(sizeof(mr_node_t *) * K * sd.nthreads);
 }
 
 // void mr_init()
@@ -83,9 +74,9 @@ void mr_thread_exit()
     for (i = 0; i < K; i++)
         HP[K * sd.thread_index + i].p = NULL;
     
-    while (this_thread()->rcount > 0) {
+    while (sd.rcount > 0) {
         scan();
-        cond_yield();
+        sched_yield();
     }
 }
 
@@ -110,7 +101,7 @@ int compare (const void *a, const void *b)
 }
 
 /* Debugging function. Leave it around. */
-inline node_t *ssearch(node_t **list, int size, node_t *key) {
+inline mr_node_t *ssearch(mr_node_t **list, int size, mr_node_t *key) {
     int i;
     for (i = 0; i < size; i++)
         if (list[i] == key)
@@ -143,7 +134,8 @@ void scan()
      *   A -> B -> C ---> A -> B      ---> A -> C
      *                    B -> POISON      B -> POISON
      */
-    write_barrier();
+    //write_barrier();
+     MEM_BARRIER;
 
     /* Stage 1: Scan HP list and insert non-null values in plist. */
     psize = 0;
@@ -177,6 +169,7 @@ void scan()
 
 void free_node_later(void *n)
 {
+    // OANA IGOR add timestamp around here
     mr_node_t* wrapper_node = ssalloc_alloc(1, sizeof(mr_node_t));
     wrapper_node->actual_node = n;
 

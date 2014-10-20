@@ -30,8 +30,8 @@
 #define __SMR_H
 
 #include "mr.h"
-#include "node.h"
-#include "test.h"
+// #include "node.h"
+// #include "test.h"
 
 /* Parameters to the algorithm:
  *  K: Number of hazard pointers per CPU.
@@ -55,8 +55,19 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct hazard_pointer hazard_pointer_t;
 /* Must be dynamically initialized to be an array of size H. */
 hazard_pointer_t *HP;
  
+struct smr_data {
+  mr_node_t *rlist;
+  mr_node_t **plist;
+  uint64_t rcount;
+  uint64_t nthreads;
+  uint64_t thread_index;
+  char padding[CACHE_LINE_SIZE - 3*sizeof(uint64_t) - sizeof(mr_node_t *) - sizeof(mr_node_t **)];
+};
+
+typedef ALIGNED(CACHE_LINE_SIZE) struct smr_data smr_data_t;
+
 void scan();
 
-void free_node_later(node_t *);
+void free_node_later(void *);
  
 #endif
