@@ -210,9 +210,9 @@ test(void* thread)
         quiescent_state(FUZZY);
       }
 
-      if (ID == 0 && qcount == 1) {
-        td->flag->flag = 1; 
-      }
+      // if (ID == 0 && qcount == 1) {
+      //   td->flag->flag = 1; 
+      // }
     }
 
   barrier_cross(&barrier);
@@ -492,6 +492,7 @@ main(int argc, char **argv)
     
   thread_data_t* tds = (thread_data_t*) malloc(num_threads * sizeof(thread_data_t));
 
+  fallback.flag = 1;
   for(t = 0; t < num_threads; t++)
     {
       tds[t].id = t;
