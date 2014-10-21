@@ -6,7 +6,7 @@
 #include "atomic_ops_if.h"
 #include "utils.h"
 #include "lock_if.h"
-
+#include "linkedlist-qsbr-smr-hybrid/node.h"
 
 
 struct qsbr_globals *qg ALIGNED(CACHE_LINE_SIZE);
@@ -119,8 +119,11 @@ void process_callbacks(mr_node_t **list)
 
     for (; (*list) != NULL; (*list) = next) {
         next = (*list)->mr_next;
-        ssfree_alloc(0, (*list)->actual_node);
-        ssfree_alloc(1, *list);
+        
+        ((node_t *)((*list)->actual_node))->key = 10000;
+        // *list->mr_next = 0;
+        // ssfree_alloc(0, (*list)->actual_node);
+        // ssfree_alloc(1, *list);
         num++;
     }
 
@@ -248,8 +251,9 @@ void scan()
                 shtd[my_index].limbo_list[j] = cur;
                 ltd.rcount++;
             } else {
-                ssfree_alloc(0, cur->actual_node);
-                ssfree_alloc(1, cur);
+                ((node_t *)(cur->actual_node))->key = 10000;      
+                // ssfree_alloc(0, cur->actual_node);
+                // ssfree_alloc(1, cur);
             }
         }
     }
