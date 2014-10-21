@@ -184,6 +184,10 @@ void free_node_later (void *q)
     wrapper_node->mr_next = shtd[my_index].limbo_list[shtd[my_index].epoch];
     shtd[my_index].limbo_list[shtd[my_index].epoch] = wrapper_node;
     ltd.rcount++;
+
+    if (fallback.flag == 1 && ltd.rcount >= R) {
+        scan();
+    }
 }
 
 // Hazard Pointers Specific
