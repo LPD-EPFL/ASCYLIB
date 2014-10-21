@@ -12,7 +12,8 @@
 #define QUIESCENCE_THRESHOLD 100
 
 // How many milliseconds should the sleeper threads sleep
-#define SLEEP_AMOUNT 200
+#define SLEEP_AMOUNT 150
+#define MARGIN 50
 
 // SMR STUFF
 

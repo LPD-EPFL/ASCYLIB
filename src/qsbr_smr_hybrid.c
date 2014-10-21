@@ -16,6 +16,7 @@ shared_thread_data_t *shtd;
 __thread local_thread_data_t ltd;
 
 int compare (const void *a, const void *b);
+uint8_t is_old_enough(mr_node_t* n);
 
 void mr_init_local(uint64_t thread_index, uint64_t nthreads) {
     ltd.thread_index = thread_index;
@@ -180,6 +181,8 @@ void free_node_later (void *q)
 
     mr_node_t* wrapper_node = ssalloc_alloc(1, sizeof(mr_node_t));
     wrapper_node->actual_node = q;
+    // Create timestamp in mr node
+    gettimeofday(&(wrapper_node->created), NULL);
 
     wrapper_node->mr_next = shtd[my_index].limbo_list[shtd[my_index].epoch];
     shtd[my_index].limbo_list[shtd[my_index].epoch] = wrapper_node;
@@ -237,7 +240,7 @@ void scan()
             cur = tmplist;
             tmplist = tmplist->mr_next;
 
-            if (bsearch(&cur, plist, psize, sizeof(mr_node_t *), compare)) {
+            if (!is_old_enough(cur) || bsearch(&cur, plist, psize, sizeof(mr_node_t *), compare)) {
                 //cur->mr_next = this_thread()->rlist;
                 //this_thread()->rlist = cur;
 
@@ -250,6 +253,15 @@ void scan()
             }
         }
     }
+}
+
+uint8_t is_old_enough(mr_node_t* n) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    uint64_t msec; 
+    msec = (now.tv_sec - n->created.tv_sec) * 1000; 
+    msec += (now.tv_usec - n->created.tv_usec) / 1000; 
+    return (msec >= (SLEEP_AMOUNT + MARGIN)); 
 }
 
 // UTILITY FUNCTIONS
