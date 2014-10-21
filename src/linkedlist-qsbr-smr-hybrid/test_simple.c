@@ -71,6 +71,8 @@ static volatile int stop;
 static volatile int wakeup_stop;
 
 static uint8_t has_sleeper_thread[NUMBER_OF_SOCKETS * CORES_PER_SOCKET];
+extern uint64_t memory_reuse;
+
 
 TEST_VARS_GLOBAL;
 
@@ -619,7 +621,8 @@ main(int argc, char **argv)
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
-
+  printf("#Reused nodes %d\n", memory_reuse);
+  
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();    
   RETRY_STATS_PRINT(total, putting_count_total, removing_count_total, putting_count_total_succ + removing_count_total_succ);    

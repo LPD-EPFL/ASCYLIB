@@ -24,6 +24,8 @@ static __thread uint8_t ssalloc_free_cur[SSALLOC_NUM_ALLOCATORS] = {0};
 static __thread uint8_t ssalloc_free_num[SSALLOC_NUM_ALLOCATORS] = {0};
 #endif 
 
+uint64_t memory_reuse;
+
 void
 ssalloc_set(void* mem)
 {
@@ -42,6 +44,8 @@ ssalloc_init()
       ssalloc_app_mem[i] = (uintptr_t) memalign(SSMEM_CACHE_LINE_SIZE, SSALLOC_SIZE);
       assert((void*) ssalloc_app_mem[i] != NULL);
     }
+
+  memory_reuse = 0;  
 #endif
 }
 
@@ -66,6 +70,7 @@ ssalloc_alloc(unsigned int allocator, size_t size)
       uint8_t spot = ssalloc_free_cur[allocator] - ssalloc_free_num[allocator];
       ret = ssalloc_free_list[allocator][spot];
       ssalloc_free_num[allocator]--;
+      memory_reuse++;
     }
   else
     {
