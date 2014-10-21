@@ -118,7 +118,6 @@ test(void* thread)
   set_cpu(phys_id);
   ssalloc_init();
   mr_init_local(ID, num_threads);
-  printf("[%d] there are %d threads\n", ID, (int)num_threads);
 
   DS_TYPE* set = td->set;
 
@@ -278,7 +277,6 @@ void* wakeup (void * arg) {
     nanosleep(&timeout, NULL);
   }
 
-  fprintf(stderr, "Sleeper thread on core %d exiting\n", core);
   pthread_exit(NULL);
 }
 
