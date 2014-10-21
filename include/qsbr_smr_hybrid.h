@@ -11,6 +11,9 @@
 #define N_EPOCHS 3
 #define QUIESCENCE_THRESHOLD 100
 
+// How many milliseconds should the sleeper threads sleep
+#define SLEEP_AMOUNT 200
+
 // SMR STUFF
 
 /* Parameters to the algorithm:

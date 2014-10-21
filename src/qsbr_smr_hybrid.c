@@ -63,8 +63,6 @@ void mr_thread_exit()
         scan();
         sched_yield();
     }
-
-    fprintf(stderr, "Thread [%d] exiting. Fallback flag is [%d]\n", ltd.thread_index, fallback.flag);
 }
 
 void mr_reinitialize()
