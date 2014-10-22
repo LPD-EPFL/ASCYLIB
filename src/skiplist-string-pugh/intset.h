@@ -26,3 +26,6 @@
 strval_t sl_contains(sl_intset_t *set, strkey_t key);
 int sl_add(sl_intset_t *set, strkey_t key, strval_t val);
 strval_t sl_remove(sl_intset_t *set, strkey_t key);
+
+int sl_merge(sl_intset_t *set, strkey_t key, strval_t val, int (*merge_operator)(strkey_t, strval_t, strval_t, strval_t));
+strval_t* sl_multiget(sl_intset_t *set, strkey_t* keys, size_t num_keys);
