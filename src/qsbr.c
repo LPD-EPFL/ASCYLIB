@@ -24,7 +24,7 @@
 #include "utils.h"
 #include "ssalloc.h"
 #include "lock_if.h"
-//#include "arch/atomic.h"
+#include "linkedlist-qsbr-hart/node.h"
 
 #define NOT_ENTERED 0
 #define ENTERED 1
@@ -169,8 +169,10 @@ void process_callbacks(mr_node_t **list)
 
     for (; (*list) != NULL; (*list) = next) {
         next = (*list)->mr_next;
-        ssfree_alloc(0, (*list)->actual_node);
-        ssfree_alloc(1, *list);
+        
+        ((node_t *)((*list)->actual_node))->key = 10000;
+        // ssfree_alloc(0, (*list)->actual_node);
+        // ssfree_alloc(1, *list);
         num++;
     }
 
