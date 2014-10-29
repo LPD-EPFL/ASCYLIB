@@ -120,9 +120,11 @@ int find (node_t **head, long key)
         } else {
             
             if (*prev != cur) goto try_again;
+            
             if (cur->key == 10000) {
                 fprintf(stderr, "touched illegal node FUUUUUUUUUUUUUUU\n");
             }
+            
             if (cur->key >= key) {
                 list_data.cur = cur;
                 list_data.prev = prev;

@@ -22,6 +22,7 @@
 // #include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "linkedlist-smr-hart/node.h"
 
 // IGOR: SSALLOC allocator convention:
 // 0 is for actual nodes
@@ -161,8 +162,9 @@ void scan()
             sd.rlist = cur;
             sd.rcount++;
         } else {
-            ssfree_alloc(0, cur->actual_node);
-            ssfree_alloc(1, cur);
+            ((node_t *)(cur->actual_node))->key = 10000;      
+            // ssfree_alloc(0, cur->actual_node);
+            // ssfree_alloc(1, cur);
         }
     }
 }
