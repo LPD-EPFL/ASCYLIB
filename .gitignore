@@ -1,7 +1,9 @@
 *~
 /#Makefile#
+/#README.md#
 /.#COMPILE
 /.#Makefile
+/.#README.md
 /.gitignore~
 /any.sh
 /archive
