@@ -14,7 +14,7 @@ do
 	r=$((2*$i));	
 	settings="-i$i -r$r -u$u";
 	echo "## $settings" | tee -a $out_file;
-	./scripts/scalability6.sh socket ./bin/lf-bst ./bin/lf-bst-howley ./bin/lb-bst-mutex ./bin/lb-bst-ticket ./bin/lb-bst-tas ./bin/lb-bst-spin $settings | tee -a $out_file;
+	./scripts/scalability6.sh socket ./bin/lf-bst_ellen./bin/lf-bst-howley ./bin/lb-bst-mutex ./bin/lb-bst-ticket ./bin/lb-bst-tas ./bin/lb-bst-spin $settings | tee -a $out_file;
     done;
 done;
 
