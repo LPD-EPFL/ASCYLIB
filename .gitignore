@@ -1,7 +1,7 @@
-/data/*
-/data/.gitignore
 *~
+/#Makefile#
 /.#COMPILE
+/.#Makefile
 /.gitignore~
 /any.sh
 /archive
@@ -10,6 +10,8 @@
 /core
 /cscope.files
 /cscope.out
+/data/*
+/data/.gitignore
 /events_all
 /gp
 /lb-sl.h
