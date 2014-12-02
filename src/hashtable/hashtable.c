@@ -2,7 +2,6 @@
  * File:
  *   hashtable.c
  * Author(s):
- *   Vincent Gramoli <vincent.gramoli@epfl.ch>
  * Description:
  *   Hashtable
  *   Implementation of an integer set using a stm-based/lock-free hashtable.
@@ -11,9 +10,9 @@
  *
  * Copyright (c) 2009-2010.
  *
- * hashtable.c is part of Synchrobench
+ * hashtable.c is part of HIDDEN
  * 
- * Synchrobench is free software: you can redistribute it and/or
+ * HIDDEN is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, version 2
  * of the License.

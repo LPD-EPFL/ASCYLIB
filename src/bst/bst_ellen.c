@@ -28,6 +28,9 @@ node_t* create_node(skey_t key, sval_t value, bool_t is_leaf, int initializing) 
     new_node->left=NULL;
 
     asm volatile("" ::: "memory");
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
     return (node_t*) new_node;
 }
 

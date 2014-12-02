@@ -40,8 +40,10 @@ volatile node_t* bst_initialize() {
     node->right = right;
     INIT_LOCK(&(node->lock));
 
-    // copied as-is from Howley tree. What does this do?
     asm volatile("" ::: "memory");
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
     return node;
 }
 

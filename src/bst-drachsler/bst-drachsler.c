@@ -24,10 +24,6 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
     new_node->parent = NULL;
     new_node->succ = NULL;
     new_node->pred = NULL;
-#ifdef DO_DRACHSLER_REBALANCE
-    new_node->left_height = 0;
-    new_node->right_height = 0;
-#endif
     INIT_LOCK(&(new_node->tree_lock));
     INIT_LOCK(&(new_node->succ_lock));
     new_node->key = k;
@@ -79,7 +75,6 @@ sval_t bst_contains(skey_t k, node_t* root) {
     while (n->key < k){
         n = (node_t*) n->succ;
     }
-    //TODO: can I use a mark bit instead of a separate field?
     if ((n->key == k) && (n->mark == FALSE)) {
         return n->value;
     }
@@ -167,25 +162,11 @@ void insert_to_tree(node_t* parent, node_t* new_node, node_t* root) {
     new_node->parent = parent;
     if (parent->key < new_node->key) {
         parent->right = new_node;
-#ifdef DO_DRACHSLER_REBALANCE
-        parent->right_height = 1;
-#endif
     } else {
         parent->left = new_node;
-#ifdef DO_DRACHSLER_REBALANCE
-        parent->left_height = 1;
-#endif
     }
 
-#ifdef DO_DRACHSLER_REBALANCE
-    if (parent!=root) {
-        bst_rebalance(lock_parent(parent),parent,root);
-    } else {
-        UNLOCK(&(parent->tree_lock));
-    }
-#else
     UNLOCK(&(parent->tree_lock));
-#endif
 }
 
 
@@ -263,21 +244,6 @@ bool_t acquire_tree_locks(node_t* n) {
         node_t* right = (node_t*) n->right;
         //lock_parent(n);
         if ((right == NULL) || (left == NULL)) {
-#ifdef DO_DRACHSLER_REBALANCE
-            if (right != NULL) {
-                if(!TRYLOCK(&(right->tree_lock))) {
-                    UNLOCK(&(n->tree_lock));
-                    //UNLOCK(&(n->parent->tree_lock));
-                    continue;
-                }
-            } else if (left != NULL) {
-                if(!TRYLOCK(&(left->tree_lock))) {
-                    UNLOCK(&(n->tree_lock));
-                    //UNLOCK(&(n->parent->tree_lock));
-                    continue;
-                }
-            }
-#endif
             return FALSE;
         } else {
             node_t* s = (node_t*) n->succ;
@@ -307,20 +273,6 @@ bool_t acquire_tree_locks(node_t* n) {
                 }
                 continue;
             }
-#ifdef DO_DRACHSLER_REBALANCE
-            node_t* sr = (node_t*) s->right;
-            if (sr != NULL) {
-                if (!TRYLOCK(&(sr->tree_lock))) {
-                    UNLOCK(&(n->tree_lock));
-                    UNLOCK(&(s->tree_lock));
-                    if (l) {
-                        UNLOCK(&(parent->tree_lock));
-                    }
-                    //UNLOCK(&(n->parent->tree_lock));
-                    continue;
-                }
-            }
-#endif
             return TRUE;
         }
     }
@@ -329,9 +281,6 @@ bool_t acquire_tree_locks(node_t* n) {
 void remove_from_tree(node_t* n, bool_t has_two_children,node_t* root) {
     node_t* child;
     node_t* parent;
-#ifdef DO_DRACHSLER_REBALANCE
-    bool_t violated = FALSE;
-#endif
     node_t* s;
     //int l=0;
     if (has_two_children == FALSE) { 
@@ -350,50 +299,20 @@ void remove_from_tree(node_t* n, bool_t has_two_children,node_t* root) {
         update_child(parent, s, child);
         s->left = n->left;
         s->right = n->right;
-#ifdef DO_DRACHSLER_REBALANCE
-        s->left_height = n->left_height;
-        s->right_height = n->right_height;
-#endif
         n->left->parent = s;
         if (n->right != NULL) {
             n->right->parent = s;
         }
         update_child((node_t*) n->parent, n, s);
-#ifdef DO_DRACHSLER_REBALANCE
-        uint32_t dif = s->left_height-s->right_height;
-        if ((dif>=2) || (dif<= (-2))) {
-            violated = TRUE;
-        }
-#endif
         if (parent == n) {
             parent = s;
         } else {
             UNLOCK(&(s->tree_lock));
         }
         UNLOCK(&(parent->tree_lock));
-#ifdef DO_DRACHSLER_REBALANCE
-        if (child) {
-            UNLOCK(&(child->tree_lock));
-         }
-#endif
     }
-#ifdef DO_DRACHSLER_REBALANCE
-    bst_rebalance(parent,child,root);
-    if (violated) {
-        LOCK(&(s->tree_lock));
-        uint32_t dif = s->left_height-s->right_height;
-        if ((s->mark==FALSE) &&  ((dif>=2) || (dif<= (-2)))) {
-          //  bool_t lr=TRUE;
-           // if (dif>=2) lr=FALSE;
-            bst_rebalance(s, NULL, root);
-        } else {
-            UNLOCK(&(s->tree_lock));
-        }
-    }
-#else 
     UNLOCK(&(n->parent->tree_lock));
     UNLOCK(&(n->tree_lock));
-#endif
 
 #if GC == 1
     ssmem_free(alloc, n);
@@ -411,207 +330,6 @@ void update_child(node_t* parent, node_t* old_ch, node_t* new_ch) {
     }
 }
 
-#ifdef DO_DRACHSLER_REBALANCE
-bool_t update_height(node_t* ch, node_t* node, bool_t is_left) {
-    int32_t new_h;
-    if (ch == NULL) {
-        new_h = 0;
-    } else {
-        new_h = max(ch->left_height, ch->right_height) + 1;
-    }
-    int32_t old_h;
-    if (is_left == TRUE) {
-        old_h = node->left_height;
-    } else {
-        old_h = node->right_height;
-    }
-    if (is_left == TRUE) {
-        node->left_height = new_h;
-    } else {
-        node->right_height =new_h;
-    }
-    if (old_h == new_h) {
-        return FALSE;
-    }
-    return TRUE;
-}
-
-bool_t restart(node_t* node, node_t* parent) {
-    if (parent != NULL) {
-        UNLOCK(&(parent->tree_lock));
-    }
-    while (1) {
-        UNLOCK(&(node->tree_lock));
-        LOCK(&(node->tree_lock));
-        if (node->mark == TRUE) {
-            UNLOCK(&(node->tree_lock));
-            return FALSE;
-        }
-        int32_t bf = node->left_height - node->right_height;
-        node_t* child;
-        if (bf >= 2) {
-            child = node->left;
-        } else { 
-            child = node->right;
-        }
-        if (child == NULL) {
-            return TRUE;
-        }
-        if (TRYLOCK(&(child->tree_lock))) {
-            return TRUE;
-        }
-    }
-}
-
-void bst_rotate(node_t* child, node_t* n, node_t* parent, bool_t left_rotation) {
-    update_child(parent,n,child);
-    n->parent = child;
-    if (left_rotation == TRUE) {
-        update_child(n,child,child->left);
-        child->left = n;
-        n->right_height = child->left_height;
-        child->left_height = max(n->left_height,n->right_height) + 1;
-    } else {
-        update_child(n,child,child->right);
-        child->right = n;
-        n->left_height = child->right_height;
-        child->right_height = max(n->left_height,n->right_height) + 1;
-    }
-}
-
-void bst_rebalance(node_t* node, node_t* child, node_t* root) {
-    if (node == root) {
-       UNLOCK(&(node->tree_lock));
-       if (child != NULL) {
-            UNLOCK(&(child->tree_lock));
-       }
-       return;
-    }
-    while (node != root) {
-        bool_t is_left = FALSE;
-        if (node->left == child) {
-            is_left = TRUE; 
-        }
-        node_t* parent = NULL;
-        bool_t updated = update_height(child,node,is_left);
-        int32_t bf = node->left_height - node->right_height;
-        if ((updated == FALSE) && (( bf < 2) && (bf > (-2)))) {
-            if (child) {
-                UNLOCK(&(child->tree_lock));
-            }
-            UNLOCK(&(node->tree_lock));
-            return;
-        }
-        while (( bf > 2) || (bf < (-2))) {
-            if (((is_left==TRUE) && (bf <= -2)) || ((is_left==FALSE) && (bf  >= 2))) {
-                if (child != NULL) {
-                    UNLOCK(&(child->tree_lock));
-                }
-                if (is_left == TRUE) {
-                    child = node->right;
-                } else {
-                    child = node->left;
-                }
-                if (is_left==TRUE) {
-                    is_left = FALSE;
-                } else {
-                    is_left= TRUE;
-                }
-                if (!TRYLOCK(&(child->tree_lock))) {
-                    if (restart(node,parent)==FALSE) {
-                        return;
-                    }
-                    parent=NULL;
-                    bf = node->left_height - node->right_height;
-                    if (bf >= 2) {
-                        child = node->left;
-                    } else { 
-                        child = node->right;
-                    }
-                    if (node->left == child) {
-                        is_left = TRUE;
-                    } else {
-                        is_left = FALSE;
-                    }
-                    continue; 
-                }
-
-            }
-            int32_t ch_bf = child->left_height - child->right_height;
-            if (((is_left == TRUE) && (ch_bf < 0)) || ((is_left == FALSE) && (ch_bf > 0))) {
-                node_t* grand_child;
-                if (is_left == TRUE) {
-                    grand_child = child->right;
-                } else {
-                    grand_child = child->left;
-                }
-                if (!TRYLOCK(&(grand_child->tree_lock))){
-                    UNLOCK(&(child->tree_lock)); 
-                    if (restart(node,parent)==FALSE) {
-                        return;
-                    }
-                    parent=NULL;
-                    bf = node->left_height - node->right_height;
-                    if (bf >= 2) {
-                        child = node->left;
-                    } else { 
-                        child = node->right;
-                    }
-                    if (node->left == child) {
-                        is_left = TRUE;
-                    } else {
-                        is_left = FALSE;
-                    }
-                    continue; 
-                }
-                bst_rotate(grand_child,child,node,is_left);
-                UNLOCK(&(child->tree_lock));
-                child = grand_child;
-            }
-            if (parent == NULL) {
-                parent = lock_parent(node);
-            }
-            bool_t not_is_left = is_left == TRUE ? FALSE : TRUE;
-            bst_rotate(child, node, parent, not_is_left); 
-            bf = node->left_height - node->right_height;
-            if ((bf >= 2) || (bf <= (-2))) {
-                UNLOCK(&(parent->tree_lock));
-                parent = child;
-                child = NULL;
-                if (bf >= 2) {
-                    is_left = FALSE;
-                } else {
-                    is_left = TRUE;
-                }
-                continue;
-            }
-            node_t* temp = node;
-            node = child;
-            child = temp;
-            if (node->left == child) {
-                is_left = TRUE;
-            } else {
-                is_left = FALSE;
-            }
-            bf = node->left_height - node->right_height;
-        }
-        if (child != NULL) {
-            UNLOCK(&(child->tree_lock));
-        }
-        child = node;
-        if (parent!=NULL) {
-            node = parent;
-        } else {
-            node= lock_parent(node);
-        }
-        parent = NULL;
-    }
-    if (child != NULL) {
-        UNLOCK(&(child->tree_lock));
-    }
-    UNLOCK(&(node->tree_lock));
-}
-#endif
 
 uint32_t bst_size(node_t* node) {
     if (node==NULL) return 0;

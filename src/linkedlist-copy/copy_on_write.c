@@ -112,6 +112,10 @@ cpy_delete(copy_on_write_t* set, skey_t key)
       all_new->kvs[n].val = all_old->kvs[i].val;
     }
 
+#ifdef __tile__
+  MEM_BARRIER;
+#endif
+
   if (removed)
     {
       set->array = all_new;
@@ -159,6 +163,10 @@ cpy_insert(copy_on_write_t* set, skey_t key, sval_t val)
   all_new->kvs[i].key = key;
   all_new->kvs[i].val = val;
   
+#ifdef __tile__
+  MEM_BARRIER;
+#endif
+
   set->array = all_new;
   cpy_delete_copy(alloc, (void*) all_old);
 

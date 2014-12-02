@@ -26,13 +26,20 @@ clh_acquire(clh_lock *L, clh_qnode* I)
 #endif	/* OPTERON_OPTIMIZE */
     }
 
+#ifdef  __tile__
+  MEM_BARRIER;
+#endif
+
   return (clh_qnode*) pred;
 }
 
 clh_qnode* 
 clh_release(clh_qnode *my_qnode, clh_qnode * my_pred) 
 {
-  my_qnode->locked=0;
+#ifdef  __tile__
+  MEM_BARRIER;
+#endif
+  COMPILER_NO_REORDER(my_qnode->locked=0;);
   return my_pred;
 }
 

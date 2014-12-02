@@ -1,7 +1,6 @@
 /*
  * File:
  * Author(s):
- *            Vasileios Trigonakis
  * Description:
 
  * GNU General Public License for more details.

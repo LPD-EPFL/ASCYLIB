@@ -2,15 +2,14 @@
  * File:
  *   intset.h
  * Author(s):
- *   Vincent Gramoli <vincent.gramoli@epfl.ch>
  * Description:
  *   Skip list integer set operations 
  *
  * Copyright (c) 2009-2010.
  *
- * intset.h is part of Synchrobench
+ * intset.h is part of HIDDEN
  * 
- * Synchrobench is free software: you can redistribute it and/or
+ * HIDDEN is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, version 2
  * of the License.

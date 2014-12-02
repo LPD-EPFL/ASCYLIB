@@ -4,7 +4,6 @@
  *  Integer set operations (contain, insert, delete) 
  *  that call stm-based / lock-free counterparts.
  *
- *  Created by Vincent Gramoli on 1/12/09.
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */

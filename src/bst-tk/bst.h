@@ -1,7 +1,6 @@
 /*
  * File:
  * Author(s):
- *            Vasileios Trigonakis
  * Description:
 
  * GNU General Public License for more details.
@@ -104,6 +103,9 @@ static inline void
 tl_unlock(volatile tl_t* tl, int right)
 {
   /* PREFETCHW(tl); */
+#ifdef __tile__
+  MEM_BARRIER;
+#endif
   COMPILER_NO_REORDER(tl->lr[right].version++);
 }
 

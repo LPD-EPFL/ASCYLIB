@@ -84,7 +84,9 @@ retry:
 	*curr_op = (*curr)->op;
 
 	if(GETFLAG(*curr_op) != STATE_OP_NONE){
-
+#ifdef __tile__
+    MEM_BARRIER;
+#endif
 		if (aux_root == root){
 			bst_help_child_cas((operation_t*)UNFLAG(*curr_op), *curr, root);
 			goto retry;

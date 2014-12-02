@@ -1,6 +1,5 @@
 /*
  *  File: bst.h
- *  Author: Tudor David
  *
  *  Created on: September 02, 2013
  *

@@ -1,7 +1,6 @@
 /*
  * File:
  * Author(s):
- *   Vasileios Trigonakis
  */
 
 #include "intset.h"

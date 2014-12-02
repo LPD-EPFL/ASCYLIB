@@ -20,8 +20,6 @@ int num_threads;
 int op_count = 100;
 uint8_t* v;
 
-// TODO how do we know that threads are correctly set up on separate cpus?
-// TODO seems to work correctly with num_threads = 10. WAT. wrap-around for set_cpu/the_cores?
 
 //used to signal the threads when to stop
 // ALIGNED(64) uint8_t running[64];

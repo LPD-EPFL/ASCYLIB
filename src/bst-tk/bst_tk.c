@@ -191,8 +191,7 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
 #if defined(__tile__)
   /* on tilera you may have store reordering causing the pointer to a new node
      to become visible, before the contents of the node are visible */
-  /* MEM_BARRIER; */
-  STORE_BARRIER;
+  MEM_BARRIER;
 #endif	/* __tile__ */
 
   if (right)

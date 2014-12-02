@@ -128,7 +128,6 @@ bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
         } else {
             child_addr= (node_t**) &(parent->right);
         }
-        //TODO check this
         if (likely(created==0)) {
             new_internal=create_node(max(key,leaf->key),0,0);
             new_node = create_node(key,val,0);

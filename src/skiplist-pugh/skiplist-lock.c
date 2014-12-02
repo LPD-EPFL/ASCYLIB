@@ -2,7 +2,6 @@
  * File:
  *   skiplist-lock.c
  * Author(s):
- *   Vasileios Trigonakis
  * Description:
  *   Skip list implementation of an integer set
  *

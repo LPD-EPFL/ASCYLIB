@@ -2,15 +2,14 @@
  * File:
  *   linkedlist-lock.c
  * Author(s):
- *   Vincent Gramoli <vincent.gramoli@epfl.ch>
  * Description:
  *   Lock-based linked list implementation of an integer set
  *
  * Copyright (c) 2009-2010.
  *
- * linkedlist-lock.c is part of Synchrobench
+ * linkedlist-lock.c is part of HIDDEN
  * 
- * Synchrobench is free software: you can redistribute it and/or
+ * HIDDEN is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, version 2
  * of the License.
