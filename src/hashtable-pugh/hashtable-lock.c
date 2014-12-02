@@ -1,18 +1,14 @@
-/*
- * File:
- *   hashtable-lock.c
- * Author(s):
- * Description:
- *   Lock-based Hashtable
- *   Implementation of an integer set using a lock-based hashtable.
- *   The hashtable contains several buckets, each represented by a linked
- *   list, since hashing distinct keys may lead to the same bucket.
+/*   
+ *   File: hashtable-lock.c
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   Description: 
+ *   hashtable-lock.c is part of ASCYLIB
  *
- * Copyright (c) 2009-2010.
+ * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+ * 	     	      Tudor David <tudor.david@epfl.ch>
+ *	      	      Distributed Programming Lab (LPD), EPFL
  *
- * hashtable-lock.c is part of HIDDEN
- * 
- * HIDDEN is free software: you can redistribute it and/or
+ * ASCYLIB is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, version 2
  * of the License.
@@ -21,6 +17,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
  */
 
 #include "hashtable-lock.h"

@@ -1,13 +1,27 @@
-/*
- *  File: bst.h
- *
- *  Created on: September 02, 2013
- *
- *  Description: 
- *      non-blocking binary search tree
+/*   
+ *   File: bst_ellen.h
+ *   Author: Tudor David <tudor.david@epfl.ch>
+ *   Description: non-blocking binary search tree
  *      based on "Non-blocking Binary Search Trees"
  *      F. Ellen et al., PODC 2010
+ *   bst_ellen.h is part of ASCYLIB
+ *
+ * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+ * 	     	      Tudor David <tudor.david@epfl.ch>
+ *	      	      Distributed Programming Lab (LPD), EPFL
+ *
+ * ASCYLIB is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, version 2
+ * of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
  */
+
 #ifndef _BST_ELLEN_H_INCLUDED_
 #define _BST_ELLEN_H_INCLUDED_
 

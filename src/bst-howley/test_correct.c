@@ -1,3 +1,26 @@
+/*   
+ *   File: test_correct.c
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *           Tudor David <tudor.david@epfl.ch>
+ *   Description: 
+ *   test_correct.c is part of ASCYLIB
+ *
+ * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+ * 	     	      Tudor David <tudor.david@epfl.ch>
+ *	      	      Distributed Programming Lab (LPD), EPFL
+ *
+ * ASCYLIB is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, version 2
+ * of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ */
+
 #include <assert.h>
 #include <getopt.h>
 #include <limits.h>
@@ -31,11 +54,11 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(k,r)  bst_contains(k,r)
+#define DS_CONTAINS(k,r)    bst_contains(k,r)
 #define DS_ADD(k,v,r)       bst_add(k,(sval_t)v,r)
-#define DS_REMOVE(k,r)    bst_remove(k,r)
+#define DS_REMOVE(k,r)      bst_remove(k,r)
 #define DS_SIZE(s)          bst_size(s)
-#define DS_NEW()           bst_initialize()
+#define DS_NEW()            bst_initialize()
 
 #define DS_TYPE             node_t
 #define DS_NODE             node_t

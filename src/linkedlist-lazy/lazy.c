@@ -1,18 +1,19 @@
-/*
- * File:
- *   lazy.c
- * Author(s):
- * Description:
+/*   
+ *   File: lazy.c
+ *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
+ *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   Description: 
  *   Lazy linked list implementation of an integer set based on Heller et al. algorithm
  *   "A Lazy Concurrent List-Based Set Algorithm"
  *   S. Heller, M. Herlihy, V. Luchangco, M. Moir, W.N. Scherer III, N. Shavit
  *   p.3-16, OPODIS 2005
+ *   lazy.c is part of ASCYLIB
  *
- * Copyright (c) 2009-2010.
+ * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+ * 	     	      Tudor David <tudor.david@epfl.ch>
+ *	      	      Distributed Programming Lab (LPD), EPFL
  *
- * lazy.c is part of HIDDEN
- * 
- * HIDDEN is free software: you can redistribute it and/or
+ * ASCYLIB is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, version 2
  * of the License.
@@ -21,6 +22,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
  */
 
 #include "lazy.h"

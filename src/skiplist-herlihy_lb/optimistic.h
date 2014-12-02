@@ -1,18 +1,19 @@
-/*
- * File:
- *   optimistic.h
- * Author(s):
- * Description:
+/*   
+ *   File: optimistic.h
+ *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
+ *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   Description: 
  *   Fine-grained locking skip list implementation of Herlihy et al. algorithm
  *   "A Simple Optimistic Skiplist Algorithm" 
  *   M. Herlihy, Y. Lev, V. Luchangco, N. Shavit 
  *   p.124-138, SIROCCO 2007
+ *   optimistic.h is part of ASCYLIB
  *
- * Copyright (c) 2009-2010.
+ * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+ * 	     	      Tudor David <tudor.david@epfl.ch>
+ *	      	      Distributed Programming Lab (LPD), EPFL
  *
- * optimistic.h is part of HIDDEN
- * 
- * HIDDEN is free software: you can redistribute it and/or
+ * ASCYLIB is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, version 2
  * of the License.
@@ -21,6 +22,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
  */
 
 #include "skiplist-lock.h"

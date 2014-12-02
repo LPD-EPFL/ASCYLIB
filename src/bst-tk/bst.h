@@ -1,13 +1,27 @@
-/*
- * File:
- * Author(s):
- * Description:
-
+/*   
+ *   File: bst.h
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   Description: 
+ *   bst.h is part of ASCYLIB
+ *
+ * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+ * 	     	      Tudor David <tudor.david@epfl.ch>
+ *	      	      Distributed Programming Lab (LPD), EPFL
+ *
+ * ASCYLIB is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation, version 2
+ * of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
  */
 
-#ifndef _H_BST_SEQ_
-#define _H_BST_SEQ_
+#ifndef _H_BST_TK_
+#define _H_BST_TK_
 
 #include <assert.h>
 #include <getopt.h>
@@ -28,9 +42,6 @@
 #include "measurements.h"
 #include "ssalloc.h"
 #include "ssmem.h"
-
-#define DEFAULT_ALTERNATE		0
-#define DEFAULT_EFFECTIVE		1
 
 static volatile int stop;
 extern __thread ssmem_allocator_t* alloc;
@@ -144,4 +155,4 @@ void set_delete(intset_t* set);
 int set_size(intset_t* set);
 void node_delete(node_t* node);
 
-#endif	/* _H_BST_SEQ_ */
+#endif	/* _H_BST_TK_ */

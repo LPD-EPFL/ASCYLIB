@@ -1,19 +1,19 @@
-/*
- * File:
- *   herlihy.c 
- * Author(s):
- *
- * Description:
+/*   
+ *   File: herlihy.c
+ *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
+ *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   Description: 
  * Herlihy, M., Lev, Y., & Shavit, N. (2011). 
  * Concurrent lock-free skiplist with wait-free contains operator. 
  * US Patent 7,937,378, 2(12). 
  * Retrieved from http://www.google.com/patents/US7937378
+ *   herlihy.c is part of ASCYLIB
  *
- * Copyright (c) 2009-2010.
+ * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+ * 	     	      Tudor David <tudor.david@epfl.ch>
+ *	      	      Distributed Programming Lab (LPD), EPFL
  *
- * fraser.c is part of HIDDEN
- * 
- * HIDDEN is free software: you can redistribute it and/or
+ * ASCYLIB is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation, version 2
  * of the License.
@@ -22,6 +22,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
+ *
  */
 
 #include "herlihy.h"
