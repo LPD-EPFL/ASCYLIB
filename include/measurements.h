@@ -35,7 +35,7 @@ extern "C" {
 #  elif defined(LPDPC4)
 #    define REF_SPEED_GHZ           3.5
 #  else
-#    error "Need to set REF_SPEED_GHZ for the platform"
+#    define REF_SPEED_GHZ          FREQ_GHZ
 #  endif
 #endif  /* REF_SPEED_GHZ */
 

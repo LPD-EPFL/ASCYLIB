@@ -171,8 +171,16 @@ endif
 endif
 
 ifneq ($(PLATFORM_KNOWN), 1)
-    CFLAGS += -DDEFAULT -DPLATFORM_MCORE 
-    PLATFORM_NUMA = 1
+    CFLAGS += -DDEFAULT
+    PLATFORM_NUMA = 0
+    CORE_NUM ?= $(shell nproc)
+    CORE_SPEED_KHz := $(shell cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq)
+    FREQ_GHZ := $(shell echo "scale=3; ${CORE_SPEED_KHz}/1000000" | bc -l)
+    $(info ********************************** Using as a default number of cores: $(CORE_NUM) on 1 socket)
+    $(info ********************************** Using as a default frequency      : $(FREQ_GHZ) GHz)
+    $(info ********************************** If incorrect, create a manual entry in common/Makefile.common)
+    CFLAGS += -DCORE_NUM=${CORE_NUM}
+    CFLAGS += -DFREQ_GHZ=${FREQ_GHZ}
 endif
 
 #################################
@@ -235,15 +243,6 @@ CFLAGS += -fno-strict-aliasing
 CFLAGS += -I$(LIBAO_INC) -I$(ROOT)/include -I$(LIBSSMEM)/include
 
 LDFLAGS += -lpthread -lrt -lm
-
-ifdef STM
-  ifneq ($(STM), SEQUENTIAL)
-	ifneq ($(STM), LOCKFREE) 
-	  CFLAGS += -I$(INCDIR)
-	  LDFLAGS += -L$(LIBDIR) -l$(TM)
-	endif
-  endif
-endif
 
 ######################
 # compilation settings
