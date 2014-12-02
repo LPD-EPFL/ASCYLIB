@@ -219,7 +219,7 @@ void bst_help_insert(info_t * op) {
     void* UNUSED dummy = CAS_PTR(&(op->iinfo.p->update),FLAG(op,STATE_IFLAG),FLAG(op,STATE_CLEAN));
 #if GC == 1
    if (i){
-        info_t* uop=UNFLAG(op);
+     info_t* uop= (info_t*) UNFLAG(op);
         ssmem_free(alloc,uop->iinfo.l);
     }
 #endif
@@ -249,7 +249,7 @@ sval_t bst_delete(skey_t key, node_t* root) {
             if (result == search_result->gpupdate) {
                 if (bst_help_delete(op)==TRUE) {
 #if GC == 1
-                    ssmem_free(alloc,UNFLAG(search_result->gpupdate));
+		  ssmem_free(alloc,(void*) UNFLAG(search_result->gpupdate));
 #endif
                     return found_value;
                 }
@@ -270,8 +270,8 @@ bool_t bst_help_delete(info_t* op) {
     result = CAS_PTR(&(op->dinfo.p->update), op->dinfo.pupdate, FLAG(op,STATE_MARK));
     if ((result == op->dinfo.pupdate) || (result == ((info_t*)FLAG(op,STATE_MARK)))) {
 #if GC == 1
-        if ((result == op->dinfo.pupdate) && (UNFLAG(result)!=NULL)) {
-            ssmem_free(alloc,UNFLAG(result));
+      if ((result == op->dinfo.pupdate) && ((void*) UNFLAG(result)!=NULL)) {
+	  ssmem_free(alloc,(void*) UNFLAG(result));
         }
 #endif
         bst_help_marked(op);
@@ -298,7 +298,7 @@ void bst_help_marked(info_t* op) {
 
 #if GC == 1
     if (i){
-        info_t* opu=UNFLAG(op);
+      info_t* opu= (info_t*) UNFLAG(op);
         ssmem_free(alloc,opu->dinfo.l);
         ssmem_free(alloc,opu->dinfo.p);
     }

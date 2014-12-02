@@ -138,7 +138,7 @@ bool_t bst_insert(skey_t k, sval_t v, node_t* root) {
                 return FALSE;
             }
             node_t* new_node = create_node(k,v,0);
-            volatile node_t* parent = choose_parent(p, s, node);
+            node_t* parent = choose_parent((node_t*) p, (node_t*) s, node);
             new_node->succ = s;
             new_node->pred = p;
             new_node->parent = parent;
