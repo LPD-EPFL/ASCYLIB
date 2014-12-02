@@ -1,16 +1,17 @@
 .PHONY:	all
 
 BENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-pugh-string src/bst-ellen src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/
-LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-pugh-string src/bst-bronson src/bst-drachsler src/bst-tk/
-LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/hashtable-rcu src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
+LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-pugh-string src/bst-bronson src/bst-drachsler src/bst-tk/
+LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
+EXTERNALS = src/hashtable-rcu src/hashtable-tbb
 NOISE = src/noise
 TESTS = src/tests
 BSTS = src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-aravind src/bst-tk/
 
-.PHONY:	clean all $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS) $(SEQBENCHS)
+.PHONY:	clean all external $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS) $(SEQBENCHS)
 
-all:	lockfree tas
+all:	lockfree tas seq external
 
 mutex:
 	$(MAKE) "LOCK=MUTEX" $(LBENCHS)
@@ -215,6 +216,9 @@ seqbstextgc:
 
 seqbstgc: seqbstextgc seqbstintgc
 
+external:
+	$(MAKE) "STM=LOCKFREE" $(EXTERNALS)
+
 clean:
 	$(MAKE) -C src/linkedlist-harris clean	
 	$(MAKE) -C src/hashtable-harris clean
@@ -249,3 +253,7 @@ $(NOISE):
 
 $(TESTS):
 	$(MAKE) -C $@ $(TARGET)
+
+$(EXTERNALS):
+	$(MAKE) -C $@ $(TARGET)
+
