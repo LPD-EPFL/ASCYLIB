@@ -1,8 +1,8 @@
 .PHONY:	all
 
-BENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst-ellen src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/
+BENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst-ellen src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/
 LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-tbb src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-string-pugh src/bst-bronson src/bst-drachsler src/bst-tk/
-LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/hashtable-rcu src/skiplist src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
+LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/hashtable-rcu src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 NOISE = src/noise
 TESTS = src/tests
@@ -217,7 +217,6 @@ seqbstgc: seqbstextgc seqbstintgc
 
 clean:
 	$(MAKE) -C src/linkedlist-harris clean	
-	$(MAKE) -C src/skiplist clean
 	$(MAKE) -C src/hashtable-harris clean
 	$(MAKE) -C src/hashtable-rcu clean
 	$(MAKE) -C src/linkedlist-coupling clean
