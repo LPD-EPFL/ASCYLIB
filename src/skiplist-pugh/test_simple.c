@@ -374,11 +374,7 @@ main(int argc, char **argv)
     }
 
   printf("## Initial: %zu / Range: %zu / ", initial, range);
-#if LBSL==ALGO_HERLIHY
-  printf("Herlihy's algorithm\n");
-#else
   printf("Pugh's algorithm\n");
-#endif
 
   levelmax = floor_log_2((unsigned int) initial);
   size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));

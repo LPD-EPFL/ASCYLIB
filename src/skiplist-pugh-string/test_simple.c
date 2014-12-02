@@ -449,11 +449,7 @@ main(int argc, char **argv)
     }
 
   printf("## Initial: %zu / Range: %zu / ", initial, range);
-#if LBSL==ALGO_HERLIHY
-  printf("Herlihy's algorithm\n");
-#else
   printf("Pugh's algorithm\n");
-#endif
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;

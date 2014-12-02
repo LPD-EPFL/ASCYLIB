@@ -13,10 +13,6 @@ You may pass the following settings to `make`:
 	       3 : enable per operation latency measurements with sspfd (all cores print results)
     * GRANULARITY=GLOBAL_LOCK (or G=GL) for global lock
     * INIT=all : initialize the structure from all threads (default is from one)
-    * LFSL= fraser  : compile with Fraser's lock-free skip list algo
-      	    herlihy : compile with Herlihy's lock-free skip list algo (default)
-    * LBSL= herlihy : compile with Herlihy's lock-bazed lazy skip list algo (default)
-      	    pugh    : compile with Pugh's lock-based lazy  skip list algo
     * SET_CPU=0 : does not pin threads to cores (does this by default) 
     * POWER=1 : enable power measurements with rapl_read library (default is 0)      	    
     * RO_FAIL=0 : disables read-only unsuccessful updates in linked lists (pugh, lazy, copy) 
