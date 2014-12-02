@@ -1,7 +1,9 @@
 /*   
  *   File: bst_ellen.c
  *   Author: Tudor David <tudor.david@epfl.ch>
- *   Description: 
+ *   Description: non-blocking binary search tree
+ *      based on "Non-blocking Binary Search Trees"
+ *      F. Ellen et al., PODC 2010
  *   bst_ellen.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
