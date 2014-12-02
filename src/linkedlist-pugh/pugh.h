@@ -1,7 +1,8 @@
 /*   
  *   File: pugh.h
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: William Pugh. 
+ *   Concurrent Maintenance of Skip Lists. Technical report, 1990.
  *   pugh.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

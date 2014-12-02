@@ -2,7 +2,7 @@
  *   File: hashtable.h
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: a harris_opt list per bucket
  *   hashtable.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

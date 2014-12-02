@@ -3,7 +3,9 @@
  *   Author: Balmau Oana <oana.balmau@epfl.ch>, 
  *  	     Zablotchi Igor <igor.zablotchi@epfl.ch>, 
  *  	     Tudor David <tudor.david@epfl.ch>
- *   Description: 
+ *   Description: Nathan G. Bronson, Jared Casper, Hassan Chafi
+ *   , and Kunle Olukotun. A Practical Concurrent Binary Search Tree. 
+ *   PPoPP 2010.
  *   bst_bronson_java.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

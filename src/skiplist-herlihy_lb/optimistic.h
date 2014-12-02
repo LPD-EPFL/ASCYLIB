@@ -2,8 +2,9 @@
  *   File: optimistic.h
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
- *   Fine-grained locking skip list implementation of Herlihy et al. algorithm
+ *   Description:  Fine-grained locking skip list.
+ *   C implementation of the Herlihy et al. algorithm originally 
+ *   designed for managed programming language.
  *   "A Simple Optimistic Skiplist Algorithm" 
  *   M. Herlihy, Y. Lev, V. Luchangco, N. Shavit 
  *   p.124-138, SIROCCO 2007

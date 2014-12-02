@@ -3,7 +3,8 @@
  *   Author: Balmau Oana <oana.balmau@epfl.ch>, 
  *  	     Zablotchi Igor <igor.zablotchi@epfl.ch>, 
  *  	     Tudor David <tudor.david@epfl.ch>
- *   Description: 
+ *   Description: Shane V Howley and Jeremy Jones. 
+ *   A non-blocking internal binary search tree. SPAA 2012
  *   bst_howley.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

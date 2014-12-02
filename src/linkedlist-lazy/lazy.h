@@ -2,9 +2,7 @@
  *   File: lazy.h
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
- *   Lazy linked list implementation of an integer set based on Heller et al. algorithm
- *   "A Lazy Concurrent List-Based Set Algorithm"
+ *   Description: A Lazy Concurrent List-Based Set Algorithm,
  *   S. Heller, M. Herlihy, V. Luchangco, M. Moir, W.N. Scherer III, N. Shavit
  *   p.3-16, OPODIS 2005
  *   lazy.h is part of ASCYLIB

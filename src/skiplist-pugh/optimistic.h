@@ -2,7 +2,8 @@
  *   File: optimistic.h
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: William Pugh. 
+ *   Concurrent Maintenance of Skip Lists. Technical report, 1990.
  *   optimistic.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

@@ -2,7 +2,11 @@
  *   File: herlihy.h
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: based on Fraser's skiplist, ASCY, and
+ *   Herlihy, M., Lev, Y., & Shavit, N. (2011). 
+ *   Concurrent lock-free skiplist with wait-free contains operator. 
+ *   US Patent 7,937,378, 2(12). 
+ *   Retrieved from http://www.google.com/patents/US7937378
  *   herlihy.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

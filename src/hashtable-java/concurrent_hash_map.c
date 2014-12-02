@@ -1,7 +1,9 @@
 /*   
  *   File: concurrent_hash_map.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: Similar to Java's ConcurrentHashMap. 
+ *   Doug Lea. 1.3.4. http://gee.cs.oswego.edu/dl/classes/EDU/oswego/
+ *   cs/dl/util/concurrent/intro.html, 2003.
  *   concurrent_hash_map.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

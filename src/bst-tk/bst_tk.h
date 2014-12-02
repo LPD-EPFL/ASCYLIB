@@ -1,7 +1,9 @@
 /*   
  *   File: bst_tk.h
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: Asynchronized Concurrency: The Secret to Scaling Concurrent
+ *    Search Data Structures, Tudor David, Rachid Guerraoui, Vasileios Trigonakis,
+ *   ASPLOS '15
  *   bst_tk.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

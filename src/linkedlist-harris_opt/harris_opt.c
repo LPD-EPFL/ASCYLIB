@@ -1,10 +1,9 @@
 /*   
  *   File: harris_opt.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
- *   Lock-free linkedlist implementation of Harris' algorithm
- *   "A Pragmatic Implementation of Non-Blocking Linked Lists" 
- *   T. Harris, p. 300-314, DISC 2001.
+ *   Description: Timothy L Harris. A Pragmatic Implementation 
+ *   of Non-blocking Linked Lists. DISC 2001.
+ *   Optimized version
  *   harris_opt.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

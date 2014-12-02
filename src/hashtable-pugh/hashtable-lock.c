@@ -1,7 +1,7 @@
 /*   
  *   File: hashtable-lock.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: using one pugh list per bucket
  *   hashtable-lock.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

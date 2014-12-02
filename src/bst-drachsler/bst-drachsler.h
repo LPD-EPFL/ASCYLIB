@@ -1,7 +1,8 @@
 /*   
  *   File: bst-drachsler.h
  *   Author: Tudor David <tudor.david@epfl.ch>
- *   Description: 
+ *   Description: Dana Drachsler, Martin Vechev, and Eran Yahav. 
+ *   Practical Concurrent Binary Search Trees via Logical Ordering. PPoPP 2014.
  *   bst-drachsler.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
@@ -18,18 +19,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- */
-
-/*
- *  File: bst-drachsler.h
- *  Author: Tudor David
- *
- *  Created on: March 11, 2014
- *
- *  Description: 
- *      concurrent binary search tree
- *      based on "Practical Concurrent Binary Search Trees via Logical Ordering"
- *      D. Drachsler et al., PPOPP 2014
  */
 
 #ifndef _BST_DRACHLER_H_INCLUDED_

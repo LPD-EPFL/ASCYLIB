@@ -1,10 +1,10 @@
 /*   
  *   File: michael.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: similar to:
- *   Michael, M. M. (2002). High performance dynamic lock-free hash tables and list-based sets. 
- *   Proceedings of the Fourteenth Annual ACM Symposium on Parallel Algorithms and Architectures 
- *   - SPAA ’02, 73. doi:10.1145/564879.564881
+ *   Description: similar to: Michael, M. M. (2002). High performance dynamic
+ *   lock-free hash tables and list-based sets. Proceedings of the Fourteenth Annual
+ *    ACM Symposium on Parallel Algorithms and Architectures 
+ *   - SPAA ’02
  *   michael.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

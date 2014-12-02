@@ -2,7 +2,10 @@
  *   File: michael.h
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: similar to: Michael, M. M. (2002). High performance dynamic
+ *   lock-free hash tables and list-based sets. Proceedings of the Fourteenth Annual
+ *    ACM Symposium on Parallel Algorithms and Architectures 
+ *   - SPAA ’02
  *   michael.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
@@ -20,10 +23,6 @@
  * GNU General Public License for more details.
  *
  */
-
-/*
- */
-
 
 #include "linkedlist.h"
 

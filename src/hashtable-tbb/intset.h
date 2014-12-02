@@ -1,7 +1,8 @@
 /*   
  *   File: intset.h
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: using Intel's TBB library
+ *   Intel Thread Building Blocks. https://www.threadingbuildingblocks.org
  *   intset.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

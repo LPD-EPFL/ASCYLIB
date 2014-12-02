@@ -2,7 +2,9 @@
  *   File: coupling.c
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: hand-over-hand locking list
+ *   (Details: Maurice Herlihy and Nir Shavit. The Art of 
+ *    Multiprocessor Programming, Revised First Edition. 2012.)
  *   coupling.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

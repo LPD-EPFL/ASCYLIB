@@ -1,7 +1,8 @@
 /*   
  *   File: bst-aravind.h
  *   Author: Tudor David <tudor.david@epfl.ch>
- *   Description: 
+ *   Description: Aravind Natarajan and Neeraj Mittal. 
+ *   Fast Concurrent Lock-free Binary Search Trees. PPoPP 2014
  *   bst-aravind.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

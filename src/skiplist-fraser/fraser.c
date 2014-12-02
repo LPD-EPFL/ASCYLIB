@@ -2,11 +2,9 @@
  *   File: fraser.c
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
- *   Lock-based skip list implementation of the Fraser algorithm
+ *   Description: Lock-based skip list implementation of the Fraser algorithm
  *   "Practical Lock Freedom", K. Fraser, 
  *   PhD dissertation, September 2003
- *   Cambridge University Technical Report UCAM-CL-TR-579 
  *   fraser.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

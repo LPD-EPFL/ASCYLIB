@@ -1,7 +1,11 @@
 /*   
  *   File: intset.h
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: using the urcu library
+ *   Mathieu Desnoyers, Paul E McKenney, Alan S Stern, Michel R Da-
+ *   genais, and Jonathan Walpole. User-level implementations of read-
+ *   copy update. Parallel and Distributed Systems, IEEE Transactions on,
+ *   23(2):375–382, 2012.
  *   intset.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

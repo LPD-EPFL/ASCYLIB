@@ -2,7 +2,8 @@
  *   File: harris.h
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description: Timothy L Harris. A Pragmatic Implementation 
+ *   of Non-blocking Linked Lists. DISC 2001.
  *   harris.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
