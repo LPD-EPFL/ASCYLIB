@@ -24,7 +24,7 @@ do
        ${MAKE} -C .. ${TARGET} 
        mv ${BINDIR}/lf-ll ${EXPERIMENT_BIN_DIR}/ll-${MBENCH_VERSION}-${TARGET}
        mv ${BINDIR}/lf-sl ${EXPERIMENT_BIN_DIR}/sl-${MBENCH_VERSION}-${TARGET}
-       mv ${BINDIR}/lf-ht ${EXPERIMENT_BIN_DIR}/ht-${MBENCH_VERSION}-${TARGET}
+       mv ${BINDIR}/lf-ht_harris ${EXPERIMENT_BIN_DIR}/ht-${MBENCH_VERSION}-${TARGET}
        mv ${BINDIR}/lf-rt ${EXPERIMENT_BIN_DIR}/rt-${MBENCH_VERSION}-${TARGET}
        mv ${BINDIR}/lf-dq ${EXPERIMENT_BIN_DIR}/dq-${MBENCH_VERSION}-${TARGET}
 done
@@ -44,7 +44,7 @@ do
        ${MAKE} -C .. ${LF} 
        mv ${BINDIR}/lf-ll ${EXPERIMENT_BIN_DIR}/ll-${MBENCH_VERSION}-${LF}
        mv ${BINDIR}/lf-sl ${EXPERIMENT_BIN_DIR}/sl-${MBENCH_VERSION}-${LF}
-       mv ${BINDIR}/lf-ht ${EXPERIMENT_BIN_DIR}/ht-${MBENCH_VERSION}-${LF}
+       mv ${BINDIR}/lf-ht_harris ${EXPERIMENT_BIN_DIR}/ht-${MBENCH_VERSION}-${LF}
 done
 
 ${MAKE} clean

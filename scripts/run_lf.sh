@@ -21,10 +21,10 @@ out="$out_folder/sl.i$initial.u$update.dat";
 ./scripts/scalability.sh "$cores" ./bin/lf-sl -d$duration -i$initial -r$range -u$update | tee $out;
 load_factor=10;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 load_factor=100;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 
 ## settings --------------------------------------------------------------------------------------------------------
 initial=10000;
@@ -36,10 +36,10 @@ out="$out_folder/sl.i$initial.u$update.dat";
 ./scripts/scalability.sh "$cores" ./bin/lf-sl -d$duration -i$initial -r$range -u$update | tee $out;
 load_factor=10;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 load_factor=100;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 
 ## settings --------------------------------------------------------------------------------------------------------
 initial=20000;
@@ -51,10 +51,10 @@ out="$out_folder/sl.i$initial.u$update.dat";
 ./scripts/scalability.sh "$cores" ./bin/lf-sl -d$duration -i$initial -r$range -u$update | tee $out;
 load_factor=10;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 load_factor=100;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 
 ## settings --------------------------------------------------------------------------------------------------------
 initial=50000;
@@ -66,10 +66,10 @@ out="$out_folder/sl.i$initial.u$update.dat";
 ./scripts/scalability.sh "$cores" ./bin/lf-sl -d$duration -i$initial -r$range -u$update | tee $out;
 load_factor=10;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 load_factor=100;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 
 
 ## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,10 +88,10 @@ out="$out_folder/sl.i$initial.u$update.dat";
 ./scripts/scalability.sh "$cores" ./bin/lf-sl -d$duration -i$initial -r$range -u$update | tee $out;
 load_factor=10;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 load_factor=100;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 
 ## settings --------------------------------------------------------------------------------------------------------
 initial=10000;
@@ -103,10 +103,10 @@ out="$out_folder/sl.i$initial.u$update.dat";
 ./scripts/scalability.sh "$cores" ./bin/lf-sl -d$duration -i$initial -r$range -u$update | tee $out;
 load_factor=10;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 load_factor=100;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 
 ## settings --------------------------------------------------------------------------------------------------------
 initial=20000;
@@ -118,10 +118,10 @@ out="$out_folder/sl.i$initial.u$update.dat";
 ./scripts/scalability.sh "$cores" ./bin/lf-sl -d$duration -i$initial -r$range -u$update | tee $out;
 load_factor=10;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 load_factor=100;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 
 ## settings --------------------------------------------------------------------------------------------------------
 initial=50000;
@@ -133,9 +133,9 @@ out="$out_folder/sl.i$initial.u$update.dat";
 ./scripts/scalability.sh "$cores" ./bin/lf-sl -d$duration -i$initial -r$range -u$update | tee $out;
 load_factor=10;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 load_factor=100;
 out="$out_folder/ht.i$initial.u$update.l$load_factor.dat";
-./scripts/scalability.sh "$cores" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+./scripts/scalability.sh "$cores" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 
 

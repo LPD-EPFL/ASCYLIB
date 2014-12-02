@@ -23,6 +23,6 @@ do
 	r=$((2*$i));	
 	settings="-i$i -r$r -u$u";
 	echo "## $settings" | tee -a $out_file;
-	./scripts/scalability8.sh socket ./bin/lf-ll "./bin/lb-ll_ticket -x2" "$lb_ll_gl" ./bin/lf-sl ./bin/lb-sl_ticket ./bin/lf-ht "./bin/lb-ht_ticket -x2" "./bin/lb-ht_gl_ticket -x2"  $settings -l4 | tee -a $out_file;
+	./scripts/scalability8.sh socket ./bin/lf-ll "./bin/lb-ll_ticket -x2" "$lb_ll_gl" ./bin/lf-sl ./bin/lb-sl_ticket ./bin/lf-ht_harris "./bin/lb-ht_ticket -x2" "./bin/lb-ht_gl_ticket -x2"  $settings -l4 | tee -a $out_file;
     done;
 done;

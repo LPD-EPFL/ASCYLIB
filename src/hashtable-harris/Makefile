@@ -2,7 +2,7 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS = $(BINDIR)/lf-ht
+BINS = $(BINDIR)/lf-ht_harris
 LLREP = lists
 PROF = $(ROOT)/src
 

@@ -38,7 +38,7 @@ do
 	do
 	    echo "*** -l$load_factor";
 	    out="$out_folder/ht.i$initial.l$load_factor.u$update.dat";
-	    ./scripts/scalability3.sh "$cores" ./bin/lb-ht "./bin/lb-ht -x2" ./bin/lf-ht -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
+	    ./scripts/scalability3.sh "$cores" ./bin/lb-ht "./bin/lb-ht -x2" ./bin/lf-ht_harris -d$duration -i$initial -r$range -u$update -l$load_factor | tee $out;
 	done
     done
 done
