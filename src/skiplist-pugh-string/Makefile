@@ -6,7 +6,7 @@ ALGO_O = pugh.o
 ALGO_C = pugh.c
 ALGO_SUFFIX = "_pugh"
 
-BINS = "$(BINDIR)/lb-sl-string$(ALGO_SUFFIX)$(BIN_SUFFIX)"
+BINS = "$(BINDIR)/lb-sl_pugh(ALGO_SUFFIX)$(BIN_SUFFIX)_string"
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
