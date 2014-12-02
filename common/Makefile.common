@@ -2,14 +2,6 @@
 # Local settings
 ################
 
-# STM
-ESTMDIR		?= SET_ESTM_PATH
-TINYSTMDIR 	?= SET_TINYSTM_PATH
-TINY098DIR 	?= SET_TINY098_PATH
-WLPDSTMDIR	?= SET_SWISSTM_PATH
-TL2DIR		?= SET_TL2_PATH
-XBDIR 		?= SET_XBOOST_PATH
-
 # Compiler
 SOLARIS_CC1 	?= /opt/csw/bin/gcc
 SOLARIS_CC2 	?= /usr/sfw/bin/gcc
@@ -124,6 +116,7 @@ ifndef PC_NAME
 endif
 
 ifeq ($(PC_NAME), parsasrv1.epfl.ch)
+    PLATFORM_KNOWN = 1
     OS = Linux
     CC = $(TILERA_CC)
     LDFLAGS += -ltmc
@@ -133,36 +126,43 @@ ifeq ($(PC_NAME), parsasrv1.epfl.ch)
 endif
 
 ifeq ($(PC_NAME), lpd48core)
+    PLATFORM_KNOWN = 1
     CC = gcc-4.8
     CFLAGS += -DOPTERON -DPLATFORM_MCORE 
     PLATFORM_NUMA = 1
 endif
 ifeq ($(PC_NAME), lpdxeon2680)
+    PLATFORM_KNOWN = 1
     CFLAGS += -DLPDXEON -DPLATFORM_MCORE
     PLATFORM_NUMA = 1
 endif
 
 ifeq ($(PC_NAME), lpdpc34)
+    PLATFORM_KNOWN = 1
     CFLAGS += -DHASWELL 
     PLATFORM_NUMA = 0
 endif
 
 ifeq ($(PC_NAME), lpdpc4)
+    PLATFORM_KNOWN = 1
     CFLAGS += -DLPDPC4
     PLATFORM_NUMA = 0
 endif
 
 ifeq ($(PC_NAME), diassrv8)
+    PLATFORM_KNOWN = 1
     CFLAGS += -DXEON -DPLATFORM_MCORE
     PLATFORM_NUMA = 1
 endif
 
 ifeq ($(PC_NAME), maglite)
+    PLATFORM_KNOWN = 1
     CC = $(SOLARIS_CC1)
     CFLAGS += -DMAGLITE
 endif
 
 ifeq ($(PC_NAME), ol-collab1)
+    PLATFORM_KNOWN = 1
 ifdef LOCK
     LOCK = TICKET
 endif
@@ -170,16 +170,9 @@ endif
     CFLAGS += -DT44
 endif
 
-ifeq ($(PC_NAME), trigonak-laptop)
-    CFLAGS += -DLAPTOP
-endif
-
-ifeq ($(PC_NAME), ubuntu)
-    CFLAGS += -DIGORLAPTOPLINUX
-endif
-
-ifeq ($(PC_NAME), oana-MacBookPro)
-    CFLAGS += -DOANALAPTOPLINUX
+ifneq ($(PLATFORM_KNOWN), 1)
+    CFLAGS += -DDEFAULT -DPLATFORM_MCORE 
+    PLATFORM_NUMA = 1
 endif
 
 #################################
