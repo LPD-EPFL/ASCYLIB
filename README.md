@@ -9,7 +9,7 @@ ASCYLIB works on x86, SPARC, and Tilera architectures and contains test to evalu
 * Author              : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
                         Tudor David <tudor.david@epfl.ch> 
 * Related Publications: ASCYLIB was developed for:
-  Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures,
+  *Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*,
   Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),
   ASPLOS '15
 
