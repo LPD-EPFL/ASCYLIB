@@ -1,6 +1,6 @@
 .PHONY:	all
 
-BENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/hashtable-rcu src/hashtable-java src/hashtable-copy src/hashtable-tbb src/skiplist-fraser src/skiplist-herlihy_lf src/skiplist-seq src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-pugh-string src/bst-ellen src/bst-seq_internal src/bst-howley src/bst-aravind src/noise/ src/tests/ src/bst-tk/
+BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-pugh-string src/skiplist-seq
 LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-pugh-string src/bst-bronson src/bst-drachsler src/bst-tk/
 LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
@@ -10,6 +10,8 @@ TESTS = src/tests
 BSTS = src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-aravind src/bst-tk/
 
 .PHONY:	clean all external $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS) $(SEQBENCHS)
+
+default: lockfree tas seq
 
 all:	lockfree tas seq external
 
@@ -220,22 +222,38 @@ external:
 	$(MAKE) "STM=LOCKFREE" $(EXTERNALS)
 
 clean:
-	$(MAKE) -C src/linkedlist-harris clean	
-	$(MAKE) -C src/hashtable-harris clean
-	$(MAKE) -C src/hashtable-rcu clean
-	$(MAKE) -C src/linkedlist-coupling clean
-	$(MAKE) -C src/linkedlist-lazy clean
-	$(MAKE) -C src/linkedlist-pugh clean
-	$(MAKE) -C src/hashtable-pugh clean
-	$(MAKE) -C src/hashtable-coupling clean
-	$(MAKE) -C src/hashtable-lazy clean
+	$(MAKE) -C src/bst-aravind clean
+	$(MAKE) -C src/bst-bronson clean
+	$(MAKE) -C src/bst-drachsler clean
 	$(MAKE) -C src/bst-ellen clean
 	$(MAKE) -C src/bst-howley clean
-	$(MAKE) -C src/bst-aravind clean
-	$(MAKE) -C src/bst-drachsler clean
-	$(MAKE) -C src/bst-bronson clean
+	$(MAKE) -C src/bst-seq_external clean
+	$(MAKE) -C src/bst-seq_internal clean
 	$(MAKE) -C src/bst-tk clean
+	$(MAKE) -C src/hashtable-copy clean
+	$(MAKE) -C src/hashtable-coupling clean
+	$(MAKE) -C src/hashtable-harris clean
+	$(MAKE) -C src/hashtable-java clean
+	$(MAKE) -C src/hashtable-lazy clean
+	$(MAKE) -C src/hashtable-pugh clean
+	$(MAKE) -C src/hashtable-rcu clean
+	$(MAKE) -C src/hashtable-seq clean
+	$(MAKE) -C src/hashtable-tbb clean
+	$(MAKE) -C src/linkedlist-copy clean
+	$(MAKE) -C src/linkedlist-coupling clean
+	$(MAKE) -C src/linkedlist-harris clean
+	$(MAKE) -C src/linkedlist-harris_opt clean
+	$(MAKE) -C src/linkedlist-lazy clean
+	$(MAKE) -C src/linkedlist-michael clean
+	$(MAKE) -C src/linkedlist-pugh clean
+	$(MAKE) -C src/linkedlist-seq clean
 	$(MAKE) -C src/noise clean
+	$(MAKE) -C src/skiplist-fraser clean
+	$(MAKE) -C src/skiplist-herlihy_lb clean
+	$(MAKE) -C src/skiplist-herlihy_lf clean
+	$(MAKE) -C src/skiplist-pugh clean
+	$(MAKE) -C src/skiplist-pugh-string clean
+	$(MAKE) -C src/skiplist-seq clean
 	$(MAKE) -C src/tests clean
 	rm -rf build
 
