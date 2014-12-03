@@ -375,11 +375,11 @@ main(int argc, char **argv)
 	  // Flag is automatically set 
 	  break;
 	case 'h':
-	  printf("intset -- STM stress test "
-		 "(hash table)\n"
+	  printf("ASCYLIB -- stress test "
+		 "\n"
 		 "\n"
 		 "Usage:\n"
-		 "  intset [options...]\n"
+		 "  %s [options...]\n"
 		 "\n"
 		 "Options:\n"
 		 "  -h, --help\n"
@@ -406,7 +406,7 @@ main(int argc, char **argv)
 		 "        Percentage of snapshot transactions (default=" XSTR(DEFAULT_SNAPSHOT) ")\n"
 		 "  -l , --load-factor <int>\n"
 		 "        Ratio of keys over buckets (default=" XSTR(DEFAULT_LOAD) ")\n"
-		 );
+		 , argv[0]);
 	  exit(0);
 	case 'v':
 	  test_verbose = 1;

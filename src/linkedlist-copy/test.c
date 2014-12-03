@@ -242,11 +242,11 @@ main(int argc, char **argv)
       /* Flag is automatically set */
       break;
     case 'h':
-      printf("intset -- STM stress test "
-	     "(linked list)\n"
+      printf("ASCYLIB -- stress test "
+	     "\n"
 	     "\n"
 	     "Usage:\n"
-	     "  intset [options...]\n"
+	     "  %s [options...]\n"
 	     "\n"
 	     "Options:\n"
 	     "  -h, --help\n"
@@ -273,7 +273,7 @@ main(int argc, char **argv)
 	     "        Use lock-based algorithm\n"
 	     "        1 = lock-coupling,\n"
 	     "        2 = lazy algorithm\n"
-	     );
+	     , argv[0]);
       exit(0);
     case 'A':
       alternate = 1;

@@ -193,9 +193,9 @@ test(void* thread)
       snprintf(strkey.key, STRING_LENGTH, "%lu", key);
 
       if(DS_ADD(set, strkey, strval) == false)
-  {
-    i--;
-  }
+	{
+	  i--;
+	}
     }
   MEM_BARRIER;
 
@@ -219,53 +219,53 @@ test(void* thread)
       key = (c & rand_max) + rand_min;         
       snprintf(strkey.key, STRING_LENGTH, "%lu", key);       
                   
-  if (unlikely(c <= scale_put))           
-    {                 
-      int res;                
-      START_TS(1);              
-      res = DS_ADD(set, strkey, strval);        
-      if(res)              
-  {               
-    END_TS(1, my_putting_count_succ);       
-    ADD_DUR(my_putting_succ);         
-    my_putting_count_succ++;          
-  }               
-      END_TS_ELSE(4, my_putting_count - my_putting_count_succ,    
-      my_putting_fail);         
-      my_putting_count++;           
-    }                 
-  else if(unlikely(c <= scale_rem))         
-    {                 
-      strval_t removed;              
-      START_TS(2);              
-      removed = DS_REMOVE(set, strkey);       
-      //if(removed != 0)              
-      if (strcmp(removed.val, "") != 0)
-  {               
-    END_TS(2, my_removing_count_succ);        
-    ADD_DUR(my_removing_succ);          
-    my_removing_count_succ++;         
-  }               
-      END_TS_ELSE(5, my_removing_count - my_removing_count_succ,  
-      my_removing_fail);          
-      my_removing_count++;            
-    }                 
-  else                  
-    {                 
-      strval_t res;                
-      START_TS(0);             
-      res =  DS_CONTAINS(set, strkey);      
-      //if(res != 0)   
-      if(strcmp(res.val, "") != 0)           
-  {               
-    END_TS(0, my_getting_count_succ);       
-    ADD_DUR(my_getting_succ);         
-    my_getting_count_succ++;          
-  }               
-      END_TS_ELSE(3, my_getting_count - my_getting_count_succ,    
-      my_getting_fail);         
-      my_getting_count++;           
-    }
+      if (unlikely(c <= scale_put))           
+	{                 
+	  int res;                
+	  START_TS(1);              
+	  res = DS_ADD(set, strkey, strval);        
+	  if(res)              
+	    {               
+	      END_TS(1, my_putting_count_succ);       
+	      ADD_DUR(my_putting_succ);         
+	      my_putting_count_succ++;          
+	    }               
+	  END_TS_ELSE(4, my_putting_count - my_putting_count_succ,    
+		      my_putting_fail);         
+	  my_putting_count++;           
+	}                 
+      else if(unlikely(c <= scale_rem))         
+	{                 
+	  strval_t removed;              
+	  START_TS(2);              
+	  removed = DS_REMOVE(set, strkey);       
+	  //if(removed != 0)              
+	  if (strcmp(removed.val, "") != 0)
+	    {               
+	      END_TS(2, my_removing_count_succ);        
+	      ADD_DUR(my_removing_succ);          
+	      my_removing_count_succ++;         
+	    }               
+	  END_TS_ELSE(5, my_removing_count - my_removing_count_succ,  
+		      my_removing_fail);          
+	  my_removing_count++;            
+	}                 
+      else                  
+	{                 
+	  strval_t res;                
+	  START_TS(0);             
+	  res =  DS_CONTAINS(set, strkey);      
+	  //if(res != 0)   
+	  if(strcmp(res.val, "") != 0)           
+	    {               
+	      END_TS(0, my_getting_count_succ);       
+	      ADD_DUR(my_getting_succ);         
+	      my_getting_count_succ++;          
+	    }               
+	  END_TS_ELSE(3, my_getting_count - my_getting_count_succ,    
+		      my_getting_fail);         
+	  my_getting_count++;           
+	}
     }
 
   barrier_cross(&barrier);
@@ -360,79 +360,79 @@ main(int argc, char **argv)
       c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:", long_options, &i);
     
       if(c == -1)
-  break;
+	break;
     
       if(c == 0 && long_options[i].flag == 0)
-  c = long_options[i].val;
+	c = long_options[i].val;
     
       switch(c) 
-  {
-  case 0:
-    /* Flag is automatically set */
-    break;
-  case 'h':
-    printf("intset -- STM stress test "
-     "(linked list)\n"
-     "\n"
-     "Usage:\n"
-     "  intset [options...]\n"
-     "\n"
-     "Options:\n"
-     "  -h, --help\n"
-     "        Print this message\n"
-     "  -d, --duration <int>\n"
-     "        Test duration in milliseconds\n"
-     "  -i, --initial-size <int>\n"
-     "        Number of elements to insert before test\n"
-     "  -n, --num-threads <int>\n"
-     "        Number of threads\n"
-     "  -r, --range <int>\n"
-     "        Range of integer values inserted in set\n"
-     "  -u, --update-rate <int>\n"
-     "        Percentage of update transactions\n"
-     "  -p, --put-rate <int>\n"
-     "        Percentage of put update transactions (should be less than percentage of updates)\n"
-     "  -b, --num-buckets <int>\n"
-     "        Number of initial buckets (stronger than -l)\n"
-     "  -v, --print-vals <int>\n"
-     "        When using detailed profiling, how many values to print.\n"
-     "  -f, --val-pf <int>\n"
-     "        When using detailed profiling, how many values to keep track of.\n"
-     );
-    exit(0);
-  case 'd':
-    duration = atoi(optarg);
-    break;
-  case 'i':
-    initial = atoi(optarg);
-    break;
-  case 'n':
-    num_threads = atoi(optarg);
-    break;
-  case 'r':
-    range = atol(optarg);
-    break;
-  case 'u':
-    update = atoi(optarg);
-    break;
-  case 'p':
-    put_explicit = 1;
-    put = atoi(optarg);
-    break;
-  case 'l':
-    load_factor = atoi(optarg);
-    break;
-  case 'v':
-    print_vals_num = atoi(optarg);
-    break;
-  case 'f':
-    pf_vals_num = pow2roundup(atoi(optarg)) - 1;
-    break;
-  case '?':
-  default:
-    printf("Use -h or --help for help\n");
-    exit(1);
-  }
+	{
+	case 0:
+	  /* Flag is automatically set */
+	  break;
+	case 'h':
+	  printf("ASCYLIB -- stress test "
+		 "\n"
+		 "\n"
+		 "Usage:\n"
+		 "  %s [options...]\n"
+		 "\n"
+		 "Options:\n"
+		 "  -h, --help\n"
+		 "        Print this message\n"
+		 "  -d, --duration <int>\n"
+		 "        Test duration in milliseconds\n"
+		 "  -i, --initial-size <int>\n"
+		 "        Number of elements to insert before test\n"
+		 "  -n, --num-threads <int>\n"
+		 "        Number of threads\n"
+		 "  -r, --range <int>\n"
+		 "        Range of integer values inserted in set\n"
+		 "  -u, --update-rate <int>\n"
+		 "        Percentage of update transactions\n"
+		 "  -p, --put-rate <int>\n"
+		 "        Percentage of put update transactions (should be less than percentage of updates)\n"
+		 "  -b, --num-buckets <int>\n"
+		 "        Number of initial buckets (stronger than -l)\n"
+		 "  -v, --print-vals <int>\n"
+		 "        When using detailed profiling, how many values to print.\n"
+		 "  -f, --val-pf <int>\n"
+		 "        When using detailed profiling, how many values to keep track of.\n"
+		 , argv[0]);
+	  exit(0);
+	case 'd':
+	  duration = atoi(optarg);
+	  break;
+	case 'i':
+	  initial = atoi(optarg);
+	  break;
+	case 'n':
+	  num_threads = atoi(optarg);
+	  break;
+	case 'r':
+	  range = atol(optarg);
+	  break;
+	case 'u':
+	  update = atoi(optarg);
+	  break;
+	case 'p':
+	  put_explicit = 1;
+	  put = atoi(optarg);
+	  break;
+	case 'l':
+	  load_factor = atoi(optarg);
+	  break;
+	case 'v':
+	  print_vals_num = atoi(optarg);
+	  break;
+	case 'f':
+	  pf_vals_num = pow2roundup(atoi(optarg)) - 1;
+	  break;
+	case '?':
+	default:
+	  printf("Use -h or --help for help\n");
+	  exit(1);
+	}
     }
 
 
@@ -541,10 +541,10 @@ main(int argc, char **argv)
       tds[t].set = set;
       rc = pthread_create(&threads[t], &attr, test, tds + t);
       if (rc)
-  {
-    printf("ERROR; return code from pthread_create() is %d\n", rc);
-    exit(-1);
-  }
+	{
+	  printf("ERROR; return code from pthread_create() is %d\n", rc);
+	  exit(-1);
+	}
         
     }
     
@@ -563,10 +563,10 @@ main(int argc, char **argv)
     {
       rc = pthread_join(threads[t], &status);
       if (rc) 
-  {
-    printf("ERROR; return code from pthread_join() is %d\n", rc);
-    exit(-1);
-  }
+	{
+	  printf("ERROR; return code from pthread_join() is %d\n", rc);
+	  exit(-1);
+	}
     }
 
   free(tds);
@@ -629,11 +629,11 @@ main(int argc, char **argv)
   double removing_perc = 100.0 * (1 - ((double)(total - removing_count_total) / total));
   double removing_perc_succ = (1 - (double) (removing_count_total - removing_count_total_succ) / removing_count_total) * 100;
   printf("srch: %-10llu | %-10llu | %10.1f%% | %10.1f%% | \n", (LLU) getting_count_total, 
-   (LLU) getting_count_total_succ,  getting_perc_succ, getting_perc);
+	 (LLU) getting_count_total_succ,  getting_perc_succ, getting_perc);
   printf("insr: %-10llu | %-10llu | %10.1f%% | %10.1f%% | %10.1f%%\n", (LLU) putting_count_total, 
-   (LLU) putting_count_total_succ, putting_perc_succ, putting_perc, (putting_perc * putting_perc_succ) / 100);
+	 (LLU) putting_count_total_succ, putting_perc_succ, putting_perc, (putting_perc * putting_perc_succ) / 100);
   printf("rems: %-10llu | %-10llu | %10.1f%% | %10.1f%% | %10.1f%%\n", (LLU) removing_count_total, 
-   (LLU) removing_count_total_succ, removing_perc_succ, removing_perc, (removing_perc * removing_perc_succ) / 100);
+	 (LLU) removing_count_total_succ, removing_perc_succ, removing_perc, (removing_perc * removing_perc_succ) / 100);
 
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);

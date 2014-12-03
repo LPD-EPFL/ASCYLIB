@@ -242,11 +242,11 @@ main(int argc, char **argv)
     case 0:
       break;
     case 'h':
-      printf("intset -- STM stress test "
-	     "(skip list)\n"
+      printf("ASCYLIB -- stress test "
+	     "\n"
 	     "\n"
 	     "Usage:\n"
-	     "  intset [options...]\n"
+	     "  %s [options...]\n"
 	     "\n"
 	     "Options:\n"
 	     "  -h, --help\n"
@@ -275,7 +275,7 @@ main(int argc, char **argv)
 	     "        3 = read/add elastic-tx,\n"
 	     "        4 = read/add/rem elastic-tx,\n"
 	     "        5 = fraser lock-free\n"
-	     );
+	     , argv[0]);
       exit(0);
     case 'A':
       alternate = 1;
