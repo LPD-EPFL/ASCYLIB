@@ -3,13 +3,18 @@ ASCYLIB
 
 ASCYLIB is a concurrent-search data-structure library. It contains over 30 implementantions of linked lists, hash tables, skip lists, and binary search trees (BST). ASCYLIB contains sequential, lock-based, and lock-free implementations for each data structure.
 
+ASCYLIB works on x86, SPARC, and Tilera architectures and contains test to evaluate the throughput, latency, latency distribution, and energy efficiency of the included data structures.
+
 * Website             : http://lpd.epfl.ch/site/ascylib
 * Author              : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
                         Tudor David <tudor.david@epfl.ch> 
 * Related Publications: ASCYLIB was developed for:
   Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures,
   Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),
-  ASPLOS '14
+  ASPLOS '15
+
+BST-TK is a new lock-based BST, introduced in ASCYLIB. Details of the algorithm and a proof of correctness can be found in the following technical report: ...
+
 
 Some of the initial implementations used in ASCYLIB were taken from Synchrobench (https://github.com/gramoli/synchrobench -  V. Gramoli. More than You Ever Wanted to Know about Synchronization. PPoPP 2015.). 
 
@@ -51,4 +56,11 @@ Building ASCYLIB generate per-data-structure benchmarks in the `bin` directory.
 Issue `./bin/executable -h` for the parameters each of those accepts.
 
 Depending on the compilation flags, these benchmarks can be set to measure throughtput, latency, and/or power-consumption statistics.
+
+Scripts
+-------
+
+ASCYLIB includes tons of usefull scripts (in the `scripts` folders). Some particularly useful ones are:
+* `scalability.sh` and `scalability_rep.h`: run the given list of executable on the given (list of) number of threads, with the given parameters, and report throughput and scalability over single-threaded execution.
+* scripts in `apslos/` directory: they were used to create the plots for the ASPLOS '15 paper. In particular, `apslos/run_scy.sh` accepts configuration files (see `asplos/config`) so it can be configured to execute almost any per-data-structure scenario.
 
