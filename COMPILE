@@ -11,6 +11,8 @@ You may pass the following settings to `make`:
     * LATENCY= 1 : enable per operation latency measurements with getticks
       	       2 : enable per operation latency measurements with sspfd (only id==0 prints results)
 	       3 : enable per operation latency measurements with sspfd (all cores print results)
+	       4 : enable latency measurements of the parse phase of ops (only id==0 prints results)
+	       5 : enable latency measurements of the parse phase of ops (all cores print results)
     * GRANULARITY=GLOBAL_LOCK (or G=GL) for global lock
     * INIT=all : initialize the structure from all threads (default is from one)
     * SET_CPU=0 : does not pin threads to cores (does this by default) 
