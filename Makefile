@@ -102,7 +102,7 @@ lfsl_herlihy_lf:
 lbsl_pugh:
 	$(MAKE) "LOCK=TAS" src/skiplist-pugh
 
-lbsl_string_pugh:
+lbsl_pugh_string:
 	$(MAKE) "LOCK=TAS" src/skiplist-pugh-string
 
 lbsl_herlihy_lb:
