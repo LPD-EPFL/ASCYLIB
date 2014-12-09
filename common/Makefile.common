@@ -267,6 +267,10 @@ else
 		CFLAGS += -DGC=1
 
 	else
+		ifeq ($(TEST),singlethreaded)
+			TEST_FILE=test_singlethreaded.c
+		endif
+
 		ifeq ($(GC),0)
 			CFLAGS += -DGC=0
 		else

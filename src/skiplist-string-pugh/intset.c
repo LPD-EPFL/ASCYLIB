@@ -41,10 +41,10 @@ sl_remove(sl_intset_t *set, strkey_t key)
   return optimistic_delete(set, key);
 }
 
-inline int sl_merge(sl_intset_t *set, strkey_t key, strval_t val, int (*merge_operator)(strkey_t, strval_t, strval_t, strval_t)){
+inline int sl_merge(sl_intset_t *set, strkey_t key, strval_t val, int (*merge_operator)(strkey_t, strval_t, strval_t, strval_t*)){
     return merge(set, key, val, merge_operator);
 }
 
 strval_t* sl_multiget(sl_intset_t *set, strkey_t* keys, size_t num_keys){
-    return multiget(set, keys, size);
+    return multiget(set, keys, num_keys);
 }

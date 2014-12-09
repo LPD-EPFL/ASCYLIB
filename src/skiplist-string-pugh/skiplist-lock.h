@@ -45,28 +45,25 @@
 #define ALGO_HERLIHY 1
 #define ALGO_PUGH 2
 
-
 extern unsigned int global_seed;
 extern __thread ssmem_allocator_t* alloc;
 
 extern unsigned int levelmax, size_pad_32;
 
-typedef volatile struct sl_node
-{
-  strkey_t key;
-  strval_t val; 
-  uint32_t toplevel;
+typedef volatile struct sl_node {
+    strkey_t key;
+    strval_t val;
+    uint32_t toplevel;
 #if !defined(LL_GLOBAL_LOCK)
-  ptlock_t lock;
+    ptlock_t lock;
 #endif
-  volatile struct sl_node* next[1];
+    volatile struct sl_node* next[1];
 } sl_node_t;
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct sl_intset 
-{
-  sl_node_t *head;
+typedef ALIGNED(CACHE_LINE_SIZE) struct sl_intset {
+    sl_node_t *head;
 #if defined(LL_GLOBAL_LOCK)
-  volatile ptlock_t* lock;
+    volatile ptlock_t* lock;
 #endif
 } sl_intset_t;
 
@@ -76,13 +73,16 @@ int floor_log_2(unsigned int n);
 /* 
  * Create a new node without setting its next fields. 
  */
-sl_node_t* sl_new_simple_node(strkey_t key, strval_t val, int toplevel, int transactional);
+sl_node_t* sl_new_simple_node(strkey_t key, strval_t val, int toplevel,
+        int transactional);
 /* 
  * Create a new node with its next field. 
  * If next=NULL, then this create a tail node. 
  */
-sl_node_t *sl_new_node(strkey_t key, strval_t val, sl_node_t *next, int toplevel, int transactional);
+sl_node_t *sl_new_node(strkey_t key, strval_t val, sl_node_t *next,
+        int toplevel, int transactional);
 void sl_delete_node(sl_node_t* n);
 sl_intset_t* sl_set_new();
 void sl_set_delete(sl_intset_t* set);
 int sl_set_size(sl_intset_t* cset);
+void sl_set_print(sl_intset_t *set);
