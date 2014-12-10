@@ -179,7 +179,9 @@ test(void* thread) {
         if (DS_ADD(set, strkey, strval) == false) {
             i--;
         }
-    } MEM_BARRIER;
+    } 
+
+    MEM_BARRIER;
 
     RETRY_STATS_ZERO();
 
@@ -198,10 +200,11 @@ test(void* thread) {
         key = (c & rand_max) + rand_min;
         snprintf(strkey.key, STRING_LENGTH, "%07lu", key);
 
-        if (ID==0) {
-            sl_merge(set, strkey, strval, &merge_operator1);
-            my_merge_count++;
-        } else {
+        // IF [UN]COMMENTING, DON'T FORGET BRACKET AT LINE 242
+        // if (ID==0) {
+        //     sl_merge(set, strkey, strval, &merge_operator1);
+        //     my_merge_count++;
+        // } else {
 
             if (unlikely(c <= scale_put)) {
                 int res;
