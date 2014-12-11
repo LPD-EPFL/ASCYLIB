@@ -255,6 +255,113 @@ retry:
     }
 }
 
-strval_t* multiget(sl_intset_t *set, strkey_t* keys, size_t num_keys){
-  return NULL;
+typedef struct aux_node{
+    strkey_t* key_ptr;
+    int pos;
+} aux_node_t;
+
+int compar(const void* p1, const void* p2) {
+
+    //printf("pointers: %p, %p\n", *((aux_node_t *)p1)->key_ptr, *((aux_node_t *)p2)->key_ptr);
+    int64_t c = strkey_compare( *((aux_node_t *)p1)->key_ptr, *((aux_node_t *)p2)->key_ptr);
+    if (c < 0){
+        return -1;
+    } else if (c > 0) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+int* multiget(sl_intset_t *set, strkey_t* keys, strval_t* vals, size_t num_keys){
+    
+    int i;
+    strval_t void_val = {""};
+
+    int* res = (int *) calloc(num_keys, sizeof(int));
+
+    // printf("original keys: \n");
+    // for (i = 0; i < num_keys; i++) {
+    //     printf("[key %s] ", keys[i].key);
+    // }
+    // printf("\n");
+
+    // sort the keys
+    aux_node_t* aux_vect = (aux_node_t*) calloc(num_keys, sizeof(aux_node_t));
+
+    // keep track of locked nodes
+    sl_node_t** locked_nodes = (sl_node_t **) calloc(num_keys, sizeof(sl_node_t*));
+    size_t num_locked = 0;
+ 
+    for (i = 0; i < num_keys; i++) {
+        aux_vect[i].pos = i;
+        aux_vect[i].key_ptr = &keys[i]; // keys[i] is of type strkey_t, it that okay? (passing as value)
+    }
+
+    qsort(aux_vect, num_keys, sizeof(aux_node_t), &compar);
+
+    // printf("sorted keys: \n");
+    // for (i = 0; i < num_keys; i++) {
+    //     printf("[key %s, pos %d] ", (aux_vect[i].key_ptr)->key, aux_vect[i].pos);
+    // }
+    // printf("\n");
+
+    // go through the lowest level in order and
+
+    int index = 0;
+    strkey_t* cur_key = aux_vect[index].key_ptr;
+
+    sl_node_t *node;
+    /* We have at least 2 elements */
+    node = set->head;
+    while (node->next[0] != NULL) {
+        
+        if (strkey_compare(node->key, *cur_key) == 0) {
+
+            if (num_locked > 0 && locked_nodes[num_locked-1] != node) {
+                LOCK(ND_GET_LOCK(node));
+                locked_nodes[num_locked] = node;
+                num_locked++;
+            }
+            
+            while (index < num_keys && strkey_compare(node->key, *cur_key) == 0) {
+                vals[aux_vect[index].pos] = node->val;
+                res[aux_vect[index].pos] = 1;
+                index++;
+                if (index < num_keys){
+                    cur_key = aux_vect[index].key_ptr;
+                }
+            }
+        } 
+
+        if (strkey_compare(node->key, *cur_key) < 0 && strkey_compare(node->next[0]->key, *cur_key) > 0) {
+
+            if (num_locked > 0 && locked_nodes[num_locked-1] != node) {
+                LOCK(ND_GET_LOCK(node));
+                locked_nodes[num_locked] = node;
+                num_locked++;
+            }
+
+            while (index < num_keys && strkey_compare(node->key, *cur_key) < 0 && strkey_compare(node->next[0]->key, *cur_key) > 0) {
+                vals[aux_vect[index].pos] = void_val;
+                res[aux_vect[index].pos] = 0;
+                index++;
+                if (index < num_keys){
+                    cur_key = aux_vect[index].key_ptr;
+                }
+            }
+        } 
+
+        node = node->next[0];
+
+    }
+
+    // unlock everything
+    for (i = 0; i < num_locked; i++) {
+        UNLOCK(ND_GET_LOCK(locked_nodes[i]));
+    }
+
+    free(aux_vect);
+    free(locked_nodes);
+    return res;
 }

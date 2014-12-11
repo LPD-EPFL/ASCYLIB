@@ -324,41 +324,69 @@ int main(int argc, char **argv) {
     DS_TYPE* set = DS_NEW();
     assert(set != NULL);
 
-    strkey_t a = {"a"}, b = {"b"}, c = {"c"};
-    strval_t x = {"x"}, y = {"y"}, z = {"z"};
+    // strkey_t a = {"a"}, b = {"b"}, c = {"c"};
+    // strval_t x = {"x"}, y = {"y"}, z = {"z"};
 
-    sl_add(set, a, x);
-    sl_add(set, b, y);
-    sl_add(set, c, z);
+    // sl_add(set, a, x);
+    // sl_add(set, b, y);
+    // sl_add(set, c, z);
 
-    strval_t ret;
-    ret = sl_contains(set, a);
-    printf("a -> %s\n", ret.val);
-    ret = sl_contains(set, b);
-    printf("b -> %s\n", ret.val);
-    ret = sl_contains(set, c);
-    printf("c -> %s\n", ret.val);
+    // strval_t ret;
+    // ret = sl_contains(set, a);
+    // printf("a -> %s\n", ret.val);
+    // ret = sl_contains(set, b);
+    // printf("b -> %s\n", ret.val);
+    // ret = sl_contains(set, c);
+    // printf("c -> %s\n", ret.val);
 
-    sl_merge(set, b, x, &merge_operator1);
+    // sl_merge(set, b, x, &merge_operator1);
 
-    ret = sl_contains(set, a);
-    printf("a -> %s\n", ret.val);
-    ret = sl_contains(set, b);
-    printf("b -> %s\n", ret.val);
-    ret = sl_contains(set, c);
-    printf("c -> %s\n", ret.val);
-
-
-    sl_merge(set, c, z, &merge_operator2);
-    sl_merge(set, b, z, &merge_operator2);
+    // ret = sl_contains(set, a);
+    // printf("a -> %s\n", ret.val);
+    // ret = sl_contains(set, b);
+    // printf("b -> %s\n", ret.val);
+    // ret = sl_contains(set, c);
+    // printf("c -> %s\n", ret.val);
 
 
-    ret = sl_contains(set, a);
-    printf("a -> %s\n", ret.val);
-    ret = sl_contains(set, b);
-    printf("b -> %s\n", ret.val);
-    ret = sl_contains(set, c);
-    printf("c -> %s\n", ret.val);
+    // sl_merge(set, c, z, &merge_operator2);
+    // sl_merge(set, b, z, &merge_operator2);
+
+
+    // ret = sl_contains(set, a);
+    // printf("a -> %s\n", ret.val);
+    // ret = sl_contains(set, b);
+    // printf("b -> %s\n", ret.val);
+    // ret = sl_contains(set, c);
+    // printf("c -> %s\n", ret.val);
+
+    strkey_t a = {"0000001"}, b = {"0000003"}, c = {"0000005"}, d = {"0000007"}, e={"0000008"}, f={"0000000"};
+
+    //list init
+    strkey_t k1 = {"0000001"}, k2 = {"0000002"}, k3 = {"0000004"}, k4 = {"0000006"}, k5 = {"0000007"};
+    strval_t v1 = {"1"}, v2 = {"2"}, v3 = {"4"}, v4 = {"6"}, v5 = {"7"};
+    sl_add(set, k1, v1);
+    sl_add(set, k2, v2);
+    sl_add(set, k3, v3);
+    sl_add(set, k4, v4);
+    sl_add(set, k5, v5);    
+
+
+    strkey_t* keys = (strkey_t*) calloc(4, sizeof(strkey_t));
+    strval_t* vals = (strval_t*) calloc(4, sizeof(strval_t));
+    int* status = NULL;
+    keys[0] = e;
+    keys[1] = f;
+    keys[2] = e;
+    keys[3] = f;
+
+    status = sl_multiget(set, keys, vals, 4);
+    int i;
+    for (i = 0; i < 4; ++i)
+    {
+        printf("[key %s, val %s, status %d] ", keys[i].key, vals[i].val, status[i]);
+    }
+    printf("\n");
 
     #if GC == 1
     ssmem_term();

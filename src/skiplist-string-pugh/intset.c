@@ -45,6 +45,6 @@ inline int sl_merge(sl_intset_t *set, strkey_t key, strval_t val, int (*merge_op
     return merge(set, key, val, merge_operator);
 }
 
-strval_t* sl_multiget(sl_intset_t *set, strkey_t* keys, size_t num_keys){
-    return multiget(set, keys, num_keys);
+int* sl_multiget(sl_intset_t *set, strkey_t* keys, strval_t* vals, size_t num_keys) {
+    return multiget(set, keys, vals, num_keys);
 }

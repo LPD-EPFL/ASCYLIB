@@ -32,4 +32,4 @@ strval_t optimistic_delete(sl_intset_t *set, strkey_t key);
 
 int merge(sl_intset_t *set, strkey_t key, strval_t val, int (*merge_operator)(strkey_t, strval_t, strval_t, strval_t*));
 
-strval_t* multiget(sl_intset_t *set, strkey_t* keys, size_t num_keys);
+int* multiget(sl_intset_t *set, strkey_t* keys, strval_t* vals, size_t num_keys);

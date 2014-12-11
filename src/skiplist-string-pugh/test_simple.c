@@ -81,6 +81,7 @@ volatile ticks *getting_count_succ;
 volatile ticks *removing_count;
 volatile ticks *removing_count_succ;
 volatile ticks *merge_count;
+volatile ticks *multiget_count;
 volatile ticks *total;
 
 /* ################################################################### *
@@ -131,6 +132,7 @@ test(void* thread) {
     uint64_t my_getting_count = 0;
     uint64_t my_removing_count = 0;
     uint64_t my_merge_count = 0;
+    uint64_t my_multiget_count = 0;
 
     uint64_t my_putting_count_succ = 0;
     uint64_t my_getting_count_succ = 0;
@@ -206,6 +208,36 @@ test(void* thread) {
         //     my_merge_count++;
         // } else {
 
+
+        // IF [UN]COMMENTING, DON'T FORGET BRACKET AT LINE 242
+        if (ID==0) {
+
+            //#keys to get
+            c = (uint32_t)(my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])));
+            int num_keys = (c & 127) + rand_min;
+
+            strkey_t* keys = (strkey_t*) calloc(num_keys, sizeof(strkey_t));
+            strval_t* vals = (strval_t*) calloc(num_keys, sizeof(strval_t));
+
+            //populate keys with rand numbers
+            for (i = 0; i < num_keys; ++i)
+            {
+                c = (uint32_t)(my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])));
+                key = (c & rand_max) + rand_min;
+                snprintf(keys[i].key, STRING_LENGTH, "%07lu", key);
+            }
+
+            int* status = NULL;
+            status = sl_multiget(set, keys, vals, num_keys);
+
+            free(status);
+            free(keys);
+            free(vals);
+
+            my_multiget_count += num_keys;
+
+        } else {
+
             if (unlikely(c <= scale_put)) {
                 int res;
                 START_TS(1);
@@ -239,6 +271,7 @@ test(void* thread) {
                         my_getting_fail);
                 my_getting_count++;
             }
+        }
         // }
     }
 
@@ -265,6 +298,7 @@ test(void* thread) {
     getting_count[ID] += my_getting_count;
     removing_count[ID] += my_removing_count;
     merge_count[ID] += my_merge_count;
+    multiget_count[ID] += my_multiget_count;
 
     putting_count_succ[ID] += my_putting_count_succ;
     getting_count_succ[ID] += my_getting_count_succ;
@@ -484,6 +518,7 @@ int main(int argc, char **argv) {
     removing_count = (ticks *) calloc(num_threads, sizeof(ticks));
     removing_count_succ = (ticks *) calloc(num_threads, sizeof(ticks));
     merge_count = (ticks *) calloc(num_threads, sizeof(ticks));
+    multiget_count = (ticks *) calloc(num_threads, sizeof(ticks));
 
     pthread_t threads[num_threads];
     pthread_attr_t attr;
@@ -547,6 +582,7 @@ int main(int argc, char **argv) {
     volatile uint64_t removing_count_total = 0;
     volatile uint64_t removing_count_total_succ = 0;
     volatile uint64_t merge_count_total = 0;
+    volatile uint64_t multiget_count_total = 0;
 
     for (t = 0; t < num_threads; t++) {
         putting_suc_total += putting_succ[t];
@@ -562,6 +598,7 @@ int main(int argc, char **argv) {
         removing_count_total += removing_count[t];
         removing_count_total_succ += removing_count_succ[t];
         merge_count_total += merge_count[t];
+        multiget_count_total += multiget_count[t];
     }
 
 #if defined(COMPUTE_LATENCY)
@@ -586,7 +623,7 @@ int main(int argc, char **argv) {
     printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success",
             "succ %", "total %", "effective %");
     uint64_t total = putting_count_total + getting_count_total
-            + removing_count_total + merge_count_total;
+            + removing_count_total + merge_count_total + multiget_count_total;
     double putting_perc = 100.0
             * (1 - ((double) (total - putting_count_total) / total));
     double putting_perc_succ = (1
@@ -616,9 +653,12 @@ int main(int argc, char **argv) {
     printf("mrgs: %-10llu | %-10llu | %10.1f%% | %10.1f%% | %10.1f%%\n",
             (LLU) merge_count_total, (LLU)0,
             (double) 0, (double) 0, (double)0);
+    printf("mltgt: %-10llu | %-10llu | %10.1f%% | %10.1f%% | %10.1f%%\n",
+            (LLU) multiget_count_total, (LLU)0,
+            (double) 0, (double) 0, (double)0);
 
     double throughput = (putting_count_total + getting_count_total
-            + removing_count_total + merge_count_total) * 1000.0 / duration;
+            + removing_count_total + merge_count_total + + multiget_count_total) * 1000.0 / duration;
     printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
     printf("#Mops %.3f\n", throughput / 1e6);
 
