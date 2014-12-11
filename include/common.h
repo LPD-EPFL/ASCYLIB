@@ -41,13 +41,17 @@ typedef struct strval_t {
 // 	return str.data();
 // }
 
-#define STR_KEY_MIN ""
-#define STR_KEY_MAX "zzz"
+#define STR_KEY_MIN "0000000"
+#define STR_KEY_MAX "9999999"
 
 #define ALT_KEY_MIN						INT64_MIN
 #define ALT_KEY_MAX						INT64_MAX
 
 static inline int strkey_compare(strkey_t k1, strkey_t k2) {
+	return strcmp(k1.key, k2.key);
+}
+
+static inline int strkey_compare_old2(strkey_t k1, strkey_t k2) {
 
 	//TODO write our own strcmp
 	if ( strcmp(k1.key, k2.key) == 0) return 0;

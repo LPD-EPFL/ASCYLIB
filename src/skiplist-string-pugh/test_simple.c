@@ -203,10 +203,10 @@ test(void* thread) {
         snprintf(strkey.key, STRING_LENGTH, "%07lu", key);
 
         // IF [UN]COMMENTING, DON'T FORGET BRACKET AT LINE 242
-        if (ID==0) {
-            sl_merge(set, strkey, strval, &merge_operator1);
-            my_merge_count++;
-        } else {
+        // if (ID==0) {
+        //     sl_merge(set, strkey, strval, &merge_operator1);
+        //     my_merge_count++;
+        // } else {
 
 
         // IF [UN]COMMENTING, DON'T FORGET BRACKET AT LINE 242
@@ -273,7 +273,7 @@ test(void* thread) {
             }
  
         // THIS ONE
-        }
+        // }
     }
 
     barrier_cross(&barrier);
