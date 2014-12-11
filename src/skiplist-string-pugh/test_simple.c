@@ -203,40 +203,40 @@ test(void* thread) {
         snprintf(strkey.key, STRING_LENGTH, "%07lu", key);
 
         // IF [UN]COMMENTING, DON'T FORGET BRACKET AT LINE 242
-        // if (ID==0) {
-        //     sl_merge(set, strkey, strval, &merge_operator1);
-        //     my_merge_count++;
-        // } else {
+        if (ID==0) {
+            sl_merge(set, strkey, strval, &merge_operator1);
+            my_merge_count++;
+        } else {
 
 
         // IF [UN]COMMENTING, DON'T FORGET BRACKET AT LINE 242
-        if (ID==0) {
+        // if (ID==0) {
 
-            //#keys to get
-            c = (uint32_t)(my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])));
-            int num_keys = (c & 127) + rand_min;
+        //     //#keys to get
+        //     c = (uint32_t)(my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])));
+        //     int num_keys = (c & 127) + rand_min;
 
-            strkey_t* keys = (strkey_t*) calloc(num_keys, sizeof(strkey_t));
-            strval_t* vals = (strval_t*) calloc(num_keys, sizeof(strval_t));
+        //     strkey_t* keys = (strkey_t*) calloc(num_keys, sizeof(strkey_t));
+        //     strval_t* vals = (strval_t*) calloc(num_keys, sizeof(strval_t));
 
-            //populate keys with rand numbers
-            for (i = 0; i < num_keys; ++i)
-            {
-                c = (uint32_t)(my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])));
-                key = (c & rand_max) + rand_min;
-                snprintf(keys[i].key, STRING_LENGTH, "%07lu", key);
-            }
+        //     //populate keys with rand numbers
+        //     for (i = 0; i < num_keys; ++i)
+        //     {
+        //         c = (uint32_t)(my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])));
+        //         key = (c & rand_max) + rand_min;
+        //         snprintf(keys[i].key, STRING_LENGTH, "%07lu", key);
+        //     }
 
-            int* status = NULL;
-            status = sl_multiget(set, keys, vals, num_keys);
+        //     int* status = NULL;
+        //     status = sl_multiget(set, keys, vals, num_keys);
 
-            free(status);
-            free(keys);
-            free(vals);
+        //     free(status);
+        //     free(keys);
+        //     free(vals);
 
-            my_multiget_count += num_keys;
+        //     my_multiget_count += num_keys;
 
-        } else {
+        // } else {
 
             if (unlikely(c <= scale_put)) {
                 int res;
