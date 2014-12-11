@@ -124,6 +124,11 @@ int optimistic_insert(sl_intset_t *set, strkey_t key, strval_t val) {
     LOCK(ND_GET_LOCK(n));
 
     n->next[0] = pred->next[0]; /* we already hold the lock for lvl 0 */
+
+    if (n->next[0] == set->head) {
+        printf("ERROR WTF\n");
+    }
+    
 #ifdef __tile__ 
     MEM_BARRIER;
 #endif
