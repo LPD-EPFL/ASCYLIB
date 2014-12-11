@@ -14,7 +14,6 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 #define MAX_BACKOFF 131071
 #define HERLIHY_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
-#define ZERO ((int64_t) 0)
 
 strval_t optimistic_find(sl_intset_t *set, strkey_t key) {
     PARSE_TRY(); PARSE_START_TS(0);
@@ -25,13 +24,13 @@ strval_t optimistic_find(sl_intset_t *set, strkey_t key) {
     for (lvl = levelmax - 1; lvl >= 0; lvl--) {
         succ = pred->next[lvl];
         // while (succ->key < key)
-        while (strkey_compare(succ->key, key) < ZERO) {
+        while (strkey_compare(succ->key, key) < 0) {
             pred = succ;
             succ = succ->next[lvl];
         }
 
         // if (succ->key == key)	/* at any search level */
-        if (strkey_compare(succ->key, key) == ZERO) {
+        if (strkey_compare(succ->key, key) == 0) {
             val = succ->val;
             break;
         }
@@ -49,13 +48,13 @@ sl_node_t* optimistic_find_node(sl_intset_t *set, strkey_t key) {
     for (lvl = levelmax - 1; lvl >= 0; lvl--) {
         succ = pred->next[lvl];
         // while (succ->key < key)
-        while (strkey_compare(succ->key, key) < ZERO) {
+        while (strkey_compare(succ->key, key) < 0) {
             pred = succ;
             succ = succ->next[lvl];
         }
 
         // if (succ->key == key)  /* at any search level */
-        if (strkey_compare(succ->key, key) == ZERO) {
+        if (strkey_compare(succ->key, key) == 0) {
             res = succ;
             break;
         }
@@ -68,7 +67,7 @@ sl_node_t*
 get_lock(sl_node_t* pred, strkey_t key, int lvl) {
     sl_node_t* succ = pred->next[lvl];
     //while (succ->key < key)
-    while (strkey_compare(succ->key, key) < ZERO) {
+    while (strkey_compare(succ->key, key) < 0) {
         pred = succ;
         succ = succ->next[lvl];
     }
@@ -76,7 +75,7 @@ get_lock(sl_node_t* pred, strkey_t key, int lvl) {
     LOCK(ND_GET_LOCK(pred));
     succ = pred->next[lvl];
     //while (succ->key < key)
-    while (strkey_compare(succ->key, key) < ZERO) {
+    while (strkey_compare(succ->key, key) < 0) {
         UNLOCK(ND_GET_LOCK(pred));
         pred = succ;
         LOCK(ND_GET_LOCK(pred));
@@ -96,7 +95,7 @@ int optimistic_insert(sl_intset_t *set, strkey_t key, strval_t val) {
         succ = pred->next[lvl];
         //while (succ->key < key)
 
-        while (strkey_compare(succ->key, key) < ZERO) {
+        while (strkey_compare(succ->key, key) < 0) {
             if (strcmp(succ->key.key, key.key) == 0) {
                 printf("WARNING");
             }
@@ -104,7 +103,7 @@ int optimistic_insert(sl_intset_t *set, strkey_t key, strval_t val) {
             succ = succ->next[lvl];
         }
         //if (unlikely(succ->key == key))	/* at any search level */
-        if (unlikely(strkey_compare(succ->key, key) == ZERO)) {
+        if (unlikely(strkey_compare(succ->key, key) == 0)) {
             return false;
         }
         update[lvl] = pred;
@@ -115,7 +114,7 @@ int optimistic_insert(sl_intset_t *set, strkey_t key, strval_t val) {
     GL_LOCK(set->lock);
     pred = get_lock(pred, key, 0);
     // if (unlikely(pred->next[0]->key == key))
-    if (unlikely(strkey_compare(pred->next[0]->key, key) == ZERO)) {
+    if (unlikely(strkey_compare(pred->next[0]->key, key) == 0)) {
         UNLOCK(ND_GET_LOCK(pred));
         GL_UNLOCK(set->lock);
         return false;
@@ -129,7 +128,7 @@ int optimistic_insert(sl_intset_t *set, strkey_t key, strval_t val) {
     if (n->next[0] == set->head) {
         printf("ERROR WTF\n");
     }
-
+    
 #ifdef __tile__ 
     MEM_BARRIER;
 #endif
@@ -160,7 +159,7 @@ strval_t optimistic_delete(sl_intset_t *set, strkey_t key) {
     for (lvl = levelmax - 1; lvl >= 0; lvl--) {
         succ = pred->next[lvl];
         //while (succ->key < key)
-        while (strkey_compare(succ->key, key) < ZERO) {
+        while (strkey_compare(succ->key, key) < 0) {
             pred = succ;
             succ = succ->next[lvl];
         }
@@ -174,7 +173,7 @@ strval_t optimistic_delete(sl_intset_t *set, strkey_t key) {
     do {
         succ = succ->next[0];
         //if (succ->key > key)
-        if (strkey_compare(succ->key, key) > ZERO) {
+        if (strkey_compare(succ->key, key) > 0) {
             GL_UNLOCK(set->lock);
             strval_t val_0 = { "" };
             return val_0;
@@ -183,10 +182,10 @@ strval_t optimistic_delete(sl_intset_t *set, strkey_t key) {
 
         LOCK(ND_GET_LOCK(succ));
         //is_garbage = (succ->key > succ->next[0]->key);
-        is_garbage = (strkey_compare(succ->key, succ->next[0]->key) > ZERO);
+        is_garbage = (strkey_compare(succ->key, succ->next[0]->key) > 0);
 
         //if (is_garbage || succ->key != key)
-        if (is_garbage || strkey_compare(succ->key, key) != ZERO) {
+        if (is_garbage || strkey_compare(succ->key, key) != 0) {
             UNLOCK(ND_GET_LOCK(succ));
         } else {
             break;
@@ -225,18 +224,18 @@ retry:
     pred = set->head;
     for (lvl = levelmax - 1; lvl >= 0; lvl--) {
         succ = pred->next[lvl];
-        while (strkey_compare(succ->key, key) < ZERO) {
+        while (strkey_compare(succ->key, key) < 0) {
             pred = succ;
             succ = succ->next[lvl];
         }
 
-        if (strkey_compare(succ->key, key) == ZERO) {
+        if (strkey_compare(succ->key, key) == 0) {
             //save succ val
             existing_val = succ->val;
             //lock and check
             LOCK(ND_GET_LOCK(succ));
             sl_node_t* check_node = optimistic_find_node(set, key);
-            if (check_node == NULL || check_node != succ || strval_compare(check_node->val, existing_val) != ZERO) {
+            if (check_node == NULL || check_node != succ || strval_compare(check_node->val, existing_val) != 0) {
               UNLOCK(ND_GET_LOCK(succ));
               goto retry;
             }
@@ -270,9 +269,9 @@ int compar(const void* p1, const void* p2) {
 
     //printf("pointers: %p, %p\n", *((aux_node_t *)p1)->key_ptr, *((aux_node_t *)p2)->key_ptr);
     int64_t c = strkey_compare( *((aux_node_t *)p1)->key_ptr, *((aux_node_t *)p2)->key_ptr);
-    if (c < ZERO){
+    if (c < 0){
         return -1;
-    } else if (c > ZERO) {
+    } else if (c > 0) {
         return 1;
     } else {
         return 0;
@@ -322,7 +321,7 @@ int* multiget(sl_intset_t *set, strkey_t* keys, strval_t* vals, size_t num_keys)
     node = set->head;
     while (node->next[0] != NULL) {
         
-        if (strkey_compare(node->key, *cur_key) == ZERO) {
+        if (strkey_compare(node->key, *cur_key) == 0) {
 
             if (num_locked > 0 && locked_nodes[num_locked-1] != node) {
                 LOCK(ND_GET_LOCK(node));
@@ -330,7 +329,7 @@ int* multiget(sl_intset_t *set, strkey_t* keys, strval_t* vals, size_t num_keys)
                 num_locked++;
             }
             
-            while (index < num_keys && strkey_compare(node->key, *cur_key) == ZERO) {
+            while (index < num_keys && strkey_compare(node->key, *cur_key) == 0) {
                 vals[aux_vect[index].pos] = node->val;
                 res[aux_vect[index].pos] = 1;
                 index++;
@@ -340,7 +339,7 @@ int* multiget(sl_intset_t *set, strkey_t* keys, strval_t* vals, size_t num_keys)
             }
         } 
 
-        if (strkey_compare(node->key, *cur_key) < ZERO && strkey_compare(node->next[0]->key, *cur_key) > ZERO) {
+        if (strkey_compare(node->key, *cur_key) < 0 && strkey_compare(node->next[0]->key, *cur_key) > 0) {
 
             if (num_locked > 0 && locked_nodes[num_locked-1] != node) {
                 LOCK(ND_GET_LOCK(node));
@@ -348,7 +347,7 @@ int* multiget(sl_intset_t *set, strkey_t* keys, strval_t* vals, size_t num_keys)
                 num_locked++;
             }
 
-            while (index < num_keys && strkey_compare(node->key, *cur_key) < ZERO && strkey_compare(node->next[0]->key, *cur_key) > ZERO) {
+            while (index < num_keys && strkey_compare(node->key, *cur_key) < 0 && strkey_compare(node->next[0]->key, *cur_key) > 0) {
                 vals[aux_vect[index].pos] = void_val;
                 res[aux_vect[index].pos] = 0;
                 index++;
