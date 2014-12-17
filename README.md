@@ -3,7 +3,7 @@ ASCYLIB
 
 ASCYLIB is a concurrent-search data-structure library. It contains over 30 implementantions of linked lists, hash tables, skip lists, and binary search trees (BST). ASCYLIB contains sequential, lock-based, and lock-free implementations for each data structure.
 
-ASCYLIB works on x86, SPARC, and Tilera architectures and contains test to evaluate the throughput, latency, latency distribution, and energy efficiency of the included data structures.
+ASCYLIB works on x86, SPARC, and Tilera architectures and contains tests to evaluate the throughput, latency, latency distribution, and energy efficiency of the included data structures.
 
 * Website             : http://lpd.epfl.ch/site/ascylib
 * Author              : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
