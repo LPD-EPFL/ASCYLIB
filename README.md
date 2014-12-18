@@ -13,7 +13,7 @@ ASCYLIB works on x86, SPARC, and Tilera architectures and contains tests to eval
   Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),
   ASPLOS '15
 
-BST-TK is a new lock-based BST, introduced in ASCYLIB. Details of the algorithm and a proof of correctness can be found in the following technical report: ...
+BST-TK is a new lock-based BST, introduced in ASCYLIB. Details of the algorithm and a proof of correctness can be found in the following technical report: https://infoscience.epfl.ch/record/203822
 
 
 Some of the initial implementations used in ASCYLIB were taken from Synchrobench (https://github.com/gramoli/synchrobench -  V. Gramoli. More than You Ever Wanted to Know about Synchronization. PPoPP 2015.). 
