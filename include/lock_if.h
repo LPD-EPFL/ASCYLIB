@@ -68,6 +68,21 @@ typedef struct tticket
     };
   };
 } tticket_t;
+#elif (WAIT_LOCK_STATS == 1)
+#    define PTLOCK_SIZE 32		/* choose 8, 16, 32, 64 */
+typedef struct tticket
+{
+  union
+  {
+    volatile uint32_t whole;
+    struct
+    {
+      volatile uint16_t tick;
+      volatile uint16_t curr;
+    };
+  };
+} tticket_t;
+
 #  else
 #    define PTLOCK_SIZE 32		/* choose 8, 16, 32, 64 */
 #  endif
@@ -93,6 +108,11 @@ typedef volatile UTYPE ptlock_t;
 #  define TAS_FREE 0
 #  define TAS_LCKD 1
 
+#if WAIT_LOCK_STATS == 1
+extern __thread volatile ticks wait_lock;
+extern __thread ticks gt_correction;
+#endif
+
 static inline void
 tas_init(ptlock_t* l)
 {
@@ -106,6 +126,23 @@ static inline uint32_t
 tas_lock(ptlock_t* l)
 {
   LOCK_TRY();
+#if WAIT_LOCK_STATS == 1
+  volatile tticket_t* t = (volatile tticket_t*) l;
+  volatile uint16_t tick = FAI_U16(&t->tick);
+
+  uint16_t cur = t->curr;
+  int16_t distance = tick - cur;
+  if (distance < 0 ) { printf("distatnce is %d / %u\n", distance, distance); }
+  if (t->curr == tick) return 0;
+
+  volatile ticks w_start = getticks(); 
+  while (t->curr != tick)
+    {
+      PAUSE;
+    }
+  volatile ticks w_end = getticks(); 
+  wait_lock += (w_end - w_start - gt_correction);
+#else
 #if RETRY_STATS == 1
   volatile tticket_t* t = (volatile tticket_t*) l;
   volatile uint16_t tick = FAI_U16(&t->tick);
@@ -126,6 +163,7 @@ tas_lock(ptlock_t* l)
     {
       PAUSE;
     }
+#endif
 #endif
   return 0;
 }
@@ -168,6 +206,10 @@ tas_unlock(ptlock_t* l)
 #  endif
 
 #if RETRY_STATS == 1
+  volatile tticket_t* t = (volatile tticket_t*) l;
+  PREFETCHW(t);
+  COMPILER_NO_REORDER(t->curr++;);
+#elif WAIT_LOCK_STATS == 1
   volatile tticket_t* t = (volatile tticket_t*) l;
   PREFETCHW(t);
   COMPILER_NO_REORDER(t->curr++;);

@@ -312,6 +312,10 @@ ifeq ($(STATS),1)
 	CFLAGS += -DRETRY_STATS=1
 endif
 
+ifeq ($(WSTATS),1)
+	CFLAGS += -DWAIT_LOCK_STATS=1
+endif
+
 ifeq ($(PAD),1)
 	CFLAGS += -DDO_PAD=1
 endif
