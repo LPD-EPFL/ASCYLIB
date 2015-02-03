@@ -65,6 +65,8 @@ seqgc:
 
 seq:	sequential
 
+wf_tests: lbll_lazy lbsl_herlihy_lb bst_tk lbht_lazy_gl
+
 
 seqht:
 	$(MAKE) "STM=SEQUENTIAL" "SEQ_NO_FREE=1" src/hashtable-seq

@@ -95,7 +95,7 @@ run_test() {
     echo $res
 }
 
-updates="0 10 50"
+updates="1 10 50"
 initials="512 2048 8192"
 
 test_structure() {
