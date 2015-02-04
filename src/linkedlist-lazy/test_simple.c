@@ -108,15 +108,15 @@ volatile ticks *total;
 __thread ticks getticks_correction = 0;
 ticks getticks_correction_calc() 
 {
-#    define GETTICKS_CALC_REPS 1000000
+#    define getticks_calc_reps 1000000
   ticks t_dur = 0;
   uint32_t i;
-  for (i = 0; i < GETTICKS_CALC_REPS; i++) {
+  for (i = 0; i < getticks_calc_reps; i++) {
     ticks t_start = getticks();
     ticks t_end = getticks();
     t_dur += t_end - t_start;
   }
-  getticks_correction = (ticks)(t_dur / (double) GETTICKS_CALC_REPS);
+  getticks_correction = (ticks)(t_dur / (double) getticks_calc_reps);
   /* printf("(cor: %llu)", (unsigned long long int) getticks_correction); */
   return getticks_correction;
 }
@@ -544,6 +544,11 @@ main(int argc, char **argv)
 		 t, getting_count[t], getting_count_succ[t], putting_count[t], putting_count_succ[t],
 		 removing_count[t], removing_count_succ[t]);
 	}
+#ifdef THROUGHPUTS
+  volatile uint64_t total_th = 0;
+  total_th+=getting_count[t] + putting_count[t] + removing_count[t];
+  printf("Thrd %lu: %zu\n", t, total_th);
+#endif
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];

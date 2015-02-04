@@ -103,6 +103,28 @@ volatile ticks *removing_count;
 volatile ticks *removing_count_succ;
 volatile ticks *total;
 
+#if WAIT_LOCK_STATS == 1
+__thread ticks getticks_correction = 0;
+ticks getticks_correction_calc() 
+{
+#    define getticks_calc_reps 1000000
+  ticks t_dur = 0;
+  uint32_t i;
+  for (i = 0; i < getticks_calc_reps; i++) {
+    ticks t_start = getticks();
+    ticks t_end = getticks();
+    t_dur += t_end - t_start;
+  }
+  getticks_correction = (ticks)(t_dur / (double) getticks_calc_reps);
+  /* printf("(cor: %llu)", (unsigned long long int) getticks_correction); */
+  return getticks_correction;
+}
+
+__thread volatile ticks wait_lock;
+__thread ticks gt_correction;
+#endif
+
+
 
 /* ################################################################### *
  * LOCALS
@@ -134,6 +156,11 @@ test(void* thread)
   DS_TYPE* set = td->set;
 
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
+
+#if WAIT_LOCK_STATS == 1
+  wait_lock = 0;
+  gt_correction = getticks_correction_calc();
+#endif
 
 #if defined(COMPUTE_LATENCY)
   volatile ticks my_putting_succ = 0;
@@ -248,6 +275,11 @@ test(void* thread)
   EXEC_IN_DEC_ID_ORDER_END(&barrier);
 
   SSPFDTERM();
+
+#if WAIT_LOCK_STATS == 1
+    fprintf(stderr, "Thread %d cycles waiting for locks: %llu\n", ID, (long long unsigned int) wait_lock);
+#endif
+
 #if GC == 1
   ssmem_term();
   free(alloc);
@@ -507,6 +539,11 @@ main(int argc, char **argv)
     
   for(t=0; t < num_threads; t++) 
     {
+#ifdef THROUGHPUTS
+  volatile uint64_t total_th = 0;
+  total_th+=getting_count[t] + putting_count[t] + removing_count[t];
+  printf("Thrd %lu: %zu\n", t, total_th);
+#endif
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];
