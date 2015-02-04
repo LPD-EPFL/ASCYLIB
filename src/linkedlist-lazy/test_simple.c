@@ -275,7 +275,7 @@ test(void* thread)
 
   SSPFDTERM();
 #if WAIT_LOCK_STATS == 1
-    fprintf(stderr, "Thread %d cycles waiting for locks: %llu\n", ID, (long long unsigned int) wait_lock);
+    printf("Thread %d cycles waiting for locks: %llu\n", ID, (long long unsigned int) wait_lock);
 #endif
 #if GC == 1
   ssmem_term();

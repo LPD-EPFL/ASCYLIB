@@ -14,7 +14,7 @@ echo "1%Updates 10%Updates 50%Updates" >> ./data/throughputs_ll.txt
 thrs=""
 devs=""
 for u in ${updates}; do
-    ./bin/lb-ll_lazy -n20 -u${u} -i${i} -r${range} | grep "Thrd" | awk '{print $3}' > ./data/temp
+    ./bin/lb-ll_lazy -n20 -u${u} -i${i} -r${range} -d${def_duration}| grep "Thrd" | awk '{print $3}' > ./data/temp
     res=$(./scripts/podc/avg_std_dev.py -i ./data/temp)
     th=$(echo $res | cut -d' ' -f 2)
     dev=$(echo $res | cut -d' ' -f 5)
@@ -31,7 +31,7 @@ echo "1%Updates 10%Updates 50%Updates" >> ./data/throughputs_sl.txt
 thrs=""
 devs=""
 for u in ${updates}; do
-    ./bin/lb-sl_herlihy -n20 -u${u} -i${i} -r${range} | grep "Thrd" | awk '{print $3}' > ./data/temp
+    ./bin/lb-sl_herlihy -n20 -u${u} -i${i} -r${range} -d${def_duration}| grep "Thrd" | awk '{print $3}' > ./data/temp
     res=$(./scripts/podc/avg_std_dev.py -i ./data/temp)
     th=$(echo $res | cut -d' ' -f 2)
     dev=$(echo $res | cut -d' ' -f 5)
@@ -48,7 +48,7 @@ echo "1%Updates 10%Updates 50%Updates" >> ./data/throughputs_ht.txt
 thrs=""
 devs=""
 for u in ${updates}; do
-    ./bin/lb-ht_lazy_gl -n20 -u${u} -i${i} -r${range} | grep "Thrd" | awk '{print $3}' > ./data/temp
+    ./bin/lb-ht_lazy_gl -n20 -u${u} -i${i} -r${range} -d${def_duration}| grep "Thrd" | awk '{print $3}' > ./data/temp
     res=$(./scripts/podc/avg_std_dev.py -i ./data/temp)
     th=$(echo $res | cut -d' ' -f 2)
     dev=$(echo $res | cut -d' ' -f 5)
@@ -65,7 +65,7 @@ echo "1%Updates 10%Updates 50%Updates" >> ./data/throughputs_bst.txt
 thrs=""
 devs=""
 for u in ${updates}; do
-    ./bin/lb-bst_tk -n20 -u${u} -i${i} -r${range} | grep "Thrd" | awk '{print $3}' > ./data/temp
+    ./bin/lb-bst_tk -n20 -u${u} -i${i} -r${range} -d${def_duration}| grep "Thrd" | awk '{print $3}' > ./data/temp
     res=$(./scripts/podc/avg_std_dev.py -i ./data/temp)
     th=$(echo $res | cut -d' ' -f 2)
     dev=$(echo $res | cut -d' ' -f 5)
