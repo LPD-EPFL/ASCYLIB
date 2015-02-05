@@ -5,7 +5,8 @@ INIT=one make WSTATS=1 wf_tests
 updates="1 50 100"
 initials="512 2048 8192"
 def_duration=5000
-cycles_duration=`echo "${def_duration} * 2800000" | bc`
+#cycles_duration=`echo "${def_duration} * 2800000" | bc`
+cycles_duration=100
 
 rm ./data/locks*
 

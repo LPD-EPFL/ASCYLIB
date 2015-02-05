@@ -124,7 +124,9 @@ __thread volatile ticks wait_lock;
 __thread ticks gt_correction;
 #endif
 
-
+#if SLOW_CORE == 1
+__thread uint32_t slow_thread;
+#endif
 
 /* ################################################################### *
  * LOCALS
@@ -149,6 +151,14 @@ test(void* thread)
 {
   thread_data_t* td = (thread_data_t*) thread;
   uint32_t ID = td->id;
+#if SLOW_CORE == 1
+  if (td->id == 0) {
+    slow_thread = 1;
+  } else {
+    slow_thread = 0;
+  }
+#endif
+
   int phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();

@@ -28,6 +28,12 @@
 
 #include "skiplist-lock.h"
 
+#if SLOW_CORE == 1
+#define SLOW_RATE 10
+extern __thread uint32_t slow_thread;
+extern __thread unsigned long * seeds;
+#endif
+
 sval_t optimistic_find(sl_intset_t *set, skey_t key);
 int optimistic_insert(sl_intset_t *set, skey_t key, sval_t val);
 sval_t optimistic_delete(sl_intset_t *set, skey_t key);

@@ -105,6 +105,18 @@ bst_tk_delete(intset_t* set, skey_t key)
 	}
     }
 
+#if SLOW_CORE==1
+    if (slow_thread == 1) {
+        uint32_t num =  my_random(&(seeds[0]), &(seeds[1]), &(seeds[2]));
+        if (num % SLOW_RATE == 0) {
+           ticks del = (num % 999) * 1000;
+           MEM_BARRIER;
+           cpause(del);              
+           MEM_BARRIER;
+        }
+    }
+#endif
+
   tl_unlock(&ppred->lock, pright);
 
 #if GC == 1
@@ -220,6 +232,17 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
       pred->left = nr;
     }
 
+#if SLOW_CORE==1
+    if (slow_thread == 1) {
+        uint32_t num =  my_random(&(seeds[0]), &(seeds[1]), &(seeds[2]));
+        if (num % SLOW_RATE == 0) {
+           ticks del = (num % 999) * 1000;
+           MEM_BARRIER;
+           cpause(del);              
+           MEM_BARRIER;
+        }
+    }
+#endif
 
   tl_unlock(&pred->lock, right);
 

@@ -140,6 +140,17 @@ optimistic_find(sl_intset_t *set, skey_t key)
 inline void
 unlock_levels(sl_intset_t* set, sl_node_t **nodes, int highestlevel)
 {
+#if SLOW_CORE==1
+    if (slow_thread == 1) {
+        uint32_t num =  my_random(&(seeds[0]), &(seeds[1]), &(seeds[2]));
+        if (num % SLOW_RATE == 0) {
+           ticks del = (num % 999) * 1000;
+           MEM_BARRIER;
+           cpause(del);              
+           MEM_BARRIER;
+        }
+    }
+#endif
 
 #if defined(LL_GLOBAL_LOCK)
   GL_UNLOCK(set->lock);

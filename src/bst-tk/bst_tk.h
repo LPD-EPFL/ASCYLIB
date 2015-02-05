@@ -24,6 +24,13 @@
 
 #include "bst.h"
 
+#if SLOW_CORE == 1
+#define SLOW_RATE 10
+extern __thread uint32_t slow_thread;
+extern __thread unsigned long * seeds;
+#endif
+
+
 sval_t bst_tk_delete(intset_t* set, skey_t key);
 sval_t bst_tk_find(intset_t* set, skey_t key);
 int bst_tk_insert(intset_t* set, skey_t key, sval_t val);
