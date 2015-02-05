@@ -316,6 +316,10 @@ ifeq ($(WSTATS),1)
 	CFLAGS += -DWAIT_LOCK_STATS=1
 endif
 
+ifeq ($(ZIPF),1)
+	CFLAGS += -DZIPF_4096=1
+endif
+
 ifeq ($(SLOW),1)
 	CFLAGS += -DSLOW_CORE=1
 endif

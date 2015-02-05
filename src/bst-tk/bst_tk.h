@@ -25,7 +25,6 @@
 #include "bst.h"
 
 #if SLOW_CORE == 1
-#define SLOW_RATE 10
 extern __thread uint32_t slow_thread;
 extern __thread unsigned long * seeds;
 #endif

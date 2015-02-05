@@ -2,7 +2,7 @@
 
 INIT=one make SLOW=1 STATS=1 wf_tests
 
-updates="1 50 100"
+updates="1 10 50"
 initials="512 2048 8192"
 def_duration=5000
 
