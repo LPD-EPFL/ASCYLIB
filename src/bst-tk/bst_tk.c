@@ -35,9 +35,17 @@ bst_tk_delete(intset_t* set, skey_t key)
   volatile uint64_t curr_ver = 0;
   uint64_t pred_ver = 0, ppred_ver = 0, right = 0, pright = 0;
 
+#if RETRY_STATS ==1 
+  int done = 0;
+#endif
  retry:
+#if RETRY_STATS == 1
+  if (done < 2) { 
   PARSE_TRY();
   UPDATE_TRY();
+  done++;
+  }
+#endif
 
   curr = set->head;
 
@@ -162,9 +170,17 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
   volatile uint64_t curr_ver = 0;
   uint64_t pred_ver = 0, right = 0;
 
+#if RETRY_STATS ==1 
+  int done = 0;
+#endif
  retry:
+#if RETRY_STATS == 1
+  if (done < 2) { 
   PARSE_TRY();
   UPDATE_TRY();
+  done++;
+  }
+#endif
 
   curr = set->head;
 

@@ -69,6 +69,7 @@ typedef struct tticket
   };
 } tticket_t;
 #elif (WAIT_LOCK_STATS == 1)
+extern RETRY_STATS_VARS;
 #    define PTLOCK_SIZE 32		/* choose 8, 16, 32, 64 */
 typedef struct tticket
 {
@@ -142,6 +143,14 @@ tas_lock(ptlock_t* l)
     }
   volatile ticks w_end = getticks(); 
   wait_lock += (w_end - w_start - gt_correction);
+#if RETRY_STATS == 1
+#define FACTOR 2800
+    ticks tot = wait_lock/FACTOR; 
+    if (tot >= HIST_SIZE) {
+        tot=HIST_SIZE-1;
+    }
+    lat[tot]++;
+#endif
 #else
 #if RETRY_STATS == 1
   volatile tticket_t* t = (volatile tticket_t*) l;

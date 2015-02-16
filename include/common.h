@@ -33,7 +33,7 @@
 
 #if SLOW_CORE == 1
 #define SLOW_RATE 10
-#define DELAY_US 1000
+#define DELAY_US 280
 #endif
 
 

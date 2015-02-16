@@ -61,10 +61,16 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
 {
   node_l_t *curr, *pred, *newnode;
   int result = -1;
-	
+#if RETRY_STATS == 1
+    size_t num = 0;
+#endif 
+
   do
     {
-      PARSE_TRY();
+#if RETRY_STATS == 1
+    num++;
+#endif 
+     PARSE_TRY();
       pred = set->head;
       curr = pred->next;
       while (likely(curr->key < key))
@@ -82,6 +88,14 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
 	    {
 	      continue;
 	    }
+
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
 	  return false;
 	}
 #endif
@@ -117,6 +131,14 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
       UNLOCK(ND_GET_LOCK(pred));
     }
   while (result < 0);
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
+
   return result;
 }
 
@@ -130,9 +152,15 @@ parse_delete(intset_l_t *set, skey_t key)
   node_l_t *pred, *curr;
   sval_t result = 0;
   int done = 0;
-	
+#if RETRY_STATS == 1
+    size_t num = 0;
+#endif
   do
     {
+
+#if RETRY_STATS == 1
+    num++;
+#endif
       PARSE_TRY();
       pred = set->head;
       curr = pred->next;
@@ -151,6 +179,14 @@ parse_delete(intset_l_t *set, skey_t key)
 	    {
 	      continue;
 	    }
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
+
 	  return false;
 	}
 #endif
@@ -190,5 +226,13 @@ if (parse_validate(pred, curr))
       UNLOCK(ND_GET_LOCK(pred));
     }
   while (!done);
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
+
   return result;
 }

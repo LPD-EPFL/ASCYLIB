@@ -35,15 +35,22 @@
 #define _LATENCY_H_
 
 #if RETRY_STATS == 1
+#define HIST_SIZE 100
 #  define RETRY_STATS_VARS						\
-  __thread size_t __parse_try, __update_try, __cleanup_try, __lock_try, __lock_queue, __lock_try_once
+  __thread size_t __parse_try, __update_try, __cleanup_try, __lock_try, __lock_queue, __lock_try_once,  rest[HIST_SIZE], lat[HIST_SIZE]
 #  define RETRY_STATS_VARS_GLOBAL					\
-  size_t __parse_try_global, __update_try_global, __cleanup_try_global, __lock_try_global, __lock_queue_global
+  size_t __parse_try_global, __update_try_global, __cleanup_try_global, __lock_try_global, __lock_queue_global, rest_gl[HIST_SIZE], lat_gl[HIST_SIZE]
 
 extern RETRY_STATS_VARS;
 extern RETRY_STATS_VARS_GLOBAL;
 
+
 #  define RETRY_STATS_ZERO()			\
+  int iii=0; \
+  for (iii=0;iii<HIST_SIZE;iii++) { \
+    rest[iii]=0; \
+    lat[iii]=0; \
+  } \
   __parse_try = 0;				\
   __update_try = 0;				\
   __cleanup_try = 0;				\
@@ -70,6 +77,11 @@ extern RETRY_STATS_VARS_GLOBAL;
 #  define LOCK_TRY_ONCE_CLEAR()    __lock_try_once = 1
 #  define RETRY_STATS_PRINT(thr, put, rem, upd_suc)   retry_stats_print(thr, put, rem, (upd_suc))
 #  define RETRY_STATS_SHARE()			\
+  int i=0; \
+  for (i=0;i<HIST_SIZE;i++) { \
+    rest_gl[i]+=rest[i]; \
+    lat_gl[i]+=lat[i]; \
+  } \
   __parse_try_global +=  __parse_try;		\
   __update_try_global += __update_try;		\
   __cleanup_try_global += __cleanup_try;	\
@@ -79,6 +91,18 @@ extern RETRY_STATS_VARS_GLOBAL;
 static inline void 
 retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
 {
+ int i;
+    printf("Retries: ");
+ for (i=0;i<HIST_SIZE;i++) {
+    printf("%zu ",rest_gl[i]);
+ }
+ printf("\n");
+    printf("Latencies: ");
+ for (i=0;i<HIST_SIZE;i++) {
+    printf("%zu ",lat_gl[i]);
+ }
+ printf("\n");
+
   double ratio_all = 100.0 * (((double) __parse_try_global / thr) - 1);
   printf("#parse_all:    %-10zu %f %%\n", __parse_try_global, ratio_all);
   size_t updates = put + rem;
@@ -100,6 +124,9 @@ retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
 #  define RETRY_STATS_VARS
 #  define RETRY_STATS_VARS_GLOBAL
 #  define RETRY_STATS_ZERO()
+# define RET_INIT
+# define RET_INC
+#define RET_CHECK
 
 #  define PARSE_TRY()     
 #  define UPDATE_TRY()    
