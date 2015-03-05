@@ -1,7 +1,7 @@
 #!/bin/bash
 
-config_workload=./scripts/osdi/config/scy1.long
-config_execs=./scripts/osdi/config/all
+config_workload=./scripts/asplos/config/scy1.long
+config_execs=./scripts/asplos/config/all
 
 
 skip=0;
