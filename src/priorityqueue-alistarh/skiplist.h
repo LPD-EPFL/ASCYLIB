@@ -43,16 +43,16 @@
 #include "ssalloc.h"
 #include "ssmem.h"
 
-#define DEFAULT_ELASTICITY              4	//??
-#define DEFAULT_ALTERNATE               0	//??
-#define DEFAULT_EFFECTIVE               1	//??
+#define DEFAULT_ELASTICITY              4
+#define DEFAULT_ALTERNATE               0
+#define DEFAULT_EFFECTIVE               1
 
 extern unsigned int levelmax, size_pad_32;
 extern __thread ssmem_allocator_t* alloc;
 
-#define TRANSACTIONAL                   DEFAULT_ELASTICITY	//??
+#define TRANSACTIONAL                   DEFAULT_ELASTICITY
 
-typedef intptr_t level_t;	//??
+typedef intptr_t level_t;
 
 typedef volatile struct sl_node
 {
@@ -61,12 +61,12 @@ typedef volatile struct sl_node
   uint32_t deleted;
   uint32_t toplevel;
   volatile struct sl_node* next[1];
-#if defined(DO_PAD)						//??
+#if defined(DO_PAD)
   uint8_t padding[64 - 32];
 #endif 
 } sl_node_t;
 
-typedef ALIGNED(CACHE_LINE_SIZE) struct sl_intset //ALIGNED??
+typedef ALIGNED(CACHE_LINE_SIZE) struct sl_intset
 {
   sl_node_t* head;
 } sl_intset_t;

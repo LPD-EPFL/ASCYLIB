@@ -1,8 +1,8 @@
 /*   
- *   File: test_simple.c
+ *   File: test_correct.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
  *   Description: 
- *   test_simple.c is part of ASCYLIB
+ *   test_correct.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  * 	     	      Tudor David <tudor.david@epfl.ch>
@@ -40,7 +40,6 @@
 #include <malloc.h>
 #include "utils.h"
 #include "atomic_ops.h"
-#include "rapl_read.h"
 #ifdef __sparc__
 #  include <sys/types.h>
 #  include <sys/processor.h>
@@ -53,20 +52,20 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k,t)  pq_contains(s, k)
-#define DS_ADD(s,k,t)       pq_insert(s, k, k)
-#define DS_REMOVE(s,k,t)    pq_deleteMin(s)
-#define DS_SIZE(s)          sl_set_size(s)
-#define DS_NEW()            sl_set_new()
+#define DS_CONTAINS(s,k)  pq_contains(s, k)
+#define DS_ADD(s,k,v)     pq_insert(s, k, (sval_t) v)
+#define DS_REMOVE(s,k)    pq_deleteMin(s)
+#define DS_SIZE(s)        sl_set_size(s)
+#define DS_NEW()          sl_set_new()
 
-#define DS_TYPE             sl_intset_t
-#define DS_NODE             sl_node_t
+#define DS_TYPE           sl_intset_t
+#define DS_NODE           sl_node_t
 
 /* ################################################################### *
  * GLOBALS
  * ################################################################### */
 
-RETRY_STATS_VARS_GLOBAL;
+#define PQ_PERCENTAGE 10 //Percentage of nodes accepted to be returned by deleteMin
 
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
@@ -87,7 +86,7 @@ uint32_t rand_max;
 #define rand_min 1
 
 static volatile int stop;
-TEST_VARS_GLOBAL;
+__thread uint32_t phys_id;
 
 volatile ticks *putting_succ;
 volatile ticks *putting_fail;
@@ -118,7 +117,7 @@ barrier_t barrier, barrier_global;
 
 typedef struct thread_data
 {
-  uint32_t id;
+  uint8_t id;
   DS_TYPE* set;
 } thread_data_t;
 
@@ -126,8 +125,8 @@ void*
 test(void* thread) 
 {
   thread_data_t* td = (thread_data_t*) thread;
-  uint32_t ID = td->id;
-  int phys_id = the_cores[ID];
+  uint8_t ID = td->id;
+  phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();
 
@@ -160,14 +159,14 @@ test(void* thread)
 #if GC == 1
   alloc = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
   assert(alloc != NULL);
-  ssmem_alloc_init_fs_size(alloc, SSMEM_DEFAULT_MEM_SIZE, SSMEM_GC_FREE_SET_SIZE, ID);
+  ssmem_alloc_init(alloc, SSMEM_DEFAULT_MEM_SIZE, ID);
+  ssmem_allocator_t* alloc_data = (ssmem_allocator_t*) malloc(sizeof(ssmem_allocator_t));
+  assert(alloc_data != NULL);
+  ssmem_alloc_init(alloc_data, SSMEM_DEFAULT_MEM_SIZE, ID);
 #endif
     
-
-  RR_INIT(phys_id);
-  barrier_cross(&barrier);
-
   uint64_t key;
+  size_t* val = NULL;
   int c = 0;
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
   uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
@@ -180,17 +179,23 @@ test(void* thread)
       num_elems_thread++;
     }
     
-#if INITIALIZE_FROM_ONE == 1
-  num_elems_thread = (ID == 0) * initial;
-#endif
-
   for(i = 0; i < num_elems_thread; i++) 
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(set, key, NULL) == false)
+      if (val == NULL)
+	{
+	  val = (size_t*) ssmem_alloc(alloc_data, sizeof(size_t));
+	}
+      val[0] = key;
+
+      if(DS_ADD(set, key, val) == false)
 	{
 	  i--;
+	}
+      else
+	{
+	  val = NULL;
 	}
     }
   MEM_BARRIER;
@@ -203,19 +208,74 @@ test(void* thread)
     }
 
 
-  RETRY_STATS_ZERO();
- 
   barrier_cross(&barrier_global);
-
-  RR_START_SIMPLE();
 
   while (stop == 0) 
     {
-      TEST_LOOP(NULL);
+      c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
+      key = (c & rand_max) + rand_min;
+
+      if (unlikely(c <= scale_put))
+	{
+	  if (val == NULL)
+	    {
+	      val = (size_t*) ssmem_alloc(alloc_data, sizeof(size_t));
+	    }
+	  val[0] = key;
+
+	  int res;
+	  START_TS(1);
+	  res = DS_ADD(set, key, val);
+	  END_TS(1, my_putting_count);
+	  if(res)
+	    {
+	      ADD_DUR(my_putting_succ);
+	      my_putting_count_succ++;
+	      val = NULL;
+	    }
+	  ADD_DUR_FAIL(my_putting_fail);
+	  my_putting_count++;
+	} 
+      else if(unlikely(c <= scale_rem))
+	{
+	  size_t* removed;
+	  START_TS(2);
+	  removed = (size_t*) DS_REMOVE(set, key);
+	  END_TS(2, my_removing_count);
+	  if(removed != NULL) 
+	    {
+	      ADD_DUR(my_removing_succ);
+	      my_removing_count_succ++;
+	      if (removed[0] > (rand_max-rand_min)*PQ_PERCENTAGE+rand_min)
+		{
+		  printf(" *[REM]* WRONG for key: %-10lu : %-10lu @ %p\n", key, removed[0], removed);
+		}
+	      ssmem_free(alloc_data, removed);
+	    }
+	  ADD_DUR_FAIL(my_removing_fail);
+	  my_removing_count++;
+	}
+      else
+	{ 
+	  size_t* res;
+	  START_TS(0);
+	  res = (size_t*) DS_CONTAINS(set, key);
+	  END_TS(0, my_getting_count);
+	  if(res != NULL) 
+	    {
+	      ADD_DUR(my_getting_succ);
+	      my_getting_count_succ++;
+	      if (res[0] != key)
+		{
+		  printf(" *[GET]* WRONG for key: %-10lu : %-10lu @ %p\n", key, res[0], res);
+		}
+	    }
+	  ADD_DUR_FAIL(my_getting_fail);
+	  my_getting_count++;
+	}
     }
 
   barrier_cross(&barrier);
-  RR_STOP_SIMPLE();
 
   if (!ID)
     {
@@ -244,7 +304,6 @@ test(void* thread)
   EXEC_IN_DEC_ID_ORDER(ID, num_threads)
     {
       print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
-      RETRY_STATS_SHARE();
     }
   EXEC_IN_DEC_ID_ORDER_END(&barrier);
 
@@ -252,6 +311,7 @@ test(void* thread)
 #if GC == 1
   ssmem_term();
   free(alloc);
+  free(alloc_data);
 #endif
 
   pthread_exit(NULL);
@@ -347,6 +407,9 @@ main(int argc, char **argv)
 	case 'l':
 	  load_factor = atoi(optarg);
 	  break;
+	/* case 'b': */
+	/*   num_buckets_param = atoi(optarg); */
+	/*   break; */
 	case 'v':
 	  print_vals_num = atoi(optarg);
 	  break;
@@ -373,6 +436,7 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
+  printf("## Test correctness \n");
   printf("## Initial: %zu / Range: %zu\n", initial, range);
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
@@ -421,13 +485,6 @@ main(int argc, char **argv)
   stop = 0;
     
   levelmax = floor_log_2((unsigned int) initial);
-  size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
-  while (size_pad_32 & 31)
-    {
-      size_pad_32++;
-    }
-
-  printf("size of node padded: %u\n", size_pad_32);
 
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
@@ -564,10 +621,6 @@ main(int argc, char **argv)
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
-
-  RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
-  RR_PRINT_CORRECTED();
-  RETRY_STATS_PRINT(total, putting_count_total, removing_count_total, putting_count_total_succ + removing_count_total_succ);
     
   pthread_exit(NULL);
     

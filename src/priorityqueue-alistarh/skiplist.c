@@ -24,16 +24,16 @@
 #include "skiplist.h"	
 
 unsigned int levelmax;
-unsigned int size_pad_32;	//??
-__thread ssmem_allocator_t* alloc;	//??
+unsigned int size_pad_32;
+__thread ssmem_allocator_t* alloc;
 
 inline int
-get_rand_level()	//Why not uniform??
+get_rand_level()
 {
   int i, level = 1;
   for (i = 0; i < levelmax - 1; i++)
     {
-      if ((rand_range(101)) < 50)	//random range produces [1,102) so this is not %50 ??
+      if ((rand_range(101)) < 50)
   	level++;
       else
   	break;
@@ -59,7 +59,7 @@ floor_log_2(unsigned int n)
  * Create a new node without setting its next fields. 
  */
 sl_node_t*
-sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional) //?????? Understand this function
+sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
 {
   sl_node_t *node;
 

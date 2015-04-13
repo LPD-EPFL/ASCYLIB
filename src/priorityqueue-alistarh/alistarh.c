@@ -36,33 +36,15 @@ __thread size_t lat_parsing_deleteMin = 0;
 
 extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
-#define FRASER_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */	//How is it different than the one above?
+#define FRASER_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
 
-#define ALISTARH_NUMBER_OF_THREADS 			4	//p
-#define ALISTARH_STARTING_HEIGHT_CONSTANT	(12-floor_log_2(ALISTARH_NUMBER_OF_THREADS))	//K
-#define ALISTARH_JUMP_LENGTH_CONSTANT		3	//M
-#define ALISTARH_CLEANER_PERCENTAGE			3
-
+#define ALISTARH_NUMBER_OF_THREADS 			4	//p //How can I get it?
+#define ALISTARH_STARTING_HEIGHT_CONSTANT	(8-floor_log_2(ALISTARH_NUMBER_OF_THREADS))	//K
+#define ALISTARH_STARTING_HEIGHT			(ALISTARH_STARTING_HEIGHT_CONSTANT+floor_log_2(ALISTARH_NUMBER_OF_THREADS))	//H
+#define ALISTARH_MAX_JUMP_LENGTH			(2*floor_log_2(floor_log_2(floor_log_2(ALISTARH_NUMBER_OF_THREADS)))+1)	//J
+#define ALISTARH_LEVELS_TO_DESCEND			1 //D
+#define ALISTARH_CLEANER_PERCENTAGE			5
 //How can make these evaluated only once??
-inline int 
-alistarh_levelsToDescend() //D
-{
-  int loglog = floor_log_2(floor_log_2(ALISTARH_NUMBER_OF_THREADS));
-  return loglog>1 ? loglog : 1;
-}
-
-inline int
-alistarh_startingHeight() //H
-{
-  int startingHeight = floor_log_2(ALISTARH_NUMBER_OF_THREADS)+ALISTARH_STARTING_HEIGHT_CONSTANT;
-  return startingHeight-(startingHeight%alistarh_levelsToDescend());
-}
-
-inline long int
-alistarh_maxJumpLength() //J
-{
-  return ALISTARH_JUMP_LENGTH_CONSTANT*floor_log_2(floor_log_2(floor_log_2(ALISTARH_NUMBER_OF_THREADS)));
-}
 
 int				
 fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **right_list)
@@ -219,7 +201,6 @@ fraser_left_search(sl_intset_t *set, skey_t key)
 sval_t
 fraser_find(sl_intset_t *set, skey_t key)
 {
-  printf("in find\n");
   sval_t result = 0;
   PARSE_START_TS(0);
   sl_node_t* left = fraser_left_search(set, key);
@@ -229,7 +210,6 @@ fraser_find(sl_intset_t *set, skey_t key)
     {
       result = left->val;
     }
-  printf("out of find\n");
   return result;
 }
 
@@ -291,9 +271,7 @@ fraser_remove(sl_intset_t *set, skey_t key)
 inline sval_t
 alistarh_cleaner(sl_intset_t *set)
 {
-  printf("in cleaner\n");
   sval_t result = 0;
-  sl_node_t *preds[FRASER_MAX_MAX_LEVEL], *succs[FRASER_MAX_MAX_LEVEL];
   sl_node_t* node = GET_UNMARKED(set->head->next[0]);
   while(node->next[0]!=NULL)
   {
@@ -303,73 +281,66 @@ alistarh_cleaner(sl_intset_t *set)
       if (my_delete)
       {
         result = node->val;
-        fraser_search(set, node->key, preds, succs);
+        fraser_search(set, node->key, NULL, NULL);
         break;
       }
     }
     node = GET_UNMARKED(node->next[0]);
   }
-  
-  #if GC == 1
-    ssmem_free(alloc, (void*) succs[0]);
-  #endif
-  printf("out of cleaner\n");
   return result;
 }
 
 sval_t
 alistarh_deleteMin(sl_intset_t *set)
 {
-  printf("in deleteMin\n");
+  sval_t result = 0;
+  sl_node_t *next, *node = set->head;
+  int i, level;
+
  retry:
   UPDATE_TRY();
   
-  PARSE_START_TS(3);		//Should I keep this??
-  int i, level = alistarh_startingHeight();
-  sval_t result = 0;
-  printf("1\n");
-  sl_node_t *next, *node = set->head;
-  for(; level>=0; level--)//descend only one level
+  PARSE_START_TS(3);
+  result = 0;
+  node = set->head;
+  next = NULL;
+  for(level = ALISTARH_STARTING_HEIGHT; level>=0; level-=ALISTARH_LEVELS_TO_DESCEND)
     {
-	  printf("2\n");
-	  i = (int)rand_range(alistarh_maxJumpLength+1)-1;
+	  i = (int)rand_range(ALISTARH_MAX_JUMP_LENGTH+1)-1;
       for (; i>0; i--)
       {
-		printf("3\n");
         next = GET_UNMARKED(node->next[level]);
         if (next==NULL || next->next[0]==NULL)
           break;
-        printf("after if\n");
         node = next;
-        printf("3,5\n");
       }
     }
   PARSE_END_TS(3, lat_parsing_deleteMin++);
-  printf("4\n");
+  
+  if (node==set->head)
+    goto retry;
+  
   int my_delete = mark_node_ptrs(node);
   
   if (my_delete)
     {
-	  printf("5\n");
+	  fraser_search(set, node->key, NULL, NULL);
       result = node->val;
     }
     
   else
     {
-	  printf("6\n");
 	  if (unlikely(rand_range(100) < ALISTARH_CLEANER_PERCENTAGE))
 		result = alistarh_cleaner(set);
 	  else
 	    goto retry;
 	}
-  printf("out deleteMin\n");
   return result;
 }
 
 int
 fraser_insert(sl_intset_t *set, skey_t key, sval_t val) 
 {
-  printf("in insert\n");
   sl_node_t *new, *pred, *succ;
   sl_node_t *succs[FRASER_MAX_MAX_LEVEL], *preds[FRASER_MAX_MAX_LEVEL];
   int i, found;
@@ -384,7 +355,6 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
   if(found)
     {
       PARSE_END_INC(lat_parsing_put);
-      printf("out of insert\n");
       return false;
     }
 
@@ -416,7 +386,6 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  if (IS_MARKED(new->next[i]))
 	    {
 	      PARSE_END_INC(lat_parsing_put);
-	      printf("out of insert\n");
 	      return true;
 	    }
 	  if (ATOMIC_CAS_MB(&pred->next[i], succ, new))
@@ -426,7 +395,6 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
 	}
     }
   PARSE_END_INC(lat_parsing_put);
-  printf("out of insert\n");
   return true;
 }
 
