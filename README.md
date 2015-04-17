@@ -13,7 +13,9 @@ ASCYLIB works on x86, SPARC, and Tilera architectures and contains tests to eval
   Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),
   ASPLOS '15
 
-BST-TK is a new lock-based BST, introduced in ASCYLIB. Details of the algorithm and a proof of correctness can be found in the following technical report: https://infoscience.epfl.ch/record/203822
+BST-TK is a new lock-based BST, introduced in ASCYLIB. 
+Additionally, CLHT is a new hash hash table, introduced in ASCYLIB. We provide lock-free and lock-based variants of CLHT as a separate repository (https://github.com/LPD-EPFL/CLHT).
+Details of the algorithms and a proofs/sketches of correctness can be found in the following technical report: https://infoscience.epfl.ch/record/203822
 
 
 Some of the initial implementations used in ASCYLIB were taken from Synchrobench (https://github.com/gramoli/synchrobench -  V. Gramoli. More than You Ever Wanted to Know about Synchronization. PPoPP 2015.). 
@@ -24,22 +26,22 @@ Compilation
 ASCYLIB requires the ssmem memory allocator (https://github.com/LPD-EPFL/ssmem).
 We have already compiled and included ssmem in external/lib for x86_64, SPARC, and the Tilera architectures.
 Still, if you would like to create your own build of ssmem, take the following steps.
-Clone ssmem, do `make libssmem.a` and then copy `libssmem.a` in `ASCYLIB/external/lib` and `ASCYLIB/include/smmem.h` in `CLHT/external/include`.
+Clone ssmem, do `make libssmem.a` and then copy `libssmem.a` in `ASCYLIB/external/lib` and `smmem.h` in `ASCYLIB/external/include`.
 
 Additionally, the sspfd profiler library is required (https://github.com/trigonak/sspfd).
 We have already compiled and included sspfd in external/lib for x86_64, SPARC, and the Tilera architectures.
 Still, if you would like to create your own build of sspfd, take the following steps.
-Clone sspfd, do `make` and then copy `libsspfd.a` in `ASCYLIB/external/lib` and `ASCYLIB/include/sspfd.h` in `CLHT/external/include`.
+Clone sspfd, do `make` and then copy `libsspfd.a` in `ASCYLIB/external/lib` and `sspfd.h` in `ASCYLIB/external/include`.
 
 Finally, to measure power on new Intel processors (e.g., Intel Ivy Bridge), the raplread library is required (https://github.com/LPD-EPFL/raplread).
 We have already compiled and included raplread in external/lib.
 Still, if you would like to create your own build of raplread, take the following steps.
-Clone raplread, do `make` and then copy `libraplread.a` in `ASCYLIB/external/lib` and `ASCYLIB/include/sspfd.h` in `CLHT/external/include`.
+Clone raplread, do `make` and then copy `libraplread.a` in `ASCYLIB/external/lib` and `sspfd.h` in `ASCYLIB/external/include`.
 
 To build all data structures, you can execute `make all`.
 This target builds all lock-free, lock-based, and sequential data structures.
 
-The last to structures, RCU and TBB, are based on external library. 
+The last two structures, RCU and TBB, are based on external libraries. 
 The RCU-based hash table requires an installation of the URCU library (http://urcu.so/).
 The TBB-based hash table requires an installation of Intel's TBB library (https://www.threadingbuildingblocks.org/).
 
