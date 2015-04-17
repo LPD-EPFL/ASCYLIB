@@ -73,8 +73,8 @@ bucket_set_init_l(intset_l_t* set, ptlock_t* lock)
   set->head = min;
 
 #if defined(LL_GLOBAL_LOCK)
-  set->lock = lock;
-  GL_INIT_LOCK(set->lock);
+  //  set->lock = lock;
+  GL_INIT_LOCK(&set->lock);
 #endif
 
   MEM_BARRIER;

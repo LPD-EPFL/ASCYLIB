@@ -35,7 +35,7 @@ lockc_delete(intset_l_t *set, skey_t key)
   node_l_t *curr, *next;
   sval_t res = 0;
 	
-  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  GL_LOCK(&set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
   curr = set->head;
   if (curr->next != NULL)
@@ -71,7 +71,7 @@ lockc_delete(intset_l_t *set, skey_t key)
 	  UNLOCK(ND_GET_LOCK(next));
 	}
     }  
-  GL_UNLOCK(set->lock);
+  GL_UNLOCK(&set->lock);
 
   return res;
 }
@@ -82,7 +82,7 @@ lockc_find(intset_l_t *set, skey_t key)
   node_l_t *curr, *next; 
   sval_t res = 0;
 	
-  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  GL_LOCK(&set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
   curr = set->head;
   if (curr->next != NULL)
@@ -105,7 +105,7 @@ lockc_find(intset_l_t *set, skey_t key)
     {
       res = next->val;
     }
-  GL_UNLOCK(set->lock);
+  GL_UNLOCK(&set->lock);
   UNLOCK(ND_GET_LOCK(curr));
   if (next != NULL)
     {
@@ -121,7 +121,7 @@ lockc_insert(intset_l_t *set, skey_t key, sval_t val)
   volatile node_l_t* curr;
   int found;
 	
-  GL_LOCK(set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
+  GL_LOCK(&set->lock);		/* when GL_[UN]LOCK is defined the [UN]LOCK is not ;-) */
   LOCK(ND_GET_LOCK(set->head));
   curr = set->head;
   if (curr->next != NULL)
@@ -146,7 +146,7 @@ lockc_insert(intset_l_t *set, skey_t key, sval_t val)
       newnode =  new_node_l(key, val, next, 1);
       curr->next = newnode;
     }
-  GL_UNLOCK(set->lock);
+  GL_UNLOCK(&set->lock);
   UNLOCK(ND_GET_LOCK(curr));
   if (next != NULL)
     {

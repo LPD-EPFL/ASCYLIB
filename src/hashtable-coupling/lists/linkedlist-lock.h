@@ -64,12 +64,19 @@ typedef struct node_l
 #endif
 } node_l_t;
 
-typedef struct intset_l 
+typedef ALIGNED(CACHE_LINE_SIZE) struct intset_l 
 {
-  node_l_t* head;
+  union
+  {
+    struct 
+    {
+      node_l_t* head;
 #if defined(LL_GLOBAL_LOCK)
-  volatile ptlock_t* lock;
+      volatile ptlock_t lock;
 #endif
+    };
+    uint8_t padding[CACHE_LINE_SIZE];
+  };
 }intset_l_t;
 
 node_l_t* new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing);
