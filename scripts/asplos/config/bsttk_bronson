@@ -1,7 +1,7 @@
-SCY=bsttk
+SCY=bsttk_bronson
 
 CPU=1;
-CORES=two;
+CORES=all;
 
 un=$(uname -n);
 if [ $un = "diassrv8" ];
@@ -14,19 +14,19 @@ then
 fi;
 
 
-bsts="./$ub/sq-bst_internal ./$ub/sq-bst_external ./$ub/lb-bst-drachsler ./$ub/lf-bst-aravind ./$ub/lb-bst_tk";
+bsts="./$ub/sq-bst_external ./$ub/sq-bst_external ./$ub/lb-bst_tk"
 
 CLHT_PATH=~/code/hyht
-MAKE_CLHT=1;
+MAKE_CLHT=0;
 
 cores_lat_dist="1 10 20";
 LATENCY_TYPE=3			# 2 or 3
 LATENCY_POINTS=256
 LATENCY_MERGE=0
 
-reps=11;
-keep=median; 			# min, median, or max
-duration=5000;
+reps=5;
+keep=max; 			# min, median, or max
+duration=1000;
 initials="4096";
 updates="10";
 cores="${CORES}";
@@ -34,7 +34,7 @@ cores_pow="two"
 
 COMPILE_FLAGS="SET_CPU=${CPU}"
 skip_thr=0;
-skip_lat=0;
+skip_lat=1;
 skip_ldi=1;
 skip_pow=1;
 
