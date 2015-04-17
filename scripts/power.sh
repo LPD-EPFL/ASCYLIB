@@ -39,21 +39,21 @@ shift;
 progs_num=$(echo $progs | wc -w);
 params="$@";
 
-print_n "#   " "%-46s" "$progs" "\n"
+print_n "#   " "%-48s" "$progs" "\n"
 
-print_rep "#co " $progs_num "Thrput     Thrput/W     Power      uJ/op        " "\n";
+print_rep "#co " $progs_num "Thrput     Thrput/W    Power       uJ/op        " "\n";
 
 d=0;
-for c in 1 $cores
+for c in $cores
 do
-    if [ $c -eq 1 ];
-    then
-	if [ $d -eq 1 ];
-	then
-	    continue;
-	fi;
-    fi;
-    d=1;
+#     if [ $c -eq 1 ];
+#     then
+# 	if [ $d -eq 1 ];
+# 	then
+# 	    continue;
+# 	fi;
+#     fi;
+#     d=1;
 
     printf "%-4d" $c;
     i=0;
