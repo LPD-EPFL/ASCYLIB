@@ -222,7 +222,7 @@ extern "C" {
 #elif defined(__tile__)
 #  define PAUSE cycle_relax()
 #else
-#  define PAUSE _mm_pause()
+#  define PAUSE { int i = 16; while (i) { __sync_fetch_and_sub(&i, 1); } }
 #endif
   static inline void
   pause_rep(uint32_t num_reps)
@@ -375,6 +375,19 @@ extern "C" {
     0, 1, 2, 3, 4, 5, 6, 7, 
     0, 1, 2, 3, 4, 5, 6, 7, 
   };
+
+  static __attribute__ ((unused)) double static_power[3] = { 0, 0, 0 };
+  static __attribute__ ((unused)) double eng_per_test_iter_nj[8][5] = 
+    {
+      { 0, 0, 0, 0, 0 },
+      { 0, 0, 0, 0, 0 },
+      { 0, 0, 0, 0, 0 },
+      { 0, 0, 0, 0, 0 },
+      { 0, 0, 0, 0, 0 },
+      { 0, 0, 0, 0, 0 },
+      { 0, 0, 0, 0, 0 },
+      { 0, 0, 0, 0, 0 },
+    };
 #endif	/*  */
 
 #if defined(OANALAPTOPLINUX)
@@ -450,7 +463,7 @@ extern "C" {
 
 #  define USE_HYPERTRHEADS 0	/* use first all the hyperthreads of one socket if set */
 
-  static __attribute__ ((unused)) double static_power[3] = { 56.623611, 28.667633, 27.955978 };
+  static __attribute__ ((unused)) double static_power[3] = { 55.352036, 27.152955, 28.199081 };
 
 #  if USE_HYPERTRHEADS == 1
   static uint8_t UNUSED the_cores[] = 
@@ -459,7 +472,7 @@ extern "C" {
       20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
       10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
       30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 
-    };
+    }; 
 
 static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] = 
   {
@@ -505,7 +518,15 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     { 34.01931977364001659009, 28.78915228904349525819, 23.09106190310396673079, 5.23016748459652133189, 5.69809038593952852740 },
   };
 
+#  elif USE_HYPERTRHEADS == 2
+  static uint8_t UNUSED the_cores[] = 
+    {
+      0, 20, 1, 21, 2, 22, 3, 23, 4, 24, 5, 25, 6, 26, 7, 27, 8, 28, 9, 29,
+      10, 30, 11, 32, 12, 32, 13, 33, 14, 34, 15, 35, 16, 36, 17, 37, 18, 38, 19, 39, 
+    }; 
+
 #  else
+  
   static uint8_t UNUSED the_cores[] = 
     {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 
