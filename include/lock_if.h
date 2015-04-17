@@ -31,14 +31,16 @@
 #if defined(MUTEX)
 typedef pthread_mutex_t ptlock_t;
 #  define PTLOCK_SIZE sizeof(ptlock_t)
-#  define INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL);
+#  define INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL)
 #  define DESTROY_LOCK(lock)			        pthread_mutex_destroy((pthread_mutex_t *) lock)
 #  define LOCK(lock)					pthread_mutex_lock((pthread_mutex_t *) lock)
+#  define TRYLOCK(lock)					pthread_mutex_trylock((pthread_mutex_t *) lock)
 #  define UNLOCK(lock)					pthread_mutex_unlock((pthread_mutex_t *) lock)
 /* GLOBAL lock */
-#  define GL_INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL);
+#  define GL_INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL)
 #  define GL_DESTROY_LOCK(lock)			        pthread_mutex_destroy((pthread_mutex_t *) lock)
 #  define GL_LOCK(lock)					pthread_mutex_lock((pthread_mutex_t *) lock)
+#  define GL_TRYLOCK(lock)				pthread_mutex_trylock((pthread_mutex_t *) lock)
 #  define GL_UNLOCK(lock)				pthread_mutex_unlock((pthread_mutex_t *) lock)
 #elif defined(SPIN)		/* pthread spinlock */
 typedef pthread_spinlock_t ptlock_t;
@@ -174,6 +176,74 @@ tas_unlock(ptlock_t* l)
 #else
   COMPILER_NO_REORDER(*l = TAS_FREE;);
 #endif
+  return 0;
+}
+
+#elif defined(TTAS)			/* TTAS */
+#  define PTLOCK_SIZE 32		/* choose 8, 16, 32, 64 */
+#  define PASTER(x, y, z) x ## y ## z
+#  define EVALUATE(sz) PASTER(uint, sz, _t)
+#  define UTYPE  EVALUATE(PTLOCK_SIZE)
+#  define PASTER2(x, y) x ## y
+#  define EVALUATE2(sz) PASTER2(CAS_U, sz)
+#  define CAS_UTYPE EVALUATE2(PTLOCK_SIZE)
+typedef volatile UTYPE ptlock_t;
+#  define INIT_LOCK(lock)				ttas_init(lock)
+#  define DESTROY_LOCK(lock)			
+#  define LOCK(lock)					ttas_lock(lock)
+#  define TRYLOCK(lock)					ttas_trylock(lock)
+#  define UNLOCK(lock)					ttas_unlock(lock)
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				ttas_init(lock)
+#  define GL_DESTROY_LOCK(lock)			
+#  define GL_LOCK(lock)					ttas_lock(lock)
+#  define GL_TRYLOCK(lock)				ttas_trylock(lock)
+#  define GL_UNLOCK(lock)              			ttas_unlock(lock)
+
+#  define TTAS_FREE 0
+#  define TTAS_LCKD 1
+
+static inline void
+ttas_init(ptlock_t* l)
+{
+  *l = TTAS_FREE;
+#  if defined(__tile__)
+  MEM_BARRIER;
+#  endif
+}
+
+static inline uint32_t
+ttas_lock(ptlock_t* l)
+{
+  while (1)
+    {
+      while (*l == TTAS_LCKD)
+	{
+	  PAUSE;
+	}
+
+      if (CAS_UTYPE(l, TTAS_FREE, TTAS_LCKD) == TTAS_FREE)
+	{
+	  break;
+	}
+    }
+
+  return 0;
+}
+
+static inline uint32_t
+ttas_trylock(ptlock_t* l)
+{
+  return (CAS_UTYPE(l, TTAS_FREE, TTAS_LCKD) == TTAS_FREE);
+}
+
+static inline uint32_t
+ttas_unlock(ptlock_t* l)
+{
+#  if defined(__tile__) 
+  MEM_BARRIER;
+#  endif
+  COMPILER_NO_REORDER(*l = TTAS_FREE;);
   return 0;
 }
 
@@ -324,6 +394,50 @@ ticket_unlock(volatile ptlock_t* l)
     clh_acquire((volatile struct clh_qnode **) lock, clh_local_p.my_qnode);
 #  define GL_UNLOCK(lock)				clh_local_p.my_qnode = \
     clh_release(clh_local_p.my_qnode, clh_local_p.my_pred);
+
+#elif defined(NONE)			/* no locking */
+
+struct none_st
+{
+  uint32_t nothing;
+};
+
+typedef struct none_st ptlock_t;
+#  define INIT_LOCK(lock)				none_init((volatile ptlock_t*) lock)
+#  define DESTROY_LOCK(lock)			
+#  define LOCK(lock)					none_lock((volatile ptlock_t*) lock)
+#  define TRYLOCK(lock)					none_trylock((volatile ptlock_t*) lock)
+#  define UNLOCK(lock)					none_unlock((volatile ptlock_t*) lock)
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				none_init((volatile ptlock_t*) lock)
+#  define GL_DESTROY_LOCK(lock)			
+#  define GL_LOCK(lock)					none_lock((volatile ptlock_t*) lock)
+#  define GL_TRYLOCK(lock)				none_trylock((volatile ptlock_t*) lock)
+#  define GL_UNLOCK(lock)				none_unlock((volatile ptlock_t*) lock)
+
+static inline void
+none_init(volatile ptlock_t* l)
+{
+}
+
+static inline uint32_t
+none_lock(volatile ptlock_t* l)
+{
+  return 0;
+}
+
+static inline uint32_t
+none_trylock(volatile ptlock_t* l)
+{
+  return 1;
+}
+
+static inline uint32_t
+none_unlock(volatile ptlock_t* l)
+{
+  return 0;
+}
+
 #endif
 
 

@@ -58,7 +58,7 @@ endif
 
 LIBSSMEM = $(ROOT)/external
 
-ifndef STM
+ifeq ($(LOCK),)
   LOCK          ?= TAS
 endif
 
@@ -259,6 +259,10 @@ else
 		CFLAGS += -DGC=1
 
 	else
+		ifeq ($(TEST),fail)
+			TEST_FILE=test_fail.c
+		endif
+
 		ifeq ($(GC),0)
 			CFLAGS += -DGC=0
 		else
@@ -305,7 +309,11 @@ endif
 
 ifeq ($(POWER),1)
 	CFLAGS += -DRAPL_READ_ENABLE=1
-	LDFLAGS += -lraplread -lm
+	ifeq ($(PLATFORM_NUMA), 1)
+		LDFLAGS += -lraplread -lm
+	else
+		LDFLAGS += -lraplread1 -lm
+	endif
 endif
 
 ifeq ($(STATS),1)
@@ -319,4 +327,3 @@ endif
 ifeq ($(SEQ_NO_FREE),1)
 	CFLAGS += -DSEQ_SSMEM_NO_FREE=1
 endif
-

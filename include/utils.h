@@ -222,7 +222,7 @@ extern "C" {
 #elif defined(__tile__)
 #  define PAUSE cycle_relax()
 #else
-#  define PAUSE { int i = 16; while (i) { __sync_fetch_and_sub(&i, 1); } }
+#  define PAUSE _mm_pause()
 #endif
   static inline void
   pause_rep(uint32_t num_reps)
