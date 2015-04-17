@@ -60,7 +60,7 @@ typedef volatile struct chm_node
   volatile struct chm_node* next;
 } chm_node_t;
 
-typedef volatile struct chm_seg
+typedef volatile struct ALIGNED(CACHE_LINE_SIZE) chm_seg
 {
   union
   {
