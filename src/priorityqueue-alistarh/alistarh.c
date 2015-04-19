@@ -38,7 +38,7 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 #define FRASER_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
 
-#define ALISTARH_NUMBER_OF_THREADS 			4	//p //How can I get it?
+#define ALISTARH_NUMBER_OF_THREADS 			DEFAULT_NB_THREADS	//p //How can I get it?
 #define ALISTARH_STARTING_HEIGHT_CONSTANT	(8-floor_log_2(ALISTARH_NUMBER_OF_THREADS))	//K
 #define ALISTARH_STARTING_HEIGHT			(ALISTARH_STARTING_HEIGHT_CONSTANT+floor_log_2(ALISTARH_NUMBER_OF_THREADS))	//H
 #define ALISTARH_MAX_JUMP_LENGTH			(2*floor_log_2(floor_log_2(floor_log_2(ALISTARH_NUMBER_OF_THREADS)))+1)	//J
