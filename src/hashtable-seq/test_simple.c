@@ -184,7 +184,6 @@ test(void* thread)
   for(i = 0; i < num_elems_thread; i++) 
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
-      
       if(DS_ADD(set, key, NULL) == false)
 	{
 	  i--;
@@ -273,6 +272,8 @@ main(int argc, char **argv)
     {NULL, 0, NULL, 0}
   };
 
+  unsigned num_buckets_param = 0;
+
   int i, c;
   while(1) 
     {
@@ -341,6 +342,9 @@ main(int argc, char **argv)
 	  break;
 	case 'l':
 	  load_factor = atoi(optarg);
+	  break;
+	case 'b':
+	  num_buckets_param = atoi(optarg);
 	  break;
 	case 'v':
 	  print_vals_num = atoi(optarg);
@@ -417,7 +421,14 @@ main(int argc, char **argv)
     
   stop = 0;
     
-  maxhtlength = (unsigned int) initial / load_factor;
+  if (num_buckets_param)
+    {
+      maxhtlength = num_buckets_param;
+    }
+  else
+    {
+      maxhtlength = (unsigned int) initial / load_factor;
+    }
 
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
