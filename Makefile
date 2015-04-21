@@ -1,7 +1,7 @@
 .PHONY:	all
 
-BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq
-LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/
+BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-optik src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq
+LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-optik src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/
 LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 EXTERNALS = src/hashtable-rcu src/hashtable-tbb
@@ -125,8 +125,8 @@ seqllgc:
 
 
 lfll: lfll_harris lfll_michael lfll_harris_opt
-lbll: seqll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro llcopy_no_ro lbll_pugh_no_ro
-ll: seqll lfll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro llcopy_no_ro lbll_pugh_no_ro
+lbll: seqll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro lbll_optik lbll_optik_no_ro llcopy_no_ro lbll_pugh_no_ro
+ll: seqll lfll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro lbll_optik lbll_optik_no_ro llcopy_no_ro lbll_pugh_no_ro
 
 
 lbht_coupling:
@@ -167,6 +167,12 @@ lbll_lazy:
 
 lbll_lazy_no_ro:
 	$(MAKE) "RO_FAIL=0" src/linkedlist-lazy
+
+lbll_optik:
+	$(MAKE) src/linkedlist-optik
+
+lbll_optik_no_ro:
+	$(MAKE) "RO_FAIL=0" src/linkedlist-optik
 
 llcopy:
 	$(MAKE) src/linkedlist-copy
@@ -240,6 +246,7 @@ clean:
 	$(MAKE) -C src/linkedlist-harris clean
 	$(MAKE) -C src/linkedlist-harris_opt clean
 	$(MAKE) -C src/linkedlist-lazy clean
+	$(MAKE) -C src/linkedlist-optik clean
 	$(MAKE) -C src/linkedlist-michael clean
 	$(MAKE) -C src/linkedlist-pugh clean
 	$(MAKE) -C src/linkedlist-seq clean
