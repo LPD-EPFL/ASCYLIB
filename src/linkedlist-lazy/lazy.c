@@ -75,7 +75,7 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
 
       UPDATE_TRY();
 
-#if LAZY_RO_FAIL ==1 
+#if LAZY_RO_FAIL == 1 
       if (curr->key == key)
 	{
 	  if (unlikely(curr->marked))
@@ -132,7 +132,7 @@ parse_delete(intset_l_t *set, skey_t key)
 
       UPDATE_TRY();
 
-#if LAZY_RO_FAIL ==1 
+#if LAZY_RO_FAIL == 1 
       if (curr->key != key)
 	{
 	  if (unlikely(curr->marked))
