@@ -403,7 +403,7 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
   if (!ATOMIC_CAS_MB(&preds[0]->next[0], GET_UNMARKED(succs[0]), new))
     {
       sl_delete_node(new);
-      return false;
+      goto retry;
     }
 
   for (i = 1; i < new->toplevel; i++) 
