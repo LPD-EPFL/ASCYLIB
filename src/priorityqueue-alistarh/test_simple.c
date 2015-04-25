@@ -199,6 +199,7 @@ test(void* thread)
 
   if (!ID)
     {
+      alistarh_init(num_threads, set);
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
@@ -359,6 +360,7 @@ main(int argc, char **argv)
 	  exit(1);
 	}
     }
+
 
 
   if (!is_power_of_two(initial))
@@ -540,7 +542,8 @@ main(int argc, char **argv)
 #define LLU long long unsigned int
 
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
-  if (size_after != (initial + pr))
+  int num_dummies = (num_threads*floor_log_2(num_threads)/2);
+  if (size_after != (initial + num_dummies + pr))
     {
       printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
       assert(size_after == (initial + pr));

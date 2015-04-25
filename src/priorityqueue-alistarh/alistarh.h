@@ -25,6 +25,7 @@
 #include "skiplist.h"
 #include "ssalloc.h"
 
+void alistarh_init(int _num_threads, sl_intset_t* set);
 sval_t fraser_find(sl_intset_t *set, skey_t key);
 sval_t fraser_remove(sl_intset_t *set, skey_t key);
 sval_t alistarh_deleteMin(sl_intset_t *set);

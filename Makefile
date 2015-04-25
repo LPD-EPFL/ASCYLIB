@@ -11,6 +11,8 @@ BSTS = src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-ar
 
 .PHONY:	clean all external $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS) $(SEQBENCHS)
 
+egeyar: lfpq_alistarh lfsl_fraser lfsl_herlihy_lf
+
 default: lockfree tas seq
 
 all:	lockfree tas seq external

@@ -107,6 +107,8 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
       exit(1);
     }
 
+//printf("at the end of creation\n");
+
   node->key = key;
   node->val = val;
   node->toplevel = toplevel;
