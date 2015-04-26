@@ -62,6 +62,8 @@
 #define DS_TYPE             sl_intset_t
 #define DS_NODE             sl_node_t
 
+#define PADDING             0
+
 /* ################################################################### *
  * GLOBALS
  * ################################################################### */
@@ -166,29 +168,12 @@ test(void* thread)
 
   RR_INIT(phys_id);
   barrier_cross(&barrier);
-
-  uint64_t key;
+  
   int c = 0;
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
   uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
 
   int i;
-/*  uint32_t num_dummies = (uint32_t) (num_threads*floor_log_2(num_threads)/2);
-  uint32_t num_dummies_thread = (uint32_t) (num_dummies / num_threads);
-  int32_t missing_dummies = (uint32_t) num_dummies - (num_dummies_thread * num_threads);
-  if (ID < missing_dummies)
-    {
-      num_dummies_thread++;
-    }
-
-  for(i = 0; i < num_dummies_thread; i++) 
-    {
-      if(DS_ADD(set, KEY_MIN+1, KEY_MIN+1) == false)
-	{
-	  i--;
-	}
-    }
-*/
   uint32_t num_elems_thread = (uint32_t) (initial / num_threads);
   uint32_t first_elem = (ID*num_elems_thread) +1;
   int32_t missing = (uint32_t) initial - (num_elems_thread * num_threads);
@@ -216,7 +201,7 @@ test(void* thread)
 
   if (!ID)
     {
-      alistarh_init(num_threads, set);
+      alistarh_init(num_threads, set, PADDING);
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
@@ -226,23 +211,18 @@ test(void* thread)
 
   RR_START_SIMPLE();
 
-  uint64_t deleted; //, maxDeleted = 0, minDeleted = initial;
-  for (i=0; i<100; i++)
+  skey_t deletedKey;
+  for (i=0; i<1; i++)
   {
-    my_removing_count++;
-	deleted = pq_deleteMin(set);
-	if (deleted == 0)
+	deletedKey = alistarh_spray(set);
+	if (deletedKey == 0)
 	{
       i--;
 	}
 	else
 	{
-      my_removing_count_succ++;
-/*	  if (unlikely(deleted>maxDeleted))
-		maxDeleted = deleted;
-      else if (unlikely(deleted<minDeleted))
-		minDeleted = deleted;
-*/    }
+      printf("%lu\n", deletedKey);
+    }
   }
 
   barrier_cross(&barrier);
@@ -254,8 +234,6 @@ test(void* thread)
       printf("#AFTER  size is: %zu\n", size_after);
     }
   
-  //printf("maxDeleted %lu\n", maxDeleted);
-  //printf("minDeleted %lu\n", minDeleted);
   barrier_cross(&barrier);
 
 #if defined(COMPUTE_LATENCY)
@@ -560,27 +538,27 @@ main(int argc, char **argv)
     }
 
 #if defined(COMPUTE_LATENCY)
-  printf("#thread srch_suc srch_fal insr_suc insr_fal remv_suc remv_fal   ## latency (in cycles) \n"); fflush(stdout);
+  //printf("#thread srch_suc srch_fal insr_suc insr_fal remv_suc remv_fal   ## latency (in cycles) \n"); fflush(stdout);
   long unsigned get_suc = (getting_count_total_succ) ? getting_suc_total / getting_count_total_succ : 0;
   long unsigned get_fal = (getting_count_total - getting_count_total_succ) ? getting_fal_total / (getting_count_total - getting_count_total_succ) : 0;
   long unsigned put_suc = putting_count_total_succ ? putting_suc_total / putting_count_total_succ : 0;
   long unsigned put_fal = (putting_count_total - putting_count_total_succ) ? putting_fal_total / (putting_count_total - putting_count_total_succ) : 0;
   long unsigned rem_suc = removing_count_total_succ ? removing_suc_total / removing_count_total_succ : 0;
   long unsigned rem_fal = (removing_count_total - removing_count_total_succ) ? removing_fal_total / (removing_count_total - removing_count_total_succ) : 0;
-  printf("%-7zu %-8lu %-8lu %-8lu %-8lu %-8lu %-8lu\n", num_threads, get_suc, get_fal, put_suc, put_fal, rem_suc, rem_fal);
+  //printf("%-7zu %-8lu %-8lu %-8lu %-8lu %-8lu %-8lu\n", num_threads, get_suc, get_fal, put_suc, put_fal, rem_suc, rem_fal);
 #endif
     
 #define LLU long long unsigned int
 
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
-  int num_dummies = (num_threads*floor_log_2(num_threads)/2);
+  int num_dummies = PADDING==0?0:(num_threads*floor_log_2(num_threads)/2);
   if (size_after != (initial + num_dummies + pr))
     {
       printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
       assert(size_after == (initial + pr));
     }
 
-  printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success", "succ %", "total %", "effective %");
+  //printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success", "succ %", "total %", "effective %");
   uint64_t total = putting_count_total + getting_count_total + removing_count_total;
   double putting_perc = 100.0 * (1 - ((double)(total - putting_count_total) / total));
   double putting_perc_succ = (1 - (double) (putting_count_total - putting_count_total_succ) / putting_count_total) * 100;
@@ -588,16 +566,16 @@ main(int argc, char **argv)
   double getting_perc_succ = (1 - (double) (getting_count_total - getting_count_total_succ) / getting_count_total) * 100;
   double removing_perc = 100.0 * (1 - ((double)(total - removing_count_total) / total));
   double removing_perc_succ = (1 - (double) (removing_count_total - removing_count_total_succ) / removing_count_total) * 100;
-  printf("srch: %-10llu | %-10llu | %10.1f%% | %10.1f%% | \n", (LLU) getting_count_total, 
+/*  printf("srch: %-10llu | %-10llu | %10.1f%% | %10.1f%% | \n", (LLU) getting_count_total, 
 	 (LLU) getting_count_total_succ,  getting_perc_succ, getting_perc);
   printf("insr: %-10llu | %-10llu | %10.1f%% | %10.1f%% | %10.1f%%\n", (LLU) putting_count_total, 
 	 (LLU) putting_count_total_succ, putting_perc_succ, putting_perc, (putting_perc * putting_perc_succ) / 100);
   printf("rems: %-10llu | %-10llu | %10.1f%% | %10.1f%% | %10.1f%%\n", (LLU) removing_count_total, 
 	 (LLU) removing_count_total_succ, removing_perc_succ, removing_perc, (removing_perc * removing_perc_succ) / 100);
-
+*/
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
-  printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
-  printf("#Mops %.3f\n", throughput / 1e6);
+  //printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
+  //printf("#Mops %.3f\n", throughput / 1e6);
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();

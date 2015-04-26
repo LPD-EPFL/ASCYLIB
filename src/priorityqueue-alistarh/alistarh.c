@@ -53,22 +53,29 @@ sl_node_t* last_dummy_entry;
 //while KEY_MIN as the key respresents the head of the skiplist!
 
 void
-alistarh_init(int _num_threads, sl_intset_t* set)
+alistarh_init(int _num_threads, sl_intset_t* set, int padding)
 {
   num_threads = _num_threads;
-  starting_height = ALISTARH_STARTING_HEIGHT_CONSTANT+floor_log_2(num_threads);
+  starting_height = floor_log_2(num_threads);
   max_jump_length = floor_log_2(num_threads)+1;
-  cleaner_percentage = 100/num_threads;
+  cleaner_percentage = (99+num_threads)/num_threads;
   cleaner_percentage = cleaner_percentage>1?cleaner_percentage:1;
   
-  int i=1, num_dummies = num_threads*floor_log_2(num_threads)/2;
-  for (; i<=num_dummies; i++)
+  if (padding)
   {
-    fraser_insert(set, KEY_MIN+i, KEY_MIN+1);
+    int i=1, num_dummies = num_threads*floor_log_2(num_threads)/2;
+    for (; i<=num_dummies; i++)
+    {
+      fraser_insert(set, KEY_MIN+i, KEY_MIN+1);
+    }
+    last_dummy_entry = set->head;
+    while (last_dummy_entry->next[0]->val==KEY_MIN+1) {
+      last_dummy_entry = last_dummy_entry->next[0];
+    }
   }
-  last_dummy_entry = set->head;
-  while (last_dummy_entry->next[0]->val==KEY_MIN+1) {
-    last_dummy_entry = last_dummy_entry->next[0];
+  else
+  {
+    last_dummy_entry = set->head;
   }
   return;
 }
@@ -298,12 +305,16 @@ fraser_remove(sl_intset_t *set, skey_t key)
 sval_t
 alistarh_deleteMin(sl_intset_t *set)
 {
+  sval_t result;
+  sl_node_t *next, *node;
+  int i, level;
+  
  retry:
   if (unlikely(rand_range(100) <= cleaner_percentage))
-  {
-	sval_t result = 0;
+  { //become cleaner
+	result = 0;
     PARSE_START_TS(4);
-    sl_node_t* node = GET_UNMARKED(last_dummy_entry->next[0]);
+    node = GET_UNMARKED(last_dummy_entry->next[0]);
     while(node->next[0]!=NULL)
     {
       if (!IS_MARKED(node->next[node->toplevel-1]))
@@ -321,12 +332,8 @@ alistarh_deleteMin(sl_intset_t *set)
     PARSE_END_TS(4, lat_parsing_cleaner++);
     return result;
   }
-  else
+  else //spray & mark as deleted
   {
-    sval_t result = 0;
-    sl_node_t *next, *node = set->head;
-    int i, level;
-
     UPDATE_TRY();
   
     PARSE_START_TS(3);
@@ -335,7 +342,7 @@ alistarh_deleteMin(sl_intset_t *set)
     next = NULL;
     for(level = starting_height; level>=0; level-=ALISTARH_LEVELS_TO_DESCEND)
     {
-	  i = (int)rand_range(max_jump_length+1)-1;
+      i = (int)rand_range(max_jump_length);
       for (; i>0; i--)
       {
         next = GET_UNMARKED(node->next[level]);
@@ -388,7 +395,6 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
       return false;
     }
 
-
   new = sl_new_simple_node(key, val, get_rand_level(), 0);
 
   for (i = 0; i < new->toplevel; i++)
@@ -427,3 +433,36 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
   return true;
 }
 
+skey_t
+alistarh_spray(sl_intset_t *set)
+{
+  sval_t result;
+  sl_node_t *next, *node;
+  int i, level;
+  
+ retry:
+  UPDATE_TRY();
+  PARSE_START_TS(3);
+  result = 0;
+  node = set->head;
+  next = NULL;
+  for(level = starting_height; level>=0; level-=ALISTARH_LEVELS_TO_DESCEND)
+  {
+    i = (int)rand_range(max_jump_length);
+    for (; i>0; i--)
+    {
+      next = GET_UNMARKED(node->next[level]);
+      if (next==NULL || next->next[0]==NULL)
+        break;
+      node = next;
+    }
+  }
+  PARSE_END_TS(3, lat_parsing_deleteMin++);
+  if (unlikely(node == set->head))
+    goto retry;
+
+  if (unlikely(node->val == KEY_MIN+1))
+    goto retry;
+
+  return node->key;
+}
