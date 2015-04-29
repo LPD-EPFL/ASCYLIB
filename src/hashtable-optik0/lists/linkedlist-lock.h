@@ -57,7 +57,7 @@ typedef volatile struct node_l
   skey_t key;			/* 8 */
   sval_t val;			/* 16 */
   volatile struct node_l *next;	/* 24 */
-  optik_t lock;			/* just padding for now */
+  optik_t lock;			/* used when !LL_GLOBAL_LOCK */
 #if defined(DO_PAD)
   uint8_t padding[CACHE_LINE_SIZE - sizeof(skey_t) -
 		  sizeof(sval_t) - sizeof(struct node*) - sizeof(optik_t)];
@@ -69,8 +69,8 @@ STATIC_ASSERT(sizeof(node_l_t) == 32, "sizeof(node_l_t) == 32");
 typedef ALIGNED(CACHE_LINE_SIZE) struct intset_l 
 {
   node_l_t* head;
-  optik_t lock;
-  uint8_t padding[CACHE_LINE_SIZE - sizeof(node_l_t*)];
+  optik_t lock;			/* used when LL_GLOBAL_LOCK */
+  uint8_t padding[CACHE_LINE_SIZE - sizeof(node_l_t*) - sizeof(optik_t)];
 } intset_l_t;
 
 node_l_t* new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing);

@@ -141,6 +141,9 @@ lbht_lazy:
 lbht_optik0:
 	$(MAKE) src/hashtable-optik0
 
+lbht_optik0_gl:
+	$(MAKE) "G=GL" src/hashtable-optik0
+
 lbht_coupling_gl:
 	$(MAKE) "G=GL" src/hashtable-coupling
 

@@ -469,6 +469,10 @@ none_unlock(volatile ptlock_t* l)
 #  define UNLOCK_A(lock)          GL_UNLOCK(lock)
 #  define PREFETCHW_LOCK_A(lock)  
 
+/* optik */
+#  define OPTIK_WITHOUT_GL_DO(a)             
+#  define OPTIK_WITH_GL_DO(a)                 a
+
 #else  /* !LL_GLOBAL_LOCK */
 #  define ND_GET_LOCK(nd)                 &nd->lock
 
@@ -488,6 +492,11 @@ none_unlock(volatile ptlock_t* l)
 #  define TRYLOCK_A(lock)         TRYLOCK(lock)
 #  define UNLOCK_A(lock)          UNLOCK(lock)
 #  define PREFETCHW_LOCK_A(lock)  PREFETCHW_LOCK(lock)
+
+/* optik */
+#  define OPTIK_WITHOUT_GL_DO(a)              a
+#  define OPTIK_WITH_GL_DO(a)                 
+
 
 #endif
 

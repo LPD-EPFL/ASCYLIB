@@ -65,14 +65,14 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
   PARSE_TRY();
 
   curr = set->head;
+  OPTIK_WITH_GL_DO(COMPILER_NO_REORDER(pred_ver = set->lock));
 
   do
     {
-      //      PREFETCH(curr->next);
-      COMPILER_NO_REORDER(optik_t curr_ver = curr->lock;);
+      OPTIK_WITHOUT_GL_DO(COMPILER_NO_REORDER(optik_t curr_ver = curr->lock;););
 	  
       pred = curr;
-      pred_ver = curr_ver;
+      OPTIK_WITHOUT_GL_DO(pred_ver = curr_ver;);
 
       curr = curr->next;
     }
@@ -87,17 +87,28 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
     }
 #endif
 
-  if ((!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
-    {
-      goto restart;
-    }
+  OPTIK_WITHOUT_GL_DO(
+		      if ((!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
+			{
+			  goto restart;
+			}
+		      );
+
+  OPTIK_WITH_GL_DO(
+		   if ((!optik_trylock_version((optik_t*) &set->lock, pred_ver)))
+		     {
+		       goto restart;
+		     }
+		   );
 
   newnode = new_node_l(key, val, curr, 0);
 #ifdef __tile__
   MEM_BARRIER;
 #endif
   pred->next = newnode;
-  optik_unlock((optik_t*) &pred->lock);
+
+  OPTIK_WITHOUT_GL_DO(optik_unlock((optik_t*) &pred->lock););
+  OPTIK_WITH_GL_DO(optik_unlock((optik_t*) &set->lock););
 
   return true;
 }
@@ -106,27 +117,30 @@ sval_t
 optik_delete(intset_l_t *set, skey_t key)
 {
   node_l_t *pred, *curr;
-  optik_t pred_ver = OPTIK_INIT, curr_ver = OPTIK_INIT;
+  optik_t pred_ver = OPTIK_INIT;
+  OPTIK_WITHOUT_GL_DO(optik_t curr_ver = OPTIK_INIT;);
   sval_t result = 0;
 
  restart:
   PARSE_TRY();
 
   curr = set->head;
-  curr_ver = curr->lock;
+  OPTIK_WITHOUT_GL_DO(curr_ver = curr->lock;);
+  OPTIK_WITH_GL_DO(COMPILER_NO_REORDER(pred_ver = set->lock));
+
 
   do
     {
       //      PREFETCH(curr->next);
       pred = curr;
-      pred_ver = curr_ver;
+      OPTIK_WITHOUT_GL_DO(pred_ver = curr_ver;);
 
       curr = curr->next;
       if (curr == NULL)
 	{
 	  break;
 	}
-      curr_ver = curr->lock;
+      OPTIK_WITHOUT_GL_DO(curr_ver = curr->lock;);
     }
   while (likely(curr->key < key));
 
@@ -139,16 +153,26 @@ optik_delete(intset_l_t *set, skey_t key)
     }
 #endif
 
-  if (unlikely(!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
-    {
-      goto restart;
-    }
+  OPTIK_WITHOUT_GL_DO(
+		      if (unlikely(!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
+			{
+			  goto restart;
+			}
 
-  if (unlikely(!optik_trylock_version((optik_t*) &curr->lock, curr_ver)))
-    {
-      optik_revert((optik_t*) &pred->lock);
-      goto restart;
-    }
+		      if (unlikely(!optik_trylock_version((optik_t*) &curr->lock, curr_ver)))
+			{
+			  optik_revert((optik_t*) &pred->lock);
+			  goto restart;
+			}
+		      );
+
+  OPTIK_WITH_GL_DO(
+		   if ((!optik_trylock_version((optik_t*) &set->lock, pred_ver)))
+		     {
+		       goto restart;
+		     }
+		   );
+
 
   result = curr->val;
   pred->next = curr->next;
@@ -156,7 +180,8 @@ optik_delete(intset_l_t *set, skey_t key)
   ssmem_free(alloc, (void*) curr);
 #endif
 
-  optik_unlock((optik_t*) &pred->lock);
+  OPTIK_WITHOUT_GL_DO(optik_unlock((optik_t*) &pred->lock););
+  OPTIK_WITH_GL_DO(optik_unlock((optik_t*) &set->lock););
       
   return result;
 }

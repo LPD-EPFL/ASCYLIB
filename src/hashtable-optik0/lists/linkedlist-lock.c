@@ -80,16 +80,6 @@ intset_l_t *set_new_l()
   min = new_node_l(KEY_MIN, 0, max, 1);
   set->head = min;
 
-#if defined(LL_GLOBAL_LOCK)
-  set->lock = (volatile ptlock_t*) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(ptlock_t));
-  if (set->lock == NULL)
-    {
-      perror("malloc");
-      exit(1);
-    }
-  GL_INIT_LOCK(set->lock);
-#endif
-
   MEM_BARRIER;
   return set;
 }
@@ -102,6 +92,7 @@ bucket_set_init_l(intset_l_t* set)
   set->head = min;
 
   optik_init(&set->lock);
+  optik_init((optik_t*) &min->lock);
 }
 
 void
