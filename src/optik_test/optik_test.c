@@ -71,6 +71,7 @@ size_t load_factor;
 double update = 20;
 size_t num_threads = 1;
 size_t duration = 1000;
+int test_verbose = 0;
 
 size_t print_vals_num = 100; 
 size_t pf_vals_num = 1023;
@@ -99,6 +100,7 @@ volatile ticks *getting_count;
 volatile ticks *getting_count_succ;
 volatile ticks *removing_count;
 volatile ticks *removing_count_succ;
+volatile ticks *consecutive;
 volatile ticks *total;
 
 
@@ -164,6 +166,9 @@ test(void* thread)
   ssmem_alloc_init_fs_size(alloc, SSMEM_DEFAULT_MEM_SIZE, SSMEM_GC_FREE_SET_SIZE, ID);
 #endif
     
+  size_t previous[initial];
+  size_t my_consecutive = 0;
+
 
   RR_INIT(phys_id);
   barrier_cross(&barrier);
@@ -195,7 +200,15 @@ test(void* thread)
 	  if(res)
 	    {
 	      ADD_DUR(my_putting_succ);
-	      global_counter[key]++;
+	      size_t c = global_counter[key]++;
+	      if (test_verbose)
+		{
+		  if (c == (previous[key] + 1))
+		    {
+		      my_consecutive++;
+		    }
+		  previous[key] = c;
+		}
 	      my_putting_count_succ++;
 	    }
 	  ADD_DUR_FAIL(my_putting_fail);
@@ -213,7 +226,15 @@ test(void* thread)
 	  /*   { */
 	  ADD_DUR(my_removing_succ);
 	  my_removing_count_succ++;
-	  global_counter[key]++;
+	  size_t c = global_counter[key]++;
+	  if (test_verbose)
+	    {
+	      if (c == (previous[key] + 1))
+		{
+		  my_consecutive++;
+		}
+	      previous[key] = c;
+	    }
 	  /* } */
 	  //	  ADD_DUR_FAIL(my_removing_fail);
 	  my_removing_count++;
@@ -229,7 +250,15 @@ test(void* thread)
 	    {
 	      ADD_DUR(my_getting_succ);
 	      my_getting_count_succ++;
-	      global_counter[key]++;
+	      size_t c = global_counter[key]++;
+	      if (test_verbose)
+		{
+		  if (c == (previous[key] + 1))
+		    {
+		      my_consecutive++;
+		    }
+		  previous[key] = c;
+		}
 	      optik_unlock(cur);
 	    }
 	  ADD_DUR_FAIL(my_getting_fail);
@@ -257,6 +286,7 @@ test(void* thread)
   putting_count_succ[ID] += my_putting_count_succ;
   getting_count_succ[ID] += my_getting_count_succ;
   removing_count_succ[ID]+= my_removing_count_succ;
+  consecutive[ID] += my_consecutive;
 
   EXEC_IN_DEC_ID_ORDER(ID, num_threads)
     {
@@ -289,8 +319,8 @@ main(int argc, char **argv)
     {"range",                     required_argument, NULL, 'r'},
     {"update-rate",               required_argument, NULL, 'u'},
     {"num-buckets",               required_argument, NULL, 'b'},
-    {"print-vals",                required_argument, NULL, 'v'},
     {"vals-pf",                   required_argument, NULL, 'f'},
+    {"verbose",                   no_argument,       NULL, 'v'},
     {NULL, 0, NULL, 0}
   };
 
@@ -298,7 +328,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:vf:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -335,10 +365,10 @@ main(int argc, char **argv)
 		 "        Percentage of put update transactions (should be less than percentage of updates)\n"
 		 "  -b, --num-buckets <int>\n"
 		 "        Number of initial buckets (stronger than -l)\n"
-		 "  -v, --print-vals <int>\n"
-		 "        When using detailed profiling, how many values to print.\n"
 		 "  -f, --val-pf <int>\n"
 		 "        When using detailed profiling, how many values to keep track of.\n"
+		 "  -v, --verbose\n"
+		 "        Print more detailed output.\n"
 		 , argv[0]);
 	  exit(0);
 	case 'd':
@@ -361,7 +391,7 @@ main(int argc, char **argv)
 	  put = atof(optarg);
 	  break;
 	case 'v':
-	  print_vals_num = atoi(optarg);
+	  test_verbose = 1;
 	  break;
 	case 'f':
 	  pf_vals_num = pow2roundup(atoi(optarg)) - 1;
@@ -390,7 +420,10 @@ main(int argc, char **argv)
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;
-  printf("Sizeof initial: %.2f KB = %.2f MB\n", kb, mb);
+  if (test_verbose)
+    {
+      printf("Sizeof initial: %.2f KB = %.2f MB\n", kb, mb);
+    }
 
   if (!is_power_of_two(range))
     {
@@ -451,6 +484,7 @@ main(int argc, char **argv)
   getting_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
+  consecutive = (ticks *) calloc(num_threads , sizeof(ticks));
     
   pthread_t threads[num_threads];
   pthread_attr_t attr;
@@ -503,21 +537,32 @@ main(int argc, char **argv)
 
   free(tds);
     
-  volatile ticks putting_suc_total = 0;
-  volatile ticks putting_fal_total = 0;
-  volatile ticks getting_suc_total = 0;
-  volatile ticks getting_fal_total = 0;
-  volatile ticks removing_suc_total = 0;
-  volatile ticks removing_fal_total = 0;
-  volatile uint64_t putting_count_total = 0;
-  volatile uint64_t putting_count_total_succ = 0;
-  volatile uint64_t getting_count_total = 0;
-  volatile uint64_t getting_count_total_succ = 0;
-  volatile uint64_t removing_count_total = 0;
-  volatile uint64_t removing_count_total_succ = 0;
+  ticks putting_suc_total = 0;
+  ticks putting_fal_total = 0;
+  ticks getting_suc_total = 0;
+  ticks getting_fal_total = 0;
+  ticks removing_suc_total = 0;
+  ticks removing_fal_total = 0;
+  uint64_t putting_count_total = 0;
+  uint64_t putting_count_total_succ = 0;
+  uint64_t getting_count_total = 0;
+  uint64_t getting_count_total_succ = 0;
+  uint64_t removing_count_total = 0;
+  uint64_t removing_count_total_succ = 0;
+  uint64_t consecutive_total = 0;
     
-  for(t=0; t < num_threads; t++) 
+  for (t = 0; t < num_threads; t++) 
     {
+      if (test_verbose)
+	{
+	  printf("t%-2ld %-10zu %-10zu %-10zu %-10zu %-10zu %-10zu -- %zu\n", t,
+		 getting_count[t], getting_count_succ[t],
+		 putting_count[t], putting_count_succ[t],
+		 removing_count[t], removing_count_succ[t],
+		 consecutive[t]
+		 );
+	  consecutive_total += consecutive[t];
+	}
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];
@@ -567,7 +612,7 @@ main(int argc, char **argv)
   size_t gc_tot = 0;
   for (i = 0; i <= rand_max; i++)
     {
-       gc_tot += global_counter[i];
+      gc_tot += global_counter[i];
     }
 
   printf("#counter    %10zu\n"
@@ -576,8 +621,14 @@ main(int argc, char **argv)
   printf("#txs       %zu\t(%-10.0f\n", num_threads, throughput_succ);
   printf("#txs succ  %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops      %.3f\n", throughput / 1e6);
-  printf("#Mops succ %.3f\n", throughput_succ / 1e6);
-
+  if (test_verbose)
+    {
+      printf("#Mops succ %-8.3f / consecutive %.2f%%\n", throughput_succ / 1e6, 100.0 * consecutive_total / total_succ);
+    }
+  else
+    {
+      printf("#Mops succ %-8.3f\n", throughput_succ / 1e6);
+    }
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();
 
