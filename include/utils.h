@@ -615,6 +615,19 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
 #  endif
 #endif 
 
+#if !defined(PREFETCH)
+#  if defined(__x86_64__)
+#    define PREFETCH(x)		     asm volatile("prefetch %0" :: "m" (*(unsigned long *)x))
+#  elif defined(__sparc__)
+#    define PREFETCH(x)		
+#  elif defined(XEON)
+#    define PREFETCH(x)		
+#  else
+#    define PREFETCH(x)		
+#  endif
+#endif 
+
+
   //debugging functions
 #ifdef DEBUG
 #  define DPRINT(args...) fprintf(stderr,args);
