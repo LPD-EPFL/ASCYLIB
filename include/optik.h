@@ -85,7 +85,7 @@ typedef union optik
 } optik_t;
 
 static inline void
-optik_lock_init(optik_t* ol)
+optik_init(optik_t* ol)
 {
   ol->to_uint64 = 0;
 }
