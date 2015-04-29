@@ -53,7 +53,7 @@ new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
   node->val = val;
   node->next = next;
 
-  optik_init((optik_t*) &node->lock);
+  OPTIK_WITHOUT_GL_DO(optik_init((optik_t*) &node->lock););
 
 #if defined(__tile__)
   /* on tilera you may have store reordering causing the pointer to a new node

@@ -80,12 +80,10 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 
   UPDATE_TRY();
 
-#if OPTIK_RO_FAIL == 1 
   if (curr != NULL && curr->key == key)
     {
       return false;
     }
-#endif
 
   OPTIK_WITHOUT_GL_DO(
 		      if ((!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
@@ -142,16 +140,14 @@ optik_delete(intset_l_t *set, skey_t key)
 	}
       OPTIK_WITHOUT_GL_DO(curr_ver = curr->lock;);
     }
-  while (likely(curr->key < key));
+  while (curr->key < key);
 
   UPDATE_TRY();
 
-#if OPTIK_RO_FAIL == 1 
   if (curr == NULL || curr->key != key)
     {
       return false;
     }
-#endif
 
   OPTIK_WITHOUT_GL_DO(
 		      if (unlikely(!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
