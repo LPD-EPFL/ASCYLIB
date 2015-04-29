@@ -121,7 +121,6 @@ optik_lock(optik_t* ol)
   return 1;
 }
 
-//TODO: check if the follwing is correct
 static inline int
 optik_lock_version(optik_t* ol, optik_t ol_old)
 {
@@ -227,6 +226,35 @@ optik_trylock_version(optik_t* ol, optik_t ol_old)
   return res;
 }
 
+static inline int
+optik_lock(optik_t* ol)
+{
+  do
+    {
+      const uint32_t ov = ol->version;
+      if ((ov != OPTIK_LOCKED) && CAS_U32(&ol->version, ov, OPTIK_LOCKED) == ov)
+	{
+	  break;
+	}
+      OPTIK_PAUSE();
+    }
+  while (1);
+  return 1;
+}
+
+static inline int
+optik_lock_version(optik_t* ol, optik_t ol_old)
+{
+  const uint32_t ov = ol_old.version;
+  if ((ov != OPTIK_LOCKED) && CAS_U32(&ol->version, ov, OPTIK_LOCKED) == ov)
+    {
+      ol->oversion = ov;
+      return 1;
+    }
+
+  optik_lock(ol);
+  return 0;
+}
 
 static inline void
 optik_unlock(optik_t* ol)
