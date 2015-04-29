@@ -53,6 +53,8 @@ optik_find(intset_l_t *set, skey_t key)
   return res;
 }
 
+/* static int __dc = 0, __r = 0; */
+
 int
 optik_insert(intset_l_t *set, skey_t key, sval_t val)
 {
@@ -66,7 +68,8 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 
   do
     {
-      COMPILER_NO_REORDER(register optik_t curr_ver = curr->lock;);
+      //      PREFETCH(curr->next);
+      COMPILER_NO_REORDER(optik_t curr_ver = curr->lock;);
 	  
       pred = curr;
       pred_ver = curr_ver;
@@ -77,7 +80,7 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 
   UPDATE_TRY();
 
-#if OPTIK_RO_FAIL ==1 
+#if OPTIK_RO_FAIL == 1 
   if (curr->key == key)
     {
       return false;
@@ -114,6 +117,7 @@ optik_delete(intset_l_t *set, skey_t key)
 
   do
     {
+      //      PREFETCH(curr->next);
       pred = curr;
       pred_ver = curr_ver;
 
@@ -143,8 +147,7 @@ optik_delete(intset_l_t *set, skey_t key)
     }
 
   result = curr->val;
-  node_l_t* c_nxt = curr->next;
-  pred->next = c_nxt;
+  pred->next = curr->next;
 #if GC == 1
   ssmem_free(alloc, (void*) curr);
 #endif
