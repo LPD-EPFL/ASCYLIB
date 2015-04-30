@@ -73,7 +73,7 @@ typedef union tl
 
 #  define OPTIK_INIT {{0}}
 
-typedef union optik
+typedef volatile union optik
 {
   /* uint8_t padding[64]; */
   struct
