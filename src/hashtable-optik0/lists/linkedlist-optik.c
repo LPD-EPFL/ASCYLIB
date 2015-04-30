@@ -172,12 +172,12 @@ optik_delete(intset_l_t *set, skey_t key)
 
   result = curr->val;
   pred->next = curr->next;
+  OPTIK_WITHOUT_GL_DO(optik_unlock((optik_t*) &pred->lock););
+  OPTIK_WITH_GL_DO(optik_unlock((optik_t*) &set->lock););
+
 #if GC == 1
   ssmem_free(alloc, (void*) curr);
 #endif
 
-  OPTIK_WITHOUT_GL_DO(optik_unlock((optik_t*) &pred->lock););
-  OPTIK_WITH_GL_DO(optik_unlock((optik_t*) &set->lock););
-      
   return result;
 }
