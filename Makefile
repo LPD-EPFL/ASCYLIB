@@ -128,6 +128,7 @@ lfll: lfll_harris lfll_michael lfll_harris_opt
 lbll: seqll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro lbll_optik lbll_optik_no_ro llcopy_no_ro lbll_pugh_no_ro
 ll: seqll lfll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro lbll_optik lbll_optik_no_ro llcopy_no_ro lbll_pugh_no_ro
 
+optik: lbll_optik lbht_optik0 lbht_optik0_gl lbht_optik1 lbht_optik1_gl
 
 lbht_coupling:
 	$(MAKE) src/hashtable-coupling

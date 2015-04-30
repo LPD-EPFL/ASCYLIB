@@ -87,7 +87,7 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
     }
 #endif
 
-  if ((!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
+  if ((!optik_trylock_version(&pred->lock, pred_ver)))
     {
       goto restart;
     }
@@ -97,7 +97,7 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
   MEM_BARRIER;
 #endif
   pred->next = newnode;
-  optik_unlock((optik_t*) &pred->lock);
+  optik_unlock(&pred->lock);
 
   return true;
 }
@@ -135,14 +135,14 @@ optik_delete(intset_l_t *set, skey_t key)
     }
 #endif
 
-  if (unlikely(!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
+  if (unlikely(!optik_trylock_version(&pred->lock, pred_ver)))
     {
       goto restart;
     }
 
-  if (unlikely(!optik_trylock_version((optik_t*) &curr->lock, curr_ver)))
+  if (unlikely(!optik_trylock_version(&curr->lock, curr_ver)))
     {
-      optik_revert((optik_t*) &pred->lock);
+      optik_revert(&pred->lock);
       goto restart;
     }
 
@@ -152,7 +152,7 @@ optik_delete(intset_l_t *set, skey_t key)
   ssmem_free(alloc, (void*) curr);
 #endif
 
-  optik_unlock((optik_t*) &pred->lock);
+  optik_unlock(&pred->lock);
       
   return result;
 }

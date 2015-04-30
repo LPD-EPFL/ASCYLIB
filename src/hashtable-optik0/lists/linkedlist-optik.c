@@ -86,14 +86,14 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
     }
 
   OPTIK_WITHOUT_GL_DO(
-		      if ((!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
+		      if ((!optik_trylock_version(&pred->lock, pred_ver)))
 			{
 			  goto restart;
 			}
 		      );
 
   OPTIK_WITH_GL_DO(
-		   if ((!optik_trylock_version((optik_t*) &set->lock, pred_ver)))
+		   if ((!optik_trylock_version(&set->lock, pred_ver)))
 		     {
 		       goto restart;
 		     }
@@ -105,8 +105,8 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 #endif
   pred->next = newnode;
 
-  OPTIK_WITHOUT_GL_DO(optik_unlock((optik_t*) &pred->lock););
-  OPTIK_WITH_GL_DO(optik_unlock((optik_t*) &set->lock););
+  OPTIK_WITHOUT_GL_DO(optik_unlock(&pred->lock););
+  OPTIK_WITH_GL_DO(optik_unlock(&set->lock););
 
   return true;
 }
@@ -150,20 +150,20 @@ optik_delete(intset_l_t *set, skey_t key)
     }
 
   OPTIK_WITHOUT_GL_DO(
-		      if (unlikely(!optik_trylock_version((optik_t*) &pred->lock, pred_ver)))
+		      if (unlikely(!optik_trylock_version(&pred->lock, pred_ver)))
 			{
 			  goto restart;
 			}
 
-		      if (unlikely(!optik_trylock_version((optik_t*) &curr->lock, curr_ver)))
+		      if (unlikely(!optik_trylock_version(&curr->lock, curr_ver)))
 			{
-			  optik_revert((optik_t*) &pred->lock);
+			  optik_revert(&pred->lock);
 			  goto restart;
 			}
 		      );
 
   OPTIK_WITH_GL_DO(
-		   if ((!optik_trylock_version((optik_t*) &set->lock, pred_ver)))
+		   if ((!optik_trylock_version(&set->lock, pred_ver)))
 		     {
 		       goto restart;
 		     }
@@ -172,8 +172,8 @@ optik_delete(intset_l_t *set, skey_t key)
 
   result = curr->val;
   pred->next = curr->next;
-  OPTIK_WITHOUT_GL_DO(optik_unlock((optik_t*) &pred->lock););
-  OPTIK_WITH_GL_DO(optik_unlock((optik_t*) &set->lock););
+  OPTIK_WITHOUT_GL_DO(optik_unlock(&pred->lock););
+  OPTIK_WITH_GL_DO(optik_unlock(&set->lock););
 
 #if GC == 1
   ssmem_free(alloc, (void*) curr);
