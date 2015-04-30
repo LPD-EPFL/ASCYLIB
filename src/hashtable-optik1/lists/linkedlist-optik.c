@@ -27,7 +27,7 @@ optik_find(intset_l_t *set, skey_t key)
 {
   PARSE_TRY();
   node_l_t* curr = set->head;
-  while (curr != NULL && (curr->key < key))
+  while (curr != NULL && curr->key < key)
     {
       curr = curr->next;
     }
@@ -41,6 +41,7 @@ optik_find(intset_l_t *set, skey_t key)
   return res;
 }
 
+#if !defined(LL_GLOBAL_LOCK)
 int
 optik_insert(intset_l_t *set, skey_t key, sval_t val)
 {	
@@ -64,7 +65,7 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
       return false;
     }
 
-  if (!optik_trylock_version((optik_t*) &set->lock, pred_ver))
+  if (!optik_trylock_version(&set->lock, pred_ver))
     {
       goto restart;
     }
@@ -83,11 +84,69 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
       set->head = newnode;
     }
 
-  optik_unlock((optik_t*) &set->lock);
+  optik_unlock(&set->lock);
 
   return true;
 }
+#else  /* LL_GLOBAL_LOCK == 1 :: pessimistic */
+int
+optik_insert(intset_l_t *set, skey_t key, sval_t val)
+{	
+  volatile node_l_t *curr, *pred;
+  COMPILER_NO_REORDER(optik_t pred_ver = set->lock);
 
+  int r;
+  for (r = 0; r < 2; r++)
+    {
+      PARSE_TRY();
+
+      pred = NULL;
+      curr = set->head;
+
+      while (curr != NULL && curr->key < key)
+	{
+	  pred = curr;
+	  curr = curr->next;
+	}
+
+      UPDATE_TRY();
+
+      if (curr != NULL && curr->key == key)
+	{
+	  if (r)
+	    {
+	      optik_unlock(&set->lock);
+	    }
+	  return false;
+	}
+
+      if (!r && optik_lock_version(&set->lock, pred_ver))
+	{
+	  break;
+	}
+    }
+
+  node_l_t* newnode = new_node_l(key, val, curr, 0);
+#ifdef __tile__
+  MEM_BARRIER;
+#endif
+
+  if (pred != NULL)
+    {
+      pred->next = newnode;
+    }
+  else
+    {
+      set->head = newnode;
+    }
+
+  optik_unlock(&set->lock);
+
+  return true;
+}
+#endif	/* LL_GLOBAL_LOCK */
+
+#if !defined(LL_GLOBAL_LOCK)
 sval_t
 optik_delete(intset_l_t *set, skey_t key)
 {
@@ -99,7 +158,7 @@ optik_delete(intset_l_t *set, skey_t key)
   COMPILER_NO_REORDER(optik_t pred_ver = set->lock);
   curr = set->head;
 
-  while (curr != NULL && (curr->key < key))
+  while (curr != NULL && curr->key < key)
     {
       pred = curr;
       curr = curr->next;
@@ -112,7 +171,7 @@ optik_delete(intset_l_t *set, skey_t key)
       return false;
     }
 
-  if ((!optik_trylock_version((optik_t*) &set->lock, pred_ver)))
+  if ((!optik_trylock_version(&set->lock, pred_ver)))
     {
       goto restart;
     }
@@ -127,7 +186,7 @@ optik_delete(intset_l_t *set, skey_t key)
       set->head = curr->next;
     }
 
-  optik_unlock((optik_t*) &set->lock);
+  optik_unlock(&set->lock);
      
 #if GC == 1
    ssmem_free(alloc, (void*) curr);
@@ -135,3 +194,60 @@ optik_delete(intset_l_t *set, skey_t key)
  
   return result;
 }
+#else  /* LL_GLOBAL_LOCK = 1 :: pessimistic locking */
+sval_t
+optik_delete(intset_l_t *set, skey_t key)
+{
+  volatile node_l_t *pred, *curr;  
+  COMPILER_NO_REORDER(optik_t pred_ver = set->lock);
+
+  int r;
+  for (r = 0; r < 2; r++)
+    {
+      PARSE_TRY();
+
+      pred = NULL;
+      curr = set->head;
+
+      while (curr != NULL && curr->key < key)
+	{
+	  pred = curr;
+	  curr = curr->next;
+	}
+
+      UPDATE_TRY();
+
+      if (curr == NULL || curr->key != key)
+	{
+	  if (r)
+	    {
+	      optik_unlock(&set->lock);
+	    }
+	  return false;
+	}
+
+      if (!r && optik_lock_version(&set->lock, pred_ver))
+	{
+	  break;
+	}
+    }
+
+  sval_t result = curr->val;
+  if (pred != NULL)
+    {
+      pred->next = curr->next;
+    }
+  else
+    {
+      set->head = curr->next;
+    }
+
+  optik_unlock(&set->lock);
+     
+#if GC == 1
+  ssmem_free(alloc, (void*) curr);
+#endif
+ 
+  return result;
+}
+#endif	/* LL_GLOBAL_LOCK */
