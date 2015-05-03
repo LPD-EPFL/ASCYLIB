@@ -22,7 +22,7 @@
  *
  */
 
-#include "alistarh.h"
+#include "prioritySkiplist.h"
 
 RETRY_STATS_VARS;
 
@@ -38,47 +38,6 @@ __thread size_t lat_parsing_cleaner = 0;
 extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 #define FRASER_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
-
-#define ALISTARH_STARTING_HEIGHT_CONSTANT	1	//K
-#define ALISTARH_MAX_JUMP_CONSTANT			1	//J
-#define ALISTARH_LEVELS_TO_DESCEND			1	//D
-
-unsigned int num_threads; //p
-unsigned int starting_height; //H
-unsigned int max_jump_length; //L
-unsigned int cleaner_percentage;
-
-sl_node_t* last_dummy_entry;
-//KEY_MIN+1 as the value is reserved for dummy entries,
-//while KEY_MIN as the key respresents the head of the skiplist!
-
-void
-alistarh_init(int _num_threads, sl_intset_t* set, int padding)
-{
-  num_threads = _num_threads;
-  starting_height = floor_log_2(num_threads);
-  max_jump_length = floor_log_2(num_threads)+1;
-  cleaner_percentage = (99+(num_threads/2))/num_threads;
-  cleaner_percentage = cleaner_percentage>1?cleaner_percentage:1;
-  
-  if (padding)
-  {
-    int i=1, num_dummies = num_threads*floor_log_2(num_threads)/2;
-    for (; i<=num_dummies; i++)
-    {
-      fraser_insert(set, KEY_MIN+i, KEY_MIN+1);
-    }
-    last_dummy_entry = set->head;
-    while (last_dummy_entry->next[0]->val==KEY_MIN+1) {
-      last_dummy_entry = last_dummy_entry->next[0];
-    }
-  }
-  else
-  {
-    last_dummy_entry = set->head;
-  }
-  return;
-}
 
 int		
 fraser_search(sl_intset_t *set, skey_t key, sl_node_t **left_list, sl_node_t **right_list)
@@ -303,77 +262,30 @@ fraser_remove(sl_intset_t *set, skey_t key)
 }
 
 sval_t
-alistarh_deleteMin(sl_intset_t *set)
+prioritySL_deleteMin(sl_intset_t *set)
 {
-  sval_t result;
-  sl_node_t *next, *node;
-  int i, level;
-  
- retry:
-  if (unlikely(rand_range(100) <= cleaner_percentage))
-  { //become cleaner
-	result = 0;
-    PARSE_START_TS(4);
-    node = GET_UNMARKED(last_dummy_entry->next[0]);
-    while(node->next[0]!=NULL)
-    {
-      if (!IS_MARKED(node->next[node->toplevel-1]))
-      {
-        int my_delete = mark_node_ptrs(node);
-        if (my_delete)
-        {
-          result = node->val;
-          fraser_search(set, node->key, NULL, NULL);
-          break;
-        }
-      }
-      node = GET_UNMARKED(node->next[0]);
-    }
-    PARSE_END_TS(4, lat_parsing_cleaner++);
-    return result;
-  }
-  else //spray & mark as deleted
+  sval_t result = 0;
+  sl_node_t *node;
+  PARSE_START_TS(4);
+  node = GET_UNMARKED(set->head->next[0]);
+  while(node->next[0]!=NULL)
   {
-    UPDATE_TRY();
-  
-    PARSE_START_TS(3);
-    result = 0;
-    node = set->head;
-    next = NULL;
-    for(level = starting_height; level>=0; level-=ALISTARH_LEVELS_TO_DESCEND)
+    if (!IS_MARKED(node->next[node->toplevel-1]))
     {
-      i = (int)rand_range(max_jump_length);
-      for (; i>0; i--)
+      int my_delete = mark_node_ptrs(node);
+      if (my_delete)
       {
-        next = GET_UNMARKED(node->next[level]);
-        if (next==NULL || next->next[0]==NULL)
-          break;
-        node = next;
+        result = node->val;
+        fraser_search(set, node->key, NULL, NULL);
+        break;
       }
     }
-    PARSE_END_TS(3, lat_parsing_deleteMin++);
-  
-    if (unlikely(node == set->head))
-      goto retry;
-    
-    if (unlikely(node->val == KEY_MIN+1))
-      goto retry;
-  
-    int my_delete = mark_node_ptrs(node);
-  
-    if (my_delete)
-    {
-	  fraser_search(set, node->key, NULL, NULL);
-      result = node->val;
-    }
-    
-    else
-    {
-	  goto retry;
-	}
-	return result;
+    node = GET_UNMARKED(node->next[0]);
   }
+  PARSE_END_TS(4, lat_parsing_cleaner++);
+  return result;
 }
+
 
 int
 fraser_insert(sl_intset_t *set, skey_t key, sval_t val) 
@@ -433,34 +345,3 @@ fraser_insert(sl_intset_t *set, skey_t key, sval_t val)
   return true;
 }
 
-skey_t
-alistarh_spray(sl_intset_t *set)
-{
-  sl_node_t *next, *node;
-  int i, level;
-  
- retry:
-  UPDATE_TRY();
-  PARSE_START_TS(3);
-  node = set->head;
-  next = NULL;
-  for(level = starting_height; level>=0; level-=ALISTARH_LEVELS_TO_DESCEND)
-  {
-    i = (int)rand_range(max_jump_length);
-    for (; i>0; i--)
-    {
-      next = GET_UNMARKED(node->next[level]);
-      if (next==NULL || next->next[0]==NULL)
-        break;
-      node = next;
-    }
-  }
-  PARSE_END_TS(3, lat_parsing_deleteMin++);
-  if (unlikely(node == set->head))
-    goto retry;
-
-  if (unlikely(node->val == KEY_MIN+1))
-    goto retry;
-
-  return node->key;
-}

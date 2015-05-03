@@ -47,7 +47,7 @@
 #  include <sys/procset.h>
 #endif
 
-#include "intRelaxedPriorityQueue.h"
+#include "intPriorityQueue.h"
 
 /* ################################################################### *
  * Definition of macros: per data structure
@@ -61,6 +61,8 @@
 
 #define DS_TYPE             sl_intset_t
 #define DS_NODE             sl_node_t
+
+#define PADDING             1
 
 /* ################################################################### *
  * GLOBALS
@@ -199,7 +201,7 @@ test(void* thread)
 
   if (!ID)
     {
-      alistarh_init(num_threads, set);
+      alistarh_init(num_threads, set, PADDING);
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 

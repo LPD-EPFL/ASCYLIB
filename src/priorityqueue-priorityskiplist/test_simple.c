@@ -62,8 +62,6 @@
 #define DS_TYPE             sl_intset_t
 #define DS_NODE             sl_node_t
 
-#define PADDING             0
-
 /* ################################################################### *
  * GLOBALS
  * ################################################################### */
@@ -165,40 +163,45 @@ test(void* thread)
   ssmem_alloc_init_fs_size(alloc, SSMEM_DEFAULT_MEM_SIZE, SSMEM_GC_FREE_SET_SIZE, ID);
 #endif
     
+
   RR_INIT(phys_id);
   barrier_cross(&barrier);
-  
+
+  uint64_t key;
+  int c = 0;
+  uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
+  uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
+
   int i;
   uint32_t num_elems_thread = (uint32_t) (initial / num_threads);
-  uint32_t first_elem = (ID*num_elems_thread) +1;
   int32_t missing = (uint32_t) initial - (num_elems_thread * num_threads);
   if (ID < missing)
     {
-	  first_elem += ID;
       num_elems_thread++;
     }
-  else
+    
+#if INITIALIZE_FROM_ONE == 1
+  num_elems_thread = (ID == 0) * initial;
+#endif
+
+  for(i = 0; i < num_elems_thread; i++) 
     {
-	  first_elem += missing;
-	}
-  uint32_t last_elem = first_elem + num_elems_thread;
-  
-  for(i = first_elem; i < last_elem; i++) 
-    {
-      if(DS_ADD(set, i, i) == false)
+      key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
+      
+      if(DS_ADD(set, key, NULL) == false)
 	{
 	  i--;
 	}
     }
-
   MEM_BARRIER;
+
   barrier_cross(&barrier);
 
   if (!ID)
     {
-      alistarh_init(num_threads, set, PADDING);
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
+
 
   RETRY_STATS_ZERO();
  
@@ -206,19 +209,10 @@ test(void* thread)
 
   RR_START_SIMPLE();
 
-  skey_t deletedKey;
-  for (i=0; i<1; i++)
-  {
-	deletedKey = alistarh_spray(set);
-	if (deletedKey == 0)
-	{
-      i--;
-	}
-	else
-	{
-      printf("%lu\n", deletedKey);
+  while (stop == 0) 
+    {
+      TEST_LOOP(NULL);
     }
-  }
 
   barrier_cross(&barrier);
   RR_STOP_SIMPLE();
@@ -228,7 +222,7 @@ test(void* thread)
       size_after = DS_SIZE(set);
       printf("#AFTER  size is: %zu\n", size_after);
     }
-  
+
   barrier_cross(&barrier);
 
 #if defined(COMPUTE_LATENCY)
@@ -365,6 +359,7 @@ main(int argc, char **argv)
 	  exit(1);
 	}
     }
+
 
 
   if (!is_power_of_two(initial))
@@ -546,8 +541,7 @@ main(int argc, char **argv)
 #define LLU long long unsigned int
 
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
-  int num_dummies = PADDING==0?0:(num_threads*floor_log_2(num_threads)/2);
-  if (size_after != (initial + num_dummies + pr))
+  if (size_after != (initial + pr))
     {
       printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
       assert(size_after == (initial + pr));

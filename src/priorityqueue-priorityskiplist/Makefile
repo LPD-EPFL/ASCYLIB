@@ -2,16 +2,16 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS = $(BINDIR)/lf-pq_alistarh
+BINS = $(BINDIR)/lf-pq_prioritySL
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
 
 all:	main
 
-ALGO_O = alistarh.o
-ALGO_H = alistarh.h
-ALGO_C = alistarh.c
+ALGO_O = prioritySkiplist.o
+ALGO_H = prioritySkiplist.h
+ALGO_C = prioritySkiplist.c
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
 

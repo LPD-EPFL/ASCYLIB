@@ -62,8 +62,6 @@
 #define DS_TYPE             sl_intset_t
 #define DS_NODE             sl_node_t
 
-#define PADDING             0
-
 /* ################################################################### *
  * GLOBALS
  * ################################################################### */
@@ -165,9 +163,15 @@ test(void* thread)
   ssmem_alloc_init_fs_size(alloc, SSMEM_DEFAULT_MEM_SIZE, SSMEM_GC_FREE_SET_SIZE, ID);
 #endif
     
+
   RR_INIT(phys_id);
   barrier_cross(&barrier);
-  
+
+  uint64_t key;
+  int c = 0;
+  uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
+  uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
+
   int i;
   uint32_t num_elems_thread = (uint32_t) (initial / num_threads);
   uint32_t first_elem = (ID*num_elems_thread) +1;
@@ -196,7 +200,6 @@ test(void* thread)
 
   if (!ID)
     {
-      alistarh_init(num_threads, set, PADDING);
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
@@ -206,18 +209,23 @@ test(void* thread)
 
   RR_START_SIMPLE();
 
-  skey_t deletedKey;
-  for (i=0; i<1; i++)
+  uint64_t deleted; //, maxDeleted = 0, minDeleted = initial;
+  for (i=0; i<num_elems_thread; i++)
   {
-	deletedKey = alistarh_spray(set);
-	if (deletedKey == 0)
+    my_removing_count++;
+	deleted = pq_deleteMin(set);
+	if (deleted == 0)
 	{
       i--;
 	}
 	else
 	{
-      printf("%lu\n", deletedKey);
-    }
+      my_removing_count_succ++;
+/*	  if (unlikely(deleted>maxDeleted))
+		maxDeleted = deleted;
+      else if (unlikely(deleted<minDeleted))
+		minDeleted = deleted;
+*/    }
   }
 
   barrier_cross(&barrier);
@@ -229,6 +237,8 @@ test(void* thread)
       printf("#AFTER  size is: %zu\n", size_after);
     }
   
+  //printf("maxDeleted %lu\n", maxDeleted);
+  //printf("minDeleted %lu\n", minDeleted);
   barrier_cross(&barrier);
 
 #if defined(COMPUTE_LATENCY)
@@ -546,8 +556,7 @@ main(int argc, char **argv)
 #define LLU long long unsigned int
 
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
-  int num_dummies = PADDING==0?0:(num_threads*floor_log_2(num_threads)/2);
-  if (size_after != (initial + num_dummies + pr))
+  if (size_after != (initial + pr))
     {
       printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
       assert(size_after == (initial + pr));
