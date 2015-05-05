@@ -43,7 +43,8 @@ This target builds all lock-free, lock-based, and sequential data structures.
 
 The last two structures, RCU and TBB, are based on external libraries. 
 The RCU-based hash table requires an installation of the URCU library (http://urcu.so/).
-The TBB-based hash table requires an installation of Intel's TBB library (https://www.threadingbuildingblocks.org/).
+You need to set the `URCU_PATH` in `common/Makefile.common` to point to the folder of your local URCU installation, or alternatively, you can install URCU globally.
+The TBB-based hash table requires an installation of Intel's TBB library (https://www.threadingbuildingblocks.org/). You need to set the `TBB_LIBS` and the `TBB_INCLUDES` variables in `common/Makefile.common`, or alternatively, you can install TBB globally.
 
 To build all data structures except from those two, you can issue `make`.
 
