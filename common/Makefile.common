@@ -6,6 +6,8 @@
 TBB_LIBS      ?= /home/trigonak/code/tbb42_20140122oss/build/linux_intel64_gcc_cc4.8_libc2.17_kernel3.11.0_release
 TBB_INCLUDES  ?= /home/trigonak/code/tbb42_20140122oss/include
 
+URCU_PATH     ?= /home/trigonak/Desktop/urcu/ #path to the URCU installation 
+
 # Compiler
 SOLARIS_CC1 	?= /opt/csw/bin/gcc
 SOLARIS_CC2 	?= /usr/sfw/bin/gcc
