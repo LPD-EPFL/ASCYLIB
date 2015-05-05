@@ -6,7 +6,7 @@ BINS  = $(BINDIR)/lb-ht_tbb
 PROF = $(ROOT)/src
 
 CC = g++
-LDFLAGS += -L/home/trigonak/code/tbb42_20140122oss/build/linux_intel64_gcc_cc4.8_libc2.17_kernel3.11.0_release -ltbb
+LDFLAGS += -L$(TBB_FOLDER) -ltbb
 TEST_FILE = test_simple.cc
 
 .PHONY:	all clean
