@@ -223,8 +223,8 @@ void rapl_read_start_pack_pp0_unprotected_all();
 void rapl_read_stop_pack_pp0_unprotected_all();
 void rapl_read_term();
 void rapl_read_print(int detailed);
-void rapl_read_print_all_sockets(int detailed, int protected);
-void rapl_read_print_sockets(int socket, int detailed, int protected);
+void rapl_read_print_all_sockets(int detailed, int is_protected);
+void rapl_read_print_sockets(int socket, int detailed, int is_protected);
 
 typedef struct rapl_stats
 {
