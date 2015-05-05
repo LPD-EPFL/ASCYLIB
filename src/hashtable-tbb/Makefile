@@ -6,7 +6,7 @@ BINS  = $(BINDIR)/lb-ht_tbb
 PROF = $(ROOT)/src
 
 CC = g++
-LDFLAGS += -L$(TBB_FOLDER) -ltbb
+LDFLAGS += -L$(TBB_LIBS) -ltbb
 TEST_FILE = test_simple.cc
 
 .PHONY:	all clean
@@ -20,7 +20,7 @@ ssalloc.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/ssalloc.o $(PROF)/ssalloc.c
 
 test.o: $(TEST_FILE)
-	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE) -I/home/trigonak/code/tbb42_20140122oss/include
+	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE) -I$(TBB_INCLUDES)
 
 main: 	test.o ssalloc.o measurements.o
 	$(CC) $(CFLAGS) $(BUILDIR)/ssalloc.o $(BUILDIR)/measurements.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS) 
