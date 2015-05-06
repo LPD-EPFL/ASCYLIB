@@ -148,11 +148,12 @@ optik_delete(intset_l_t *set, skey_t key)
 
   result = curr->val;
   pred->next = curr->next;
+
+  optik_unlock(&pred->lock);
+      
 #if GC == 1
   ssmem_free(alloc, (void*) curr);
 #endif
 
-  optik_unlock(&pred->lock);
-      
   return result;
 }
