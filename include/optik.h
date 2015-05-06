@@ -91,6 +91,12 @@ optik_init(optik_t* ol)
 }
 
 static inline int
+optik_is_same_version(optik_t v1, optik_t v2)
+{
+  return v1.to_uint64 == v2.to_uint64;
+}
+
+static inline int
 optik_trylock_version(optik_t* ol, optik_t ol_old)
 {
   uint32_t version = ol_old.version;
@@ -172,6 +178,15 @@ optik_unlock(optik_t* ol)
 #  elif OPTIK_RLS_TYPE == OPTIK_RLS_ATOMIC
   FAI_U32(&ol->version);
 #  endif
+}
+
+static inline optik_t
+optik_unlockv(optik_t* ol)
+{
+#  ifdef __tile__
+  MEM_BARRIER;
+#  endif
+  return (optik_t) IAF_U64(&ol->to_uint64);
 }
 
 static inline void
