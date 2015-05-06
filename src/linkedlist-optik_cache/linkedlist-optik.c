@@ -24,6 +24,11 @@
 
 RETRY_STATS_VARS;
 
+#define CACHE_TYPE       0	/* 0 - validation with optik versions */
+                                /* 1 - uses any non-deleted element */
+
+
+#if CACHE_TYPE == 0
 
 typedef struct node_cache
 {
@@ -34,10 +39,6 @@ typedef struct node_cache
 
 __thread node_cache_t node_last = {0, 0, OPTIK_INIT};
 
-/*
- * Checking that both curr and pred are both unmarked and that pred's next pointer
- * points to curr to verify that the entries are adjacent and present in the list.
- */
 static inline int
 optik_cache_validate(skey_t key) 
 {
@@ -63,8 +64,82 @@ optik_cache_and_unlock(node_l_t* pred)
 }
 
 sval_t
+optik_find_pes(intset_l_t *set, skey_t key)
+{
+  node_l_t *curr, *pred;
+  optik_t pred_ver = OPTIK_INIT;
+	
+ restart:
+  PARSE_TRY();
+  curr = set->head;
+
+  do
+    {
+      COMPILER_NO_REORDER(optik_t curr_ver = curr->lock;);
+	  
+      pred = curr;
+      pred_ver = curr_ver;
+
+      curr = curr->next;
+    }
+  while (likely(curr->key < key));
+
+  if ((!optik_trylock_version(&pred->lock, pred_ver)))
+    {
+      goto restart;
+    }
+
+  int res = (curr->key == key);
+
+  optik_cache_and_unlock(pred);
+  return res;
+}
+
+#elif CACHE_TYPE == 1
+
+typedef struct node_cache
+{
+  node_l_t* node;
+} node_cache_t;
+
+__thread node_cache_t node_last = {0};
+
+static inline int
+optik_cache_validate(skey_t key) 
+{
+  return (node_last.node &&
+	  !optik_is_deleted(node_last.node->lock) &&
+	  key > node_last.node->key);
+}
+
+static inline int
+optik_cache_validate_plus(skey_t key) 
+{
+  return (node_last.node &&
+	  !optik_is_deleted(node_last.node->lock) &&
+	  key >= node_last.node->key);
+}
+
+static inline void
+optik_cache_and_unlock(node_l_t* pred)
+{
+  node_last.node = pred;
+  optik_unlock(&pred->lock);
+}
+
+#endif	/* CACHE_TYPE */
+
+
+sval_t
 optik_find(intset_l_t *set, skey_t key)
 {
+#if CACHE_TYPE == 0
+  if (unlikely(!node_last.key))
+    {
+      return optik_find_pes(set, key);
+    }
+#endif
+
   PARSE_TRY();
   node_l_t* curr;
   if (optik_cache_validate_plus(key))
@@ -82,6 +157,9 @@ optik_find(intset_l_t *set, skey_t key)
       curr = curr->next;
     }
 
+#if CACHE_TYPE == 1
+  node_last.node = curr;
+#endif
 
   sval_t res = 0;
   if (curr->key == key)
@@ -159,8 +237,12 @@ optik_delete(intset_l_t *set, skey_t key)
 
   if (optik_cache_validate(key))
     {
-      curr = node_last.node;
+#if CACHE_TYPE == 0
       curr_ver = node_last.version;
+#elif CACHE_TYPE == 1
+      curr_ver = node_last.node->lock;
+#endif
+      curr = node_last.node;
     }
   else
     {
@@ -193,7 +275,7 @@ optik_delete(intset_l_t *set, skey_t key)
       goto restart;
     }
 
-  if (unlikely(!optik_trylock_version(&curr->lock, curr_ver)))
+  if (unlikely(!optik_trylock_vdelete(&curr->lock, curr_ver)))
     {
       optik_revert(&pred->lock);
       goto restart;
