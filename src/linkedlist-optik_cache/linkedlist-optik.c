@@ -86,9 +86,6 @@ optik_find(intset_l_t *set, skey_t key)
   sval_t res = 0;
   if (curr->key == key)
     {
-      node_last.version = curr->lock;
-      node_last.key = key;
-      node_last.node = curr;
       res = curr->val;
     }
   
