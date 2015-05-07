@@ -43,7 +43,7 @@ typedef struct ht_intset
 {
   size_t hash;
   intset_t* buckets;
-  uint8_t padding[CACHE_LINE_SIZE - 24];
+  uint8_t padding[CACHE_LINE_SIZE - sizeof(size_t) - sizeof(intset_t*)];
 } ht_intset_t;
 
 void ht_delete(ht_intset_t *set);
