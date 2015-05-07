@@ -39,19 +39,32 @@ typedef struct node_cache
 
 __thread node_cache_t node_last = {0, 0, OPTIK_INIT};
 
+sval_t optik_find_pes(intset_l_t *set, skey_t key);
+
+
 static inline int
-optik_cache_validate(skey_t key) 
+optik_cache_validate(intset_l_t* set, skey_t key) 
 {
-  return (node_last.key &&
-	  key > node_last.key &&
+  if (unlikely(!node_last.key))
+    {
+      //      printf("--> pessimistic run\n");
+      return optik_find_pes(set, key);
+    }
+
+  return (key > node_last.key &&
 	  optik_is_same_version(node_last.node->lock, node_last.version));
 }
 
 static inline int
-optik_cache_validate_plus(skey_t key) 
+optik_cache_validate_plus(intset_l_t* set, skey_t key) 
 {
-  return (node_last.key &&
-	  key >= node_last.key &&
+  if (unlikely(!node_last.key))
+    {
+      //      printf("--> pessimistic run\n");
+      return optik_find_pes(set, key);
+    }
+
+  return (key >= node_last.key &&
 	  optik_is_same_version(node_last.node->lock, node_last.version));
 }
 
@@ -105,7 +118,7 @@ typedef struct node_cache
 __thread node_cache_t node_last = {0};
 
 static inline int
-optik_cache_validate(skey_t key) 
+optik_cache_validate(intset_l_t* set, skey_t key) 
 {
   return (node_last.node &&
 	  !optik_is_deleted(node_last.node->lock) &&
@@ -113,7 +126,7 @@ optik_cache_validate(skey_t key)
 }
 
 static inline int
-optik_cache_validate_plus(skey_t key) 
+optik_cache_validate_plus(intset_l_t* set, skey_t key) 
 {
   return (node_last.node &&
 	  !optik_is_deleted(node_last.node->lock) &&
@@ -133,16 +146,9 @@ optik_cache_and_unlock(node_l_t* pred)
 sval_t
 optik_find(intset_l_t *set, skey_t key)
 {
-#if CACHE_TYPE == 0
-  if (unlikely(!node_last.key))
-    {
-      return optik_find_pes(set, key);
-    }
-#endif
-
   PARSE_TRY();
   node_l_t* curr;
-  if (optik_cache_validate_plus(key))
+  if (optik_cache_validate_plus(set, key))
     {
       /* printf("++> optik_find(%zu) cache start @%zu\n", key, node_last.key); */
       curr = node_last.node;
@@ -181,7 +187,7 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
  restart:
   PARSE_TRY();
 
-  if (optik_cache_validate(key))
+  if (optik_cache_validate(set, key))
     {
       curr = node_last.node;
     }
@@ -235,7 +241,7 @@ optik_delete(intset_l_t *set, skey_t key)
  restart:
   PARSE_TRY();
 
-  if (optik_cache_validate(key))
+  if (optik_cache_validate(set, key))
     {
 #if CACHE_TYPE == 0
       curr_ver = node_last.version;
