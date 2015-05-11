@@ -140,6 +140,23 @@ optik_lock_version(optik_t* ol, optik_t ol_old)
 }
 
 static inline int
+optik_lock_vdelete(optik_t* ol)
+{
+  uint32_t ticket = FAI_U32(&ol->ticket);
+  while (ticket != ol->version)
+    {
+      OPTIK_PAUSE();
+      if (ol->version == INT_MAX)
+	{
+	  return 0;
+	}
+    }
+
+  ol->version = INT_MAX;
+  return 1;
+}
+
+static inline int
 optik_trylock_vdelete(optik_t* ol, optik_t ol_old)
 {
   uint32_t version = ol_old.version;
@@ -150,10 +167,10 @@ optik_trylock_vdelete(optik_t* ol, optik_t ol_old)
 
 #  if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
   optik_t olo = { .version = version, .ticket = version };
-  optik_t oln = { .version = version, .ticket = INT_MAX };
+  optik_t oln = { .version = INT_MAX, .ticket = version };
 #  else
   optik_t olo = { version, version };
-  optik_t oln = { version, INT_MAX };
+  optik_t oln = { INT_MAX, version };
 #  endif
   return CAS_U64(&ol->to_uint64, olo.to_uint64, oln.to_uint64) == olo.to_uint64;
 }
@@ -161,7 +178,7 @@ optik_trylock_vdelete(optik_t* ol, optik_t ol_old)
 static inline int
 optik_is_deleted(optik_t ol)
 {
-  return ol.ticket == INT_MAX;
+  return ol.version == INT_MAX;
 }
 
 static inline void
