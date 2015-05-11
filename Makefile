@@ -1,7 +1,7 @@
 .PHONY:	all
 
-BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_cache src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq
-LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_cache src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/
+BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_cache src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq
+LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_cache src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/
 LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 EXTERNALS = src/hashtable-rcu src/hashtable-tbb
@@ -105,7 +105,10 @@ lbsl_pugh:
 lbsl_herlihy_lb:
 	$(MAKE) src/skiplist-herlihy_lb
 
-sl:	seqsl lfsl_fraser lfsl_herlihy_lf lbsl_pugh lbsl_herlihy_lb
+lbsl_optik:
+	$(MAKE) src/skiplist-optik
+
+sl:	seqsl lfsl_fraser lfsl_herlihy_lf lbsl_pugh lbsl_herlihy_lb lbsl_optik
 
 
 lfll_harris:
@@ -275,6 +278,7 @@ clean:
 	$(MAKE) -C src/noise clean
 	$(MAKE) -C src/skiplist-fraser clean
 	$(MAKE) -C src/skiplist-herlihy_lb clean
+	$(MAKE) -C src/skiplist-optik clean
 	$(MAKE) -C src/skiplist-herlihy_lf clean
 	$(MAKE) -C src/skiplist-pugh clean
 	$(MAKE) -C src/skiplist-seq clean
