@@ -128,7 +128,7 @@ unlock_levels(sl_node_t** nodes, int low, int high)
 {
   sl_node_t* old = NULL;
   int i;
-  for (i = low; i <= high; i++)
+  for (i = high; i >= low; i--)
     {
       if (old != nodes[i])
 	{
@@ -182,17 +182,7 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	sl_node_t* pred = preds[i];
 	if (pred_prev != pred && !optik_trylock_version(&pred->lock, predsv[i]))
 	  {
-	    pred_prev = NULL;
-	    int u;
-	    for (u = i - 1; u >= inserted_upto; u--)
-	      {
-		sl_node_t* pred = preds[u];
-		if (pred_prev != pred)
-		  {
-		    optik_unlock(&pred->lock);
-		  }
-		pred_prev = pred;
-	      }
+	    unlock_levels(preds, inserted_upto, i - 1);
 	    inserted_upto = i;
 	    goto restart;
 	  }
@@ -201,16 +191,7 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	pred_prev = pred;
       }
 
-    pred_prev = NULL;
-    for (i = (toplevel - 1); i >= inserted_upto; i--)
-      {
-	sl_node_t* pred = preds[i];
-	if (pred_prev != pred)
-	  {
-	    optik_unlock(&pred->lock);
-	  }
-	pred_prev = pred;
-      }
+    unlock_levels(preds, inserted_upto, toplevel - 1);
 
     return 1;
   }
