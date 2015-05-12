@@ -103,7 +103,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
   node->key = key;
   node->val = val;
   node->toplevel = toplevel;
-  node->fullylinked = 0;
+  /* node->fullylinked = 0; */
   optik_init(&node->lock);
 
 #if defined(__tile__)
@@ -154,8 +154,8 @@ sl_set_new()
 
   max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
   min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
-  max->fullylinked = 1;
-  min->fullylinked = 1;
+  /* max->fullylinked = 1; */
+  /* min->fullylinked = 1; */
   set->head = min;
 
 #if defined(LL_GLOBAL_LOCK)
@@ -198,7 +198,7 @@ int sl_set_size(sl_intset_t *set)
   node = set->head->next[0];
   while (node->next[0] != NULL) 
     {
-      if (node->fullylinked && !optik_is_deleted(node->lock))
+      if (!optik_is_deleted(node->lock))
 	{
 	  size++;
 	}

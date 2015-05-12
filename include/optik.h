@@ -142,6 +142,11 @@ optik_lock_version(optik_t* ol, optik_t ol_old)
 static inline int
 optik_lock_vdelete(optik_t* ol)
 {
+  if (ol->version == INT_MAX)
+    {
+      return 0;
+    }
+
   uint32_t ticket = FAI_U32(&ol->ticket);
   while (ticket != ol->version)
     {
@@ -153,6 +158,27 @@ optik_lock_vdelete(optik_t* ol)
     }
 
   ol->version = INT_MAX;
+  return 1;
+}
+
+static inline int
+optik_lock_if_not_deleted(optik_t* ol)
+{
+  if (ol->version == INT_MAX)
+    {
+      return 0;
+    }
+
+  uint32_t ticket = FAI_U32(&ol->ticket);
+  while (ticket != ol->version)
+    {
+      OPTIK_PAUSE();
+      if (ol->version == INT_MAX)
+	{
+	  return 0;
+	}
+    }
+
   return 1;
 }
 

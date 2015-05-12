@@ -37,9 +37,10 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 #define MAX_BACKOFF 131071
 #define OPTIK_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
 
-inline int
+static int
 sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, sl_node_t** succs, optik_t* predsv)
 {
+ restart:
   PARSE_TRY();
   int found, i;
   sl_node_t* pred, *curr;
@@ -63,12 +64,12 @@ sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, sl_node_t** suc
 	  currv = curr->lock;  
 	}
 
-      if (preds != NULL)
-	{
-	  preds[i] = pred;
-	  predsv[i] = predv;
-	}
-
+      /* if (unlikely(optik_is_deleted(predv))) */
+      /* 	{ */
+      /* 	  goto restart; */
+      /* 	} */
+      preds[i] = pred;
+      predsv[i] = predv;
       succs[i] = curr;
       if (found == -1 && key == curr->key)
 	{
@@ -115,13 +116,12 @@ sl_optik_left_search(sl_intset_t* set, skey_t key)
 sval_t
 sl_optik_find(sl_intset_t* set, skey_t key)
 { 
-  sval_t result = 0;
-
   PARSE_START_TS(0);
   sl_node_t* nd = sl_optik_left_search(set, key);
   PARSE_END_TS(0, lat_parsing_get++);
 
-  if (nd != NULL && !optik_is_deleted(nd->lock) && nd->fullylinked)
+  sval_t result = 0;
+  if (nd != NULL && !optik_is_deleted(nd->lock))
     {
       result = nd->val;
     }
@@ -154,27 +154,22 @@ unlock_levels(sl_intset_t* set, sl_node_t** nodes, int highestlevel)
 int
 sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 {
-  sl_node_t* succs[OPTIK_MAX_MAX_LEVEL], *preds[OPTIK_MAX_MAX_LEVEL];
+  sl_node_t* preds[OPTIK_MAX_MAX_LEVEL], *succs[OPTIK_MAX_MAX_LEVEL];;
   optik_t predsv[OPTIK_MAX_MAX_LEVEL];
-  sl_node_t * node_found, *prev_pred, *new_node;
-  sl_node_t* pred, *succ;
-  int toplevel, highest_locked, i, valid, found;
-  unsigned int backoff;
-
-  toplevel = get_rand_level();
-  backoff = 1;
+  unsigned int backoff = 1;
 	
+  int toplevel = get_rand_level();
+
   PARSE_START_TS(1);
   while (1) 
     {
       UPDATE_TRY();
-      found = sl_optik_search(set, key, preds, succs, predsv);
+      int found = sl_optik_search(set, key, preds, succs, predsv);
       PARSE_END_TS(1, lat_parsing_put);
 
       if (found != -1)
 	{
-	  node_found = succs[found];
-	  if (!optik_is_deleted(node_found->lock))
+	  if (!optik_is_deleted(succs[found]->lock))
 	    {
 	      PARSE_END_INC(lat_parsing_put);
 	      return 0;
@@ -182,21 +177,25 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	  continue;
 	}
 
-      highest_locked = -1;
-      prev_pred = NULL;
-      valid = 1;
+      int highest_locked = -1;
+      sl_node_t* prev_pred = NULL;
+      int i, valid = 1;
       for (i = 0; valid && (i < toplevel); i++)
 	{
-	  pred = preds[i];
-	  succ = succs[i];
+	  sl_node_t* pred = preds[i];
+	  /* sl_node_t* succ = succs[i]; */
 	  if (pred != prev_pred)
 	    {
+	      /* valid = optik_trylock_version(&pred->lock, predsv[i]);/ */
+	      /* valid = optik_lock_if_not_deleted(&pred->lock); */
+	      /* assert(!optik_is_deleted(predsv[i])); */
 	      valid = optik_trylock_version(&pred->lock, predsv[i]);
 	      if (valid)
 		{
 		  highest_locked = i;
 		  prev_pred = pred;
-		  optik_is_deleted(succ->lock);
+		  /* valid = !optik_is_deleted(pred->lock) && !optik_is_deleted(succ->lock) && (pred->next[i] == succ); */
+		  /* valid = !optik_is_deleted(succ->lock); */
 		}
 	    }	
 			
@@ -204,8 +203,8 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	
       if (!valid) 
 	{			 /* Unlock the predecessors before leaving */ 
-	  unlock_levels(set, preds, highest_locked); /* unlocks the global-lock in the GL case */
-	  if (backoff > 5000) 
+	  unlock_levels(set, preds, highest_locked); 
+	  if (backoff > 5000)
 	    {
 	      nop_rep(backoff & MAX_BACKOFF);
 	    }
@@ -213,7 +212,7 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	  continue;
 	}
 		
-      new_node = sl_new_simple_node(key, val, toplevel, 0);
+      sl_node_t* new_node = sl_new_simple_node(key, val, toplevel, 0);
 
       for (i = 0; i < toplevel; i++)
 	{
@@ -229,8 +228,6 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	  preds[i]->next[i] = new_node;
 	}
 		
-      new_node->fullylinked = 1;
-
       unlock_levels(set, preds, highest_locked);
       PARSE_END_INC(lat_parsing_put);
       return 1;
@@ -241,28 +238,22 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 inline int 
 ok_to_delete(sl_node_t* node, int found)
 {
-  return (node->fullylinked && ((node->toplevel-1) == found) && !optik_is_deleted(node->lock));
+  return (((node->toplevel-1) == found) && !optik_is_deleted(node->lock));
 }
 
 sval_t
 sl_optik_delete(sl_intset_t* set, skey_t key)
 {
-  sl_node_t* succs[OPTIK_MAX_MAX_LEVEL], *preds[OPTIK_MAX_MAX_LEVEL];
+  sl_node_t* succs[OPTIK_MAX_MAX_LEVEL], *preds[OPTIK_MAX_MAX_LEVEL], *node_todel = NULL;
   optik_t predsv[OPTIK_MAX_MAX_LEVEL];
-  sl_node_t* node_todel, *prev_pred, *pred; 
-  int is_marked, toplevel, highest_locked, i, valid, found;	
-  unsigned int backoff;
+  int is_marked = 0, toplevel = -1;	
+  unsigned int backoff = 1;
 
-  node_todel = NULL;
-  is_marked = 0;
-  toplevel = -1;
-  backoff = 1;
-	
   PARSE_START_TS(2);
   while(1)
     {
       UPDATE_TRY();
-      found = sl_optik_search(set, key, preds, succs, predsv);
+      int found = sl_optik_search(set, key, preds, succs, predsv);
       PARSE_END_TS(2, lat_parsing_rem);
 
       /* If not marked and ok to delete, then mark it */
@@ -283,12 +274,11 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	    }
 
 	  /* Physical deletion */
-	  highest_locked = -1;
-	  prev_pred = NULL;
-	  valid = 1;
+	  sl_node_t* prev_pred = NULL;
+	  int i, valid = 1, highest_locked = -1;
 	  for (i = 0; valid && (i < toplevel); i++)
 	    {
-	      pred = preds[i];
+	      sl_node_t* pred = preds[i];
 	      if (pred != prev_pred)
 		{
 		  valid = optik_trylock_version(&pred->lock, predsv[i]);
@@ -317,14 +307,12 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	    }
 
 	  sval_t val = node_todel->val;
+	  /* optik_unlock(&node_todel->lock); */
+	  unlock_levels(set, preds, highest_locked);
+	  PARSE_END_INC(lat_parsing_rem);
 #if GC == 1
 	  ssmem_free(alloc, (void*) node_todel);
 #endif
-
-	  /* optik_unlock(&node_todel->lock); */
-	  unlock_levels(set, preds, highest_locked);
-
-	  PARSE_END_INC(lat_parsing_rem);
 	  return val;
 	}
       else
