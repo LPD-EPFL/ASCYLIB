@@ -47,7 +47,8 @@ typedef volatile struct sl_node
 {
   skey_t key;
   sval_t val; 
-  size_t toplevel;
+  uint32_t toplevel;
+  uint32_t state; 		/* 0: being inserted / 1: valid / 2: deleted */
   /* volatile uint32_t fullylinked; */
   optik_t lock;
   volatile struct sl_node* next[1];

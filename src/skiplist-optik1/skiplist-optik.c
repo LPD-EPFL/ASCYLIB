@@ -51,7 +51,7 @@ sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, optik_t* predsv
   if (nr++ > 1000 && print)
     {
       print = 0;
-      printf("#[par-%zu]#> parse restarted %zu times\n", key, nr);
+      /* printf("#[par-%zu]#> parse restarted %zu times\n", key, nr); */
     }
   PARSE_TRY();
 	
@@ -225,7 +225,9 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	pred_prev = pred;
       }
 
+    node_new->state = 1;
     unlock_levels_down(preds, inserted_upto, toplevel - 1);
+
 
     return 1;
   }
@@ -251,7 +253,7 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 
     if (!my_delete)
       {
-	if (optik_is_deleted(node_found->lock))
+	if (optik_is_deleted(node_found->lock) || (!node_found->state))
 	  {
 	    return 0;
 	  }
@@ -260,7 +262,7 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	  {
 	    if (optik_is_deleted(node_found->lock))
 	      {
-		printf("+[del-%zu]+> someone else did the deletion\n", key);
+		/* printf("+[del-%zu]+> someone else did the deletion\n", key); */
 		return 0;
 	      }
 	    else
@@ -284,7 +286,7 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	sl_node_t* pred = preds[i];
 	if (pred_prev != pred && !optik_trylock_version(&pred->lock, predsv[i]))
 	  {
-	    printf("-[del-%zu]-> failed to grab lvl %d\n", key, i); 
+	    /* printf("-[del-%zu]-> failed to grab lvl %d\n", key, i);  */
 	    unlock_levels_up(preds, 0, locked_upto);
 	    goto restart;
 	  }
@@ -294,8 +296,8 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	  {
 	    if (once)
 	      {
-		printf("-[del-%zu]-> node_found->next[%d](%zu)->lock is deleted\n",
-		       key, i, node_found->next[i]->key);
+		/* printf("-[del-%zu]-> node_found->next[%d](%zu)->lock is deleted\n", */
+		/*        key, i, node_found->next[i]->key); */
 	      }
 	    once = 0;
 	    /* unlock_levels_up(preds, 0, locked_upto); */
@@ -307,6 +309,7 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
     for (i = (node_found->toplevel - 1); i >= 0; i--)
     /* for (i = 0; i < toplevel_nf; i++) */
       {
+	assert(node_found->next[i] != NULL);
 	preds[i]->next[i] = node_found->next[i];
       }
 

@@ -103,6 +103,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
   node->key = key;
   node->val = val;
   node->toplevel = toplevel;
+  node->state = 0;
   /* node->fullylinked = 0; */
   optik_init(&node->lock);
 
