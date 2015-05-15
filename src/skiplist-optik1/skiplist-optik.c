@@ -44,15 +44,7 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 static sl_node_t*
 sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, optik_t* predsv, optik_t* node_foundv)
 {
-  size_t nr = 0;
-  int print = 1;
-
  restart:
-  if (nr++ > 1000 && print)
-    {
-      print = 0;
-      /* printf("#[par-%zu]#> parse restarted %zu times\n", key, nr); */
-    }
   PARSE_TRY();
 	
   sl_node_t* node_found = NULL;
@@ -197,6 +189,7 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	  }
 	else if (inserted_upto && optik_is_deleted(node_found->lock))
 	  {
+#warning impossible right now
 	    printf("+[ins-%zu]+> deleted -- (upto %d) \n", key, inserted_upto);
 	    return 1;
 	  }
@@ -241,8 +234,6 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
   optik_t predsv[OPTIK_MAX_MAX_LEVEL], node_foundv;
   int my_delete = 0;
 
-  int once = 1;
-
  restart:
   {
     sl_node_t* node_found = sl_optik_search(set, key, preds, predsv, &node_foundv);
@@ -270,10 +261,6 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 		goto restart;
 	      }
 	  }
-	else
-	  {
-	    /* printf("-[del-%zu]-> vdeleted\n", key);  */
-	  }
       }
 
     my_delete = 1;
@@ -292,24 +279,12 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	  }
 	pred_prev = pred;
 	locked_upto = i + 1;
-	if (optik_is_deleted(node_found->next[i]->lock))
-	  {
-	    if (once)
-	      {
-		/* printf("-[del-%zu]-> node_found->next[%d](%zu)->lock is deleted\n", */
-		/*        key, i, node_found->next[i]->key); */
-	      }
-	    once = 0;
-	    /* unlock_levels_up(preds, 0, locked_upto); */
-	    /* goto restart; */
-	  }
       }
 
 
     for (i = (node_found->toplevel - 1); i >= 0; i--)
     /* for (i = 0; i < toplevel_nf; i++) */
       {
-	assert(node_found->next[i] != NULL);
 	preds[i]->next[i] = node_found->next[i];
       }
 
