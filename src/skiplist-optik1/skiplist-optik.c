@@ -187,12 +187,6 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 		goto restart;
 	      }
 	  }
-	else if (inserted_upto && optik_is_deleted(node_found->lock))
-	  {
-#warning impossible right now
-	    printf("+[ins-%zu]+> deleted -- (upto %d) \n", key, inserted_upto);
-	    return 1;
-	  }
 	// if node_found is deleted, can the insertion succeed?
 	// is there any chance we get both the deleted and the non-deleted in there?
       }
