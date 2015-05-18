@@ -177,7 +177,6 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
       {
 	if (!inserted_upto)
 	  {
-	    return 0;
 	    if (!optik_is_deleted(node_found->lock))
 	      {
 		return 0;
