@@ -170,7 +170,6 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
   int inserted_upto = 0;
   /* printf("++> inserting %zu\n", key); */
 
-
  restart:
   {
     sl_node_t* node_found = sl_optik_search(set, key, preds, predsv, &unused);
@@ -178,6 +177,7 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
       {
 	if (!inserted_upto)
 	  {
+	    return 0;
 	    if (!optik_is_deleted(node_found->lock))
 	      {
 		return 0;
@@ -214,7 +214,6 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 
     node_new->state = 1;
     unlock_levels_down(preds, inserted_upto, toplevel - 1);
-
 
     return 1;
   }
@@ -267,7 +266,6 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	sl_node_t* pred = preds[i];
 	if (pred_prev != pred && !optik_trylock_version(&pred->lock, predsv[i]))
 	  {
-	    /* printf("-[del-%zu]-> failed to grab lvl %d\n", key, i);  */
 	    unlock_levels_up(preds, 0, locked_upto);
 	    goto restart;
 	  }
@@ -275,14 +273,10 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	locked_upto = i + 1;
       }
 
-
     for (i = (node_found->toplevel - 1); i >= 0; i--)
-    /* for (i = 0; i < toplevel_nf; i++) */
       {
 	preds[i]->next[i] = node_found->next[i];
       }
-
-    /* printf("-[del-%zu]-> pdeleted\n", key);  */
 
     unlock_levels_up(preds, 0, toplevel_nf);
   }
