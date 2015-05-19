@@ -52,6 +52,7 @@ ok_to_delete(sl_node_t *node, int found)
 inline int
 sl_optik_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **succs, optik_t* predsv)
 {
+ restart:
   PARSE_TRY();
   int found, i;
   sl_node_t *pred, *curr;
@@ -74,6 +75,10 @@ sl_optik_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **suc
 	  currv = curr->lock;  
 	}
 
+      if (unlikely(pred->marked))
+	{
+	  goto restart;
+	}
       preds[i] = pred;
       predsv[i] = predv;
       succs[i] = curr;
@@ -189,14 +194,17 @@ sl_optik_insert(sl_intset_t *set, skey_t key, sval_t val)
 	  succ = succs[i];
 	  if (pred != prev_pred)
 	    {
-	      optik_lock(&pred->lock);
+	      //	      optik_lock(&pred->lock);
+	      if (!optik_lock_version(&pred->lock, predsv[i]))
+		{
+		  valid = !pred->marked;
+		}
 	      highest_locked = i;
 	      prev_pred = pred;
 	    }	
-			
-	  valid = (!pred->marked && !succ->marked && 
-		   ((volatile sl_node_t*) pred->next[i] == 
-		    (volatile sl_node_t*) succ));
+
+	  valid = valid && !succ->marked;
+	  valid = valid && (pred->next[i] == succ);
 	}
 	
       if (!valid) 
@@ -288,13 +296,15 @@ sl_optik_delete(sl_intset_t *set, skey_t key)
 	      succ = succs[i];
 	      if (pred != prev_pred)
 		{
-		  optik_lock(&pred->lock);
+		  if (!optik_lock_version(&pred->lock, predsv[i]))
+		    {
+		      valid = !pred->marked;
+		      valid = valid && (pred->next[i] == succ);
+		    }
 		  highest_locked = i;
 		  prev_pred = pred;
 		}
 
-	      valid = (!pred->marked && ((volatile sl_node_t*) pred->next[i] == 
-					 (volatile sl_node_t*) succ));
 	    }
 
 	  if (!valid)
