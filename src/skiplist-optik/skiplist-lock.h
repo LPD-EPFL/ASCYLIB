@@ -80,6 +80,13 @@ node_is_unlinking(sl_node_t* node)
 }
 
 static inline int
+node_is_unlinked(sl_node_t* node)
+{
+  return (node->state == ND_UNLINKED);
+}
+
+
+static inline int
 node_is_linked(sl_node_t* node)
 {
   return (node->state == ND_LINKED);
