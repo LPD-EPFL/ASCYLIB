@@ -42,7 +42,7 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
  * if return value is >= 0, then the succs[found] contains the node with the key we are looking for
  */
 static sl_node_t*
-sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, sl_node_t** succs, optik_t* predsv, optik_t* node_foundv)
+sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, sl_node_t** succs, optik_t* predsv)
 {
  restart:
   PARSE_TRY();
@@ -76,7 +76,6 @@ sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, sl_node_t** suc
       if (key == curr->key)
 	{
 	  node_found = curr;
-	  *node_foundv = currv;
 	}
     }
   return node_found;
@@ -173,7 +172,7 @@ int
 sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 {
   sl_node_t* preds[OPTIK_MAX_MAX_LEVEL], *succs[OPTIK_MAX_MAX_LEVEL];
-  optik_t predsv[OPTIK_MAX_MAX_LEVEL], unused;
+  optik_t predsv[OPTIK_MAX_MAX_LEVEL];
   sl_node_t* node_new = NULL;
 
   int toplevel = get_rand_level();
@@ -183,7 +182,7 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
   size_t nr = 0;
  restart:
   UPDATE_TRY();
-  sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv, &unused);
+  sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv);
   if (node_found != NULL && !inserted_upto)
     {
       return 0;
@@ -228,13 +227,13 @@ sval_t
 sl_optik_delete(sl_intset_t* set, skey_t key)
 {
   sl_node_t* preds[OPTIK_MAX_MAX_LEVEL], *succs[OPTIK_MAX_MAX_LEVEL];
-  optik_t predsv[OPTIK_MAX_MAX_LEVEL], node_foundv;
+  optik_t predsv[OPTIK_MAX_MAX_LEVEL];
   int my_delete = 0;
 
   size_t nr = 0;
  restart:
   UPDATE_TRY();
-  sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv, &node_foundv);
+  sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv);
   if (node_found == NULL)
     {
       return 0;
@@ -252,15 +251,12 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
       	}
 
 
-      if (!optik_lock_version(&node_found->lock, node_foundv))
+      optik_lock(&node_found->lock);
+      if (node_is_unlinking(node_found))
 	{
-	  if (node_is_unlinking(node_found))
-	    {
-	      optik_unlock(&node_found->lock);
-	      return 0;
-	    }
+	  optik_unlock(&node_found->lock);
+	  return 0;
 	}
-
       node_set_unlinking(node_found);
     }
 
