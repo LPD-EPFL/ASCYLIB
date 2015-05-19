@@ -198,17 +198,14 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
   for (i = inserted_upto; i < toplevel; i++)
     {
       sl_node_t* pred = preds[i];
-      if (pred_prev != pred)
+      if (pred_prev != pred && (!optik_lock_version(&pred->lock, predsv[i])))
 	{
-	  if (!optik_lock_version(&pred->lock, predsv[i]))
+	  sl_node_t* succ = succs[i];
+	  if (node_is_unlinking(pred) || node_is_unlinking(succ) || pred->next[i] != succ)
 	    {
-	      sl_node_t* succ = succs[i];
-	      if (node_is_unlinking(pred) || node_is_unlinking(succ) || pred->next[i] != succ)
-		{
-		  unlock_levels_down(preds, inserted_upto, i);
-		  inserted_upto = i;
-		  PAUSE_AND_RETRY();
-		}
+	      unlock_levels_down(preds, inserted_upto, i);
+	      inserted_upto = i;
+	      PAUSE_AND_RETRY();
 	    }
 	}
       node_new->next[i] = pred->next[i];
@@ -246,9 +243,9 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	  return 0;
 	}
       else if (node_is_linking(node_found))
-      	{
-      	  PAUSE_AND_RETRY();
-      	}
+	{
+	  PAUSE_AND_RETRY();
+	}
 
 
       optik_lock(&node_found->lock);
@@ -268,15 +265,12 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
   for (i = 0; i < toplevel; i++)
     {
       sl_node_t* pred = preds[i];
-      if (pred_prev != pred)
+      if (pred_prev != pred && (!optik_lock_version(&pred->lock, predsv[i])))
 	{
-	  if (!optik_lock_version(&pred->lock, predsv[i]))
+	  if (node_is_unlinking(pred) || pred->next[i] != succs[i])
 	    {
-	      if (node_is_unlinking(pred) || pred->next[i] != succs[i])
-		{
-		  unlock_levels_down(preds, 0, i);
-		  PAUSE_AND_RETRY();
-		}
+	      unlock_levels_down(preds, 0, i);
+	      PAUSE_AND_RETRY();
 	    }
 	}
       pred_prev = pred;
@@ -290,9 +284,10 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
   optik_unlock(&node_found->lock);
   unlock_levels_down(preds, 0, toplevel - 1);
 
+  sval_t val = node_found->val;
 #if GC == 1
   ssmem_free(alloc, (void*) node_found);
 #endif
 
-  return node_found->val;
+  return val;
 }
