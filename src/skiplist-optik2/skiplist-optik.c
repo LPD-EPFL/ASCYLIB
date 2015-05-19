@@ -49,13 +49,8 @@ ok_to_delete(sl_node_t *node, int found)
   return (node->fullylinked && ((node->toplevel-1) == found) && !node->marked);
 }
 
-/*
- * Function optimistic_search corresponds to the findNode method of the 
- * original paper. A fast parameter has been added to speed-up the search 
- * so that the function quits as soon as the searched element is found.
- */
 inline int
-optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **succs, int fast)
+sl_optik_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **succs, int fast)
 {
   PARSE_TRY();
   int found, i;
@@ -84,7 +79,7 @@ optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **s
 }
 
 inline sl_node_t*
-optimistic_left_search(sl_intset_t *set, skey_t key)
+sl_optik_left_search(sl_intset_t *set, skey_t key)
 {
   PARSE_TRY();
   int i;
@@ -111,19 +106,13 @@ optimistic_left_search(sl_intset_t *set, skey_t key)
   return nd;
 }
 
-/*
- * Function optimistic_find corresponds to the contains method of the original 
- * paper. In contrast with the original version, it allocates and frees the 
- * memory at right places to avoid the use of a stop-the-world garbage 
- * collector. 
- */
 sval_t
-optimistic_find(sl_intset_t *set, skey_t key)
+sl_optik_find(sl_intset_t *set, skey_t key)
 { 
   sval_t result = 0;
 
   PARSE_START_TS(0);
-  sl_node_t* nd = optimistic_left_search(set, key);
+  sl_node_t* nd = sl_optik_left_search(set, key);
   PARSE_END_TS(0, lat_parsing_get++);
 
   if (nd != NULL && !nd->marked && nd->fullylinked)
@@ -133,10 +122,6 @@ optimistic_find(sl_intset_t *set, skey_t key)
   return result;
 }
 
-/*
- * Function unlock_levels is an helper function for the insert and delete 
- * functions.
- */ 
 inline void
 unlock_levels(sl_intset_t* set, sl_node_t **nodes, int highestlevel)
 {
@@ -153,12 +138,8 @@ unlock_levels(sl_intset_t* set, sl_node_t **nodes, int highestlevel)
     }
 }
 
-/*
- * Function optimistic_insert stands for the add method of the original paper.
- * Unlocking and freeing the memory are done at the right places.
- */
 int
-optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
+sl_optik_insert(sl_intset_t *set, skey_t key, sval_t val)
 {
   sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t  *node_found, *prev_pred, *new_node;
@@ -173,7 +154,7 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   while (1) 
     {
       UPDATE_TRY();
-      found = optimistic_search(set, key, preds, succs, 1);
+      found = sl_optik_search(set, key, preds, succs, 1);
       PARSE_END_TS(1, lat_parsing_put);
 
       if (found != -1)
@@ -245,14 +226,8 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
     }
 }
 
-/*
- * Function optimistic_delete is similar to the method remove of the paper.
- * Here we avoid the fast search parameter as the comparison is faster in C 
- * than calling the Java compareTo method of the Comparable interface 
- * (cf. p132 of SIROCCO'07 proceedings).
- */
 sval_t
-optimistic_delete(sl_intset_t *set, skey_t key)
+sl_optik_delete(sl_intset_t *set, skey_t key)
 {
   sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t *node_todel, *prev_pred; 
@@ -269,7 +244,7 @@ optimistic_delete(sl_intset_t *set, skey_t key)
   while(1)
     {
       UPDATE_TRY();
-      found = optimistic_search(set, key, preds, succs, 1);
+      found = sl_optik_search(set, key, preds, succs, 1);
       PARSE_END_TS(2, lat_parsing_rem);
 
       /* If not marked and ok to delete, then mark it */
