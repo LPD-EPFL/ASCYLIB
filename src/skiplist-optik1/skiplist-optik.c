@@ -179,6 +179,14 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	  {
 	    if (!optik_is_deleted(node_found->lock))
 	      {
+		if (unlikely(node_new != NULL))
+		  {
+#if GC == 1
+		    ssmem_free(alloc, (void*) node_new);
+#else
+		    ssalloc_free(node_new);
+#endif
+		  } 
 		return 0;
 	      }
 	    else		/* there is a logically deleted node -- wait for it to be physically removed */
@@ -186,8 +194,6 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 		goto restart;
 	      }
 	  }
-	// if node_found is deleted, can the insertion succeed?
-	// is there any chance we get both the deleted and the non-deleted in there?
       }
 
     if (node_new == NULL)
@@ -227,58 +233,61 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
   int my_delete = 0;
 
  restart:
-  {
-    sl_node_t* node_found = sl_optik_search(set, key, preds, predsv, &node_foundv);
-    if (node_found == NULL)
-      {
-	return 0;
-      }
+  UPDATE_TRY();
+  sl_node_t* node_found = sl_optik_search(set, key, preds, predsv, &node_foundv);
+  if (node_found == NULL)
+    {
+      return 0;
+    }
 
-    if (!my_delete)
-      {
-	if (optik_is_deleted(node_found->lock) || (!node_found->state))
-	  {
-	    return 0;
-	  }
+  if (!my_delete)
+    {
+      if (optik_is_deleted(node_found->lock) || (!node_found->state))
+	{
+	  return 0;
+	}
 
-	if (!optik_trylock_vdelete(&node_found->lock, node_foundv))
-	  {
-	    if (optik_is_deleted(node_found->lock))
-	      {
-		/* printf("+[del-%zu]+> someone else did the deletion\n", key); */
-		return 0;
-	      }
-	    else
-	      {
-		goto restart;
-	      }
-	  }
-      }
+      if (!optik_trylock_vdelete(&node_found->lock, node_foundv))
+	{
+	  if (optik_is_deleted(node_found->lock))
+	    {
+	      /* printf("+[del-%zu]+> someone else did the deletion\n", key); */
+	      return 0;
+	    }
+	  else
+	    {
+	      goto restart;
+	    }
+	}
+    }
 
-    my_delete = 1;
+  my_delete = 1;
 
-    const int toplevel_nf = node_found->toplevel;
-    sl_node_t* pred_prev = NULL;
-    int i, locked_upto = -1;
-    for (i = 0; i < toplevel_nf; i++)
-      {
-	sl_node_t* pred = preds[i];
-	if (pred_prev != pred && !optik_trylock_version(&pred->lock, predsv[i]))
-	  {
-	    unlock_levels_up(preds, 0, locked_upto);
-	    goto restart;
-	  }
-	pred_prev = pred;
-	locked_upto = i + 1;
-      }
+  const int toplevel_nf = node_found->toplevel;
+  sl_node_t* pred_prev = NULL;
+  int i, locked_upto = -1;
+  for (i = 0; i < toplevel_nf; i++)
+    {
+      sl_node_t* pred = preds[i];
+      if (pred_prev != pred && !optik_trylock_version(&pred->lock, predsv[i]))
+	{
+	  unlock_levels_up(preds, 0, locked_upto);
+	  goto restart;
+	}
+      pred_prev = pred;
+      locked_upto = i + 1;
+    }
 
-    for (i = (node_found->toplevel - 1); i >= 0; i--)
-      {
-	preds[i]->next[i] = node_found->next[i];
-      }
+  for (i = (node_found->toplevel - 1); i >= 0; i--)
+    {
+      preds[i]->next[i] = node_found->next[i];
+    }
 
-    unlock_levels_up(preds, 0, toplevel_nf);
-  }
+  unlock_levels_up(preds, 0, toplevel_nf);
 
-  return 1;
+#if GC == 1
+  ssmem_free(alloc, (void*) node_found);
+#endif
+
+  return node_found->val;
 }
