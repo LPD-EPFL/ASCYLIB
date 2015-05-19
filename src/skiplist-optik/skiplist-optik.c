@@ -177,10 +177,6 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
     if (nr++)
       {
 	cpause(rand() % (nr<<1));
-	if (nr > 1000)
-	  {
-	    printf("++ %-3zu : r%zu \n", key, nr);
-	  }
       }
     sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv, &unused);
     if (node_found != NULL && !inserted_upto)
@@ -191,10 +187,6 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 	  }
 	else		/* there is a logically deleted node -- wait for it to be physically removed */
 	  {
-	  if (nr > 1000)
-	    {
-	      printf("++ stuck in logically delete node\n");
-	    }
 	    goto restart;
 	  }
       }
@@ -247,10 +239,6 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
   if (nr++)
     {
       cpause(rand() % nr);
-      if (nr > 1000)
-	{
-	  printf("-- %-3zu : r%zu \n", key, nr);
-	}
     }
   sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv, &node_foundv);
   if (node_found == NULL)
@@ -266,10 +254,6 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	}
       else if (node_is_linking(node_found))
 	{
-	  if (nr > 1000)
-	    {
-	      printf("-- stuck in linking node\n");
-	    }
 	  goto restart;
 	}
 
@@ -283,39 +267,26 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	  else
 	    {
 	      optik_unlock(&node_found->lock);
-	      if (nr > 1000)
-		{
-		  printf("-- stuck in anothers del\n");
-		}
 	      goto restart;
 	    }
 	}
 
       node_set_unlinking(node_found);
     }
-  else
-    {
-      optik_lock(&node_found->lock);
-    }
 
   my_delete = 1;
 
-  const int toplevel_nf = node_found->toplevel;
+  const int toplevel = node_found->toplevel;
   sl_node_t* pred_prev = NULL;
   int i, locked_upto = -1;
-  for (i = 0; i < toplevel_nf; i++)
+  for (i = 0; i < toplevel; i++)
     {
       sl_node_t* pred = preds[i];
       if (pred_prev != pred)
 	{
-	  if (!optik_trylock_version(&pred->lock, predsv[i]))
+	  if (!optik_lock_version(&pred->lock, predsv[i]))
 	    {
-	      if (nr > 1000)
-		{
-		  printf("-- stuck in lvl %d\n", i);
-		}
-	      optik_unlock(&node_found->lock);
-	      unlock_levels_up(preds, 0, locked_upto);
+	      unlock_levels_down(preds, 0, i);
 	      goto restart;
 	    }
 	}
@@ -330,7 +301,7 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 
   node_set_unlinked(node_found);
   optik_unlock(&node_found->lock);
-  unlock_levels_up(preds, 0, toplevel_nf);
+  unlock_levels_down(preds, 0, toplevel - 1);
 
 #if GC == 1
   ssmem_free(alloc, (void*) node_found);
