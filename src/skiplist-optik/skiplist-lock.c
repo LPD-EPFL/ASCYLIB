@@ -103,6 +103,7 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
   node->key = key;
   node->val = val;
   node->toplevel = toplevel;
+  node->state = ND_LINKING;
   /* node->fullylinked = 0; */
   optik_init(&node->lock);
 
@@ -154,19 +155,8 @@ sl_set_new()
 
   max = sl_new_node(KEY_MAX, 0, NULL, levelmax, 1);
   min = sl_new_node(KEY_MIN, 0, max, levelmax, 1);
-  /* max->fullylinked = 1; */
-  /* min->fullylinked = 1; */
   set->head = min;
 
-#if defined(LL_GLOBAL_LOCK)
-  set->lock = (volatile ptlock_t*) ssalloc_aligned(CACHE_LINE_SIZE, sizeof(ptlock_t));
-  if (set->lock == NULL)
-    {
-      perror("malloc");
-      exit(1);
-    }
-  GL_INIT_LOCK(set->lock);
-#endif
 
   return set;
 }
