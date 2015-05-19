@@ -66,7 +66,7 @@ sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, sl_node_t** suc
 	  currv = curr->lock;  
 	}
 
-      if (unlikely(!node_is_valid(pred)))
+      if (unlikely(node_is_unlinking(pred)))
       	{
       	  goto restart;
       	}
@@ -118,7 +118,7 @@ sl_optik_find(sl_intset_t* set, skey_t key)
   PARSE_END_TS(0, lat_parsing_get++);
 
   sval_t result = 0;
-  if (nd != NULL && node_is_valid(nd))
+  if (nd != NULL)
     {
       result = nd->val;
     }
@@ -156,6 +156,15 @@ unlock_levels_up(sl_node_t** nodes, int low, int high)
 }
 
 
+static inline void
+sl_pause(size_t num_restarts)
+{
+  cpause(rand() % num_restarts);
+}
+
+#define PAUSE_AND_RETRY() sl_pause(++nr); goto restart;
+
+
 /*
  * Function sl_optik_insert stands for the add method of the original paper.
  * Unlocking and freeing the memory are done at the right places.
@@ -173,57 +182,45 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 
   size_t nr = 0;
  restart:
-  {
-    if (nr++)
-      {
-	cpause(rand() % (nr<<1));
-      }
-    sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv, &unused);
-    if (node_found != NULL && !inserted_upto)
-      {
-	if (node_is_valid(node_found))
-	  {
-	    return 0;
-	  }
-	else		/* there is a logically deleted node -- wait for it to be physically removed */
-	  {
-	    goto restart;
-	  }
-      }
+  UPDATE_TRY();
+  sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv, &unused);
+  if (node_found != NULL && !inserted_upto)
+    {
+      return 0;
+    }
 
-    if (node_new == NULL)
-      {
-	node_new = sl_new_simple_node(key, val, toplevel, 0);
-      }
+  if (node_new == NULL)
+    {
+      node_new = sl_new_simple_node(key, val, toplevel, 0);
+    }
 
-    sl_node_t* pred_prev = NULL;
-    int i;
-    for (i = inserted_upto; i < toplevel; i++)
-      {
-	sl_node_t* pred = preds[i];
-	if (pred_prev != pred)
-	  {
-	    if (!optik_lock_version(&pred->lock, predsv[i]))
-	      {
-		sl_node_t* succ = succs[i];
-		if (node_is_unlinking(pred) || node_is_unlinking(succ) || pred->next[i] != succ)
-		  {
-		    unlock_levels_down(preds, inserted_upto, i);
-		    inserted_upto = i;
-		    goto restart;
-		  }
-	      }
-	  }
-	node_new->next[i] = pred->next[i];
-	pred->next[i] = node_new;
-	pred_prev = pred;
-      }
+  sl_node_t* pred_prev = NULL;
+  int i;
+  for (i = inserted_upto; i < toplevel; i++)
+    {
+      sl_node_t* pred = preds[i];
+      if (pred_prev != pred)
+	{
+	  if (!optik_lock_version(&pred->lock, predsv[i]))
+	    {
+	      sl_node_t* succ = succs[i];
+	      if (node_is_unlinking(pred) || node_is_unlinking(succ) || pred->next[i] != succ)
+		{
+		  unlock_levels_down(preds, inserted_upto, i);
+		  inserted_upto = i;
+		  PAUSE_AND_RETRY();
+		}
+	    }
+	}
+      node_new->next[i] = pred->next[i];
+      pred->next[i] = node_new;
+      pred_prev = pred;
+    }
 
-    node_set_valid(node_new);
-    unlock_levels_down(preds, inserted_upto, toplevel - 1);
+  node_set_valid(node_new);
+  unlock_levels_down(preds, inserted_upto, toplevel - 1);
 
-    return 1;
-  }
+  return 1;
 }
 
 
@@ -236,10 +233,7 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 
   size_t nr = 0;
  restart:
-  if (nr++)
-    {
-      cpause(rand() % nr);
-    }
+  UPDATE_TRY();
   sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv, &node_foundv);
   if (node_found == NULL)
     {
@@ -253,9 +247,10 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	  return 0;
 	}
       else if (node_is_linking(node_found))
-	{
-	  goto restart;
-	}
+      	{
+      	  PAUSE_AND_RETRY();
+      	}
+
 
       if (!optik_lock_version(&node_found->lock, node_foundv))
 	{
@@ -263,11 +258,6 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	    {
 	      optik_unlock(&node_found->lock);
 	      return 0;
-	    }
-	  else
-	    {
-	      optik_unlock(&node_found->lock);
-	      goto restart;
 	    }
 	}
 
@@ -289,7 +279,7 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	      if (node_is_unlinking(pred) || pred->next[i] != succs[i])
 		{
 		  unlock_levels_down(preds, 0, i);
-		  goto restart;
+		  PAUSE_AND_RETRY();
 		}
 	    }
 	}
@@ -301,7 +291,6 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
       preds[i]->next[i] = node_found->next[i];
     }
 
-  node_set_unlinked(node_found);
   optik_unlock(&node_found->lock);
   unlock_levels_down(preds, 0, toplevel - 1);
 

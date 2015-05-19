@@ -48,7 +48,6 @@ typedef enum
     ND_LINKING,
     ND_LINKED,
     ND_UNLINKING,
-    ND_UNLINKED,
   } sl_node_state_t;
 
 typedef volatile struct sl_node
@@ -62,12 +61,6 @@ typedef volatile struct sl_node
 } sl_node_t;
 
 static inline int
-node_is_valid(sl_node_t* node)
-{
-  return (node->state < ND_UNLINKED);
-}
-
-static inline int
 node_is_linking(sl_node_t* node)
 {
   return (node->state == ND_LINKING);
@@ -76,15 +69,8 @@ node_is_linking(sl_node_t* node)
 static inline int
 node_is_unlinking(sl_node_t* node)
 {
-  return (node->state >= ND_UNLINKING);
+  return (node->state == ND_UNLINKING);
 }
-
-static inline int
-node_is_unlinked(sl_node_t* node)
-{
-  return (node->state == ND_UNLINKED);
-}
-
 
 static inline int
 node_is_linked(sl_node_t* node)
@@ -102,12 +88,6 @@ static inline void
 node_set_unlinking(sl_node_t* node)
 {
   node->state = ND_UNLINKING;
-}
-
-static inline void
-node_set_unlinked(sl_node_t* node)
-{
-  node->state = ND_UNLINKED;
 }
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct sl_intset 
