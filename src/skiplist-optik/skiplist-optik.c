@@ -278,7 +278,7 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 
   const int toplevel = node_found->toplevel;
   sl_node_t* pred_prev = NULL;
-  int i, locked_upto = -1;
+  int i;
   for (i = 0; i < toplevel; i++)
     {
       sl_node_t* pred = preds[i];
@@ -286,12 +286,14 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
 	{
 	  if (!optik_lock_version(&pred->lock, predsv[i]))
 	    {
-	      unlock_levels_down(preds, 0, i);
-	      goto restart;
+	      if (node_is_unlinking(pred) || pred->next[i] != succs[i])
+		{
+		  unlock_levels_down(preds, 0, i);
+		  goto restart;
+		}
 	    }
 	}
       pred_prev = pred;
-      locked_upto = i + 1;
     }
 
   for (i = (node_found->toplevel - 1); i >= 0; i--)
