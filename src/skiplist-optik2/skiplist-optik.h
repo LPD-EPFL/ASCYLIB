@@ -28,6 +28,6 @@
 
 #include "skiplist-lock.h"
 
-sval_t optimistic_find(sl_intset_t *set, skey_t key);
-int optimistic_insert(sl_intset_t *set, skey_t key, sval_t val);
-sval_t optimistic_delete(sl_intset_t *set, skey_t key);
+sval_t sl_optik_find(sl_intset_t *set, skey_t key);
+int sl_optik_insert(sl_intset_t *set, skey_t key, sval_t val);
+sval_t sl_optik_delete(sl_intset_t *set, skey_t key);

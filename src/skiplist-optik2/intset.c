@@ -26,17 +26,17 @@
 inline sval_t
 sl_contains(sl_intset_t *set, skey_t key)
 {
-  return optimistic_find(set, key);
+  return sl_optik_find(set, key);
 }
 
 inline int
 sl_add(sl_intset_t *set, skey_t key, sval_t val)
 {  
-  return optimistic_insert(set, key, val);
+  return sl_optik_insert(set, key, val);
 }
 
 inline sval_t
 sl_remove(sl_intset_t *set, skey_t key)
 {
-  return optimistic_delete(set, key);
+  return sl_optik_delete(set, key);
 }
