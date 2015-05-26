@@ -54,8 +54,10 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct queue
   optik_t head_lock;
   uint8_t padding1[CACHE_LINE_SIZE - sizeof(queue_node_t*) - sizeof(optik_t)];
   queue_node_t* tail;
-  optik_t tail_lock;
-  uint8_t padding2[CACHE_LINE_SIZE - sizeof(queue_node_t*) - sizeof(optik_t)];
+  /* optik_t tail_lock; */
+  /* uint8_t padding2[CACHE_LINE_SIZE - sizeof(queue_node_t*) - sizeof(optik_t)]; */
+  ptlock_t tail_lock;
+  uint8_t padding2[CACHE_LINE_SIZE - sizeof(queue_node_t*) - sizeof(ptlock_t)];
 } queue_t;
 
 int floor_log_2(unsigned int n);
