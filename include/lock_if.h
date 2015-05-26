@@ -395,6 +395,23 @@ ticket_unlock(volatile ptlock_t* l)
 #  define GL_UNLOCK(lock)				clh_local_p.my_qnode = \
     clh_release(clh_local_p.my_qnode, clh_local_p.my_pred);
 
+#elif defined(MCS)		/* MCS lock */
+
+#  include "mcs.h"
+
+typedef mcs_lock_t ptlock_t;
+#define LOCK_LOCAL_DATA                                 __thread mcs_lock_local_t __mcs_local
+
+#  define INIT_LOCK(lock)				mcs_lock_init(lock, NULL)
+#  define DESTROY_LOCK(lock)			        mcs_lock_destroy(lock)
+#  define LOCK(lock)					mcs_lock_lock(lock)
+#  define UNLOCK(lock)					mcs_lock_unlock(lock)     
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				mcs_lock_init(lock, NULL) 
+#  define GL_DESTROY_LOCK(lock)				mcs_lock_destroy(lock)	  
+#  define GL_LOCK(lock)					mcs_lock_lock(lock)	  
+#  define GL_UNLOCK(lock)				mcs_lock_unlock(lock)     
+
 #elif defined(NONE)			/* no locking */
 
 struct none_st
