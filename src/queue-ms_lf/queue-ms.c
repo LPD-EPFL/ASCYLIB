@@ -41,6 +41,7 @@ queue_ms_find(queue_t* qu, skey_t key)
 int
 queue_ms_insert(queue_t* qu, skey_t key, sval_t val)
 {
+  size_t nr = 1;
   queue_node_t* node = queue_new_node(key, val, NULL);
   queue_node_t* tail;
   while(1)
@@ -61,6 +62,7 @@ queue_ms_insert(queue_t* qu, skey_t key, sval_t val)
 	      UNUSED void* dummy = CAS_PTR(&qu->tail, tail, next);
 	    }
 	}
+      cpause(rand() % (nr++));
     }
   UNUSED void* dummy = CAS_PTR(&qu->tail, tail, node);
   return 1;
@@ -70,21 +72,37 @@ queue_ms_insert(queue_t* qu, skey_t key, sval_t val)
 sval_t
 queue_ms_delete(queue_t* qu)
 {
-  sval_t val = 0;
-  LOCK_A(&qu->head_lock);
-  queue_node_t* node = qu->head;
-  queue_node_t* head_new = node->next;
-  if (head_new == NULL)
+  queue_node_t* next, *head;
+  size_t nr = 1;
+  while (1)
     {
-      UNLOCK(&qu->head_lock);
-      return 0;
+      head = qu->head;
+      queue_node_t* tail = qu->tail;
+      next = head->next;
+      if (likely(head == qu->head))
+	{
+	  if (head == tail)
+	    {
+	      if (next == NULL)
+		{
+		  return 0;
+		}
+	      UNUSED void* dummy = CAS_PTR(&qu->tail, tail, next);
+	    }
+	  else
+	    {
+	      if (CAS_PTR(&qu->head, head, next) == head)
+		{
+		  break;
+		}
+	    }
+	}
+      cpause(rand() % (nr++));
     }
-  val = head_new->val;
-  qu->head = head_new;
-  UNLOCK_A(&qu->head_lock);
+
 
 #if GC == 1
-  ssmem_free(alloc, (void*) node);
+  ssmem_free(alloc, (void*) head);
 #endif
-  return val;
+  return next->val;
 }
