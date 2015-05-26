@@ -64,13 +64,10 @@ queue_new()
   node->next = NULL;
   set->head = node;
   set->tail = node;
-  set->overflow_head = NULL;
-  set->overflow_tail = NULL;
-  set->overflow_len = 0;
+  set->overflow = NULL;
 
   optik_init(&set->head_lock);
   optik_init(&set->tail_lock);
-  optik_init(&set->overflow_lock);
 
   return set;
 }

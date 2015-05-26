@@ -38,48 +38,102 @@ queue_optik_find(queue_t* qu, skey_t key)
   return 1;
 }
 
-      /* cur = qu->overflow; */
-      /* while (cur != NULL) */
-      /* 	{ */
-      /* 	  printf("[%zu] -> ", cur->key); */
-      /* 	  cur = cur->next; */
-      /* 	} */
-      /* printf("NULL\n"); */
+
+UNUSED static void
+queue_list_print(queue_node_t* node)
+{
+  size_t len = 0;
+  queue_node_t* cur = node;
+  while (cur != NULL && len++ < 1024)
+    {
+      printf("[%zu] -> ", cur->key);
+      cur = cur->next;
+    }
+  if (len > 1000)
+    {
+      printf("[[[ extreme size ]]] ");
+    }
+  printf("NULL\n");
+}
+
+UNUSED static size_t
+queue_list_len(queue_node_t* node)
+{
+  size_t len = 0;
+  queue_node_t* cur = node;
+  while (cur != NULL)
+    {
+      len++;
+      cur = cur->next;
+    }
+  return len;
+}
+
+UNUSED static void
+queue_list_head_tail_assert(queue_node_t* node, queue_node_t* head, queue_node_t* tail)
+{
+  size_t len = 0;
+  queue_node_t* cur = node, *pred = NULL;
+  assert(head == cur);
+  while (cur != NULL)
+    {
+      len++;
+      pred = cur;
+      cur = cur->next;
+    }
+  assert(pred == tail);
+}
 
 int
 queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 {
   queue_node_t* node = queue_new_node(key, val, NULL);
 
-  if (optik_num_queued(qu->tail_lock) > 3)
+  if (optik_num_queued(qu->tail_lock) > 2)
     {
-      optik_lock(&qu->overflow_lock);
-      queue_node_t* head = qu->overflow_head;
-      if (head == NULL)
+      size_t nr = 1;
+      queue_node_t* succ;
+      do
 	{
-	  qu->overflow_head = qu->overflow_tail = node;
-	  optik_unlock(&qu->overflow_lock);
+	  /* uintptr_t oh = queue_node_unmark(qu->overflow); */
+	  queue_node_t* oh = qu->overflow;
+	  node->next = oh;
+	  succ = (queue_node_t*) CAS_U64(&qu->overflow, oh, (uintptr_t) node);
+	  if (succ == oh)
+	    {
+	      break;
+	    }
+	  pause_rep(rand() % (nr++));
+	}
+      while (1);
 
-	  cpause(1024);
-
-	  optik_lock(&qu->overflow_lock);
-	  queue_node_t* tail = qu->overflow_tail;
-	  qu->overflow_head = qu->overflow_tail = NULL;
-	  optik_unlock(&qu->overflow_lock);
-
+      if (succ == 0)
+	{
 	  optik_lock(&qu->tail_lock);
-	  qu->tail->next = node;
-	  qu->tail = tail;
+	  do
+	    {
+	      queue_node_t* oh = qu->overflow;
+	      if ((uintptr_t) CAS_U64(&qu->overflow, oh, NULL) == (uintptr_t) oh)
+		{
+		  qu->tail->next = oh;
+		  qu->tail = node;
+		  break;
+		}
+	      PAUSE;
+	    }
+	  while (1);
 	  optik_unlock(&qu->tail_lock);
 	}
       else
 	{
-	  qu->overflow_tail->next = node;
-	  qu->overflow_tail = node;
-	  optik_unlock(&qu->overflow_lock);
+	  while (qu->overflow != NULL)
+	    {
+	      PAUSE;
+	    }
 	}
+
       return 1;
-    }
+    }      
 
   optik_lock(&qu->tail_lock);
   qu->tail->next = node;
@@ -92,21 +146,28 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 sval_t
 queue_optik_delete(queue_t* qu)
 {
-  sval_t val = 0;
-  optik_lock(&qu->head_lock);
-  queue_node_t* node = qu->head;
-  queue_node_t* head_new = node->next;
+  size_t nr = 1;
+ restart:
+  COMPILER_NO_REORDER(const optik_t version = qu->head_lock;);
+  const queue_node_t* node = qu->head;
+  const queue_node_t* head_new = node->next;
   if (head_new == NULL)
     {
-      optik_unlock(&qu->head_lock);
       return 0;
     }
-  val = head_new->val;
-  qu->head = head_new;
+
+  if (!optik_trylock_version(&qu->head_lock, version))
+    {
+      pause_rep(rand() % (nr++));
+      goto restart;
+    }
+
+  qu->head = (queue_node_t*) head_new;
   optik_unlock(&qu->head_lock);
 
 #if GC == 1
   ssmem_free(alloc, (void*) node);
 #endif
-  return val;
+
+  return head_new->val;
 }
