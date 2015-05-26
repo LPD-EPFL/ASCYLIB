@@ -64,7 +64,7 @@ typedef union tl
 #define OPTIK_RLS_ATOMIC   0
 #define OPTIK_RLS_STORE    1
 #define OPTIK_RLS_BARRIER  2
-#define OPTIK_RLS_TYPE     OPTIK_RLS_ATOMIC
+#define OPTIK_RLS_TYPE     OPTIK_RLS_STORE
 
 #define OPTIK_PAUSE() asm volatile ("mfence");
 
@@ -127,6 +127,13 @@ optik_lock(optik_t* ol)
   return 1;
 }
 
+
+static inline int
+optik_num_queued(optik_t ol)
+{
+  return (ol.ticket - ol.version);
+}
+
 static inline int
 optik_lock_version(optik_t* ol, optik_t ol_old)
 {
@@ -135,6 +142,26 @@ optik_lock_version(optik_t* ol, optik_t ol_old)
     {
       OPTIK_PAUSE();
     }
+
+  return (ol_old.version == ticket);
+}
+
+static inline int
+optik_lock_version_backoff(optik_t* ol, optik_t ol_old)
+{
+  uint32_t ticket = FAI_U32(&ol->ticket);
+  int distance;
+  do
+    {
+      distance = (ticket - ol->version);
+      if (distance == 0)
+	{
+	  break;
+	}
+      const uint32_t di = (distance > 0) ? distance : -distance;
+      cpause(di << 8);
+    }
+  while (1);
 
   return (ol_old.version == ticket);
 }
@@ -213,7 +240,7 @@ optik_unlock(optik_t* ol)
 #  ifdef __tile__
   MEM_BARRIER;
 #  endif
-#  if OPTIK_RLS_ATOMIC >= OPTIK_RLS_STORE
+#  if OPTIK_RLS_ATOMIC == OPTIK_RLS_ATOMIC || OPTIK_RLS_ATOMIC == OPTIK_RLS_BARRIER
   COMPILER_NO_REORDER(ol->version++);
 #    if OPTIK_RLS_ATOMIC == OPTIK_RLS_BARRIER
   asm volatile ("sfence");
