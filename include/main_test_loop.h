@@ -1,7 +1,7 @@
-/*   
+/*
  *   File: main_test_loop.h
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: 
+ *   Description:
  *   main_test_loop.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
@@ -27,9 +27,64 @@
   volatile int phase_put = 0;						\
   volatile uint32_t phase_put_threshold_start = 0.99999 * UINT_MAX;	\
   volatile uint32_t phase_put_threshold_stop  = 0.9999999 * UINT_MAX;  \
-  __thread volatile ticks phase_start, phase_stop;			
+  __thread volatile ticks phase_start, phase_stop;
 
 #define UNIFORM_WORKLOAD 1
+
+#  define TEST_LOOP_90_10(algo_type)            \
+  c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2]))); \
+  if (c <= (uint32_t) (0.9 * UINT_MAX)) {\
+    key = ((c & (rand_max/10)) + rand_min)*10;\
+  } else {\
+    key = (c & rand_max) + rand_min;\
+  }\
+                    \
+  c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2]))); \
+  if (unlikely(c <= scale_put))           \
+    {                 \
+      int res;                \
+      START_TS(1);              \
+      res = DS_ADD(set, key, algo_type);        \
+      if(res)               \
+  {               \
+    END_TS(1, my_putting_count_succ);       \
+    ADD_DUR(my_putting_succ);         \
+    my_putting_count_succ++;          \
+  }               \
+      END_TS_ELSE(4, my_putting_count - my_putting_count_succ,    \
+      my_putting_fail);         \
+      my_putting_count++;           \
+    }                 \
+  else if(unlikely(c <= scale_rem))         \
+    {                 \
+      int removed;              \
+      START_TS(2);              \
+      removed = DS_REMOVE(set, key, algo_type);       \
+      if(removed != 0)              \
+  {               \
+    END_TS(2, my_removing_count_succ);        \
+    ADD_DUR(my_removing_succ);          \
+    my_removing_count_succ++;         \
+  }               \
+      END_TS_ELSE(5, my_removing_count - my_removing_count_succ,  \
+      my_removing_fail);          \
+      my_removing_count++;            \
+    }                 \
+  else                  \
+    {                 \
+      int res;                \
+      START_TS(0);              \
+      res = (sval_t) DS_CONTAINS(set, key, algo_type);      \
+      if(res != 0)              \
+  {               \
+    END_TS(0, my_getting_count_succ);       \
+    ADD_DUR(my_getting_succ);         \
+    my_getting_count_succ++;          \
+  }               \
+      END_TS_ELSE(3, my_getting_count - my_getting_count_succ,    \
+      my_getting_fail);         \
+      my_getting_count++;           \
+    }
 
 #if UNIFORM_WORKLOAD == 0
 #  define TEST_LOOP(algo_type)						\
@@ -197,7 +252,7 @@
 
 #else
 #  define RR_PRINT_CORRECTED()
-#endif    
+#endif
 
 
 
