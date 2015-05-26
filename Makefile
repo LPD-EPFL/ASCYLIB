@@ -1,7 +1,7 @@
 .PHONY:	all
 
-BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_cache src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-optik1 src/skiplist-optik2 src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq
-LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_cache src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-optik1 src/skiplist-optik2 src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/
+BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_cache src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-optik1 src/skiplist-optik2 src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq src/queue-ms_lb src/queue-ms_lf src/queue-optik0 src/queue-optik1 src/queue-optik2 src/queue-optik3
+LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_cache src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-optik1 src/skiplist-optik2 src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/ src/queue-ms_lb src/queue-ms_lf src/queue-optik0 src/queue-optik1 src/queue-optik2 src/queue-optik3
 LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 EXTERNALS = src/hashtable-rcu src/hashtable-tbb
@@ -116,6 +116,24 @@ lbsl_optik2:
 
 sl:	seqsl lfsl_fraser lfsl_herlihy_lf lbsl_pugh lbsl_herlihy_lb lbsl_optik lbsl_optik1 lbsl_optik2
 
+
+lbqu_ms:
+	$(MAKE) src/queue-ms_lb
+
+lfqu_ms:
+	$(MAKE) src/queue-ms_lf
+
+lbqu_optik0:
+	$(MAKE) src/queue-optik0
+
+lbqu_optik1:
+	$(MAKE) src/queue-optik1
+
+lbqu_optik2:
+	$(MAKE) src/queue-optik2
+
+lbqu_optik3:
+	$(MAKE) src/queue-optik3
 
 lfll_harris:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-harris
@@ -290,6 +308,12 @@ clean:
 	$(MAKE) -C src/skiplist-herlihy_lf clean
 	$(MAKE) -C src/skiplist-pugh clean
 	$(MAKE) -C src/skiplist-seq clean
+	$(MAKE) -C src/queue-ms_lb
+	$(MAKE) -C src/queue-ms_lf
+	$(MAKE) -C src/queue-optik0
+	$(MAKE) -C src/queue-optik1
+	$(MAKE) -C src/queue-optik2
+	$(MAKE) -C src/queue-optik3
 	$(MAKE) -C src/tests clean
 	rm -rf build
 

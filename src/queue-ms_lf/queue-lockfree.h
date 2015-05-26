@@ -41,11 +41,11 @@
 extern unsigned int global_seed;
 extern __thread ssmem_allocator_t* alloc;
 
-typedef volatile struct queue_node
+typedef struct queue_node
 {
   skey_t key;
   sval_t val; 
-  volatile struct queue_node* next;
+  struct queue_node* next;
 } queue_node_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct queue

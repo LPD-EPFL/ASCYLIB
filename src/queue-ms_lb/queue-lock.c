@@ -31,6 +31,7 @@ queue_node_t*
 queue_new_node(skey_t key, sval_t val, queue_node_t* next)
 {
   queue_node_t *node = ssmem_alloc(alloc, sizeof(*node));
+  node->key = key;
   node->val = val;
   node->next = next;
 	
