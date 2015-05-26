@@ -34,10 +34,10 @@ clh.o:
 $(CHM).o: $(CHM).c $(CHM).h
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/$(CHM).o $(CHM).c
 
-test.o: 
+test.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/test.o $(TEST_FILE)
 
-main: measurements.o ssalloc.o test.o htlock.o $(CHM).o
+main: measurements.o ssalloc.o test.o htlock.o clh.o $(CHM).o
 	$(CC) $(CFLAGS)  $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/htlock.o $(BUILDIR)/clh.o $(BUILDIR)/$(CHM).o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
