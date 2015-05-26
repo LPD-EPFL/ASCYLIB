@@ -45,7 +45,7 @@ queue_new_node(skey_t key, sval_t val, queue_node_t* next)
 void
 queue_delete_node(queue_node_t *n)
 {
-  DESTROY_LOCK(ND_GET_LOCK(n));
+  /* DESTROY_LOCK(ND_GET_LOCK(n)); */
   ssfree_alloc(1, (void*) n);
 }
 

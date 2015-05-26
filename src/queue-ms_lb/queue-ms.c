@@ -38,6 +38,8 @@ queue_ms_find(queue_t* qu, skey_t key)
   return 1;
 }
 
+LOCK_LOCAL_DATA;
+
 int
 queue_ms_insert(queue_t* qu, skey_t key, sval_t val)
 {
