@@ -20,7 +20,7 @@
  *
  */
 
-#include "queue-lockfree.h"
+#include "queue-lock.h"
 
 sval_t queue_ms_find(queue_t *set, skey_t key);
 int queue_ms_insert(queue_t *set, skey_t key, sval_t val);
