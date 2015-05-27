@@ -219,7 +219,11 @@ test(void* thread)
 
   while (stop == 0)
     {
+#ifdef SKEW9010
+      TEST_LOOP_90_10(NULL);
+#else
       TEST_LOOP(NULL);
+#endif
     }
 
   barrier_cross(&barrier);

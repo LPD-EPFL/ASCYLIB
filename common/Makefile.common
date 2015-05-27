@@ -313,6 +313,10 @@ ifeq ($(INIT_SEQ),1)
     CFLAGS += -DINIT_SEQ
 endif
 
+ifeq ($(SKEW9010),1)
+    CFLAGS += -DSKEW9010
+endif
+
 ifeq ($(SET_CPU),0)
 	CFLAGS += -DNO_SET_CPU
 endif
