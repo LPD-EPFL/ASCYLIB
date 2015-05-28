@@ -394,10 +394,6 @@ main(int argc, char **argv)
 
   printf("## Initial: %zu / Range: %zu / Load factor: %zu / Concurrency: %zu\n", initial, range, load_factor, concurrency);
 
-  double kb = initial * sizeof(DS_NODE) / 1024.0;
-  double mb = kb / 1024.0;
-  printf("Sizeof initial: %.2f KB = %.2f MB\n", kb, mb);
-
   if (!is_power_of_two(range))
     {
       size_t range_pow2 = pow2roundup(range);
@@ -434,6 +430,10 @@ main(int argc, char **argv)
   stop = 0;
 
   size_t capacity = initial / load_factor;
+
+  double kb = initial * (sizeof(DS_NODE) + sizeof(DS_NODE*)) / 1024.0;
+  double mb = kb / 1024.0;
+  printf("Sizeof initial: %.2f KB = %.2f MB\n", kb, mb);
 
   DS_TYPE* set = DS_NEW(capacity, concurrency);
   assert(set != NULL);
