@@ -1,7 +1,7 @@
-/*   
+/*
  *   File: concurrent_hash_map2.h
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: Similar to Java's ConcurrentHashMap. 
+ *   Description: Similar to Java's ConcurrentHashMap.
  *   Doug Lea. 1.3.4. http://gee.cs.oswego.edu/dl/classes/EDU/oswego/
  *   cs/dl/util/concurrent/intro.html, 2003.
  *   concurrent_hash_map2.h is part of ASCYLIB
@@ -33,7 +33,7 @@
 #define DEFAULT_LOAD                    1
 #define MAXHTLENGTH                     65536
 
-/* 
+/*
  * parameters
  */
 
@@ -42,13 +42,13 @@
 /* on the tilera we need to keep the ht small to avoid the TLB issues */
 #  define CHM_LOAD_FACTOR                 3
 #else
-#  define CHM_LOAD_FACTOR                 0.75
+#  define CHM_LOAD_FACTOR                 1.1 // changed from 0.75 to avoid resizing
 #endif
 #define CHM_TRY_PREFETCH                0
 #define CHM_MAX_SCAN_RETRIES            64
 #define CHM_READ_ONLY_FAIL              RO_FAIL
 
-/* 
+/*
  * structures
  */
 
@@ -94,7 +94,7 @@ typedef struct ALIGNED(CACHE_LINE_SIZE) chm
   };
 } chm_t;
 
-/* 
+/*
  * interface
  */
 
