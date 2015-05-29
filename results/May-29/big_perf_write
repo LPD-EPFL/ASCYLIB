@@ -1,0 +1,942 @@
+## Initial: 8192 / Range: 16384 / Pugh's algorithm
+lvl max = 13
+Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 8192
+#AFTER  size is: 8099
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 15411843   | 7703319    |       50.0% |       50.0% |       25.0%
+rems: 15413007   | 7703412    |       50.0% |       50.0% |       25.0%
+#txs 16	(30824850  
+#Mops 30.825
+## Initial: 32768 / Range: 65536 / Pugh's algorithm
+lvl max = 15
+Sizeof initial: 5120.00 KB = 5.00 MB = 0.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 32768
+#AFTER  size is: 32607
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 13395388   | 6698380    |       50.0% |       50.0% |       25.0%
+rems: 13404020   | 6698541    |       50.0% |       50.0% |       25.0%
+#txs 16	(26799408  
+#Mops 26.799
+## Initial: 65536 / Range: 131072 / Pugh's algorithm
+lvl max = 16
+Sizeof initial: 10240.00 KB = 10.00 MB = 0.01 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 65536
+#AFTER  size is: 65760
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 12231045   | 6117723    |       50.0% |       50.0% |       25.0%
+rems: 12233086   | 6117499    |       50.0% |       50.0% |       25.0%
+#txs 16	(24464131  
+#Mops 24.464
+## Initial: 262144 / Range: 524288 / Pugh's algorithm
+lvl max = 18
+Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 262144
+#AFTER  size is: 261460
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 9514099    | 4756561    |       50.0% |       50.0% |       25.0%
+rems: 9517132    | 4757245    |       50.0% |       50.0% |       25.0%
+#txs 16	(19031231  
+#Mops 19.031
+## Initial: 524288 / Range: 1048576 / Pugh's algorithm
+lvl max = 19
+Sizeof initial: 98304.00 KB = 96.00 MB = 0.09 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 524288
+#AFTER  size is: 524645
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 7575203    | 3787515    |       50.0% |       50.0% |       25.0%
+rems: 7574815    | 3787158    |       50.0% |       50.0% |       25.0%
+#txs 16	(15150018  
+#Mops 15.150
+## Initial: 2097152 / Range: 4194304 / Pugh's algorithm
+lvl max = 21
+Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 2097152
+#AFTER  size is: 2097629
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 5094120    | 2546200    |       50.0% |       50.0% |       25.0%
+rems: 5091793    | 2545723    |       50.0% |       50.0% |       25.0%
+#txs 16	(10185913  
+#Mops 10.186
+## Initial: 4194304 / Range: 8388608 / Pugh's algorithm
+lvl max = 22
+Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 4194304
+#AFTER  size is: 4193036
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 4279884    | 2139479    |       50.0% |       50.0% |       25.0%
+rems: 4280364    | 2140747    |       50.0% |       50.0% |       25.0%
+#txs 16	(8560248   
+#Mops 8.560
+## Initial: 33554432 / Range: 67108864 / Pugh's algorithm
+lvl max = 25
+Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 33554432
+#AFTER  size is: 33554988
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 3073815    | 1537848    |       50.0% |       50.0% |       25.0%
+rems: 3073600    | 1537292    |       50.0% |       50.0% |       25.0%
+#txs 16	(6147415   
+#Mops 6.147
+## Initial: 134217728 / Range: 268435456 / Pugh's algorithm
+lvl max = 27
+Sizeof initial: 33554432.00 KB = 32768.00 MB = 32.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 134217728
+#AFTER  size is: 134215427
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2308059    | 1153605    |       50.0% |       50.0% |       25.0%
+rems: 2311635    | 1155906    |       50.0% |       50.0% |       25.0%
+#txs 16	(4619694   
+#Mops 4.620
+## Initial: 268435456 / Range: 536870912 / Pugh's algorithm
+lvl max = 28
+Sizeof initial: 67108864.00 KB = 65536.00 MB = 64.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 268435456
+#AFTER  size is: 268435836
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 1873760    | 935124     |       49.9% |       50.0% |       25.0%
+rems: 1870592    | 934744     |       50.0% |       50.0% |       25.0%
+#txs 16	(3744352   
+#Mops 3.744
+## Initial: 8192 / Range: 16384 / Herlihy's algorithm
+Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 8192
+#AFTER  size is: 8248
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 14807483   | 7401915    |       50.0% |       50.0% |       25.0%
+rems: 14803196   | 7401859    |       50.0% |       50.0% |       25.0%
+#txs 16	(29610679  
+#Mops 29.611
+## Initial: 32768 / Range: 65536 / Herlihy's algorithm
+Sizeof initial: 6144.00 KB = 6.00 MB = 0.01 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 32768
+#AFTER  size is: 32962
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 12936966   | 6466762    |       50.0% |       50.0% |       25.0%
+rems: 12929247   | 6466568    |       50.0% |       50.0% |       25.0%
+#txs 16	(25840373  
+#Mops 25.840
+## Initial: 65536 / Range: 131072 / Herlihy's algorithm
+Sizeof initial: 12288.00 KB = 12.00 MB = 0.01 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 65536
+#AFTER  size is: 65539
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 11773770   | 5887550    |       50.0% |       50.0% |       25.0%
+rems: 11778099   | 5887547    |       50.0% |       50.0% |       25.0%
+#txs 16	(23551869  
+#Mops 23.552
+## Initial: 262144 / Range: 524288 / Herlihy's algorithm
+Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 262144
+#AFTER  size is: 261696
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 8860918    | 4431293    |       50.0% |       50.0% |       25.0%
+rems: 8858178    | 4431741    |       50.0% |       50.0% |       25.0%
+#txs 16	(17719096  
+#Mops 17.719
+## Initial: 524288 / Range: 1048576 / Herlihy's algorithm
+Sizeof initial: 114688.00 KB = 112.00 MB = 0.11 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 524288
+#AFTER  size is: 524162
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 6564799    | 3281492    |       50.0% |       50.0% |       25.0%
+rems: 6557493    | 3281618    |       50.0% |       50.0% |       25.0%
+#txs 16	(13122292  
+#Mops 13.122
+## Initial: 2097152 / Range: 4194304 / Herlihy's algorithm
+Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 2097152
+#AFTER  size is: 2096804
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 4725860    | 2363070    |       50.0% |       50.0% |       25.0%
+rems: 4728356    | 2363418    |       50.0% |       50.0% |       25.0%
+#txs 16	(9454216   
+#Mops 9.454
+## Initial: 4194304 / Range: 8388608 / Herlihy's algorithm
+Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 4194304
+#AFTER  size is: 4195868
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 3959392    | 1980733    |       50.0% |       50.0% |       25.0%
+rems: 3957122    | 1979169    |       50.0% |       50.0% |       25.0%
+#txs 16	(7916514   
+#Mops 7.917
+## Initial: 33554432 / Range: 67108864 / Herlihy's algorithm
+Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 33554432
+#AFTER  size is: 33553215
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2951080    | 1474050    |       49.9% |       50.0% |       25.0%
+rems: 2951806    | 1475267    |       50.0% |       50.0% |       25.0%
+#txs 16	(5902886   
+#Mops 5.903
+## Initial: 134217728 / Range: 268435456 / Herlihy's algorithm
+Sizeof initial: 37748736.00 KB = 36864.00 MB = 36.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 134217728
+#AFTER  size is: 134217601
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2224586    | 1112570    |       50.0% |       50.0% |       25.0%
+rems: 2222458    | 1112697    |       50.1% |       50.0% |       25.0%
+#txs 16	(4442601   
+#Mops 4.443
+## Initial: 268435456 / Range: 536870912 / Herlihy's algorithm
+Sizeof initial: 75497472.00 KB = 73728.00 MB = 72.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 268435456
+#AFTER  size is: 268436485
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2074482    | 1036903    |       50.0% |       50.0% |       25.0%
+rems: 2071205    | 1035874    |       50.0% |       50.0% |       25.0%
+#txs 16	(4145687   
+#Mops 4.146
+## Initial: 8192 / Range: 16384
+Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
+size of node padded: 160
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 8192
+#AFTER  size is: 8281
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 13920137   | 6958659    |       50.0% |       50.0% |       25.0%
+rems: 13921356   | 6958570    |       50.0% |       50.0% |       25.0%
+#txs 16	(27841493  
+#Mops 27.841
+## Initial: 32768 / Range: 65536
+Sizeof initial: 5120.00 KB = 5.00 MB = 0.00 GB
+size of node padded: 160
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 32768
+#AFTER  size is: 32800
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 12117004   | 6060003    |       50.0% |       50.0% |       25.0%
+rems: 12119282   | 6059971    |       50.0% |       50.0% |       25.0%
+#txs 16	(24236286  
+#Mops 24.236
+## Initial: 65536 / Range: 131072
+Sizeof initial: 10240.00 KB = 10.00 MB = 0.01 GB
+size of node padded: 160
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 65536
+#AFTER  size is: 65550
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 11117955   | 5557883    |       50.0% |       50.0% |       25.0%
+rems: 11118805   | 5557869    |       50.0% |       50.0% |       25.0%
+#txs 16	(22236760  
+#Mops 22.237
+## Initial: 262144 / Range: 524288
+Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
+size of node padded: 192
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 262144
+#AFTER  size is: 261925
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 8570200    | 4286020    |       50.0% |       50.0% |       25.0%
+rems: 8569511    | 4286239    |       50.0% |       50.0% |       25.0%
+#txs 16	(17139711  
+#Mops 17.140
+## Initial: 524288 / Range: 1048576
+Sizeof initial: 98304.00 KB = 96.00 MB = 0.09 GB
+size of node padded: 192
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 524288
+#AFTER  size is: 525084
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 6939893    | 3468456    |       50.0% |       50.0% |       25.0%
+rems: 6935648    | 3467660    |       50.0% |       50.0% |       25.0%
+#txs 16	(13875541  
+#Mops 13.876
+## Initial: 2097152 / Range: 4194304
+Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
+size of node padded: 224
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 2097152
+#AFTER  size is: 2096662
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 4846659    | 2422769    |       50.0% |       50.0% |       25.0%
+rems: 4845667    | 2423259    |       50.0% |       50.0% |       25.0%
+#txs 16	(9692326   
+#Mops 9.692
+## Initial: 4194304 / Range: 8388608
+Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
+size of node padded: 224
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 4194304
+#AFTER  size is: 4192657
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 4096449    | 2048633    |       50.0% |       50.0% |       25.0%
+rems: 4099974    | 2050280    |       50.0% |       50.0% |       25.0%
+#txs 16	(8196423   
+#Mops 8.196
+## Initial: 33554432 / Range: 67108864
+Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
+size of node padded: 256
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 33554432
+#AFTER  size is: 33551544
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2955482    | 1475719    |       49.9% |       50.0% |       25.0%
+rems: 2958716    | 1478607    |       50.0% |       50.0% |       25.0%
+#txs 16	(5914198   
+#Mops 5.914
+## Initial: 134217728 / Range: 268435456
+Sizeof initial: 33554432.00 KB = 32768.00 MB = 32.00 GB
+size of node padded: 256
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 134217728
+#AFTER  size is: 134215458
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2340033    | 1169870    |       50.0% |       50.0% |       25.0%
+rems: 2342035    | 1172140    |       50.0% |       50.0% |       25.0%
+#txs 16	(4682068   
+#Mops 4.682
+## Initial: 268435456 / Range: 536870912
+Sizeof initial: 67108864.00 KB = 65536.00 MB = 64.00 GB
+size of node padded: 256
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 268435456
+#AFTER  size is: 268434338
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 1962778    | 981266     |       50.0% |       50.0% |       25.0%
+rems: 1965666    | 982384     |       50.0% |       50.0% |       25.0%
+#txs 16	(3928444   
+#Mops 3.928
+## Initial: 8192 / Range: 16384 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 320.00 KB = 0.31 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 8192
+#AFTER  size is: 8089
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 60720177   | 30352438   |       50.0% |       50.0% |       25.0%
+rems: 60732360   | 30352541   |       50.0% |       50.0% |       25.0%
+#txs 16	(121452537 
+#Mops 121.453
+## Initial: 32768 / Range: 65536 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 1280.00 KB = 1.25 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 32768
+#AFTER  size is: 32814
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 60555728   | 30271341   |       50.0% |       50.0% |       25.0%
+rems: 60543734   | 30271295   |       50.0% |       50.0% |       25.0%
+#txs 16	(121099462 
+#Mops 121.099
+## Initial: 65536 / Range: 131072 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 2560.00 KB = 2.50 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 65536
+#AFTER  size is: 65762
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 60836565   | 30417855   |       50.0% |       50.0% |       25.0%
+rems: 60828137   | 30417629   |       50.0% |       50.0% |       25.0%
+#txs 16	(121664702 
+#Mops 121.665
+## Initial: 262144 / Range: 524288 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 10240.00 KB = 10.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 262144
+#AFTER  size is: 261793
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 55666983   | 27832814   |       50.0% |       50.0% |       25.0%
+rems: 55670824   | 27833165   |       50.0% |       50.0% |       25.0%
+#txs 16	(111337807 
+#Mops 111.338
+## Initial: 524288 / Range: 1048576 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 20480.00 KB = 20.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 524288
+#AFTER  size is: 524286
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 53744917   | 26876507   |       50.0% |       50.0% |       25.0%
+rems: 53755506   | 26876509   |       50.0% |       50.0% |       25.0%
+#txs 16	(107500423 
+#Mops 107.500
+## Initial: 2097152 / Range: 4194304 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 81920.00 KB = 80.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 2097152
+#AFTER  size is: 2097508
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 43519946   | 21761666   |       50.0% |       50.0% |       25.0%
+rems: 43521065   | 21761310   |       50.0% |       50.0% |       25.0%
+#txs 16	(87041011  
+#Mops 87.041
+## Initial: 4194304 / Range: 8388608 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 163840.00 KB = 160.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 4194304
+#AFTER  size is: 4195167
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 39162275   | 19581708   |       50.0% |       50.0% |       25.0%
+rems: 39164662   | 19580845   |       50.0% |       50.0% |       25.0%
+#txs 16	(78326937  
+#Mops 78.327
+## Initial: 33554432 / Range: 67108864 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 1310720.00 KB = 1280.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 33554432
+#AFTER  size is: 33555749
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 36126346   | 18063527   |       50.0% |       50.0% |       25.0%
+rems: 36130760   | 18062210   |       50.0% |       50.0% |       25.0%
+#txs 16	(72257106  
+#Mops 72.257
+## Initial: 134217728 / Range: 268435456 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 5242880.00 KB = 5120.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 134217728
+#AFTER  size is: 134217158
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 32830977   | 16411527   |       50.0% |       50.0% |       25.0%
+rems: 32826509   | 16412097   |       50.0% |       50.0% |       25.0%
+#txs 16	(65657486  
+#Mops 65.657
+## Initial: 268435456 / Range: 536870912 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 10485760.00 KB = 10240.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 268435456
+#AFTER  size is: 268438708
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 30486985   | 15241940   |       50.0% |       50.0% |       25.0%
+rems: 30473926   | 15238688   |       50.0% |       50.0% |       25.0%
+#txs 16	(60960911  
+#Mops 60.961
+## Initial: 1073741824 / Range: 2147483648 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 41943040.00 KB = 40960.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 1073741824
+#AFTER  size is: 1073742828
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 15980138   | 7989621    |       50.0% |       50.0% |       25.0%
+rems: 15972977   | 7988617    |       50.0% |       50.0% |       25.0%
+#txs 16	(31953115  
+#Mops 31.953
+## Initial: 8192 / Range: 16384 / Pugh's algorithm
+lvl max = 13
+Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 8192
+#AFTER  size is: 8192
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 15428538   | 7712083    |       50.0% |       50.0% |       25.0%
+rems: 15429033   | 7712083    |       50.0% |       50.0% |       25.0%
+#txs 16	(30857571  
+#Mops 30.858
+## Initial: 32768 / Range: 65536 / Pugh's algorithm
+lvl max = 15
+Sizeof initial: 5120.00 KB = 5.00 MB = 0.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 32768
+#AFTER  size is: 32857
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 13449424   | 6725857    |       50.0% |       50.0% |       25.0%
+rems: 13452553   | 6725768    |       50.0% |       50.0% |       25.0%
+#txs 16	(26901977  
+#Mops 26.902
+## Initial: 65536 / Range: 131072 / Pugh's algorithm
+lvl max = 16
+Sizeof initial: 10240.00 KB = 10.00 MB = 0.01 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 65536
+#AFTER  size is: 65569
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 12260896   | 6132339    |       50.0% |       50.0% |       25.0%
+rems: 12254906   | 6132306    |       50.0% |       50.0% |       25.0%
+#txs 16	(24515802  
+#Mops 24.516
+## Initial: 262144 / Range: 524288 / Pugh's algorithm
+lvl max = 18
+Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 262144
+#AFTER  size is: 262711
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 9520147    | 4761153    |       50.0% |       50.0% |       25.0%
+rems: 9525517    | 4760586    |       50.0% |       50.0% |       25.0%
+#txs 16	(19045664  
+#Mops 19.046
+## Initial: 524288 / Range: 1048576 / Pugh's algorithm
+lvl max = 19
+Sizeof initial: 98304.00 KB = 96.00 MB = 0.09 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 524288
+#AFTER  size is: 524246
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 7560386    | 3781382    |       50.0% |       50.0% |       25.0%
+rems: 7560400    | 3781424    |       50.0% |       50.0% |       25.0%
+#txs 16	(15105680  
+#Mops 15.106
+## Initial: 2097152 / Range: 4194304 / Pugh's algorithm
+lvl max = 21
+Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 2097152
+#AFTER  size is: 2095636
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 5113585    | 2559574    |       50.1% |       50.0% |       25.0%
+rems: 5121596    | 2561090    |       50.0% |       50.0% |       25.0%
+#txs 16	(10235181  
+#Mops 10.235
+## Initial: 4194304 / Range: 8388608 / Pugh's algorithm
+lvl max = 22
+Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 4194304
+#AFTER  size is: 4195063
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 4289598    | 2143797    |       50.0% |       50.0% |       25.0%
+rems: 4289146    | 2143038    |       50.0% |       50.0% |       25.0%
+#txs 16	(8578744   
+#Mops 8.579
+## Initial: 33554432 / Range: 67108864 / Pugh's algorithm
+lvl max = 25
+Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 33554432
+#AFTER  size is: 33554340
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 3064192    | 1531750    |       50.0% |       50.0% |       25.0%
+rems: 3066052    | 1531842    |       50.0% |       50.0% |       25.0%
+#txs 16	(6130244   
+#Mops 6.130
+## Initial: 134217728 / Range: 268435456 / Pugh's algorithm
+lvl max = 27
+Sizeof initial: 33554432.00 KB = 32768.00 MB = 32.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 134217728
+#AFTER  size is: 134217426
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2308467    | 1155241    |       50.0% |       50.0% |       25.0%
+rems: 2308772    | 1155543    |       50.1% |       50.0% |       25.0%
+#txs 16	(4617239   
+#Mops 4.617
+## Initial: 268435456 / Range: 536870912 / Pugh's algorithm
+lvl max = 28
+Sizeof initial: 67108864.00 KB = 65536.00 MB = 64.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 268435456
+#AFTER  size is: 268436160
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 1901336    | 951066     |       50.0% |       50.0% |       25.0%
+rems: 1901355    | 950362     |       50.0% |       50.0% |       25.0%
+#txs 16	(3802691   
+#Mops 3.803
+## Initial: 8192 / Range: 16384 / Herlihy's algorithm
+Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 8192
+#AFTER  size is: 8191
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 14783137   | 7391636    |       50.0% |       50.0% |       25.0%
+rems: 14785398   | 7391637    |       50.0% |       50.0% |       25.0%
+#txs 16	(29568535  
+#Mops 29.569
+## Initial: 32768 / Range: 65536 / Herlihy's algorithm
+Sizeof initial: 6144.00 KB = 6.00 MB = 0.01 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 32768
+#AFTER  size is: 32610
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 12928662   | 6460910    |       50.0% |       50.0% |       25.0%
+rems: 12920822   | 6461068    |       50.0% |       50.0% |       25.0%
+#txs 16	(25849484  
+#Mops 25.849
+## Initial: 65536 / Range: 131072 / Herlihy's algorithm
+Sizeof initial: 12288.00 KB = 12.00 MB = 0.01 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 65536
+#AFTER  size is: 65679
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 11773546   | 5888153    |       50.0% |       50.0% |       25.0%
+rems: 11776531   | 5888010    |       50.0% |       50.0% |       25.0%
+#txs 16	(23550077  
+#Mops 23.550
+## Initial: 262144 / Range: 524288 / Herlihy's algorithm
+Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 262144
+#AFTER  size is: 262346
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 8885277    | 4440813    |       50.0% |       50.0% |       25.0%
+rems: 8878014    | 4440611    |       50.0% |       50.0% |       25.0%
+#txs 16	(17763291  
+#Mops 17.763
+## Initial: 524288 / Range: 1048576 / Herlihy's algorithm
+Sizeof initial: 114688.00 KB = 112.00 MB = 0.11 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 524288
+#AFTER  size is: 524099
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 6581304    | 3288332    |       50.0% |       50.0% |       25.0%
+rems: 6574943    | 3288521    |       50.0% |       50.0% |       25.0%
+#txs 16	(13143104  
+#Mops 13.143
+## Initial: 2097152 / Range: 4194304 / Herlihy's algorithm
+Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 2097152
+#AFTER  size is: 2097115
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 4729888    | 2364013    |       50.0% |       50.0% |       25.0%
+rems: 4730996    | 2364050    |       50.0% |       50.0% |       25.0%
+#txs 16	(9460884   
+#Mops 9.461
+## Initial: 4194304 / Range: 8388608 / Herlihy's algorithm
+Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 4194304
+#AFTER  size is: 4196432
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 3964390    | 1983783    |       50.0% |       50.0% |       25.0%
+rems: 3962407    | 1981655    |       50.0% |       50.0% |       25.0%
+#txs 16	(7926797   
+#Mops 7.927
+## Initial: 33554432 / Range: 67108864 / Herlihy's algorithm
+Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 33554432
+#AFTER  size is: 33553242
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2941123    | 1468999    |       49.9% |       50.0% |       25.0%
+rems: 2939313    | 1470189    |       50.0% |       50.0% |       25.0%
+#txs 16	(5880436   
+#Mops 5.880
+## Initial: 134217728 / Range: 268435456 / Herlihy's algorithm
+Sizeof initial: 37748736.00 KB = 36864.00 MB = 36.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 134217728
+#AFTER  size is: 134220675
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2144689    | 1073375    |       50.0% |       50.0% |       25.0%
+rems: 2143752    | 1070428    |       49.9% |       50.0% |       25.0%
+#txs 16	(4288441   
+#Mops 4.288
+## Initial: 268435456 / Range: 536870912 / Herlihy's algorithm
+Sizeof initial: 75497472.00 KB = 73728.00 MB = 72.00 GB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 268435456
+#AFTER  size is: 268437125
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 1743021    | 871407     |       50.0% |       50.0% |       25.0%
+rems: 1739773    | 869738     |       50.0% |       50.0% |       25.0%
+#txs 16	(3482794   
+#Mops 3.483
+## Initial: 8192 / Range: 16384
+Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
+size of node padded: 160
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 8192
+#AFTER  size is: 8058
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 13899689   | 6950753    |       50.0% |       50.0% |       25.0%
+rems: 13907846   | 6950887    |       50.0% |       50.0% |       25.0%
+#txs 16	(27807535  
+#Mops 27.808
+## Initial: 32768 / Range: 65536
+Sizeof initial: 5120.00 KB = 5.00 MB = 0.00 GB
+size of node padded: 160
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 32768
+#AFTER  size is: 32708
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 12130409   | 6064877    |       50.0% |       50.0% |       25.0%
+rems: 12133232   | 6064937    |       50.0% |       50.0% |       25.0%
+#txs 16	(24263641  
+#Mops 24.264
+## Initial: 65536 / Range: 131072
+Sizeof initial: 10240.00 KB = 10.00 MB = 0.01 GB
+size of node padded: 160
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 65536
+#AFTER  size is: 65499
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 12103976   | 6055304    |       50.0% |       50.0% |       25.0%
+rems: 12110361   | 6055341    |       50.0% |       50.0% |       25.0%
+#txs 16	(24214337  
+#Mops 24.214
+## Initial: 262144 / Range: 524288
+Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
+size of node padded: 192
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 262144
+#AFTER  size is: 261896
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 8624697    | 4310417    |       50.0% |       50.0% |       25.0%
+rems: 8621105    | 4310665    |       50.0% |       50.0% |       25.0%
+#txs 16	(17245802  
+#Mops 17.246
+## Initial: 524288 / Range: 1048576
+Sizeof initial: 98304.00 KB = 96.00 MB = 0.09 GB
+size of node padded: 192
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 524288
+#AFTER  size is: 524162
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 6919565    | 3459288    |       50.0% |       50.0% |       25.0%
+rems: 6919294    | 3459414    |       50.0% |       50.0% |       25.0%
+#txs 16	(13838859  
+#Mops 13.839
+## Initial: 2097152 / Range: 4194304
+Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
+size of node padded: 224
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 2097152
+#AFTER  size is: 2097245
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 4856345    | 2427439    |       50.0% |       50.0% |       25.0%
+rems: 4853319    | 2427346    |       50.0% |       50.0% |       25.0%
+#txs 16	(9709664   
+#Mops 9.710
+## Initial: 4194304 / Range: 8388608
+Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
+size of node padded: 224
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 4194304
+#AFTER  size is: 4196255
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 4102897    | 2052419    |       50.0% |       50.0% |       25.0%
+rems: 4103534    | 2050468    |       50.0% |       50.0% |       25.0%
+#txs 16	(8206431   
+#Mops 8.206
+## Initial: 33554432 / Range: 67108864
+Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
+size of node padded: 256
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 33554432
+#AFTER  size is: 33551796
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2953103    | 1476208    |       50.0% |       50.0% |       25.0%
+rems: 2954615    | 1478844    |       50.1% |       50.0% |       25.0%
+#txs 16	(5901816   
+#Mops 5.902
+## Initial: 134217728 / Range: 268435456
+Sizeof initial: 33554432.00 KB = 32768.00 MB = 32.00 GB
+size of node padded: 256
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 134217728
+#AFTER  size is: 134218101
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 2273334    | 1137372    |       50.0% |       50.0% |       25.0%
+rems: 2273889    | 1136999    |       50.0% |       50.0% |       25.0%
+#txs 16	(4547223   
+#Mops 4.547
+## Initial: 268435456 / Range: 536870912
+Sizeof initial: 67108864.00 KB = 65536.00 MB = 64.00 GB
+size of node padded: 256
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 268435456
+#AFTER  size is: 268432964
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 1963563    | 981537     |       50.0% |       50.0% |       25.0%
+rems: 1966349    | 984029     |       50.0% |       50.0% |       25.0%
+#txs 16	(3929912   
+#Mops 3.930
+## Initial: 8192 / Range: 16384 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 320.00 KB = 0.31 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 8192
+#AFTER  size is: 8233
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 61712744   | 30844709   |       50.0% |       50.0% |       25.0%
+rems: 61726110   | 30844668   |       50.0% |       50.0% |       25.0%
+#txs 16	(123438854 
+#Mops 123.439
+## Initial: 32768 / Range: 65536 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 1280.00 KB = 1.25 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 32768
+#AFTER  size is: 32827
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 60616420   | 30300087   |       50.0% |       50.0% |       25.0%
+rems: 60605403   | 30300028   |       50.0% |       50.0% |       25.0%
+#txs 16	(121221823 
+#Mops 121.222
+## Initial: 65536 / Range: 131072 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 2560.00 KB = 2.50 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 65536
+#AFTER  size is: 65402
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 61002475   | 30504031   |       50.0% |       50.0% |       25.0%
+rems: 61012499   | 30504165   |       50.0% |       50.0% |       25.0%
+#txs 16	(122014974 
+#Mops 122.015
+## Initial: 262144 / Range: 524288 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 10240.00 KB = 10.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 262144
+#AFTER  size is: 262776
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 55134620   | 27571633   |       50.0% |       50.0% |       25.0%
+rems: 55150633   | 27571001   |       50.0% |       50.0% |       25.0%
+#txs 16	(110285253 
+#Mops 110.285
+## Initial: 524288 / Range: 1048576 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 20480.00 KB = 20.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 524288
+#AFTER  size is: 524572
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 53506061   | 26756903   |       50.0% |       50.0% |       25.0%
+rems: 53520842   | 26756619   |       50.0% |       50.0% |       25.0%
+#txs 16	(107026903 
+#Mops 107.027
+## Initial: 2097152 / Range: 4194304 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 81920.00 KB = 80.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 2097152
+#AFTER  size is: 2098477
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 43703384   | 21852804   |       50.0% |       50.0% |       25.0%
+rems: 43700551   | 21851479   |       50.0% |       50.0% |       25.0%
+#txs 16	(87316618  
+#Mops 87.317
+## Initial: 4194304 / Range: 8388608 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 163840.00 KB = 160.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 4194304
+#AFTER  size is: 4193540
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 39891323   | 19948113   |       50.0% |       50.0% |       25.0%
+rems: 39891843   | 19948877   |       50.0% |       50.0% |       25.0%
+#txs 16	(79783166  
+#Mops 79.783
+## Initial: 33554432 / Range: 67108864 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 1310720.00 KB = 1280.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 33554432
+#AFTER  size is: 33556562
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 36574517   | 18287712   |       50.0% |       50.0% |       25.0%
+rems: 36576763   | 18285582   |       50.0% |       50.0% |       25.0%
+#txs 16	(73151280  
+#Mops 73.151
+## Initial: 134217728 / Range: 268435456 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 5242880.00 KB = 5120.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 134217728
+#AFTER  size is: 134214938
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 33087632   | 16545324   |       50.0% |       50.0% |       25.0%
+rems: 33095917   | 16548114   |       50.0% |       50.0% |       25.0%
+#txs 16	(66183549  
+#Mops 66.184
+## Initial: 268435456 / Range: 536870912 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 10485760.00 KB = 10240.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 268435456
+#AFTER  size is: 268452466
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 30577697   | 15293914   |       50.0% |       50.0% |       25.0%
+rems: 30566522   | 15276904   |       50.0% |       50.0% |       25.0%
+#txs 16	(61144219  
+#Mops 61.144
+## Initial: 1073741824 / Range: 2147483648 / Load factor: 1 / Concurrency: 512
+Sizeof initial: 41943040.00 KB = 40960.00 MB
+[ALLOC] initializing allocator with fs size: 507 objects
+#BEFORE size is: 1073741824
+#AFTER  size is: 1073738424
+    : total      | success    | succ %      | total %     | effective %
+srch: 0          | 0          |       -nan% |        0.0% | 
+insr: 22581871   | 11287309   |       50.0% |       50.0% |       25.0%
+rems: 22576344   | 11290709   |       50.0% |       50.0% |       25.0%
+#txs 16	(45158215  
+#Mops 45.158
