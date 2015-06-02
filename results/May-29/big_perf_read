@@ -5,10 +5,10 @@ Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
 #BEFORE size is: 8192
 #AFTER  size is: 8192
     : total      | success    | succ %      | total %     | effective %
-srch: 254385945  | 123619216  |       48.6% |      100.0% | 
+srch: 254385945  | 123619216  |       48.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(254385945 
+#txs 16	(254385945
 #Mops 254.386
 ## Initial: 32768 / Range: 65536 / Pugh's algorithm
 lvl max = 15
@@ -17,10 +17,10 @@ Sizeof initial: 5120.00 KB = 5.00 MB = 0.00 GB
 #BEFORE size is: 32768
 #AFTER  size is: 32768
     : total      | success    | succ %      | total %     | effective %
-srch: 189570455  | 93465448   |       49.3% |      100.0% | 
+srch: 189570455  | 93465448   |       49.3% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(189570455 
+#txs 16	(189570455
 #Mops 189.570
 ## Initial: 65536 / Range: 131072 / Pugh's algorithm
 lvl max = 16
@@ -29,10 +29,10 @@ Sizeof initial: 10240.00 KB = 10.00 MB = 0.01 GB
 #BEFORE size is: 65536
 #AFTER  size is: 65536
     : total      | success    | succ %      | total %     | effective %
-srch: 151563914  | 75252465   |       49.7% |      100.0% | 
+srch: 151563914  | 75252465   |       49.7% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(151563914 
+#txs 16	(151563914
 #Mops 151.564
 ## Initial: 262144 / Range: 524288 / Pugh's algorithm
 lvl max = 18
@@ -41,10 +41,10 @@ Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
 #BEFORE size is: 262144
 #AFTER  size is: 262144
     : total      | success    | succ %      | total %     | effective %
-srch: 112691929  | 55935523   |       49.6% |      100.0% | 
+srch: 112691929  | 55935523   |       49.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(112691929 
+#txs 16	(112691929
 #Mops 112.692
 ## Initial: 524288 / Range: 1048576 / Pugh's algorithm
 lvl max = 19
@@ -53,10 +53,10 @@ Sizeof initial: 98304.00 KB = 96.00 MB = 0.09 GB
 #BEFORE size is: 524288
 #AFTER  size is: 524288
     : total      | success    | succ %      | total %     | effective %
-srch: 81994377   | 40854038   |       49.8% |      100.0% | 
+srch: 81994377   | 40854038   |       49.8% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(81994377  
+#txs 16	(81994377
 #Mops 81.994
 ## Initial: 2097152 / Range: 4194304 / Pugh's algorithm
 lvl max = 21
@@ -65,10 +65,10 @@ Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
 #BEFORE size is: 2097152
 #AFTER  size is: 2097152
     : total      | success    | succ %      | total %     | effective %
-srch: 54145925   | 27033307   |       49.9% |      100.0% | 
+srch: 54145925   | 27033307   |       49.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(54145925  
+#txs 16	(54145925
 #Mops 54.146
 ## Initial: 4194304 / Range: 8388608 / Pugh's algorithm
 lvl max = 22
@@ -77,10 +77,10 @@ Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
 #BEFORE size is: 4194304
 #AFTER  size is: 4194304
     : total      | success    | succ %      | total %     | effective %
-srch: 43094752   | 21515082   |       49.9% |      100.0% | 
+srch: 43094752   | 21515082   |       49.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(43094752  
+#txs 16	(43094752
 #Mops 43.095
 ## Initial: 33554432 / Range: 67108864 / Pugh's algorithm
 lvl max = 25
@@ -89,10 +89,10 @@ Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
 #BEFORE size is: 33554432
 #AFTER  size is: 33554432
     : total      | success    | succ %      | total %     | effective %
-srch: 31357987   | 15764478   |       50.3% |      100.0% | 
+srch: 31357987   | 15764478   |       50.3% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(31357987  
+#txs 16	(31357987
 #Mops 31.358
 ## Initial: 134217728 / Range: 268435456 / Pugh's algorithm
 lvl max = 27
@@ -101,10 +101,10 @@ Sizeof initial: 33554432.00 KB = 32768.00 MB = 32.00 GB
 #BEFORE size is: 134217728
 #AFTER  size is: 134217728
     : total      | success    | succ %      | total %     | effective %
-srch: 21677357   | 11089592   |       51.2% |      100.0% | 
+srch: 21677357   | 11089592   |       51.2% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(21677357  
+#txs 16	(21677357
 #Mops 21.677
 ## Initial: 268435456 / Range: 536870912 / Pugh's algorithm
 lvl max = 28
@@ -113,10 +113,10 @@ Sizeof initial: 67108864.00 KB = 65536.00 MB = 64.00 GB
 #BEFORE size is: 268435456
 #AFTER  size is: 268435456
     : total      | success    | succ %      | total %     | effective %
-srch: 15494396   | 7892622    |       50.9% |      100.0% | 
+srch: 15494396   | 7892622    |       50.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(15494396  
+#txs 16	(15494396
 #Mops 15.494
 ## Initial: 8192 / Range: 16384 / Herlihy's algorithm
 Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
@@ -124,10 +124,10 @@ Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
 #BEFORE size is: 8192
 #AFTER  size is: 8192
     : total      | success    | succ %      | total %     | effective %
-srch: 268251283  | 130354365  |       48.6% |      100.0% | 
+srch: 268251283  | 130354365  |       48.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(268251283 
+#txs 16	(268251283
 #Mops 268.251
 ## Initial: 32768 / Range: 65536 / Herlihy's algorithm
 Sizeof initial: 6144.00 KB = 6.00 MB = 0.01 GB
@@ -135,10 +135,10 @@ Sizeof initial: 6144.00 KB = 6.00 MB = 0.01 GB
 #BEFORE size is: 32768
 #AFTER  size is: 32768
     : total      | success    | succ %      | total %     | effective %
-srch: 203747621  | 100430837  |       49.3% |      100.0% | 
+srch: 203747621  | 100430837  |       49.3% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(203747621 
+#txs 16	(203747621
 #Mops 203.748
 ## Initial: 65536 / Range: 131072 / Herlihy's algorithm
 Sizeof initial: 12288.00 KB = 12.00 MB = 0.01 GB
@@ -146,10 +146,10 @@ Sizeof initial: 12288.00 KB = 12.00 MB = 0.01 GB
 #BEFORE size is: 65536
 #AFTER  size is: 65536
     : total      | success    | succ %      | total %     | effective %
-srch: 155448602  | 77176688   |       49.6% |      100.0% | 
+srch: 155448602  | 77176688   |       49.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(155448602 
+#txs 16	(155448602
 #Mops 155.449
 ## Initial: 262144 / Range: 524288 / Herlihy's algorithm
 Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
@@ -157,10 +157,10 @@ Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
 #BEFORE size is: 262144
 #AFTER  size is: 262144
     : total      | success    | succ %      | total %     | effective %
-srch: 115295309  | 57243150   |       49.6% |      100.0% | 
+srch: 115295309  | 57243150   |       49.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(115295309 
+#txs 16	(115295309
 #Mops 115.295
 ## Initial: 524288 / Range: 1048576 / Herlihy's algorithm
 Sizeof initial: 114688.00 KB = 112.00 MB = 0.11 GB
@@ -168,10 +168,10 @@ Sizeof initial: 114688.00 KB = 112.00 MB = 0.11 GB
 #BEFORE size is: 524288
 #AFTER  size is: 524288
     : total      | success    | succ %      | total %     | effective %
-srch: 83012722   | 41366804   |       49.8% |      100.0% | 
+srch: 83012722   | 41366804   |       49.8% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(83012722  
+#txs 16	(83012722
 #Mops 83.013
 ## Initial: 2097152 / Range: 4194304 / Herlihy's algorithm
 Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
@@ -179,10 +179,10 @@ Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
 #BEFORE size is: 2097152
 #AFTER  size is: 2097152
     : total      | success    | succ %      | total %     | effective %
-srch: 53743667   | 26838261   |       49.9% |      100.0% | 
+srch: 53743667   | 26838261   |       49.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(53743667  
+#txs 16	(53743667
 #Mops 53.744
 ## Initial: 4194304 / Range: 8388608 / Herlihy's algorithm
 Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
@@ -190,10 +190,10 @@ Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
 #BEFORE size is: 4194304
 #AFTER  size is: 4194304
     : total      | success    | succ %      | total %     | effective %
-srch: 42806649   | 21370893   |       49.9% |      100.0% | 
+srch: 42806649   | 21370893   |       49.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(42806649  
+#txs 16	(42806649
 #Mops 42.807
 ## Initial: 33554432 / Range: 67108864 / Herlihy's algorithm
 Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
@@ -201,10 +201,10 @@ Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
 #BEFORE size is: 33554432
 #AFTER  size is: 33554432
     : total      | success    | succ %      | total %     | effective %
-srch: 31975747   | 16073828   |       50.3% |      100.0% | 
+srch: 31975747   | 16073828   |       50.3% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(31975747  
+#txs 16	(31975747
 #Mops 31.976
 ## Initial: 134217728 / Range: 268435456 / Herlihy's algorithm
 Sizeof initial: 37748736.00 KB = 36864.00 MB = 36.00 GB
@@ -212,10 +212,10 @@ Sizeof initial: 37748736.00 KB = 36864.00 MB = 36.00 GB
 #BEFORE size is: 134217728
 #AFTER  size is: 134217728
     : total      | success    | succ %      | total %     | effective %
-srch: 23183195   | 11858018   |       51.1% |      100.0% | 
+srch: 23183195   | 11858018   |       51.1% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(23183195  
+#txs 16	(23183195
 #Mops 23.183
 ## Initial: 268435456 / Range: 536870912 / Herlihy's algorithm
 Sizeof initial: 75497472.00 KB = 73728.00 MB = 72.00 GB
@@ -223,10 +223,10 @@ Sizeof initial: 75497472.00 KB = 73728.00 MB = 72.00 GB
 #BEFORE size is: 268435456
 #AFTER  size is: 268435456
     : total      | success    | succ %      | total %     | effective %
-srch: 19728039   | 10046423   |       50.9% |      100.0% | 
+srch: 19728039   | 10046423   |       50.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(19728039  
+#txs 16	(19728039
 #Mops 19.728
 ## Initial: 8192 / Range: 16384
 Sizeof initial: 1280.00 KB = 1.25 MB = 0.00 GB
@@ -235,10 +235,10 @@ size of node padded: 160
 #BEFORE size is: 8192
 #AFTER  size is: 8192
     : total      | success    | succ %      | total %     | effective %
-srch: 232957231  | 113200031  |       48.6% |      100.0% | 
+srch: 232957231  | 113200031  |       48.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(232957231 
+#txs 16	(232957231
 #Mops 232.957
 ## Initial: 32768 / Range: 65536
 Sizeof initial: 5120.00 KB = 5.00 MB = 0.00 GB
@@ -247,10 +247,10 @@ size of node padded: 160
 #BEFORE size is: 32768
 #AFTER  size is: 32768
     : total      | success    | succ %      | total %     | effective %
-srch: 163619593  | 80662476   |       49.3% |      100.0% | 
+srch: 163619593  | 80662476   |       49.3% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(163619593 
+#txs 16	(163619593
 #Mops 163.620
 ## Initial: 65536 / Range: 131072
 Sizeof initial: 10240.00 KB = 10.00 MB = 0.01 GB
@@ -259,10 +259,10 @@ size of node padded: 160
 #BEFORE size is: 65536
 #AFTER  size is: 65536
     : total      | success    | succ %      | total %     | effective %
-srch: 130787867  | 64932176   |       49.6% |      100.0% | 
+srch: 130787867  | 64932176   |       49.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(130787867 
+#txs 16	(130787867
 #Mops 130.788
 ## Initial: 262144 / Range: 524288
 Sizeof initial: 49152.00 KB = 48.00 MB = 0.05 GB
@@ -271,10 +271,10 @@ size of node padded: 192
 #BEFORE size is: 262144
 #AFTER  size is: 262144
     : total      | success    | succ %      | total %     | effective %
-srch: 96987534   | 48160279   |       49.7% |      100.0% | 
+srch: 96987534   | 48160279   |       49.7% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(96987534  
+#txs 16	(96987534
 #Mops 96.988
 ## Initial: 524288 / Range: 1048576
 Sizeof initial: 98304.00 KB = 96.00 MB = 0.09 GB
@@ -283,10 +283,10 @@ size of node padded: 192
 #BEFORE size is: 524288
 #AFTER  size is: 524288
     : total      | success    | succ %      | total %     | effective %
-srch: 76389603   | 38060009   |       49.8% |      100.0% | 
+srch: 76389603   | 38060009   |       49.8% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(76313290  
+#txs 16	(76313290
 #Mops 76.313
 ## Initial: 2097152 / Range: 4194304
 Sizeof initial: 458752.00 KB = 448.00 MB = 0.44 GB
@@ -295,10 +295,10 @@ size of node padded: 224
 #BEFORE size is: 2097152
 #AFTER  size is: 2097152
     : total      | success    | succ %      | total %     | effective %
-srch: 52253435   | 26090698   |       49.9% |      100.0% | 
+srch: 52253435   | 26090698   |       49.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(52253435  
+#txs 16	(52253435
 #Mops 52.253
 ## Initial: 4194304 / Range: 8388608
 Sizeof initial: 917504.00 KB = 896.00 MB = 0.88 GB
@@ -307,10 +307,10 @@ size of node padded: 224
 #BEFORE size is: 4194304
 #AFTER  size is: 4194304
     : total      | success    | succ %      | total %     | effective %
-srch: 41228568   | 20578629   |       49.9% |      100.0% | 
+srch: 41228568   | 20578629   |       49.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(41228568  
+#txs 16	(41228568
 #Mops 41.229
 ## Initial: 33554432 / Range: 67108864
 Sizeof initial: 8388608.00 KB = 8192.00 MB = 8.00 GB
@@ -319,10 +319,10 @@ size of node padded: 256
 #BEFORE size is: 33554432
 #AFTER  size is: 33554432
     : total      | success    | succ %      | total %     | effective %
-srch: 30390416   | 15276292   |       50.3% |      100.0% | 
+srch: 30390416   | 15276292   |       50.3% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(30390416  
+#txs 16	(30390416
 #Mops 30.390
 ## Initial: 134217728 / Range: 268435456
 Sizeof initial: 33554432.00 KB = 32768.00 MB = 32.00 GB
@@ -331,10 +331,10 @@ size of node padded: 256
 #BEFORE size is: 134217728
 #AFTER  size is: 134217728
     : total      | success    | succ %      | total %     | effective %
-srch: 21394906   | 10947358   |       51.2% |      100.0% | 
+srch: 21394906   | 10947358   |       51.2% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(21394906  
+#txs 16	(21394906
 #Mops 21.395
 ## Initial: 268435456 / Range: 536870912
 Sizeof initial: 67108864.00 KB = 65536.00 MB = 64.00 GB
@@ -343,10 +343,10 @@ size of node padded: 256
 #BEFORE size is: 268435456
 #AFTER  size is: 268435456
     : total      | success    | succ %      | total %     | effective %
-srch: 20377810   | 10379634   |       50.9% |      100.0% | 
+srch: 20377810   | 10379634   |       50.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(20377810  
+#txs 16	(20377810
 #Mops 20.378
 ## Initial: 8192 / Range: 16384 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 320.00 KB = 0.31 MB
@@ -354,10 +354,10 @@ Sizeof initial: 320.00 KB = 0.31 MB
 #BEFORE size is: 8192
 #AFTER  size is: 8192
     : total      | success    | succ %      | total %     | effective %
-srch: 812014621  | 394584517  |       48.6% |      100.0% | 
+srch: 812014621  | 394584517  |       48.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(812014621 
+#txs 16	(812014621
 #Mops 812.015
 ## Initial: 32768 / Range: 65536 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 1280.00 KB = 1.25 MB
@@ -365,10 +365,10 @@ Sizeof initial: 1280.00 KB = 1.25 MB
 #BEFORE size is: 32768
 #AFTER  size is: 32768
     : total      | success    | succ %      | total %     | effective %
-srch: 753505044  | 371468411  |       49.3% |      100.0% | 
+srch: 753505044  | 371468411  |       49.3% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(753505044 
+#txs 16	(753505044
 #Mops 753.505
 ## Initial: 65536 / Range: 131072 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 2560.00 KB = 2.50 MB
@@ -376,10 +376,10 @@ Sizeof initial: 2560.00 KB = 2.50 MB
 #BEFORE size is: 65536
 #AFTER  size is: 65536
     : total      | success    | succ %      | total %     | effective %
-srch: 730929322  | 362901665  |       49.6% |      100.0% | 
+srch: 730929322  | 362901665  |       49.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(730929322 
+#txs 16	(730929322
 #Mops 730.929
 ## Initial: 262144 / Range: 524288 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 10240.00 KB = 10.00 MB
@@ -387,10 +387,10 @@ Sizeof initial: 10240.00 KB = 10.00 MB
 #BEFORE size is: 262144
 #AFTER  size is: 262144
     : total      | success    | succ %      | total %     | effective %
-srch: 665352732  | 330336358  |       49.6% |      100.0% | 
+srch: 665352732  | 330336358  |       49.6% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(665352732 
+#txs 16	(665352732
 #Mops 665.353
 ## Initial: 524288 / Range: 1048576 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 20480.00 KB = 20.00 MB
@@ -398,10 +398,10 @@ Sizeof initial: 20480.00 KB = 20.00 MB
 #BEFORE size is: 524288
 #AFTER  size is: 524288
     : total      | success    | succ %      | total %     | effective %
-srch: 617910557  | 307881543  |       49.8% |      100.0% | 
+srch: 617910557  | 307881543  |       49.8% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(617910557 
+#txs 16	(617910557
 #Mops 617.911
 ## Initial: 2097152 / Range: 4194304 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 81920.00 KB = 80.00 MB
@@ -409,10 +409,10 @@ Sizeof initial: 81920.00 KB = 80.00 MB
 #BEFORE size is: 2097152
 #AFTER  size is: 2097152
     : total      | success    | succ %      | total %     | effective %
-srch: 419440372  | 209437201  |       49.9% |      100.0% | 
+srch: 419440372  | 209437201  |       49.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(419440372 
+#txs 16	(419440372
 #Mops 419.440
 ## Initial: 4194304 / Range: 8388608 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 163840.00 KB = 160.00 MB
@@ -420,10 +420,10 @@ Sizeof initial: 163840.00 KB = 160.00 MB
 #BEFORE size is: 4194304
 #AFTER  size is: 4194304
     : total      | success    | succ %      | total %     | effective %
-srch: 359720051  | 179584105  |       49.9% |      100.0% | 
+srch: 359720051  | 179584105  |       49.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(359720051 
+#txs 16	(359720051
 #Mops 359.720
 ## Initial: 33554432 / Range: 67108864 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 1310720.00 KB = 1280.00 MB
@@ -431,10 +431,10 @@ Sizeof initial: 1310720.00 KB = 1280.00 MB
 #BEFORE size is: 33554432
 #AFTER  size is: 33554432
     : total      | success    | succ %      | total %     | effective %
-srch: 300279871  | 150946849  |       50.3% |      100.0% | 
+srch: 300279871  | 150946849  |       50.3% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(300279871 
+#txs 16	(300279871
 #Mops 300.280
 ## Initial: 134217728 / Range: 268435456 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 5242880.00 KB = 5120.00 MB
@@ -442,10 +442,10 @@ Sizeof initial: 5242880.00 KB = 5120.00 MB
 #BEFORE size is: 134217728
 #AFTER  size is: 134217728
     : total      | success    | succ %      | total %     | effective %
-srch: 253458234  | 129666303  |       51.2% |      100.0% | 
+srch: 253458234  | 129666303  |       51.2% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(253458234 
+#txs 16	(253458234
 #Mops 253.458
 ## Initial: 268435456 / Range: 536870912 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 10485760.00 KB = 10240.00 MB
@@ -453,10 +453,10 @@ Sizeof initial: 10485760.00 KB = 10240.00 MB
 #BEFORE size is: 268435456
 #AFTER  size is: 268435456
     : total      | success    | succ %      | total %     | effective %
-srch: 241494142  | 122988563  |       50.9% |      100.0% | 
+srch: 241494142  | 122988563  |       50.9% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(241494142 
+#txs 16	(241494142
 #Mops 241.494
 ## Initial: 1073741824 / Range: 2147483648 / Load factor: 1 / Concurrency: 512
 Sizeof initial: 41943040.00 KB = 40960.00 MB
@@ -464,8 +464,8 @@ Sizeof initial: 41943040.00 KB = 40960.00 MB
 #BEFORE size is: 1073741824
 #AFTER  size is: 1073741824
     : total      | success    | succ %      | total %     | effective %
-srch: 226768190  | 121874508  |       53.7% |      100.0% | 
+srch: 226768190  | 121874508  |       53.7% |      100.0% |
 insr: 0          | 0          |       -nan% |        0.0% |       -nan%
 rems: 0          | 0          |       -nan% |        0.0% |       -nan%
-#txs 16	(226768190 
+#txs 16	(226768190
 #Mops 226.768
