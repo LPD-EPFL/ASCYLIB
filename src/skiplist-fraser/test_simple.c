@@ -447,7 +447,23 @@ main(int argc, char **argv)
   size_t true_node_size = size_pad_32;
 #endif
 
+#if defined(TIGHT_ALLOC)
+  int level;
+  size_t total_bytes = 0;
+  size_t ns;
+  for (level = 1; level <= levelmax; ++level) {
+    ns = sizeof(sl_node_t) + level * sizeof(sl_node_t*);
+    if (ns % 32 != 0) {
+      ns = 32 * (ns/32 + 1);
+    }
+    total_bytes += ns * (initial >> level);
+  }
+  double kb = total_bytes/1024.0; 
+
+#else
   double kb = (initial * true_node_size) / 1024.0;
+#endif
+
   double mb = kb / 1024.0;
   printf("Sizeof initial: %.2f KB = %.2f MB = %.2f GB\n", kb, mb, mb / 1024);
 
