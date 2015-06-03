@@ -4,7 +4,7 @@
  *   Description: 
  *   skiplist-lock.h is part of ASCYLIB
  *
- * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+n * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  * 	     	      Tudor David <tudor.david@epfl.ch>
  *	      	      Distributed Programming Lab (LPD), EPFL
  *
@@ -41,26 +41,38 @@
 extern unsigned int global_seed;
 extern __thread ssmem_allocator_t* alloc;
 
-typedef struct queue_node
+typedef volatile struct queue_node
 {
+  volatile size_t version;
   skey_t key;
-  sval_t val; 
-  struct queue_node* pred;
-  struct queue_node* next;
+  sval_t val;
 } queue_node_t;
+
+typedef struct rcu_node
+{
+  volatile uint8_t in_op;
+  uint8_t padding[CACHE_LINE_SIZE - sizeof(uint8_t) - sizeof(struct rcu_node*)];
+  struct rcu_node* next;
+} rcu_node_t;
+
+STATIC_ASSERT(sizeof(rcu_node_t) == 64, "sizeof(rcu_node_t) == 64");
+
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct queue
 {
-  queue_node_t* head;
-  optik_t head_lock;
-  uint8_t padding1[CACHE_LINE_SIZE - sizeof(queue_node_t*) - sizeof(optik_t)];
-  queue_node_t* tail;
-  optik_t tail_lock;
-  uint8_t padding2[CACHE_LINE_SIZE - sizeof(queue_node_t*) - sizeof(optik_t)];
-  queue_node_t* overflow;
-  /* uint8_t padding3[CACHE_LINE_SIZE - 2 * sizeof(queue_node_t*) - sizeof(size_t) - sizeof(optik_t)]; */
-  uint8_t padding3[CACHE_LINE_SIZE - 1 * sizeof(queue_node_t*)];
+  queue_node_t** array;
+  optik_t lock;
+  size_t hash;
+  size_t size;
+  rcu_node_t* threads;
+  uint8_t padding1[CACHE_LINE_SIZE - 5 * sizeof(size_t)];
+  size_t head_n;
+  size_t tail_n;
+  uint8_t padding3[CACHE_LINE_SIZE - 2 * sizeof(size_t)];
 } queue_t;
+
+STATIC_ASSERT(sizeof(queue_t) == 128, "sizeof(queue_t) == 128");
+
 
 /* 
  * Create a new node without setting its next fields. 
@@ -70,7 +82,7 @@ queue_node_t* queue_new_simple_node(skey_t key, sval_t val, int toplevel, int tr
  * Create a new node with its next field. 
  * If next=NULL, then this create a tail node. 
  */
-queue_node_t* queue_new_node(skey_t key, sval_t val, queue_node_t* pred, queue_node_t* next);
+queue_node_t* queue_new_node(skey_t key, sval_t val);
 void queue_delete_node(queue_node_t* n);
 queue_t* queue_new();
 void queue_delete(queue_t* qu);

@@ -28,13 +28,11 @@ __thread ssmem_allocator_t* alloc;
 
 
 queue_node_t*
-queue_new_node(skey_t key, sval_t val, queue_node_t* pred, queue_node_t* next)
+queue_new_node(skey_t key, sval_t val)
 {
   queue_node_t* node = ssmem_alloc(alloc, sizeof(queue_node_t));
   node->key = key;
   node->val = val;
-  node->pred = pred;
-  node->next = next;
 	
 #ifdef __tile__
   MEM_BARRIER;
@@ -50,6 +48,8 @@ queue_delete_node(queue_node_t *n)
   ssfree_alloc(1, (void*) n);
 }
 
+#define QUEUE_SIZE_INIT (1L<<15)
+
 queue_t*
 queue_new()
 {
@@ -61,12 +61,22 @@ queue_new()
       exit(1);
     }
 
-  set->head = NULL;
-  set->tail = NULL;
-  set->overflow = NULL;
+  set->array = (queue_node_t**) memalign(CACHE_LINE_SIZE, QUEUE_SIZE_INIT * sizeof(queue_node_t*));
+  assert(set->array != NULL);
 
-  optik_init(&set->head_lock);
-  optik_init(&set->tail_lock);
+  unsigned i;
+  for (i = 0; i < QUEUE_SIZE_INIT; i++)
+    {
+      size_t v = ((i - 1) & (QUEUE_SIZE_INIT - 1)) | 0x1;
+      set->array[i] = (queue_node_t*) v;
+    }
+
+  set->threads = NULL;
+  set->head_n = set->tail_n = 0;
+  set->size = QUEUE_SIZE_INIT;
+  set->hash = QUEUE_SIZE_INIT - 1;
+
+  optik_init(&set->lock);
 
   return set;
 }
@@ -78,17 +88,22 @@ queue_delete(queue_t *set)
 }
 
 int
-queue_size(queue_t *set)
+queue_size(queue_t* qu)
 {
-  int size = 0;
-  queue_node_t *node;
-	
-  /* We have at least 2 elements */
-  node = set->head;
-  while (node != NULL) 
-    {
-      size++;
-      node = node->pred;
-    }
+  int size = qu->tail_n - qu->head_n;
+  /* int i, size1 = 0; */
+  /* for (i = 0; i < qu->size; i++) */
+  /*   { */
+  /*     if (qu->array[i] != NULL) */
+  /* 	{ */
+  /* 	  size1++; */
+  /* 	} */
+  /*   } */
+
+  /* if (size != size) */
+  /*   { */
+  /*     printf("xxx size = %d, size1= %d\n", size, size1); */
+  /*   } */
+
   return size;
 }

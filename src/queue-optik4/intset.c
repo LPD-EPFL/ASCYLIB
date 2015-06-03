@@ -23,12 +23,6 @@
 
 #include "intset.h"
 
-inline sval_t
-queue_contains(queue_t *set, skey_t key)
-{
-  return queue_optik_find(set, key);
-}
-
 inline int
 queue_add(queue_t *set, skey_t key, sval_t val)
 {  

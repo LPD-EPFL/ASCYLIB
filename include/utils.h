@@ -227,7 +227,7 @@ extern "C" {
   static inline void
   pause_rep(uint32_t num_reps)
   {
-    uint32_t i;
+    volatile uint32_t i;
     for (i = 0; i < num_reps; i++)
       {
 	PAUSE;

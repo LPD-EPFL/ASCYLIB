@@ -253,6 +253,8 @@ test(void* thread)
 	}									
     }
 
+  /* printf("%d ** out\n", ID); */
+
   barrier_cross(&barrier);
   RR_STOP_SIMPLE();
 
@@ -573,7 +575,7 @@ main(int argc, char **argv)
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
   if (size_after != (initial + pr))
     {
-      printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
+      printf("// WRONG size. %zu + %d = %zu != %zu\n", initial, pr, initial + pr, size_after);
       /* assert(size_after == (initial + pr)); */
     }
 
