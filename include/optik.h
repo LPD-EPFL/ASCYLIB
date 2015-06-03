@@ -116,6 +116,36 @@ optik_trylock_version(optik_t* ol, optik_t ol_old)
 }
 
 static inline int
+optik_trylock(optik_t* ol)
+{
+  uint32_t version = ol->version;
+  if (unlikely(ol->ticket != version))
+    {
+      return 0;
+    }
+
+#  if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
+  optik_t olo = { .version = version, .ticket = version };
+  optik_t oln = { .version = version, .ticket = (version + 1) };
+#  else
+  optik_t olo = { version, version };
+  optik_t oln = { version, (version + 1) };
+#  endif
+  return CAS_U64(&ol->to_uint64, olo.to_uint64, oln.to_uint64) == olo.to_uint64;
+}
+
+static inline int
+optik_is_locked(optik_t ol)
+{
+  if (ol.ticket != ol.version)
+    {
+      return 1;
+    }
+  return 0;
+}
+
+
+static inline int
 optik_lock(optik_t* ol)
 {
   uint32_t ticket = FAI_U32(&ol->ticket);
@@ -127,6 +157,25 @@ optik_lock(optik_t* ol)
   return 1;
 }
 
+static inline int
+optik_lock_backoff(optik_t* ol)
+{
+  uint32_t ticket = FAI_U32(&ol->ticket);
+  int distance;
+  do
+    {
+      distance = (ticket - ol->version);
+      if (distance == 0)
+	{
+	  break;
+	}
+      const uint32_t di = (distance > 0) ? distance : -distance;
+      cpause(di << 7);
+    }
+  while (1);
+
+  return 1;
+}
 
 static inline int
 optik_num_queued(optik_t ol)
