@@ -48,7 +48,7 @@ queue_delete_node(queue_node_t *n)
   ssfree_alloc(1, (void*) n);
 }
 
-#define QUEUE_SIZE_INIT (1L<<15)
+#define QUEUE_SIZE_INIT (1L<<17)
 
 queue_t*
 queue_new()
@@ -91,19 +91,5 @@ int
 queue_size(queue_t* qu)
 {
   int size = qu->tail_n - qu->head_n;
-  /* int i, size1 = 0; */
-  /* for (i = 0; i < qu->size; i++) */
-  /*   { */
-  /*     if (qu->array[i] != NULL) */
-  /* 	{ */
-  /* 	  size1++; */
-  /* 	} */
-  /*   } */
-
-  /* if (size != size) */
-  /*   { */
-  /*     printf("xxx size = %d, size1= %d\n", size, size1); */
-  /*   } */
-
   return size;
 }
