@@ -73,9 +73,9 @@ queue_rcu_wait_others(queue_t* qu)
 }
 
 static inline int 
-queue_is_empty(const size_t tail, const size_t head)
+queue_is_empty(const size_t tail, const size_t head, const size_t hash)
 {
-  return head >= tail;
+  return (head >= tail) && ((tail - head) < hash);
 }
 
 static inline int 
@@ -90,15 +90,20 @@ queue_node_is_null(queue_node_t* node)
   return ((uintptr_t) node & 0x1);
 }
 
+static inline uintptr_t
+queue_node_set_null(size_t node)
+{
+  return ((uintptr_t) node | 0x1);
+}
+
 static int
 queue_optik_resize(queue_t* qu, size_t* tail_new)
 {
   if (optik_trylock(&qu->lock))
     {
-      //      printf("[RES] wait for others --\n");
       queue_rcu_wait_others(qu);
       size_t size_new = qu->size << 1;
-      //      printf("-- will resize from %zu to %zu\n", qu->size, size_new);
+      size_t hash_new = size_new - 1;
       queue_node_t** array_new = (queue_node_t**) memalign(CACHE_LINE_SIZE, size_new * sizeof(queue_node_t*));
       assert(array_new != NULL);
 
@@ -110,38 +115,36 @@ queue_optik_resize(queue_t* qu, size_t* tail_new)
 	  queue_node_t* node = qu->array[i & hash];
 	  if (!queue_node_is_null(node))
 	    {
-	      node->version = ((tot - 1) & (size_new - 1)) | 0x1;
+	      node->version = queue_node_set_null((tot - 1) & (hash_new));
 	      array_new[tot++] = node;
 	    }
 	}
 
-      unsigned j;
+      size_t j;
       for (j = tot; j < size_new; j++)
 	{
-	  size_t v = ((j - 1) & (size_new - 1)) | 0x1;
+	  size_t v = ((j - 1) & (hash_new)) | 0x1;
 	  array_new[j] = (queue_node_t*) v;
 	}
 
-      j = 0;
-      size_t v = ((j - 1) & (size_new - 1)) | 0x1;
-      array_new[j] = (queue_node_t*) v;
-
+      array_new[0] = (queue_node_t*) queue_node_set_null((-1) & (hash_new));
       tot--;
 
-      //      printf(" - copied %u\n", tot);
       qu->size = size_new;
-      qu->hash = size_new - 1;
-      qu->tail_n = tot;
+      qu->hash = hash_new;
+      qu->tail_n = tot + 1;
       qu->head_n = 0;
+      queue_node_t** array_old = qu->array;
       qu->array = array_new;
-
       *tail_new = tot;
+
       optik_unlock(&qu->lock);
+      free(array_old);
       return 1; 
     }
   else
     {
-      //      printf("  ~~~ resize is done by other\n");
+      FAD_U64(&qu->tail_n);
       return 0;
     }
 }
@@ -181,30 +184,27 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 
   queue_node_t* node = queue_new_node(key, val);
   size_t hash = qu->hash;
-  while (1)
+  size_t tail = FAI_U64(&qu->tail_n);
+  if (queue_is_full(tail, qu->head_n, hash))
     {
-      size_t tail = qu->tail_n;
-      if (queue_is_full(tail, qu->head_n, hash))
+      /* printf(" !! full \n"); */
+      if (!queue_optik_resize(qu, &tail))
 	{
-	  if (!queue_optik_resize(qu, &tail))
-	    {
-	      goto restart;
-	    }
-	  hash = qu->hash;
+	  goto restart;
 	}
+      hash = qu->hash;
+    }
 
-      size_t spot = (tail + 1) & hash;
-      size_t tailm = tail | 0x1;
-      node->version = tailm;
-      if ((uintptr_t) CAS_U64(&qu->array[spot], tailm, node) == tailm)
-	{
-	  FAI_U64(&qu->tail_n);
-	  break;
-	}
-
+  size_t spot = (tail + 1) & hash;
+  size_t tailm = queue_node_set_null(tail);
+  node->version = tailm;
+  while (unlikely((uintptr_t) qu->array[spot]) != tailm)
+    {
       cpause(rand() & 1023);
     }
 
+  qu->array[spot] = node;
+ 
   queue_rcu_op_off(qu);
   return 1;
 }
@@ -217,7 +217,7 @@ queue_optik_delete(queue_t* qu)
   while (1)
     {
       size_t head = qu->head_n;
-      if (queue_is_empty(qu->tail_n, head))
+      if (queue_is_empty(qu->tail_n, head, hash))
 	{
 	  return 0;
 	}
@@ -230,13 +230,13 @@ queue_optik_delete(queue_t* qu)
 	  queue_pause(qpt);
 	  continue;
 	}
-      else if (unlikely(node->version != (head | 0x1)))
+      else if (unlikely(node->version != queue_node_set_null(head)))
 	{
 	  queue_pause(qpt);
 	  continue;
 	}
 
-      size_t spotm_next = (head + hash + 1) | 0x1;
+      size_t spotm_next = queue_node_set_null(head + hash + 1);
       if ((CAS_U64(&qu->array[spot], node, spotm_next) == node))
 	{
 	  FAI_U64(&qu->head_n);

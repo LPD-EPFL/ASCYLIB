@@ -91,57 +91,32 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 
   if (optik_num_queued(qu->tail_lock) > 2)
     {
-      size_t nr = 1;
-      queue_node_t* succ;
-      do
+      node->next = SWAP_PTR(&qu->overflow, node);
+      if (node->next == NULL)
 	{
-	  /* uintptr_t oh = queue_node_unmark(qu->overflow); */
-	  queue_node_t* oh = qu->overflow;
-	  node->next = oh;
-	  succ = (queue_node_t*) CAS_U64(&qu->overflow, oh, (uintptr_t) node);
-	  if (succ == oh)
-	    {
-	      break;
-	    }
-	  pause_rep(rand() % (nr++));
-	}
-      while (1);
-
-      if (succ == 0)
-	{
-	  optik_lock(&qu->tail_lock);
-	  do
-	    {
-	      queue_node_t* oh = qu->overflow;
-	      if ((uintptr_t) CAS_U64(&qu->overflow, oh, NULL) == (uintptr_t) oh)
-		{
-		  qu->tail->next = oh;
-		  qu->tail = node;
-		  break;
-		}
-	      PAUSE;
-	    }
-	  while (1);
+	  optik_lock_backoff(&qu->tail_lock);
+	  queue_node_t* oh = SWAP_PTR(&qu->overflow, NULL);
+	  qu->tail->next = oh;
+	  qu->tail = node;
 	  optik_unlock(&qu->tail_lock);
 	}
       else
 	{
 	  while (qu->overflow != NULL)
 	    {
-	      PAUSE;
+	      pause_rep(16);
 	    }
 	}
 
       return 1;
     }      
 
-  optik_lock(&qu->tail_lock);
+  optik_lock_backoff(&qu->tail_lock);
   qu->tail->next = node;
   qu->tail = node; 
   optik_unlock(&qu->tail_lock);
   return 1;
 }
-
 
 sval_t
 queue_optik_delete(queue_t* qu)
