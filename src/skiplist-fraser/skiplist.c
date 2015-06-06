@@ -44,14 +44,15 @@ get_rand_level()
 }
 
 int
-floor_log_2(unsigned int n)
+floor_log_2(uint64_t n)
 {
   int pos = 0;
-  if (n >= 1<<16) { n >>= 16; pos += 16; }
-  if (n >= 1<< 8) { n >>=  8; pos +=  8; }
-  if (n >= 1<< 4) { n >>=  4; pos +=  4; }
-  if (n >= 1<< 2) { n >>=  2; pos +=  2; }
-  if (n >= 1<< 1) {           pos +=  1; }
+  if (n >= 1UL<<32) { n >>= 32; pos += 32; }
+  if (n >= 1UL<<16) { n >>= 16; pos += 16; }
+  if (n >= 1UL<< 8) { n >>=  8; pos +=  8; }
+  if (n >= 1UL<< 4) { n >>=  4; pos +=  4; }
+  if (n >= 1UL<< 2) { n >>=  2; pos +=  2; }
+  if (n >= 1UL<< 1) {           pos +=  1; }
   return ((n == 0) ? (-1) : pos);
 }
 
@@ -79,9 +80,9 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
     {
 #if defined(TIGHT_ALLOC)
     size_t ns = sizeof(sl_node_t) + toplevel * sizeof(sl_node_t*);
-    if (ns % 32 != 0) {
-      ns = 32 * (ns/32 + 1);
-    }
+    // if (ns % 32 != 0) {
+    //   ns = 32 * (ns/32 + 1);
+    // }
 #else
       size_t ns = size_pad_32;
 #if defined(DO_PAD)
@@ -139,7 +140,7 @@ sl_new_node(skey_t key, sval_t val, sl_node_t *next, int toplevel, int transacti
 
   node = sl_new_simple_node(key, val, toplevel, transactional);
 
-  for (i = 0; i < levelmax; i++)
+  for (i = 0; i < toplevel; i++)
     {
       node->next[i] = next;
     }
@@ -193,10 +194,10 @@ sl_set_delete(sl_intset_t *set)
   ssfree(set);
 }
 
-int
+uint64_t
 sl_set_size(sl_intset_t *set)
 {
-  int size = 0;
+  uint64_t size = 0;
   sl_node_t *node;
 
   node = GET_UNMARKED(set->head->next[0]);

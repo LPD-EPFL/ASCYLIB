@@ -44,14 +44,15 @@ get_rand_level()
 }
 
 int
-floor_log_2(unsigned int n) 
+floor_log_2(uint64_t n)
 {
   int pos = 0;
-  if (n >= 1<<16) { n >>= 16; pos += 16; }
-  if (n >= 1<< 8) { n >>=  8; pos +=  8; }
-  if (n >= 1<< 4) { n >>=  4; pos +=  4; }
-  if (n >= 1<< 2) { n >>=  2; pos +=  2; }
-  if (n >= 1<< 1) {           pos +=  1; }
+  if (n >= 1UL<<32) { n >>= 32; pos += 32; }
+  if (n >= 1UL<<16) { n >>= 16; pos += 16; }
+  if (n >= 1UL<< 8) { n >>=  8; pos +=  8; }
+  if (n >= 1UL<< 4) { n >>=  4; pos +=  4; }
+  if (n >= 1UL<< 2) { n >>=  2; pos +=  2; }
+  if (n >= 1UL<< 1) {           pos +=  1; }
   return ((n == 0) ? (-1) : pos);
 }
 
@@ -77,14 +78,21 @@ sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional)
     }
   else 
     {
+#if defined(TIGHT_ALLOC)
+    size_t ns = sizeof(sl_node_t) + toplevel * sizeof(sl_node_t*);
+    // if (ns % 32 != 0) {
+    //   ns = 32 * (ns/32 + 1);
+    // }
+#else
       size_t ns = size_pad_32;
-#  if defined(DO_PAD)
-      size_t ns_rm = ns & 63;
+#if defined(DO_PAD)
+      size_t ns_rm = size_pad_32;
       if (ns_rm)
-	{
-	  ns += 64 - ns_rm;
-	}
-#  endif
+  {
+    ns += 64 - ns_rm;
+  }
+#endif
+#endif
       node = (sl_node_t*) ssmem_alloc(alloc, ns);
     }
 #else
@@ -186,9 +194,9 @@ sl_set_delete(sl_intset_t *set)
   ssfree((void*) set);
 }
 
-int sl_set_size(sl_intset_t *set)
+uint64_t sl_set_size(sl_intset_t *set)
 {
-  int size = 0;
+  uint64_t size = 0;
   sl_node_t *node;
 	
   /* We have at least 2 elements */

@@ -81,8 +81,8 @@ static inline int strkey_compare(strkey_t k1, strkey_t k2) {
 	return strcmp(k1.key, k2.key);
 }
 
-#define KEY_MIN                         INT_MIN
-#define KEY_MAX                         (INT_MAX - 2)
+#define KEY_MIN                         INTPTR_MIN
+#define KEY_MAX                         (INTPTR_MAX - 2)
 
 
 

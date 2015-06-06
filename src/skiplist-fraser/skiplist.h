@@ -72,7 +72,7 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct sl_intset
 } sl_intset_t;
 
 int get_rand_level();
-int floor_log_2(unsigned int n);
+int floor_log_2(uint64_t n);
 
 sl_node_t* sl_new_simple_node(skey_t key, sval_t val, int toplevel, int transactional);
 sl_node_t* sl_new_node(skey_t key, sval_t val, sl_node_t* next, int toplevel, int transactional);
@@ -80,7 +80,7 @@ void sl_delete_node(sl_node_t *n);
 
 sl_intset_t* sl_set_new();
 void sl_set_delete(sl_intset_t *set);
-int sl_set_size(sl_intset_t *set);
+uint64_t sl_set_size(sl_intset_t *set);
 
 inline long rand_range(long r); /* declared in test.c */
 

@@ -88,7 +88,7 @@ extern "C" {
 #endif
 
   static inline int
-  is_power_of_two (unsigned int x) 
+  is_power_of_two (uint64_t x) 
   {
     return ((x != 0) && !(x & (x - 1)));
   }
@@ -736,7 +736,7 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
 
   /// Round up to next higher power of 2 (return x if it's already a power
   /// of 2) for 32-bit numbers
-  static inline uint32_t pow2roundup (uint32_t x){
+  static inline uint64_t pow2roundup (uint64_t x){
     if (x==0) return 1;
     --x;
     x |= x >> 1;
@@ -744,6 +744,7 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     x |= x >> 4;
     x |= x >> 8;
     x |= x >> 16;
+    x |= x >> 32;
     return x+1;
   }
 

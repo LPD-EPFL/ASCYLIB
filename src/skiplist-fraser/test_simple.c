@@ -83,7 +83,7 @@ double update_rate, put_rate, get_rate;
 size_t size_after = 0;
 int seed = 0;
 __thread unsigned long * seeds;
-uint32_t rand_max;
+uint64_t rand_max;
 #define rand_min 1
 
 static volatile int stop;
@@ -172,7 +172,6 @@ test(void* thread)
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
   uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
 
-  int i;
   uint32_t num_elems_thread = (uint32_t) (initial / num_threads);
   int32_t missing = (uint32_t) initial - (num_elems_thread * num_threads);
   if (ID < missing)
@@ -185,12 +184,21 @@ test(void* thread)
 #endif
 
 #ifdef INIT_SEQ
+  size_t j;
   if (ID == 0) {
-    for (i = range - 1; i >= range/2; i--) {
-      DS_ADD(set, i, NULL);
+    for (j = range - 1; j >= range/2; j--) {
+      if (j == 7*range/8) {
+        printf("inserting: 25/100 done, j = %zu \n", j);
+      } else if (j == 3 * range / 4) {
+        printf("inserting: 50/100 done\n");
+      } else if (j == 5 * range / 8) {
+        printf("inserting: 75/100 done\n");
+      }
+      DS_ADD(set, j, NULL);
     }
   }
 #else
+  int i;
   for(i = 0; i < num_elems_thread; i++)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
@@ -341,7 +349,7 @@ main(int argc, char **argv)
 	  duration = atoi(optarg);
 	  break;
 	case 'i':
-	  initial = atoi(optarg);
+	  initial = atol(optarg);
 	  break;
 	case 'n':
 	  num_threads = atoi(optarg);
@@ -430,7 +438,7 @@ main(int argc, char **argv)
 
   stop = 0;
 
-  levelmax = floor_log_2((unsigned int) initial);
+  levelmax = floor_log_2(initial);
   size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
   while (size_pad_32 & 31)
     {
@@ -453,9 +461,9 @@ main(int argc, char **argv)
   size_t ns;
   for (level = 1; level <= levelmax; ++level) {
     ns = sizeof(sl_node_t) + level * sizeof(sl_node_t*);
-    if (ns % 32 != 0) {
-      ns = 32 * (ns/32 + 1);
-    }
+    // if (ns % 32 != 0) {
+    //   ns = 32 * (ns/32 + 1);
+    // }
     total_bytes += ns * (initial >> level);
   }
   double kb = total_bytes/1024.0; 

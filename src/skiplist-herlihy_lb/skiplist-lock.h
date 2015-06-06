@@ -76,7 +76,7 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct sl_intset
 } sl_intset_t;
 
 int get_rand_level();
-int floor_log_2(unsigned int n);
+int floor_log_2(uint64_t n);
 
 /* 
  * Create a new node without setting its next fields. 
@@ -90,4 +90,4 @@ sl_node_t *sl_new_node(skey_t key, sval_t val, sl_node_t *next, int toplevel, in
 void sl_delete_node(sl_node_t* n);
 sl_intset_t* sl_set_new();
 void sl_set_delete(sl_intset_t* set);
-int sl_set_size(sl_intset_t* cset);
+uint64_t sl_set_size(sl_intset_t* cset);
