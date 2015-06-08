@@ -311,14 +311,7 @@ optik_unlockv(optik_t* ol)
 static inline void
 optik_revert(optik_t* ol)
 {
-#  if OPTIK_RLS_ATOMIC >= OPTIK_RLS_STORE
-  COMPILER_NO_REORDER(ol->ticket--);
-#    if OPTIK_RLS_ATOMIC == OPTIK_RLS_BARRIER
-  asm volatile ("sfence");
-#    endif
-#  elif OPTIK_RLS_TYPE == OPTIK_RLS_ATOMIC
   FAD_U32(&ol->ticket);
-#  endif
 }
 
 
