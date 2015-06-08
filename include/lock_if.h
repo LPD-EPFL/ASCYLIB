@@ -30,6 +30,7 @@
 
 #if defined(MUTEX)
 typedef pthread_mutex_t ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL)
 #  define DESTROY_LOCK(lock)			        pthread_mutex_destroy((pthread_mutex_t *) lock)
@@ -44,6 +45,7 @@ typedef pthread_mutex_t ptlock_t;
 #  define GL_UNLOCK(lock)				pthread_mutex_unlock((pthread_mutex_t *) lock)
 #elif defined(SPIN)		/* pthread spinlock */
 typedef pthread_spinlock_t ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_spin_init((pthread_spinlock_t *) lock, PTHREAD_PROCESS_PRIVATE);
 #  define DESTROY_LOCK(lock)			        pthread_spin_destroy((pthread_spinlock_t *) lock)
@@ -80,6 +82,7 @@ typedef struct tticket
 #  define EVALUATE2(sz) PASTER2(CAS_U, sz)
 #  define CAS_UTYPE EVALUATE2(PTLOCK_SIZE)
 typedef volatile UTYPE ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define INIT_LOCK(lock)				tas_init(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					tas_lock(lock)
@@ -188,6 +191,7 @@ tas_unlock(ptlock_t* l)
 #  define EVALUATE2(sz) PASTER2(CAS_U, sz)
 #  define CAS_UTYPE EVALUATE2(PTLOCK_SIZE)
 typedef volatile UTYPE ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define INIT_LOCK(lock)				ttas_init(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					ttas_lock(lock)
@@ -257,6 +261,7 @@ struct ticket_st
 };
 
 typedef struct ticket_st ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define INIT_LOCK(lock)				ticket_init((volatile ptlock_t*) lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					ticket_lock((volatile ptlock_t*) lock)
@@ -420,6 +425,7 @@ struct none_st
 };
 
 typedef struct none_st ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define INIT_LOCK(lock)				none_init((volatile ptlock_t*) lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					none_lock((volatile ptlock_t*) lock)
