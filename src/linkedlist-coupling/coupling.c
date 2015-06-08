@@ -26,6 +26,7 @@
 #include "coupling.h"
 
 RETRY_STATS_VARS;
+LOCK_LOCAL_DATA;
 
 /* 
  * Similar algorithm for the delete, find, and insert:
