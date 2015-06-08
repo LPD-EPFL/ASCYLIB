@@ -407,15 +407,15 @@ ticket_unlock(volatile ptlock_t* l)
 typedef mcs_lock_t ptlock_t;
 #define LOCK_LOCAL_DATA                                 __thread mcs_lock_local_t __mcs_local
 
-#  define INIT_LOCK(lock)				mcs_lock_init(lock, NULL)
-#  define DESTROY_LOCK(lock)			        mcs_lock_destroy(lock)
-#  define LOCK(lock)					mcs_lock_lock(lock)
-#  define UNLOCK(lock)					mcs_lock_unlock(lock)     
+#  define INIT_LOCK(lock)				mcs_lock_init((mcs_lock_t*) lock, NULL)
+#  define DESTROY_LOCK(lock)			        mcs_lock_destroy((mcs_lock_t*) lock)
+#  define LOCK(lock)					mcs_lock_lock((mcs_lock_t*) lock)
+#  define UNLOCK(lock)					mcs_lock_unlock((mcs_lock_t*) lock)     
 /* GLOBAL lock */
-#  define GL_INIT_LOCK(lock)				mcs_lock_init(lock, NULL) 
-#  define GL_DESTROY_LOCK(lock)				mcs_lock_destroy(lock)	  
-#  define GL_LOCK(lock)					mcs_lock_lock(lock)	  
-#  define GL_UNLOCK(lock)				mcs_lock_unlock(lock)     
+#  define GL_INIT_LOCK(lock)				mcs_lock_init((mcs_lock_t*) lock, NULL) 
+#  define GL_DESTROY_LOCK(lock)				mcs_lock_destroy((mcs_lock_t*) lock)	  
+#  define GL_LOCK(lock)					mcs_lock_lock((mcs_lock_t*) lock)	  
+#  define GL_UNLOCK(lock)				mcs_lock_unlock((mcs_lock_t*) lock)     
 
 #elif defined(NONE)			/* no locking */
 
