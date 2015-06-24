@@ -42,7 +42,7 @@ int
 queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 {
   queue_node_t* node = queue_new_node(key, val, NULL);
-  optik_lock(&qu->tail_lock);
+  optik_lock_backoff(&qu->tail_lock);
   qu->tail->next = node;
   qu->tail = node; 
   optik_unlock(&qu->tail_lock);
