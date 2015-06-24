@@ -59,7 +59,7 @@ typedef union tl
 
 #define OPTIK_TICKET   0
 #define OPTIK_INTEGER  1
-#define OPTIK_VERSION  OPTIK_TICKET
+#define OPTIK_VERSION  OPTIK_INTEGER
 
 #define OPTIK_RLS_ATOMIC   0
 #define OPTIK_RLS_STORE    1
@@ -317,53 +317,81 @@ optik_revert(optik_t* ol)
 
 #elif OPTIK_VERSION == OPTIK_INTEGER
 
-#  define OPTIK_INIT    {{0}}
-#  define OPTIK_LOCKED  INT_MAX
+#  define OPTIK_INIT    0
+#  define OPTIK_LOCKED  0x1LL //odd values -> locked
 
-typedef union optik
+typedef volatile uint64_t optik_t;
+
+
+static inline int
+optik_is_locked(optik_t ol)
 {
-  struct 
-  {
-    volatile uint32_t version;
-    volatile uint32_t oversion;
-  };
-  volatile uint64_t to_uint64;
-} optik_t;
+  return (ol & OPTIK_LOCKED);
+}
 
 static inline void
-optik_lock_init(optik_t* ol)
+optik_init(optik_t* ol)
 {
-  ol->to_uint64 = 0;
+  *ol = 0;
 }
 
 static inline int
 optik_trylock_version(optik_t* ol, optik_t ol_old)
 {
-  uint32_t ov = ol_old.version;
-  if (unlikely(ol->version != ov || ov == OPTIK_LOCKED))
+  optik_t ol_new = *ol;
+  if (unlikely(optik_is_locked(ol_new) || ol_new != ol_old))
     {
       return 0;
     }
 
-  int res = (CAS_U32(&ol->version, ov, OPTIK_LOCKED) == ov);
-  if (likely(res))
-    {
-      ol->oversion = ov;
-    }
-  return res;
+  return CAS_U64(ol, ol_old, ++ol_new) == ol_old;
 }
 
 static inline int
 optik_lock(optik_t* ol)
 {
+  optik_t ol_old;
   do
     {
-      const uint32_t ov = ol->version;
-      if ((ov != OPTIK_LOCKED) && CAS_U32(&ol->version, ov, OPTIK_LOCKED) == ov)
+      while (1)
+	{
+	  ol_old = *ol;
+	  if (!optik_is_locked(ol_old))
+	    {
+	      break;
+	    }
+	  OPTIK_PAUSE();
+	}
+
+      if (CAS_U64(ol, ol_old, ol_old + 1) == ol_old)
 	{
 	  break;
 	}
-      OPTIK_PAUSE();
+    }
+  while (1);
+  return 1;
+}
+
+static inline int
+optik_lock_backoff(optik_t* ol)
+{
+  optik_t ol_old;
+  do
+    {
+      while (1)
+	{
+	  ol_old = *ol;
+	  if (!optik_is_locked(ol_old))
+	    {
+	      break;
+	    }
+	  cpause(128);
+	}
+
+      if (CAS_U64(ol, ol_old, ol_old + 1) == ol_old)
+	{
+	  break;
+	}
     }
   while (1);
   return 1;
@@ -372,15 +400,51 @@ optik_lock(optik_t* ol)
 static inline int
 optik_lock_version(optik_t* ol, optik_t ol_old)
 {
-  const uint32_t ov = ol_old.version;
-  if ((ov != OPTIK_LOCKED) && CAS_U32(&ol->version, ov, OPTIK_LOCKED) == ov)
+  optik_t ol_cur;
+  do
     {
-      ol->oversion = ov;
-      return 1;
-    }
+      while (1)
+	{
+	  ol_cur = *ol;
+	  if (!optik_is_locked(ol_cur))
+	    {
+	      break;
+	    }
+	  OPTIK_PAUSE();
+	}
 
-  optik_lock(ol);
-  return 0;
+      if (CAS_U64(ol, ol_cur, ol_cur + 1) == ol_cur)
+	{
+	  break;
+	}
+    }
+  while (1);
+  return ol_cur == ol_old;
+}
+
+static inline int
+optik_lock_version_backoff(optik_t* ol, optik_t ol_old)
+{
+  optik_t ol_cur;
+  do
+    {
+      while (1)
+	{
+	  ol_cur = *ol;
+	  if (!optik_is_locked(ol_cur))
+	    {
+	      break;
+	    }
+	  cpause(128);
+	}
+
+      if (CAS_U64(ol, ol_cur, ol_cur + 1) == ol_cur)
+	{
+	  break;
+	}
+    }
+  while (1);
+  return ol_cur == ol_old;
 }
 
 static inline void
@@ -389,15 +453,19 @@ optik_unlock(optik_t* ol)
 #  ifdef __tile__
   MEM_BARRIER;
 #  endif
-   /* COMPILER_NO_REORDER(ol->version++); */
-  COMPILER_NO_REORDER(ol->version = ol->oversion + 1;);
+#  if OPTIK_RLS_ATOMIC == OPTIK_RLS_ATOMIC || OPTIK_RLS_ATOMIC == OPTIK_RLS_BARRIER
+  COMPILER_NO_REORDER((*ol)++);
+#    if OPTIK_RLS_ATOMIC == OPTIK_RLS_BARRIER
+  asm volatile ("sfence");
+#    endif
+#  elif OPTIK_RLS_TYPE == OPTIK_RLS_ATOMIC
+  FAI_U64(ol);
+#  endif
 }
-
 static inline void
 optik_revert(optik_t* ol)
 {
-  /* COMPILER_NO_REORDER(ol->ticket--); */
-  COMPILER_NO_REORDER(ol->version = ol->oversion;);
+  FAD_U64(ol);
 }
 
 #endif	/* OPTIK_VERSION */
