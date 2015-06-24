@@ -73,12 +73,10 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 
   UPDATE_TRY();
 
-#if OPTIK_RO_FAIL == 1 
   if (curr->key == key)
     {
       return false;
     }
-#endif
 
   newnode = new_node_l(key, val, curr, 0);
 
@@ -117,12 +115,10 @@ optik_delete(intset_l_t *set, skey_t key)
 
   UPDATE_TRY();
 
-#if OPTIK_RO_FAIL == 1 
   if (curr->key != key)
     {
       return false;
     }
-#endif
 
   if (unlikely(!optik_trylock_version(&set->lock, version)))
     {

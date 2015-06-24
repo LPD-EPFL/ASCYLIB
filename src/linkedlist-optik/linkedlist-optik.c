@@ -80,12 +80,10 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 
   UPDATE_TRY();
 
-#if OPTIK_RO_FAIL == 1 
   if (curr->key == key)
     {
       return false;
     }
-#endif
 
   if ((!optik_trylock_version(&pred->lock, pred_ver)))
     {
@@ -128,12 +126,12 @@ optik_delete(intset_l_t *set, skey_t key)
 
   UPDATE_TRY();
 
-#if OPTIK_RO_FAIL == 1 
   if (curr->key != key)
     {
       return false;
     }
-#endif
+
+  node_l_t* cnxt = curr->next;
 
   if (unlikely(!optik_trylock_version(&pred->lock, pred_ver)))
     {
@@ -146,11 +144,10 @@ optik_delete(intset_l_t *set, skey_t key)
       goto restart;
     }
 
-  result = curr->val;
-  pred->next = curr->next;
-
+  pred->next = cnxt;
   optik_unlock(&pred->lock);
       
+  result = curr->val;
 #if GC == 1
   ssmem_free(alloc, (void*) curr);
 #endif
