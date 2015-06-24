@@ -1,7 +1,7 @@
 .PHONY:	all
 
-BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_gl src/linkedlist-optik_cache src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-optik1 src/skiplist-optik2 src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq src/queue-ms_lb src/queue-ms_lf src/queue-optik0 src/queue-optik1 src/queue-optik2 src/queue-optik3 src/queue-optik4 src/queue-optik5 src/stack-treiber src/stack-lock src/stack-optik
-LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_gl src/linkedlist-optik_cache src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-optik1 src/skiplist-optik2 src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/ src/queue-ms_lb src/queue-ms_lf src/queue-optik0 src/queue-optik1 src/queue-optik2 src/queue-optik3 src/queue-optik4 src/queue-optik5 src/stack-treiber src/stack-lock src/stack-optik
+BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_gl src/linkedlist-optik_cache src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-optik1 src/skiplist-optik2 src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq src/queue-ms_lb src/queue-ms_lf src/queue-optik0 src/queue-optik1 src/queue-optik2 src/queue-optik3 src/queue-optik4 src/queue-optik5 src/queue-hybrid src/stack-treiber src/stack-lock src/stack-optik
+LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-optik src/linkedlist-optik_gl src/linkedlist-optik_cache src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-optik0 src/hashtable-optik1 src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-optik src/skiplist-optik1 src/skiplist-optik2 src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/ src/queue-ms_lb src/queue-ms_lf src/queue-optik0 src/queue-optik1 src/queue-optik2 src/queue-optik3 src/queue-optik4 src/queue-optik5 src/queue-hybrid src/stack-treiber src/stack-lock src/stack-optik
 LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 EXTERNALS = src/hashtable-rcu src/hashtable-tbb
@@ -140,6 +140,9 @@ lbqu_optik4:
 
 lbqu_optik5:
 	$(MAKE) src/queue-optik5
+
+lbqu_hybrid:
+	$(MAKE) src/queue-hybrid
 
 lfst_treiber:
 	$(MAKE) src/stack-treiber
@@ -336,6 +339,7 @@ clean:
 	$(MAKE) -C src/queue-optik3 clean
 	$(MAKE) -C src/queue-optik4 clean
 	$(MAKE) -C src/queue-optik5 clean
+	$(MAKE) -C src/queue-hybrid clean
 	$(MAKE) -C src/stack-treiber clean
 	$(MAKE) -C src/stack-lock clean
 	$(MAKE) -C src/stack-optik clean
