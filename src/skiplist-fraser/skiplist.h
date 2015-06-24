@@ -61,9 +61,6 @@ typedef volatile struct sl_node
   uint32_t deleted;
   uint32_t toplevel;
   volatile struct sl_node* next[1];
-#if defined(DO_PAD)
-  uint8_t padding[64 - 32];
-#endif 
 } sl_node_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct sl_intset
