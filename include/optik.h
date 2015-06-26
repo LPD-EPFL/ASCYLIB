@@ -39,24 +39,6 @@
 #include "utils.h"
 
 
-typedef union optik32
-{
-  struct
-  {
-    volatile uint16_t version;
-    volatile uint16_t ticket;
-  };
-  volatile uint32_t to_uint32;
-} optik32_t;
-
-
-typedef union tl
-{
-  optik32_t lr[2];
-  uint64_t to_uint64;
-} tl_t;
-
-
 #define OPTIK_TICKET   0
 #define OPTIK_INTEGER  1
 #define OPTIK_VERSION  OPTIK_INTEGER
@@ -94,6 +76,18 @@ static inline int
 optik_is_same_version(optik_t v1, optik_t v2)
 {
   return v1.to_uint64 == v2.to_uint64;
+}
+
+static inline uint32_t
+optik_get_version(optik_t ol)
+{
+  return ol.version;
+}
+
+static inline uint32_t
+optik_get_n_locked(optik_t ol)
+{
+  return ol.version;
 }
 
 static inline int
@@ -329,6 +323,18 @@ optik_is_locked(optik_t ol)
   return (ol & OPTIK_LOCKED);
 }
 
+static inline uint32_t
+optik_get_version(optik_t ol)
+{
+  return ol;
+}
+
+static inline uint32_t
+optik_get_n_locked(optik_t ol)
+{
+  return ol >> 1;
+}
+
 static inline void
 optik_init(optik_t* ol)
 {
@@ -445,6 +451,17 @@ optik_lock_version_backoff(optik_t* ol, optik_t ol_old)
     }
   while (1);
   return ol_cur == ol_old;
+}
+
+static inline int
+optik_trylock(optik_t* ol)
+{
+  optik_t ol_new = *ol;
+  if (unlikely(optik_is_locked(ol_new)))
+    {
+      return 0;
+    }
+  return CAS_U64(ol, ol_new, ol_new + 1) == ol_new;
 }
 
 static inline void
