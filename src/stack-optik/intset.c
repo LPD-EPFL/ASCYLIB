@@ -26,17 +26,17 @@
 inline sval_t
 mstack_contains(mstack_t *set, skey_t key)
 {
-  return mstack_lock_find(set, key);
+  return mstack_optik_find(set, key);
 }
 
 inline int
 mstack_add(mstack_t *set, skey_t key, sval_t val)
 {  
-  return mstack_lock_insert(set, key, val);
+  return mstack_optik_insert(set, key, val);
 }
 
 inline sval_t
 mstack_remove(mstack_t *set)
 {
-  return mstack_lock_delete(set);
+  return mstack_optik_delete(set);
 }

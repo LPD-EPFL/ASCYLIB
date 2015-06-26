@@ -22,6 +22,6 @@
 
 #include "stack-lock.h"
 
-sval_t mstack_lock_find(mstack_t *set, skey_t key);
-int mstack_lock_insert(mstack_t *set, skey_t key, sval_t val);
-sval_t mstack_lock_delete(mstack_t *set);
+sval_t mstack_optik_find(mstack_t *set, skey_t key);
+int mstack_optik_insert(mstack_t *set, skey_t key, sval_t val);
+sval_t mstack_optik_delete(mstack_t *set);
