@@ -71,9 +71,10 @@ extern size_t __optik_trylock_calls_suc_tot;
 #endif
 
 
-#define OPTIK_TICKET   0
-#define OPTIK_INTEGER  1
-#define OPTIK_VERSION  OPTIK_INTEGER
+#define OPTIK_TICKET    0
+#define OPTIK_INTEGER   1
+#define OPTIK_SEPARATE  2
+#define OPTIK_VERSION   OPTIK_INTEGER
 
 #define OPTIK_RLS_ATOMIC   0
 #define OPTIK_RLS_STORE    1
@@ -380,7 +381,7 @@ static inline int
 optik_trylock_version(optik_t* ol, optik_t ol_old)
 {
   OPTIK_STATS_TRYLOCK_CALLS_INC();
-  if (unlikely(optik_is_locked(ol_old || *ol != ol_old)))
+  if (unlikely(optik_is_locked(ol_old) || *ol != ol_old))
     {
       return 0;
     }
@@ -521,6 +522,8 @@ optik_revert(optik_t* ol)
 {
   FAD_U64(ol);
 }
+
+#elif OPTIK_VERSION == OPTIK_SEPARATE
 
 #endif	/* OPTIK_VERSION */
 
