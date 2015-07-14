@@ -327,3 +327,7 @@ endif
 ifeq ($(SEQ_NO_FREE),1)
 	CFLAGS += -DSEQ_SSMEM_NO_FREE=1
 endif
+
+ifneq ($(OPTIK),)
+	CFLAGS += -DOPTIK_VERSION=$(OPTIK)
+endif
