@@ -119,6 +119,8 @@ lbpq_alistarh_pugh:
 lfpq_lotanshavit:
 	$(MAKE) "STM=LOCKFREE" src/priorityqueue-lotanshavit_lf
 
+pq: lfpq_alistarh lfpq_alistarh_herlihy lbpq_alistarh_pugh lfpq_lotanshavit
+
 lfll_harris:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-harris
 
