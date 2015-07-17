@@ -2,16 +2,16 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS = $(BINDIR)/lf-pq_alistarh
+BINS = $(BINDIR)/lf-pq_alistarh_herlihy
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
 
 all:	main
 
-ALGO_O = alistarh.o
-ALGO_H = alistarh.h
-ALGO_C = alistarh.c
+ALGO_O = alistarh_herlihy.o
+ALGO_H = alistarh_herlihy.h
+ALGO_C = alistarh_herlihy.c
 measurements.o:
 	$(CC) $(CFLAGS) -c -o $(BUILDIR)/measurements.o $(PROF)/measurements.c
 
@@ -34,4 +34,4 @@ main: measurements.o ssalloc.o skiplist.o $(ALGO_O) intPriorityQueue.o test.o
 	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/skiplist.o $(BUILDIR)/$(ALGO_O) $(BUILDIR)/intPriorityQueue.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
-	-rm -f $(BINS)
+	-rm -f $(BINS)`

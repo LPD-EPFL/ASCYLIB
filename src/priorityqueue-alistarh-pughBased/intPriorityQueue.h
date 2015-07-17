@@ -22,7 +22,7 @@
  *
  */
 
-#include "alistarh.h"
+#include "alistarh_pugh.h"
 
 sval_t pq_contains(sl_intset_t *set, skey_t key);
 int pq_insert(sl_intset_t *set, skey_t key, sval_t val);

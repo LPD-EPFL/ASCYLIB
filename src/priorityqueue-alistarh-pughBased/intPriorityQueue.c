@@ -49,8 +49,8 @@ pq_contains(sl_intset_t *set, skey_t key)
   node = node->next[0];
   result = (node->key == key);
 		
-#elif defined LOCKFREE
-  result = fraser_find(set, key);
+#else
+  result = optimistic_find(set, key);
 #endif
 	
   return result;
@@ -95,8 +95,8 @@ pq_insert(sl_intset_t *set, skey_t key, sval_t val)
   int result = 0;
 #ifdef SEQUENTIAL
   result = pq_seq_insert(set, key, val);
-#elif defined LOCKFREE /* fraser lock-free */
-  result = fraser_insert(set, key, val);
+#else
+  result = optimistic_insert(set, key, val);
 #endif
   return result;
 }
@@ -113,8 +113,10 @@ pq_deleteMin(sl_intset_t *set)
     head->next[i] = node->next[i];
   sl_delete_node(node);
 
-#elif defined LOCKFREE
+#else
   result = alistarh_deleteMin(set);
 #endif
   return result;
 }
+
+

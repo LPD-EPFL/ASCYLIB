@@ -54,21 +54,20 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k,t)      pq_contains(s, k)
-#define DS_ADD(s,k,t)           pq_insert(s, k, k)
-#define DS_REMOVE(s,k,t)        pq_deleteMin(s)
-#define DS_SIZE(s)              sl_set_size(s)
-#define DS_NEW()                sl_set_new()
+#define DS_CONTAINS(s,k,t)  pq_contains(s, k)
+#define DS_ADD(s,k,t)       pq_insert(s, k, k)
+#define DS_REMOVE(s,k,t)    pq_deleteMin(s)
+#define DS_SIZE(s)          sl_set_size(s)
+#define DS_NEW()            sl_set_new()
 
-#define DS_TYPE                 sl_intset_t
-#define DS_NODE                 sl_node_t
+#define DS_TYPE             sl_intset_t
+#define DS_NODE             sl_node_t
 
 /* ################################################################### *
  * GLOBALS
  * ################################################################### */
 
 RETRY_STATS_VARS_GLOBAL;
-#define PADDING              1
 
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
@@ -152,7 +151,7 @@ test(void* thread)
   uint64_t my_putting_count_succ = 0;
   uint64_t my_getting_count_succ = 0;
   uint64_t my_removing_count_succ = 0;
-
+    
 #if defined(COMPUTE_LATENCY) && PFD_TYPE == 0
   volatile ticks start_acq, end_acq;
   volatile ticks correction = getticks_correction_calc();
@@ -171,6 +170,8 @@ test(void* thread)
 
   uint64_t key;
   int c = 0;
+//  uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
+//  uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
 
   int i;
   uint32_t num_elems_thread = (uint32_t) (initial / num_threads);
@@ -188,7 +189,7 @@ test(void* thread)
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
       
-      if(DS_ADD(set, key, key) == false)
+      if(DS_ADD(set, key, NULL) == false)
 	{
 	  i--;
 	}
@@ -199,7 +200,6 @@ test(void* thread)
 
   if (!ID)
     {
-      alistarh_init(num_threads, set, PADDING);
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
 
@@ -216,25 +216,11 @@ test(void* thread)
   while (stop == 0) 
     {
       //TEST_LOOP(NULL);
-      c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
+      c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	
       key = (c & rand_max) + rand_min;
 
-      if (rand_range(my_putting_count_succ+my_removing_count_succ) <= my_putting_count_succ)
-        {
-          int removed;
-          START_TS(2);
-          removed = DS_REMOVE(set, key, algo_type);
-          if(removed != 0)
-            {
-	      END_TS(2, my_removing_count_succ);
-	      ADD_DUR(my_removing_succ);
-              my_removing_count_succ++;
-            }
-          END_TS_ELSE(5, my_removing_count - my_removing_count_succ, my_removing_fail);
-          my_removing_count++;
-        }
-      else				
-        {
+      if (rand_range(my_putting_count_succ+my_removing_count_succ) <= my_removing_count_succ)						
+        {									
           int res;								
           START_TS(1);							
           res = DS_ADD(set, key, algo_type);				
@@ -245,7 +231,21 @@ test(void* thread)
 	      my_putting_count_succ++;					
 	    }								
           END_TS_ELSE(4, my_putting_count - my_putting_count_succ, my_putting_fail);					
-          my_putting_count++;		
+          my_putting_count++;						
+        }									
+      else				
+        {									
+          int removed;							
+          START_TS(2);							
+          removed = DS_REMOVE(set, key, algo_type);				
+          if(removed != 0)							
+	    {								
+	      END_TS(2, my_removing_count_succ);				
+	      ADD_DUR(my_removing_succ);				 	
+              my_removing_count_succ++;					
+            }								
+          END_TS_ELSE(5, my_removing_count - my_removing_count_succ, my_removing_fail);					
+          my_removing_count++;
         }
     }
 
@@ -484,7 +484,7 @@ main(int argc, char **argv)
   getting_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
- 
+    
   pthread_t threads[num_threads];
   pthread_attr_t attr;
   int rc;
@@ -579,8 +579,7 @@ main(int argc, char **argv)
 #define LLU long long unsigned int
 
   int UNUSED pr = (int) (putting_count_total_succ - removing_count_total_succ);
-  int num_dummies = (num_threads*floor_log_2(num_threads)/2);
-  if (size_after != (initial + num_dummies + pr))
+  if (size_after != (initial + pr))
     {
       printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
       assert(size_after == (initial + pr));

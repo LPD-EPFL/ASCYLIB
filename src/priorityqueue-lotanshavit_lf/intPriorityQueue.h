@@ -1,10 +1,10 @@
 /*   
- *   File: intPriorityQueue.h
+ *   File: intRelaxedPriorityQueue.h
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
  *  	     Egeyar Ozlen Bagcioglu <egeyar.bagcioglu@epfl.ch>
  *   Description: 
- *   intPriorityQueue.h is part of ASCYLIB
+ *   intRelaxedPriorityQueue.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  * 	     	      Tudor David <tudor.david@epfl.ch>
@@ -22,7 +22,7 @@
  *
  */
 
-#include "alistarh.h"
+#include "lotanshavit_lf.h"
 
 sval_t pq_contains(sl_intset_t *set, skey_t key);
 int pq_insert(sl_intset_t *set, skey_t key, sval_t val);

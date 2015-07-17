@@ -1,8 +1,9 @@
 /*   
- *   File: test_simple.c
+ *   File: test_correct.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *  	     Egeyar Bagcioglu <egeyar.bagcioglu@epfl.ch>
  *   Description: 
- *   test_simple.c is part of ASCYLIB
+ *   test_correct.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  * 	     	      Tudor David <tudor.david@epfl.ch>
@@ -165,9 +166,10 @@ test(void* thread)
   ssmem_alloc_init_fs_size(alloc, SSMEM_DEFAULT_MEM_SIZE, SSMEM_GC_FREE_SET_SIZE, ID);
 #endif
     
+
   RR_INIT(phys_id);
   barrier_cross(&barrier);
-  
+
   int i;
   uint32_t num_elems_thread = (uint32_t) (initial / num_threads);
   uint32_t first_elem = (ID*num_elems_thread) +1;
@@ -205,18 +207,35 @@ test(void* thread)
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
-
-  skey_t deletedKey;
-  for (i=0; i<1; i++)
+  
+  uint64_t deleted;
+  for (i=0; i<num_elems_thread; i++)
   {
-	deletedKey = alistarh_spray(set);
-	if (deletedKey == 0)
+    my_removing_count++;
+	deleted = pq_deleteMin(set);
+	if (deleted == 0)
 	{
       i--;
 	}
 	else
 	{
-      printf("%lu\n", deletedKey);
+      my_removing_count_succ++;
+    }
+  }
+
+  uint64_t inserted;
+  for (i=0; i<num_elems_thread; i++)
+  {
+    my_putting_count++;
+	inserted = DS_ADD(set, initial+(num_threads*i)+ID+1, initial+(num_threads*i)+ID+1);
+	//printf("%d %d", ID, i);
+	if (inserted == 0)
+	{
+      i--;
+	}
+	else
+	{
+      my_putting_count_succ++;
     }
   }
 
@@ -229,6 +248,8 @@ test(void* thread)
       printf("#AFTER  size is: %zu\n", size_after);
     }
   
+  //printf("maxDeleted %lu\n", maxDeleted);
+  //printf("minDeleted %lu\n", minDeleted);
   barrier_cross(&barrier);
 
 #if defined(COMPUTE_LATENCY)

@@ -3,7 +3,6 @@
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
  *  	     Egeyar Bagcioglu <egeyar.bagcioglu@epfl.ch>
- *   Description: Lock-based skip list implementation of the Fraser algorithm
  *   alistarh.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,

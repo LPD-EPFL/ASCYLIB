@@ -114,7 +114,9 @@ pq_deleteMin(sl_intset_t *set)
   sl_delete_node(node);
 
 #elif defined LOCKFREE
-  result = alistarh_deleteMin(set);
+  result = prioritySL_deleteMin(set);
 #endif
   return result;
 }
+
+

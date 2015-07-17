@@ -54,14 +54,14 @@
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k,t)      pq_contains(s, k)
-#define DS_ADD(s,k,t)           pq_insert(s, k, k)
-#define DS_REMOVE(s,k,t)        pq_deleteMin(s)
-#define DS_SIZE(s)              sl_set_size(s)
-#define DS_NEW()                sl_set_new()
+#define DS_CONTAINS(s,k,t)        pq_contains(s, k)
+#define DS_ADD(s,k,t)             pq_insert(s, k, k)
+#define DS_REMOVE(s,k,t)          pq_deleteMin(s)
+#define DS_SIZE(s)                sl_set_size(s)
+#define DS_NEW()                  sl_set_new()
 
-#define DS_TYPE                 sl_intset_t
-#define DS_NODE                 sl_node_t
+#define DS_TYPE                   sl_intset_t
+#define DS_NODE                   sl_node_t
 
 /* ################################################################### *
  * GLOBALS
@@ -171,6 +171,8 @@ test(void* thread)
 
   uint64_t key;
   int c = 0;
+//  uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
+//  uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
 
   int i;
   uint32_t num_elems_thread = (uint32_t) (initial / num_threads);
@@ -216,25 +218,11 @@ test(void* thread)
   while (stop == 0) 
     {
       //TEST_LOOP(NULL);
-      c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
+      c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	
       key = (c & rand_max) + rand_min;
 
-      if (rand_range(my_putting_count_succ+my_removing_count_succ) <= my_putting_count_succ)
-        {
-          int removed;
-          START_TS(2);
-          removed = DS_REMOVE(set, key, algo_type);
-          if(removed != 0)
-            {
-	      END_TS(2, my_removing_count_succ);
-	      ADD_DUR(my_removing_succ);
-              my_removing_count_succ++;
-            }
-          END_TS_ELSE(5, my_removing_count - my_removing_count_succ, my_removing_fail);
-          my_removing_count++;
-        }
-      else				
-        {
+      if (rand_range(my_putting_count_succ+my_removing_count_succ) <= my_removing_count_succ)						
+        {									
           int res;								
           START_TS(1);							
           res = DS_ADD(set, key, algo_type);				
@@ -245,7 +233,21 @@ test(void* thread)
 	      my_putting_count_succ++;					
 	    }								
           END_TS_ELSE(4, my_putting_count - my_putting_count_succ, my_putting_fail);					
-          my_putting_count++;		
+          my_putting_count++;						
+        }									
+      else				
+        {									
+          int removed;							
+          START_TS(2);
+          removed = DS_REMOVE(set, key, algo_type);
+          if(removed != 0)						
+	    {								
+	      END_TS(2, my_removing_count_succ);				
+	      ADD_DUR(my_removing_succ);				 	
+              my_removing_count_succ++;					
+            }								
+          END_TS_ELSE(5, my_removing_count - my_removing_count_succ, my_removing_fail);					
+          my_removing_count++;
         }
     }
 
