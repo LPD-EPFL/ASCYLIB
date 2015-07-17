@@ -140,7 +140,7 @@ seqllgc:
 
 lfll: lfll_harris lfll_michael lfll_harris_opt
 
-# ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy
+#ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy
 
 ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro llcopy_no_ro lbll_pugh_no_ro
 
