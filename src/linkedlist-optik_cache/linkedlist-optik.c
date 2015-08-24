@@ -181,7 +181,7 @@ optik_find(intset_l_t *set, skey_t key)
 int
 optik_insert(intset_l_t *set, skey_t key, sval_t val)
 {
-  node_l_t *curr, *pred, *newnode;
+  node_l_t *curr, *pred;
   optik_t pred_ver = OPTIK_INIT;
 	
  restart:
@@ -209,19 +209,20 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 
   UPDATE_TRY();
 
-#if OPTIK_RO_FAIL == 1 
   if (curr->key == key)
     {
       return false;
     }
-#endif
+
+  node_l_t* newnode = new_node_l(key, val, curr, 0);
+
 
   if ((!optik_trylock_version(&pred->lock, pred_ver)))
     {
+      node_delete_l(newnode);
       goto restart;
     }
 
-  newnode = new_node_l(key, val, curr, 0);
 #ifdef __tile__
   MEM_BARRIER;
 #endif
@@ -236,7 +237,6 @@ optik_delete(intset_l_t *set, skey_t key)
 {
   node_l_t *pred, *curr;
   optik_t pred_ver = OPTIK_INIT, curr_ver = OPTIK_INIT;
-  sval_t result = 0;
 
  restart:
   PARSE_TRY();
@@ -269,31 +269,26 @@ optik_delete(intset_l_t *set, skey_t key)
 
   UPDATE_TRY();
 
-#if OPTIK_RO_FAIL == 1 
   if (curr->key != key)
     {
       return false;
     }
-#endif
 
   if (unlikely(!optik_trylock_version(&pred->lock, pred_ver)))
     {
       goto restart;
     }
 
-  if (unlikely(!optik_trylock_vdelete(&curr->lock, curr_ver)))
+  if (unlikely(!optik_trylock_version(&curr->lock, curr_ver)))
     {
       optik_revert(&pred->lock);
       goto restart;
     }
 
-  result = curr->val;
   pred->next = curr->next;
   optik_cache_and_unlock(pred);  
 
-#if GC == 1
-  ssmem_free(alloc, (void*) curr);
-#endif
-      
+  sval_t result = curr->val;
+  node_delete_l(curr);
   return result;
 }

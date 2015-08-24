@@ -34,6 +34,7 @@ new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
   if (initializing)		/* for initialization AND the coupling algorithm */
     {
       node = (volatile node_l_t *) ssalloc(sizeof(node_l_t));
+      optik_init(&node->lock);
     }
   else
     {
@@ -52,8 +53,6 @@ new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
   node->key = key;
   node->val = val;
   node->next = next;
-
-  optik_init(&node->lock);
 
 #if defined(__tile__)
   /* on tilera you may have store reordering causing the pointer to a new node
@@ -97,9 +96,8 @@ intset_l_t *set_new_l()
 void
 node_delete_l(node_l_t *node) 
 {
-  DESTROY_LOCK(&node->lock);
 #if GC == 1
-  ssfree((void*) node);
+  ssmem_free(alloc, (void*) node);
 #endif
 }
 
