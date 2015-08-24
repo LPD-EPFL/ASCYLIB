@@ -38,36 +38,97 @@
 #include "common.h"
 #include "utils.h"
 
-#define OPTIK_STATS 0
+#ifndef OPTIK_STATS
+#  define OPTIK_STATS 0
+#endif
 
 #if OPTIK_STATS == 1
 extern __thread size_t __optik_trylock_calls;
+extern __thread size_t __optik_trylock_cas;
 extern __thread size_t __optik_trylock_calls_suc;
 extern size_t __optik_trylock_calls_tot;
+extern size_t __optik_trylock_cas_tot;
 extern size_t __optik_trylock_calls_suc_tot;
 #  define OPTIK_STATS_VARS_DEFINITION()					\
   __thread size_t __optik_trylock_calls = 0;				\
+  __thread size_t __optik_trylock_cas = 0;				\
   __thread size_t __optik_trylock_calls_suc = 0;			\
   size_t __optik_trylock_calls_tot = 0;					\
+  size_t __optik_trylock_cas_tot = 0;					\
   size_t __optik_trylock_calls_suc_tot = 0
 
-#  define OPTIK_STATS_TRYLOCK_CALLS_INC()	      __optik_trylock_calls++;
+#  define OPTIK_STATS_TRYLOCK_CALLS_INC()       __optik_trylock_calls++;
+#  define OPTIK_STATS_TRYLOCK_CAS_INC()	        __optik_trylock_cas++;
 #  define OPTIK_STATS_TRYLOCK_CALLS_SUC_INC(by) __optik_trylock_calls_suc+=by;
 #  define OPTIK_STATS_PUBLISH()			\
   __sync_fetch_and_add(&__optik_trylock_calls_tot, __optik_trylock_calls); \
+  __sync_fetch_and_add(&__optik_trylock_cas_tot, __optik_trylock_cas); \
   __sync_fetch_and_add(&__optik_trylock_calls_suc_tot, __optik_trylock_calls_suc)
 
 #  define OPTIK_STATS_PRINT()						\
-  printf("[OPTIK] %-10s tot: %-10zu | suc: %-10zu | overhead %.3f%% \n", "trylock", \
-	 __optik_trylock_calls_tot, __optik_trylock_calls_suc_tot,	\
-	 100 * (((double) __optik_trylock_calls_tot / __optik_trylock_calls_suc_tot) - 1))
+  printf("[OPTIK] %-10s tot: %-10zu | cas: %-10zu | suc: %-10zu | "	\
+	 "succ-cas: %6.2f%% | succ-tot: %6.2f%% | cas/suc: %.2f\n", "trylock", \
+	 __optik_trylock_calls_tot, __optik_trylock_cas_tot, __optik_trylock_calls_suc_tot, \
+	 100 * (1 - ((double) (__optik_trylock_cas_tot - __optik_trylock_calls_suc_tot) / __optik_trylock_cas_tot)), \
+	 100 * (1 - ((double) (__optik_trylock_calls_tot - __optik_trylock_calls_suc_tot) / __optik_trylock_calls_tot)), \
+	 (double) __optik_trylock_cas_tot / __optik_trylock_calls_suc_tot)
+
+#  define OPTIK_STATS_PRINT_DUR(dur_ms)					\
+  printf("[OPTIK] %-10s tot: %-10.0f | cas: %-10.0f | suc: %-10.0f | "	\
+	 "succ-cas: %6.2f%% | succ-tot: %6.2f%% | cas/suc: %.2f\n", "trylock/s", \
+	 __optik_trylock_calls_tot / (dur_ms / 1000.0), __optik_trylock_cas_tot / (dur_ms / 1000.0), \
+	 __optik_trylock_calls_suc_tot / (dur_ms / 1000.0),		\
+	 100 * (1 - ((double) (__optik_trylock_cas_tot - __optik_trylock_calls_suc_tot) / __optik_trylock_cas_tot)), \
+	 100 * (1 - ((double) (__optik_trylock_calls_tot - __optik_trylock_calls_suc_tot) / __optik_trylock_calls_tot)), \
+	 (double) __optik_trylock_cas_tot / __optik_trylock_calls_suc_tot)
+
+
+#elif OPTIK_STATS == 2 // only CAS
+extern __thread size_t __optik_trylock_calls;
+extern __thread size_t __optik_trylock_cas;
+extern __thread size_t __optik_trylock_calls_suc;
+extern size_t __optik_trylock_calls_tot;
+extern size_t __optik_trylock_cas_tot;
+extern size_t __optik_trylock_calls_suc_tot;
+#  define OPTIK_STATS_VARS_DEFINITION()					\
+  __thread size_t __optik_trylock_calls = 0;				\
+  __thread size_t __optik_trylock_cas = 0;				\
+  __thread size_t __optik_trylock_calls_suc = 0;			\
+  size_t __optik_trylock_calls_tot = 0;					\
+  size_t __optik_trylock_cas_tot = 0;					\
+  size_t __optik_trylock_calls_suc_tot = 0
+
+#  define OPTIK_STATS_TRYLOCK_CALLS_INC()
+#  define OPTIK_STATS_TRYLOCK_CAS_INC()	        __optik_trylock_cas++;
+#  define OPTIK_STATS_TRYLOCK_CALLS_SUC_INC(by)
+#  define OPTIK_STATS_PUBLISH()			\
+  __sync_fetch_and_add(&__optik_trylock_cas_tot, __optik_trylock_cas);
+
+#  define OPTIK_STATS_PRINT()						\
+  printf("[OPTIK] %-10s tot: %-10zu | cas: %-10zu | suc: %-10zu | "\
+	 "succ-cas: %6.2f%% | succ-tot: %6.2f%% | cas/suc: %.2f\n", "trylock", \
+	 __optik_trylock_calls_tot, __optik_trylock_cas_tot, __optik_trylock_calls_suc_tot,	\
+	 100 * (1 - ((double) (__optik_trylock_cas_tot - __optik_trylock_calls_suc_tot) / __optik_trylock_cas_tot)), \
+	 100 * (1 - ((double) (__optik_trylock_calls_tot - __optik_trylock_calls_suc_tot) / __optik_trylock_calls_tot)), \
+	 (double) __optik_trylock_cas_tot / __optik_trylock_calls_suc_tot)
+
+#  define OPTIK_STATS_PRINT_DUR(dur_ms)					\
+  printf("[OPTIK] %-10s tot: %-10.0f | cas: %-10.0f | suc: %-10.0f | "	\
+	 "succ-cas: %6.2f%% | succ-tot: %6.2f%% | cas/suc: %.2f\n", "trylock/s", \
+	 __optik_trylock_calls_tot / (dur_ms / 1000.0), __optik_trylock_cas_tot / (dur_ms / 1000.0), \
+	 __optik_trylock_calls_suc_tot / (dur_ms / 1000.0),		\
+	 100 * (1 - ((double) (__optik_trylock_cas_tot - __optik_trylock_calls_suc_tot) / __optik_trylock_cas_tot)), \
+	 100 * (1 - ((double) (__optik_trylock_calls_tot - __optik_trylock_calls_suc_tot) / __optik_trylock_calls_tot)), \
+	 (double) __optik_trylock_cas_tot / __optik_trylock_calls_suc_tot)
 
 #else
 #  define OPTIK_STATS_VARS_DEFINITION()
 #  define OPTIK_STATS_TRYLOCK_CALLS_INC()	   
+#  define OPTIK_STATS_TRYLOCK_CAS_INC()	   
 #  define OPTIK_STATS_TRYLOCK_CALLS_SUC_INC(by)
 #  define OPTIK_STATS_PUBLISH()
 #  define OPTIK_STATS_PRINT()
+#  define OPTIK_STATS_PRINT_DUR(dur_ms)
 #endif
 
 
@@ -129,6 +190,12 @@ optik_is_locked(optik_t ol)
   return 0;
 }
 
+static inline int
+optik_is_deleted(optik_t ol)
+{
+  return (ol.ticket < ol.version);
+}
+
 static inline uint32_t
 optik_get_version(optik_t ol)
 {
@@ -146,18 +213,44 @@ optik_trylock_version(optik_t* ol, optik_t ol_old)
 {
   OPTIK_STATS_TRYLOCK_CALLS_INC();
   uint32_t version = ol_old.version;
-  if (unlikely(version != ol_old.ticket))// || version != ol->version))
+  if (unlikely(version != ol_old.ticket || version != ol->ticket))
     {
       return 0;
     }
 
-#  if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
-  optik_t olo = { .version = version, .ticket = version };
-  optik_t oln = { .version = version, .ticket = (version + 1) };
-#  else
-  optik_t olo = { version, version };
-  optik_t oln = { version, (version + 1) };
-#  endif
+  OPTIK_STATS_TRYLOCK_CAS_INC();
+
+/* #  if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6 */
+/*   optik_t olo = { .version = version, .ticket = version }; */
+/*   optik_t oln = { .version = version, .ticket = (version + 1) }; */
+/* #  else */
+/*   optik_t olo = { version, version }; */
+/*   optik_t oln = { version, (version + 1) }; */
+/* #  endif */
+  optik_t olo = ol_old;
+  ol_old.ticket++;
+  optik_t oln = ol_old;
+
+  int ret = CAS_U64(&ol->to_uint64, olo.to_uint64, oln.to_uint64) == olo.to_uint64;
+  OPTIK_STATS_TRYLOCK_CALLS_SUC_INC(ret);
+  return ret;
+}
+
+static inline int
+optik_trylock_vdelete(optik_t* ol, optik_t ol_old)
+{
+  OPTIK_STATS_TRYLOCK_CALLS_INC();
+  uint32_t version = ol_old.version;
+  if (unlikely(version != ol_old.ticket || version != ol->ticket))
+    {
+      return 0;
+    }
+
+  OPTIK_STATS_TRYLOCK_CAS_INC();
+  optik_t olo = ol_old;
+  ol_old.ticket = version - 1;
+  optik_t oln = ol_old;
+
   int ret = CAS_U64(&ol->to_uint64, olo.to_uint64, oln.to_uint64) == olo.to_uint64;
   OPTIK_STATS_TRYLOCK_CALLS_SUC_INC(ret);
   return ret;
@@ -296,12 +389,6 @@ optik_lock_if_not_deleted(optik_t* ol)
   return 1;
 }
 
-static inline int
-optik_is_deleted(optik_t ol)
-{
-  return ol.version == INT_MAX;
-}
-
 static inline void
 optik_unlock(optik_t* ol)
 {
@@ -336,6 +423,8 @@ optik_revert(optik_t* ol)
 
 #elif OPTIK_VERSION == OPTIK_INTEGER
 
+#define OPTIK_DELETED ((uint64_t) -1)
+
 static inline const char*
 optik_get_type_name()
 {
@@ -352,6 +441,29 @@ static inline int
 optik_is_locked(optik_t ol)
 {
   return (ol & OPTIK_LOCKED);
+}
+
+static inline optik_t
+optik_get_version_wait(optik_t* ol)
+{
+  do
+    {
+      /* PREFETCHW(ol); */
+      optik_t olv = *ol;
+      if (likely(!optik_is_locked(olv)))
+	{
+	  return olv;
+	}
+
+      cpause(4096);
+    }
+  while (1);
+}
+
+static inline int
+optik_is_deleted(optik_t ol)
+{
+  return (ol == OPTIK_DELETED);
 }
 
 static inline uint32_t
@@ -373,6 +485,12 @@ optik_init(optik_t* ol)
 }
 
 static inline int
+optik_is_same_version(optik_t v1, optik_t v2)
+{
+  return v1 == v2;
+}
+
+static inline int
 optik_trylock_version(optik_t* ol, optik_t ol_old)
 {
   OPTIK_STATS_TRYLOCK_CALLS_INC();
@@ -381,7 +499,23 @@ optik_trylock_version(optik_t* ol, optik_t ol_old)
       return 0;
     }
 
+  OPTIK_STATS_TRYLOCK_CAS_INC();
   int ret = CAS_U64(ol, ol_old, ol_old + 1) == ol_old;
+  OPTIK_STATS_TRYLOCK_CALLS_SUC_INC(ret);
+  return ret;
+}
+
+static inline int
+optik_trylock_vdelete(optik_t* ol, optik_t ol_old)
+{
+  OPTIK_STATS_TRYLOCK_CALLS_INC();
+  if (unlikely(optik_is_locked(ol_old) || *ol != ol_old))
+    {
+      return 0;
+    }
+
+  OPTIK_STATS_TRYLOCK_CAS_INC();
+  int ret = CAS_U64(ol, ol_old, OPTIK_DELETED) == ol_old;
   OPTIK_STATS_TRYLOCK_CALLS_SUC_INC(ret);
   return ret;
 }
@@ -512,6 +646,17 @@ optik_unlock(optik_t* ol)
   FAI_U64(ol);
 #  endif
 }
+
+static inline optik_t
+optik_unlockv(optik_t* ol)
+{
+#  ifdef __tile__
+  MEM_BARRIER;
+#  endif
+  return (optik_t) IAF_U64(ol);
+}
+
+
 static inline void
 optik_revert(optik_t* ol)
 {
@@ -578,6 +723,7 @@ optik_lock(optik_t* ol)
 	  OPTIK_PAUSE();
 	}
 
+      OPTIK_STATS_TRYLOCK_CAS_INC();
       if (CAS_U32(&ol->lock, 0, 1) == 0)
 	{
 	  break;
@@ -598,6 +744,7 @@ optik_trylock_version(optik_t* ol, optik_t ol_old)
       return 0;
     }
 
+  OPTIK_STATS_TRYLOCK_CALLS_SUC_INC(1);
   return 1;
 }
 
