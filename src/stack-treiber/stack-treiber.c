@@ -32,6 +32,8 @@ __thread size_t lat_parsing_put = 0;
 __thread size_t lat_parsing_rem = 0;
 #endif	/* LATENCY_PARSING == 1 */
 
+extern __thread unsigned long* seeds;
+
 sval_t
 mstack_treiber_find(mstack_t* qu, skey_t key)
 { 
@@ -41,7 +43,7 @@ mstack_treiber_find(mstack_t* qu, skey_t key)
 int
 mstack_treiber_insert(mstack_t* qu, skey_t key, sval_t val)
 {
-  size_t nr = 1;
+  /* size_t nr = 1; */
   mstack_node_t* node = mstack_new_node(key, val, NULL);
   while(1)
     {
@@ -51,7 +53,7 @@ mstack_treiber_insert(mstack_t* qu, skey_t key, sval_t val)
 	{
 	  break;
 	}
-      cpause(rand() % (nr++));
+      do_pause();
     }
   return 1;
 }
@@ -61,7 +63,7 @@ sval_t
 mstack_treiber_delete(mstack_t* qu)
 {
   mstack_node_t* top;
-  size_t nr = 1;
+  /* size_t nr = 1; */
   while (1)
     {
       top = qu->top;
@@ -75,7 +77,7 @@ mstack_treiber_delete(mstack_t* qu)
 	  break;
 	}
 
-      cpause(rand() % (nr++));
+      do_pause();
     }
 
 #if GC == 1
