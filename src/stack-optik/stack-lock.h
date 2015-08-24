@@ -46,6 +46,7 @@ typedef struct mstack_node
   skey_t key;
   sval_t val; 
   struct mstack_node* next;
+  uint8_t padding[CACHE_LINE_SIZE - sizeof(skey_t) - sizeof(sval_t) - sizeof(struct mstack_node*)];
 } mstack_node_t;
 
 typedef ALIGNED(CACHE_LINE_SIZE) struct mstack
