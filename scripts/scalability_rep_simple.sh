@@ -49,7 +49,7 @@ progs_num=$(echo $progs | wc -w);
 params="$@";
 
 
-print_n "#       " "%-13s" "$progs" "\n"
+print_n "#       " "%-12s " "$progs" "\n"
 
 print_rep "#cores  " $progs_num "throughput   " "\n"
 
