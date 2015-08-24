@@ -188,7 +188,7 @@ int sl_set_size(sl_intset_t *set)
   node = set->head->next[0];
   while (node->next[0] != NULL) 
     {
-      if (!optik_is_deleted(node->lock))
+      /* if (!optik_is_deleted(node->lock)) */
 	{
 	  size++;
 	}

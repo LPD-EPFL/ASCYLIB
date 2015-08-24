@@ -51,7 +51,6 @@ mstack_lock_insert(mstack_t* qu, skey_t key, sval_t val)
   return 1;
 }
 
-
 sval_t
 mstack_lock_delete(mstack_t* qu)
 {
