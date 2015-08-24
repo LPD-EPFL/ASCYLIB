@@ -30,7 +30,12 @@ __thread ssmem_allocator_t* alloc;
 queue_node_t*
 queue_new_node(skey_t key, sval_t val, queue_node_t* next)
 {
-  queue_node_t *node = ssmem_alloc(alloc, sizeof(*node));
+#if GC == 1
+  queue_node_t* node = ssmem_alloc(alloc, sizeof(*node));
+#else
+  queue_node_t* node = ssalloc(sizeof(*node));
+#endif
+
   node->key = key;
   node->val = val;
   node->next = next;
@@ -45,8 +50,10 @@ queue_new_node(skey_t key, sval_t val, queue_node_t* next)
 void
 queue_delete_node(queue_node_t *n)
 {
-  DESTROY_LOCK(ND_GET_LOCK(n));
-  ssfree_alloc(1, (void*) n);
+  /* DESTROY_LOCK(ND_GET_LOCK(n)); */
+#if GC == 1
+  ssmem_free(alloc, (void*) n);
+#endif
 }
 
 queue_t*

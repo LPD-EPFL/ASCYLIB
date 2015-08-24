@@ -62,6 +62,7 @@ queue_ms_insert(queue_t* qu, skey_t key, sval_t val)
 	      UNUSED void* dummy = CAS_PTR(&qu->tail, tail, next);
 	    }
 	}
+      /* cpause(1024 * (nr++)); */
       cpause(rand() % (nr++));
     }
   UNUSED void* dummy = CAS_PTR(&qu->tail, tail, node);
@@ -97,6 +98,7 @@ queue_ms_delete(queue_t* qu)
 		}
 	    }
 	}
+      /* cpause(1024 * (nr++)); */
       cpause(rand() % (nr++));
     }
 
