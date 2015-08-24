@@ -296,6 +296,11 @@ ifeq ($(LATENCY),5)
 	LDFLAGS += $(SSPFD) -lm
 endif
 
+ifeq ($(LATENCY),6)
+	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS -DPFD_TYPE=2
+	LDFLAGS += $(SSPFD) -lm
+endif
+
 
 ifeq ($(INIT),all)
 	CFLAGS += -DINITIALIZE_FROM_ONE=0
@@ -331,3 +336,8 @@ endif
 ifneq ($(OPTIK),)
 	CFLAGS += -DOPTIK_VERSION=$(OPTIK)
 endif
+
+ifneq ($(OPTIK_STATS),)
+	CFLAGS += -DOPTIK_STATS=$(OPTIK_STATS)
+endif
+

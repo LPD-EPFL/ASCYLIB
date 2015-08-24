@@ -119,11 +119,17 @@ retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
 /* ****************************************************************************************** */
 /* ****************************************************************************************** */
 
+#  define COMPILER_BARRIER() asm volatile ("" ::: "memory")
+
 #if defined(USE_SSPFD)
-#  define PFD_TYPE 1
+#  ifndef PFD_TYPE
+#    define PFD_TYPE 1
+#  endif
 #  define SSPFD_DO_TIMINGS 1
 #else
-#  define PFD_TYPE 0
+#  ifndef PFD_TYPE
+#    define PFD_TYPE 0
+#  endif
 #  define SSPFD_NUM_ENTRIES 0
 #  undef SSPFD_DO_TIMINGS
 #  define SSPFD_DO_TIMINGS 0
@@ -149,6 +155,7 @@ retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
 #  define PARSE_START_TS(s)
 #  define PARSE_END_TS(s, i)
 #  define PARSE_END_INC(i)
+#  define LATENCY_DISTRIBUTION_PRINT()
 #elif PFD_TYPE == 0
 #  define PARSE_START_TS(s)
 #  define PARSE_END_TS(s, i)
@@ -174,7 +181,7 @@ retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
       ADD_DUR(tar);						\
     }
 #  define PF_INIT(s, e, id)
-#else  /* PFD_TYPE == 1 */
+#elif PFD_TYPE == 1  /* PFD_TYPE == 1 */
 
 #  define PF_NUM_STORES 6
 #  define SSPFD_NUM_ENTRIES  (pf_vals_num + 1)
@@ -212,6 +219,79 @@ extern size_t pf_vals_num;
 #    define PARSE_END_INC(i)      i++
 
 #  endif	 /* LATENCY_PARSING */
+#elif PFD_TYPE == 2
+#  undef PFD_TYPE
+#  define PFD_TYPE  0
+#  define ECDF_CALC 1
+
+#  define LATENCY_TYPE_NUM 6
+#  define LATENCY_VAL_NUM  (2<<14)
+extern __thread ticks** __lat_op;
+extern ticks** __lat_op_all[1024];
+static __attribute__ ((unused)) const char* __lat_titles[LATENCY_TYPE_NUM] =
+  {
+    "srch-succ",
+    "srch-fail",
+    "insr-succ",
+    "insr-fail",
+    "remv-succ",
+    "remv-fail",
+  };
+
+
+#  define PARSE_START_TS(s)
+#  define PARSE_END_TS(s, i)
+#  define PARSE_END_INC(i)
+#  define START_TS(s)				\
+  COMPILER_BARRIER();				\
+  start_acq = getticks();			\
+  COMPILER_BARRIER();				\
+  LFENCE;
+#  define END_TS(s, i)							\
+  COMPILER_BARRIER();							\
+  LFENCE;								\
+  end_acq = getticks();							\
+  __lat_op[s][(i) & (LATENCY_VAL_NUM - 1)] = (end_acq - start_acq - correction); \
+    asm volatile ("");
+#  define END_TS_ELSE(s, i, inc)
+#  define ADD_DUR(tar)
+#  define ADD_DUR_FAIL(tar)
+#  define PF_INIT(s, e, id)					\
+  __lat_op = malloc(LATENCY_TYPE_NUM * sizeof(ticks*));		\
+  assert(__lat_op != NULL);					\
+  { int i;							\
+    for (i = 0; i < LATENCY_TYPE_NUM; i++)			\
+      {								\
+	__lat_op[i] = malloc(LATENCY_VAL_NUM * sizeof(ticks*));	\
+	assert (__lat_op[i] != NULL);				\
+      }								\
+    __lat_op_all[id] = __lat_op;				\
+  }
+
+
+#  define LDI_LIMIT 99
+#  define LATENCY_DISTRIBUTION_PRINT()					\
+  ticks* __lats[LATENCY_TYPE_NUM];					\
+  int l;								\
+  for (l = 0; l < LATENCY_TYPE_NUM; l++)				\
+    {									\
+      __lats[l] = malloc(num_threads * LATENCY_VAL_NUM * sizeof(ticks)); \
+      assert(__lats[i] != NULL);					\
+      int h;								\
+      for (h = 0; h < num_threads; h++)					\
+	{								\
+	  size_t e;							\
+	  for (e = 0; e < LATENCY_VAL_NUM; e++)				\
+	    {								\
+	      __lats[l][(h * LATENCY_VAL_NUM) + e] = __lat_op_all[h][l][e]; \
+	    }								\
+	}								\
+      ecdf_t* ecdf = ecdf_calc(__lats[l], LATENCY_VAL_NUM * num_threads); \
+      ecdf_print_boxplot(ecdf, LDI_LIMIT, __lat_titles[l]);		\
+      ecdf_destroy(ecdf);						\
+      free(__lats[l]);							\
+    }
+
 #endif
 
 static inline void
