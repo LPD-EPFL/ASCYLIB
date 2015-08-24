@@ -68,7 +68,7 @@
 size_t initial = 1024;
 size_t range = 2048;
 size_t load_factor;
-double update = 20;
+double update = 0;
 size_t num_threads = 1;
 size_t duration = 1000;
 int test_verbose = 0;
@@ -124,6 +124,7 @@ typedef struct thread_data
 
 
 static volatile size_t* global_counter;
+OPTIK_STATS_VARS_DEFINITION();
 
 void*
 test(void* thread) 
@@ -179,6 +180,17 @@ test(void* thread)
 
   MEM_BARRIER;
 
+  size_t fair_delay = 0;
+  if (num_threads > 1)
+    {
+      fair_delay = ((((num_threads + 9) / 10) * 300) + (num_threads<<3));
+      fair_delay = 0;
+      if (ID == 0)
+	{
+	  printf(" /// fair delay: %zu\n", fair_delay);
+	}
+    }
+
   barrier_cross(&barrier_global);
 
   RR_START_SIMPLE();
@@ -200,9 +212,9 @@ test(void* thread)
 	  if(res)
 	    {
 	      ADD_DUR(my_putting_succ);
-	      size_t c = global_counter[key]++;
 	      if (test_verbose)
 		{
+		  size_t c = global_counter[key]++;
 		  if (c == (previous[key] + 1))
 		    {
 		      my_consecutive++;
@@ -217,18 +229,14 @@ test(void* thread)
 	} 
       else if(unlikely(c <= scale_rem))
 	{
-	  //  int res;
 	  START_TS(2);
-	  /* res = */
 	  optik_lock(cur);
 	  END_TS(2, my_removing_count);
-	  /* if(removed != 0)  */
-	  /*   { */
 	  ADD_DUR(my_removing_succ);
 	  my_removing_count_succ++;
-	  size_t c = global_counter[key]++;
 	  if (test_verbose)
 	    {
+	      size_t c = global_counter[key]++;
 	      if (c == (previous[key] + 1))
 		{
 		  my_consecutive++;
@@ -248,11 +256,9 @@ test(void* thread)
 	  END_TS(0, my_getting_count);
 	  if(res != 0) 
 	    {
-	      ADD_DUR(my_getting_succ);
-	      my_getting_count_succ++;
-	      size_t c = global_counter[key]++;
 	      if (test_verbose)
 		{
+		  size_t c = global_counter[key]++;
 		  if (c == (previous[key] + 1))
 		    {
 		      my_consecutive++;
@@ -260,10 +266,15 @@ test(void* thread)
 		  previous[key] = c;
 		}
 	      optik_unlock(cur);
+	      ADD_DUR(my_getting_succ);
+	      my_getting_count_succ++;
+
 	    }
 	  ADD_DUR_FAIL(my_getting_fail);
 	  my_getting_count++;
 	}
+
+      cpause(fair_delay);
     }
 
   barrier_cross(&barrier);
@@ -288,6 +299,8 @@ test(void* thread)
   removing_count_succ[ID]+= my_removing_count_succ;
   consecutive[ID] += my_consecutive;
 
+  OPTIK_STATS_PUBLISH();
+
   EXEC_IN_DEC_ID_ORDER(ID, num_threads)
     {
       print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
@@ -306,6 +319,8 @@ test(void* thread)
 int
 main(int argc, char **argv) 
 {
+  printf("# using: %s\n", optik_get_type_name());
+
   set_cpu(the_cores[0]);
   ssalloc_init();
   seeds = seed_rand();
@@ -618,8 +633,8 @@ main(int argc, char **argv)
   printf("#counter    %10zu\n"
 	 "   vs. succ %10zu = %-3s\n",
 	 gc_tot, total_succ, (gc_tot == total_succ) ? "OK" : "NO");
-  printf("#txs       %zu\t(%-10.0f\n", num_threads, throughput_succ);
-  printf("#txs succ  %zu\t(%-10.0f\n", num_threads, throughput);
+  printf("#txs       %zu\t(%-10.0f\n", num_threads, throughput);
+  printf("#txs succ  %zu\t(%-10.0f\n", num_threads, throughput_succ);
   printf("#Mops      %.3f\n", throughput / 1e6);
   if (test_verbose)
     {
@@ -631,6 +646,8 @@ main(int argc, char **argv)
     }
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();
+
+  OPTIK_STATS_PRINT_DUR(duration);
 
   pthread_exit(NULL);
     
