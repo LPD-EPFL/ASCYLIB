@@ -30,7 +30,7 @@ params="$@";
 
 print_n "#       " "%-34s" "$progs" "\n"
 
-print_rep "#cores  " $progs_num "thrghpt-succ thrghpt-all  succ%%   " "\n"
+print_rep "#cores  " $progs_num "thrgh-suc thrgh-all thrgh-cas cas/sc " "\n"
 
 
 printf "%-8d" 1;
@@ -38,8 +38,8 @@ thr1="";
 for p in $progs;
 do
     thr=$($run_script ./$p $params -n1);
-    printf "%-12d %-12d " $thr;
-    printf "%-8.2f" 100;
+    printf "%-9d %-9d %-9d " $thr;
+    printf "%-7.2f" 1;
 done;
 
 echo "";
@@ -59,10 +59,11 @@ do
 	i=$(($i+1));
 	thr1p=$(get_n $i "$thr1");
 	thr=$($run_script ./$p $params -n$c);
-	printf "%-12d %-12d " $thr;
+	printf "%-9d %-9d %-9d " $thr;
 	thra=( $thr );
-	ratio=$(echo "100*(1 - ((${thra[1]} - ${thra[0]}) / ${thra[1]}))" | bc -l)
-	printf "%-8.2f" $ratio;
+	# ratio=$(echo "100*(1 - ((${thra[1]} - ${thra[0]}) / ${thra[1]}))" | bc -l)
+	ratio=$(echo "${thra[2]} / ${thra[0]}" | bc -l);
+	printf "%-7.2f" $ratio;
     done;     
     echo "";
 done;

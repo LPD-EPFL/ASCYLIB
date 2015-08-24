@@ -26,7 +26,13 @@ do
     res=$($run_script ./$prog $params);
     thr_all=$(echo "$res" | grep "#txs" | ${HEAD} -n1 | cut -d'(' -f2 | cut -d. -f1);
     thr_suc=$(echo "$res" | grep "#txs" | ${TAIL} -n1 | cut -d'(' -f2 | cut -d. -f1);
-    echo "$thr_suc $thr_all" >> $tmp;
+    thr_cas=$(echo "$res" | awk '/trylock/ { print $7 }');
+    if [ -z ${thr_cas} ];
+    then
+	thr_cas=0;
+    fi
+       
+    echo "$thr_suc $thr_all $thr_cas" >> $tmp;
 done;
 
 med_idx=$(echo "1 + $reps/2" | bc);
