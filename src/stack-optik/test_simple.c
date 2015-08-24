@@ -272,6 +272,8 @@ test(void* thread)
   getting_count_succ[ID] += my_getting_count_succ;
   removing_count_succ[ID]+= my_removing_count_succ;
 
+  OPTIK_STATS_PUBLISH();
+
   EXEC_IN_DEC_ID_ORDER(ID, num_threads)
     {
       print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
@@ -287,6 +289,8 @@ test(void* thread)
 
   pthread_exit(NULL);
 }
+
+OPTIK_STATS_VARS_DEFINITION();
 
 int
 main(int argc, char **argv) 
@@ -588,9 +592,12 @@ main(int argc, char **argv)
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
 
+  OPTIK_STATS_PRINT();
+
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();
   RETRY_STATS_PRINT(total, putting_count_total, removing_count_total, putting_count_total_succ + removing_count_total_succ);    
+  LATENCY_DISTRIBUTION_PRINT();
     
   pthread_exit(NULL);
     
