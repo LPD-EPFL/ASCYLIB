@@ -591,6 +591,7 @@ main(int argc, char **argv)
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();
   RETRY_STATS_PRINT(total, putting_count_total, removing_count_total, putting_count_total_succ + removing_count_total_succ);    
+  LATENCY_DISTRIBUTION_PRINT();
     
   pthread_exit(NULL);
     
