@@ -34,6 +34,8 @@
 extern __thread unsigned long* seeds; 
 #endif
 
+
+#define mrand(x) xorshf96(&x[0], &x[1], &x[2])
 #define my_random xorshf96
 
 //fast but weak random number generator for the sparc machine
