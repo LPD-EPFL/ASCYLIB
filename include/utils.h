@@ -760,6 +760,13 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     return x+1;
   }
 
+  static inline void
+  do_pause()
+  {
+    cpause(mrand(seeds) & 1023);
+    /* cpause(rand() & 1023); */
+  }
+
 #ifdef __cplusplus
 }
 
