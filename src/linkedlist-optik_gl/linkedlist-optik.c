@@ -24,16 +24,6 @@
 
 RETRY_STATS_VARS;
 
-/*
- * Checking that both curr and pred are both unmarked and that pred's next pointer
- * points to curr to verify that the entries are adjacent and present in the list.
- */
-inline int
-optik_validate(node_l_t* pred, node_l_t* curr) 
-{
-  return 1;
-}
-
 sval_t
 optik_find(intset_l_t *set, skey_t key)
 {
@@ -61,7 +51,6 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
  restart:
   PARSE_TRY();
   COMPILER_NO_REORDER(optik_t version = set->lock;);
-
   curr = set->head;
 
   do
@@ -82,7 +71,8 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 
   if ((!optik_trylock_version(&set->lock, version)))
     {
-      cpause(rand() & 1023);
+      do_pause();
+      node_delete_l(newnode);
       goto restart;
     }
 
@@ -122,7 +112,8 @@ optik_delete(intset_l_t *set, skey_t key)
 
   if (unlikely(!optik_trylock_version(&set->lock, version)))
     {
-      cpause(rand() & 1023);
+      do_pause();
+      /* cpause(rand() & 1023); */
       goto restart;
     }
 
@@ -132,9 +123,6 @@ optik_delete(intset_l_t *set, skey_t key)
 
   result = curr->val;
       
-#if GC == 1
-  ssmem_free(alloc, (void*) curr);
-#endif
-
+  node_delete_l(curr);
   return result;
 }

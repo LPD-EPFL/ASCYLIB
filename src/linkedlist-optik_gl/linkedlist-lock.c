@@ -82,12 +82,11 @@ intset_l_t *set_new_l()
   return set;
 }
 
-void
+inline void
 node_delete_l(node_l_t *node) 
 {
-  DESTROY_LOCK(&node->lock);
 #if GC == 1
-  ssfree((void*) node);
+  ssmem_free(alloc, (void*) node);
 #endif
 }
 
