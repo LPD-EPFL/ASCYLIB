@@ -108,7 +108,8 @@ queue_optik_resize(queue_t* qu, size_t* tail_new)
       assert(array_new != NULL);
 
       size_t hash = qu->hash;
-      size_t head = qu->head_lock.version & hash;
+      /* size_t head = qu->head_lock.version & hash; */
+      size_t head = optik_get_n_locked( qu->head_lock) & hash;
       int i, tot = 1;
       for (i = head + 1; i < (qu->size + head + 1); i++)
 	{
@@ -185,7 +186,8 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
   queue_node_t* node = queue_new_node(key, val);
   size_t hash = qu->hash;
   size_t tail = FAI_U64(&qu->tail_n);
-  if (queue_is_full(tail, qu->head_lock.version, hash))
+  /* if (queue_is_full(tail, qu->head_lock.version, hash)) */
+  if (queue_is_full(tail, optik_get_n_locked(qu->head_lock), hash))
     {
       /* printf(" !! full \n"); */
       if (!queue_optik_resize(qu, &tail))
@@ -217,7 +219,8 @@ queue_optik_delete(queue_t* qu)
   while (1)
     {
       optik_t version = qu->head_lock;
-      size_t head = qu->head_lock.version;
+      /* size_t head = qu->head_lock.version; */
+      size_t head = optik_get_n_locked(qu->head_lock);
       if (queue_is_empty(qu->tail_n, head, hash))
 	{
 	  return 0;

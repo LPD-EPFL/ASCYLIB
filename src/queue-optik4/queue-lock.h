@@ -67,11 +67,14 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct queue
   rcu_node_t* threads;
   uint8_t padding1[CACHE_LINE_SIZE - 5 * sizeof(size_t)];
   size_t head_n;
+  uint8_t padding2[CACHE_LINE_SIZE - 1 * sizeof(size_t)];
   size_t tail_n;
-  uint8_t padding3[CACHE_LINE_SIZE - 2 * sizeof(size_t)];
+  uint8_t padding3[CACHE_LINE_SIZE - 1 * sizeof(size_t)];
 } queue_t;
 
-STATIC_ASSERT(sizeof(queue_t) == 128, "sizeof(queue_t) == 128");
+#warning test if putting head/tail on different CLs helps
+/* STATIC_ASSERT(sizeof(queue_t) == 128, "sizeof(queue_t) == 128"); */
+STATIC_ASSERT(sizeof(queue_t) == 192, "sizeof(queue_t) == 192");
 
 
 /* 

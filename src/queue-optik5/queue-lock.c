@@ -91,6 +91,7 @@ queue_delete(queue_t *set)
 int
 queue_size(queue_t* qu)
 {
-  int size = qu->tail_n - qu->head_lock.version;
+  /* int size = qu->tail_n - qu->head_lock.version; */
+  int size = qu->tail_n - optik_get_n_locked(qu->head_lock);
   return size;
 }

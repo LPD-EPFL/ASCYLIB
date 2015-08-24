@@ -52,7 +52,7 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 	{
 	  if (next == NULL)
 	    {
-	      if (CAS_PTR(&tail->next, next, node) == next)
+	      if (CAS_PTR(&tail->next, NULL, node) == NULL)
 		{
 		  break;
 		}
