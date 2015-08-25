@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ub="./bin"
-uo="data/ppopp";
+uo="scripts/ppopp/data";
 algos=( ${ub}/lb-ll_lazy ${ub}/lb-ll_coupling_gl_opt ${ub}/lb-ll_optik_gl ${ub}/lb-ll_optik ${ub}/lb-ll_optik_cache );
 repetitions=11;
 duration=5000;
