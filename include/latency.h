@@ -253,7 +253,7 @@ static __attribute__ ((unused)) const char* __lat_titles[LATENCY_TYPE_NUM] =
   end_acq = getticks();							\
   __lat_op[s][(i) & (LATENCY_VAL_NUM - 1)] = (end_acq - start_acq - correction); \
     asm volatile ("");
-#  define END_TS_ELSE(s, i, inc)
+#  define END_TS_ELSE(s, i, inc) END_TS(s, i);
 #  define ADD_DUR(tar)
 #  define ADD_DUR_FAIL(tar)
 #  define PF_INIT(s, e, id)					\
