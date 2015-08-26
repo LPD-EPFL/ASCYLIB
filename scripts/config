@@ -111,7 +111,7 @@ elif [ "$cores" = "socketover" ];
 then
     if [ $unm = "lpdxeon2680" ];
     then
-	cores=$(seq 10 10 80);
+	cores=$(seq 10 10 60);
     else
 	cores=$(seq 6 6 48);
     fi;
