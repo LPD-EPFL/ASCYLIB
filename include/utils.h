@@ -702,10 +702,6 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
 	    fprintf(stderr, "Error setting thread affinity\n");
 	  }
       }
-    else
-      {
-	printf("--> set_cpu(%d) will not pin thread cause there exist only %d cpus\n", cpu, n_cpus);
-      }
 #  endif
 #endif
   }
