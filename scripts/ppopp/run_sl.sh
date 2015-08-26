@@ -5,8 +5,12 @@ ds=sl;
 ub="./bin"
 uo="scripts/ppopp/data";
 
+
+do_compile=$#;
+set_cpu=0;
+
 algos=( ${ub}/lb-sl_herlihy ${ub}/lb-sl_optik ${ub}/lb-sl_optik1 ${ub}/lb-sl_optik2 );
-repetitions=7;
+repetitions=5;
 duration=3000;
 keep=median; #max min median
 
@@ -34,6 +38,18 @@ read cont;
 if [ "$cont" = "n" ];
 then
     exit;
+fi;
+
+if [ $do_compile -eq 1 ];
+then
+    ctarget=${ds}ppopp;
+    cflags="SET_CPU=$set_cpu";
+    echo "----> Compiling" $ctarget " with flags:" $cflags;
+    make $ctarget $cflags >> /dev/null;
+    if [ $? -eq 0 ];
+    then
+	echo "----> Success!"
+    fi;
 fi;
 
 
