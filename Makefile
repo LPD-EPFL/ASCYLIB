@@ -119,6 +119,8 @@ lbsl_optik2:
 
 sl:	seqsl lfsl_fraser lfsl_herlihy_lf lbsl_pugh lbsl_herlihy_lb lbsl_optik lbsl_optik1 lbsl_optik2
 
+slppopp:	lbsl_herlihy_lb lbsl_optik lbsl_optik1 lbsl_optik2
+
 
 qu: lbqu_ms lfqu_ms lbqu_optik0 lbqu_optik1 lbqu_optik2 lbqu_optik3 lbqu_optik4 lbqu_optik5
 
