@@ -524,6 +524,7 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     {
       0, 20, 1, 21, 2, 22, 3, 23, 4, 24, 5, 25, 6, 26, 7, 27, 8, 28, 9, 29,
       10, 30, 11, 32, 12, 32, 13, 33, 14, 34, 15, 35, 16, 36, 17, 37, 18, 38, 19, 39, 
+      40, 41, 42, 43, 44, 45, 46, 47, 48, 49 /* extra 10 cores used on other machines */
     }; 
 
 #  else
@@ -534,6 +535,8 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
       10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
       20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
       30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 
+      40, 41, 42, 43, 44, 45, 46, 47, 48, 49 /* extra 10 cores used on other machines */
+
     };
 
   static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] = 
