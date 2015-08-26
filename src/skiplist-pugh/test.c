@@ -96,7 +96,7 @@ test(void *data)
 
   thread_data_t *d = (thread_data_t *)data;
 	
-  set_cpu(the_cores[d->id]);
+  set_cpu(d->id);
 
   ssalloc_init();
   PF_CORRECTION;
@@ -282,7 +282,7 @@ main(int argc, char **argv)
   init_clh_thread(&clh_local_p);
 #endif
 
-  set_cpu(the_cores[0]);
+  set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();
 

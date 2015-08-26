@@ -471,7 +471,8 @@ extern "C" {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 
       20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
       10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
-      30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 
+      30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+      40, 41, 42, 43, 44, 45, 46, 47, 48, 49 /* extra 10 cores used on other machines */
     }; 
 
 static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] = 
@@ -673,28 +674,37 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
   {
 #ifndef NO_SET_CPU
 #  ifdef __sparc__
-    processor_bind(P_LWPID,P_MYID, cpu, NULL);
+    processor_bind(P_LWPID,P_MYID, the_cores[cpu], NULL);
 #  elif defined(__tile__)
     if (cpu>=tmc_cpus_grid_total()) {
       perror("Thread id too high");
     }
     // cput_set_t cpus;
-    if (tmc_cpus_set_my_cpu(cpu)<0) {
+    if (tmc_cpus_set_my_cpu(the_cores[cpu])<0) {
       tmc_task_die("tmc_cpus_set_my_cpu() failed."); 
     }    
 #  else
-    cpu %= (NUMBER_OF_SOCKETS * CORES_PER_SOCKET);
 
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(cpu, &mask);
-#    if defined(PLATFORM_NUMA)
-    numa_set_preferred(get_cluster(cpu));
-#    endif
-    pthread_t thread = pthread_self();
-    if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &mask) != 0) 
+    int n_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    //    cpu %= (NUMBER_OF_SOCKETS * CORES_PER_SOCKET);
+    if (cpu < n_cpus)
       {
-	fprintf(stderr, "Error setting thread affinity\n");
+	int cpu_use = the_cores[cpu];
+	cpu_set_t mask;
+	CPU_ZERO(&mask);
+	CPU_SET(cpu_use, &mask);
+#    if defined(PLATFORM_NUMA)
+	numa_set_preferred(get_cluster(cpu_use));
+#    endif
+	pthread_t thread = pthread_self();
+	if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &mask) != 0) 
+	  {
+	    fprintf(stderr, "Error setting thread affinity\n");
+	  }
+      }
+    else
+      {
+	printf("--> set_cpu(%d) will not pin thread cause there exist only %d cpus\n", cpu, n_cpus);
       }
 #  endif
 #endif

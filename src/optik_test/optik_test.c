@@ -321,7 +321,7 @@ main(int argc, char **argv)
 {
   printf("# using: %s\n", optik_get_type_name());
 
-  set_cpu(the_cores[0]);
+  set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();
 

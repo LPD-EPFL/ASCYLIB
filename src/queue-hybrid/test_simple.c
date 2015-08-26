@@ -182,7 +182,7 @@ test_server(void* thread)
   thread_data_t* td = (thread_data_t*) thread;
   uint32_t ID = td->id;
   DS_TYPE* set = td->set;
-  set_cpu(the_cores[0]);
+  set_cpu(0);
 
   ssmp_init(num_threads + 1);
 
@@ -231,7 +231,7 @@ test(void* thread)
   uint32_t ID = td->id;
   int phys_id = the_cores[ID + 1];
   if (phys_id == 20) { phys_id = 39; }
-  set_cpu(phys_id);
+  set_cpu(ID);
   ssalloc_init();
 
   ssmp_mem_init(ID, num_threads + 1);
@@ -402,7 +402,7 @@ test(void* thread)
 int
 main(int argc, char **argv) 
 {
-  set_cpu(the_cores[0]);
+  set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();
 

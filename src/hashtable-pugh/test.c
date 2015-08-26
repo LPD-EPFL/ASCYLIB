@@ -93,7 +93,7 @@ test(void *data)
   int transactional = d->unit_tx;
 
   /* Create transaction */
-  set_cpu(the_cores[d->id]);
+  set_cpu(d->id);
 
   ssalloc_init();
   PF_CORRECTION;
@@ -236,7 +236,7 @@ main(int argc, char **argv)
 #endif
 
   /* Create transaction */
-  set_cpu(the_cores[0]);
+  set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();
 

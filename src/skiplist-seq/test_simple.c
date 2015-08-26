@@ -125,8 +125,7 @@ test(void* thread)
 {
   thread_data_t* td = (thread_data_t*) thread;
   uint32_t ID = td->id;
-  int phys_id = the_cores[ID];
-  set_cpu(phys_id);
+  set_cpu(ID);
   ssalloc_init();
 
   DS_TYPE* set = td->set;
@@ -255,7 +254,7 @@ test(void* thread)
 int
 main(int argc, char **argv) 
 {
-  set_cpu(the_cores[0]);
+  set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();
 
