@@ -1,10 +1,11 @@
 #!/bin/bash
 
-ds=ll;
+ds=ht;
 
 ub="./bin"
 uo="scripts/ppopp/data";
-algos=( ${ub}/lb-ll_lazy ${ub}/lb-ll_coupling_gl_opt ${ub}/lb-ll_optik_gl ${ub}/lb-ll_optik ${ub}/lb-ll_optik_cache );
+algos=( ${ub}/lb-ht_lazy_gl ${ub}/lb-ht_java ${ub}/lb-ht_java_optik ${ub}/lb-ht_optik0 ${ub}/lb-ht_optik1 )
+
 repetitions=11;
 duration=5000;
 keep=median; #max min median

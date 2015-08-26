@@ -29,6 +29,7 @@
 #include "common.h"
 #include "lock_if.h"
 #include "ssmem.h"
+#include "optik.h"
 
 #define DEFAULT_LOAD                    1
 #define MAXHTLENGTH                     65536
@@ -68,7 +69,7 @@ typedef volatile struct ALIGNED(CACHE_LINE_SIZE) chm_seg
     {
       size_t num_buckets;
       size_t hash;
-      ptlock_t lock;
+      optik_t lock;
       uint32_t modifications;
       uint32_t size;
       float load_factor;
