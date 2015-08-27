@@ -10,8 +10,8 @@ do_compile=$#;
 set_cpu=0;
 
 algos=( ${ub}/lb-sl_herlihy ${ub}/lb-sl_optik ${ub}/lb-sl_optik1 ${ub}/lb-sl_optik2 );
-repetitions=5;
-duration=3000;
+repetitions=11;
+duration=5000;
 keep=median; #max min median
 
 params_i=( 128 512 2048 4096 8192 );
