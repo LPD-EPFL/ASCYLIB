@@ -1,9 +1,10 @@
 .PHONY:	all
 
-BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-seq2 src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq
-LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/
-LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
+BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-seq2 src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-pugh-string src/skiplist-seq src/priorityqueue-alistarh src/priorityqueue-lotanshavit_lf src/priorityqueue-alistarh-herlihyBased src/priorityqueue-alistarh-pughBased
+LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-pugh-string src/priorityqueue-alistarh-pughBased src/bst-bronson src/bst-drachsler src/bst-tk/
+LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind src/priorityqueue-alistarh src/priorityqueue-lotanshavit_lf src/priorityqueue-alistarh-herlihyBased
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/hashtable-seq2 src/skiplist-seq src/bst-seq_internal src/bst-seq_external
+
 EXTERNALS = src/hashtable-rcu src/hashtable-tbb
 NOISE = src/noise
 TESTS = src/tests
@@ -113,6 +114,19 @@ lbsl_herlihy_lb:
 
 sl:	seqsl lfsl_fraser lfsl_herlihy_lf lbsl_pugh lbsl_herlihy_lb
 
+lfpq_alistarh:
+	$(MAKE) "STM=LOCKFREE" src/priorityqueue-alistarh
+
+lfpq_alistarh_herlihy:
+	$(MAKE) "STM=LOCKFREE" src/priorityqueue-alistarh-herlihyBased
+
+lbpq_alistarh_pugh:
+	$(MAKE) "LOCK=TAS" src/priorityqueue-alistarh-pughBased
+
+lfpq_lotanshavit:
+	$(MAKE) "STM=LOCKFREE" src/priorityqueue-lotanshavit_lf
+
+pq: lfpq_alistarh lfpq_alistarh_herlihy lbpq_alistarh_pugh lfpq_lotanshavit
 
 lfll_harris:
 	$(MAKE) "STM=LOCKFREE" src/linkedlist-harris
@@ -256,6 +270,10 @@ clean:
 	$(MAKE) -C src/skiplist-herlihy_lf clean
 	$(MAKE) -C src/skiplist-pugh clean
 	$(MAKE) -C src/skiplist-seq clean
+	$(MAKE) -C src/priorityqueue-alistarh clean
+	$(MAKE) -C src/priorityqueue-alistarh-herlihyBased clean
+	$(MAKE) -C src/priorityqueue-alistarh-pughBased clean
+	$(MAKE) -C src/priorityqueue-lotanshavit_lf clean
 	$(MAKE) -C src/tests clean
 	rm -rf build
 
