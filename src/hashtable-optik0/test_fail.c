@@ -553,6 +553,7 @@ main(int argc, char **argv)
     
   for(t=0; t < num_threads; t++) 
     {
+      PRINT_OPS_PER_THREAD();
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];

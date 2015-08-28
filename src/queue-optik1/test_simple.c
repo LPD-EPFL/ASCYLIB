@@ -210,38 +210,7 @@ test(void* thread)
 
   while (stop == 0) 
     {
-      c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
-      if (unlikely(c < scale_put))						
-	{									
-	  key = (c & rand_max) + rand_min;					
-	  int res;								
-	  START_TS(1);							
-	  res = DS_ADD(set, key, key);				
-	  if(res)								
-	    {								
-	      END_TS(1, my_putting_count_succ);				
-	      ADD_DUR(my_putting_succ);					
-	      my_putting_count_succ++;					
-	    }								
-	  END_TS_ELSE(4, my_putting_count - my_putting_count_succ,		
-		      my_putting_fail);					
-	  my_putting_count++;						
-	}									
-      else if(unlikely(c <= scale_rem))					
-	{									
-	  int removed;							
-	  START_TS(2);							
-	  removed = DS_REMOVE(set);				
-	  if(removed != 0)							
-	    {								
-	      END_TS(2, my_removing_count_succ);				
-	      ADD_DUR(my_removing_succ);					
-	      my_removing_count_succ++;					
-	    }								
-	  END_TS_ELSE(5, my_removing_count - my_removing_count_succ,	
-		      my_removing_fail);					
-	  my_removing_count++;						
-	}									
+      TEST_LOOP_ONLY_UPDATES();
     }
 
   barrier_cross(&barrier);
@@ -271,6 +240,8 @@ test(void* thread)
   getting_count_succ[ID] += my_getting_count_succ;
   removing_count_succ[ID]+= my_removing_count_succ;
 
+  OPTIK_STATS_PUBLISH();
+
   EXEC_IN_DEC_ID_ORDER(ID, num_threads)
     {
       print_latency_stats(ID, SSPFD_NUM_ENTRIES, print_vals_num);
@@ -286,6 +257,8 @@ test(void* thread)
 
   pthread_exit(NULL);
 }
+
+OPTIK_STATS_VARS_DEFINITION();
 
 int
 main(int argc, char **argv) 
@@ -534,6 +507,7 @@ main(int argc, char **argv)
     
   for(t=0; t < num_threads; t++) 
     {
+      PRINT_OPS_PER_THREAD();
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];
@@ -586,6 +560,8 @@ main(int argc, char **argv)
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
+
+  OPTIK_STATS_PRINT();
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();

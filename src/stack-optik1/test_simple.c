@@ -210,39 +210,9 @@ test(void* thread)
 
   while (stop == 0) 
     {
-      c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));
-      if (unlikely(c < scale_put))						
-	{									
-	  key = (c & rand_max) + rand_min;					
-	  int res;								
-	  START_TS(1);							
-	  res = DS_ADD(set, key, key);				
-	  if(res)								
-	    {								
-	      END_TS(1, my_putting_count_succ);				
-	      ADD_DUR(my_putting_succ);					
-	      my_putting_count_succ++;					
-	    }								
-	  END_TS_ELSE(4, my_putting_count - my_putting_count_succ,		
-		      my_putting_fail);					
-	  my_putting_count++;						
-	}									
-      else if(unlikely(c <= scale_rem))					
-	{									
-	  int removed;							
-	  START_TS(2);							
-	  removed = DS_REMOVE(set);				
-	  if(removed != 0)							
-	    {								
-	      END_TS(2, my_removing_count_succ);				
-	      ADD_DUR(my_removing_succ);					
-	      my_removing_count_succ++;					
-	    }								
-	  END_TS_ELSE(5, my_removing_count - my_removing_count_succ,	
-		      my_removing_fail);					
-	  my_removing_count++;						
-	}									
+      TEST_LOOP_ONLY_UPDATES();
     }
+
 
   barrier_cross(&barrier);
   RR_STOP_SIMPLE();
@@ -540,6 +510,7 @@ main(int argc, char **argv)
     
   for(t=0; t < num_threads; t++) 
     {
+      PRINT_OPS_PER_THREAD();
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];

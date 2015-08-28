@@ -325,6 +325,14 @@ ifeq ($(STATS),1)
 	CFLAGS += -DRETRY_STATS=1
 endif
 
+ifeq ($(STATS),2)
+	CFLAGS += -DOPS_PER_THREAD=1
+endif
+
+ifeq ($(STATS),3)
+	CFLAGS += -DRETRY_STATS=1 -DOPS_PER_THREAD=1
+endif
+
 ifeq ($(PAD),1)
 	CFLAGS += -DDO_PAD=1
 endif

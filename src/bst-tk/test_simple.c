@@ -521,6 +521,7 @@ main(int argc, char **argv)
 		 t, getting_count[t], getting_count_succ[t], putting_count[t], putting_count_succ[t],
 		 removing_count[t], removing_count_succ[t]);
 	}
+      PRINT_OPS_PER_THREAD();
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];
