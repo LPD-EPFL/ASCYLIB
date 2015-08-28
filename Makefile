@@ -1,9 +1,9 @@
 .PHONY:	all
 
-BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq
+BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-seq2 src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-seq
 LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/bst-bronson src/bst-drachsler src/bst-tk/
 LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
-SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
+SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/hashtable-seq2 src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 EXTERNALS = src/hashtable-rcu src/hashtable-tbb
 NOISE = src/noise
 TESTS = src/tests
@@ -71,6 +71,12 @@ seqht:
 
 seqhtgc:
 	$(MAKE) "STM=SEQUENTIAL" "GC=1" src/hashtable-seq
+
+seqht2:
+	$(MAKE) "STM=SEQUENTIAL" "SEQ_NO_FREE=1" src/hashtable-seq2
+
+seqhtgc2:
+	$(MAKE) "STM=SEQUENTIAL" "GC=1" src/hashtable-seq2
 
 seqsl:
 	$(MAKE) "STM=SEQUENTIAL" "SEQ_NO_FREE=1" src/skiplist-seq
@@ -234,6 +240,7 @@ clean:
 	$(MAKE) -C src/hashtable-pugh clean
 	$(MAKE) -C src/hashtable-rcu clean
 	$(MAKE) -C src/hashtable-seq clean
+	$(MAKE) -C src/hashtable-seq2 clean
 	$(MAKE) -C src/hashtable-tbb clean
 	$(MAKE) -C src/linkedlist-copy clean
 	$(MAKE) -C src/linkedlist-coupling clean
