@@ -5,7 +5,7 @@ PSIZE = "set size 0.5, 0.6"
 
 set key horiz maxrows 1
 
-set output "eps/ll_thr.eps"
+set output "eps/ht_thr.eps"
 
 set terminal postscript color "Helvetica" 24 eps enhanced
 set rmargin 0
@@ -26,6 +26,7 @@ set style line 9 lc rgb '#ff299f' lt 2 pt 9 ps 1.6 lw 5 pi 3
 set style line 12 lc rgb '#808080' lt 2 lw 1
 
 title_offset   = -0.5
+ytics_offset   = 0.65
 top_row_y      = 0.44
 bottom_row_y   = 0.0
 graphs_x_offs  = 0.1
@@ -42,11 +43,11 @@ FIRST            =    2
 OFFSET           =    3
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
-LINE0 = '"lazy"'
-LINE1 = '"MCS-gl-opt"'
-LINE2 = '"OPTIK-gl"'
+LINE0 = '"lazy-gl"'
+LINE1 = '"java"'
+LINE2 = '"java-optik"'
 LINE3 = '"OPTIK"'
-LINE4 = '"OPTIK-cache"'
+LINE4 = '"OPTIK-gl"'
 
 PLOT0 = '"Very low contention\n{/*0.8(8192 elements, 1% updates)}"'
 PLOT1 = '"Low contention\n{/*0.8(4096 elements, 10% updates)}"'
@@ -65,11 +66,11 @@ set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textc
 
 
 
-FILE0 = '"data/lpdxeon2680.ll.i8192.u1.dat"'
-FILE1 = '"data/lpdxeon2680.ll.i4096.u10.dat"'
-FILE2 = '"data/lpdxeon2680.ll.i2048.u20.dat"'
-FILE3 = '"data/lpdxeon2680.ll.i512.u50.dat"'
-FILE4 = '"data/lpdxeon2680.ll.i128.u100.dat"'
+FILE0 = '"data/lpdxeon2680.ht.i8192.u1.dat"'
+FILE1 = '"data/lpdxeon2680.ht.i4096.u10.dat"'
+FILE2 = '"data/lpdxeon2680.ht.i2048.u20.dat"'
+FILE3 = '"data/lpdxeon2680.ht.i512.u50.dat"'
+FILE4 = '"data/lpdxeon2680.ht.i128.u100.dat"'
 
 unset xlabel
 set xrange [0:61]
@@ -83,8 +84,8 @@ set multiplot layout 5, 2
 set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
-set ylabel 'Throughput (Mops/s)' offset 2,0.5
-set ytics 0.4
+set ylabel 'Throughput (Mops/s)' offset 3,0.5
+set ytics 300 offset ytics_offset
 plot \
      @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -99,7 +100,7 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-set ytics 0.8
+set ytics 200
 plot \
      @FILE1 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -110,12 +111,11 @@ plot \
 
 set origin 1.0 + graphs_x_offs, top_row_y
 @PSIZE
-set ytics auto
 @YTICS
 set ylabel ""
 unset ylabel
 set title @PLOT2
-set ytics 2
+set ytics 150
 plot \
      @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -130,7 +130,7 @@ set title @PLOT3
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 7
+set ytics 100
 plot \
      @FILE3 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -145,7 +145,7 @@ set title @PLOT4
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 8
+set ytics 50
 plot \
      @FILE4 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -158,11 +158,11 @@ plot \
 # OPTERON ##################################################################################
 # ##########################################################################################
 
-FILE0 = '"data/lpd48core.ll.i8192.u1.dat"'
-FILE1 = '"data/lpd48core.ll.i4096.u10.dat"'
-FILE2 = '"data/lpd48core.ll.i2048.u20.dat"'
-FILE3 = '"data/lpd48core.ll.i512.u50.dat"'
-FILE4 = '"data/lpd48core.ll.i128.u100.dat"'
+FILE0 = '"data/lpd48core.ht.i8192.u1.dat"'
+FILE1 = '"data/lpd48core.ht.i4096.u10.dat"'
+FILE2 = '"data/lpd48core.ht.i2048.u20.dat"'
+FILE3 = '"data/lpd48core.ht.i512.u50.dat"'
+FILE4 = '"data/lpd48core.ht.i128.u100.dat"'
 
 set xlabel "# Threads" offset 1.5, 0.75 font ",28"
 set xrange [0:65]
@@ -175,7 +175,7 @@ set lmargin 3
 set origin 0.0 + graphs_x_offs, bottom_row_y
 # set title @PLOT0 offset 0.2,title_offset
 set ylabel 'Throughput (Mops/s)' offset 2,-0.5
-set ytics 0.6
+set ytics 150
 plot \
      @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -190,7 +190,7 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 # set title @PLOT1
-set ytics 1
+set ytics 50
 plot \
      @FILE1 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -201,12 +201,11 @@ plot \
 
 set origin 1.0 + graphs_x_offs, bottom_row_y
 @PSIZE
-set ytics auto
 @YTICS
 set ylabel ""
 unset ylabel
 # set title @PLOT2
-set ytics 2
+set ytics 40
 plot \
      @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -221,7 +220,7 @@ set origin 1.5 + graphs_x_offs, bottom_row_y
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 3
+set ytics 30
 plot \
      @FILE3 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -236,7 +235,7 @@ set origin 2.0 + graphs_x_offs, bottom_row_y
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 2.5
+set ytics 20
 plot \
      @FILE4 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
