@@ -2,11 +2,16 @@
 
 ds=ll;
 
-ub="./bin"
+ub="./bin/$(uname -n)";
 uo="scripts/ppopp/data";
-algos=( ${ub}/lb-ll_lazy ${ub}/lb-ll_coupling_gl_opt ${ub}/lb-ll_optik_gl ${ub}/lb-ll_optik ${ub}/lb-ll_optik_cache );
-repetitions=11;
-duration=5000;
+
+do_compile=1;
+set_cpu=0;
+
+
+algos=( ${ub}/lb-ll_lazy ${ub}/lb-ll_gl ${ub}/lb-ll_optik_gl ${ub}/lb-ll_optik ${ub}/lb-ll_optik_cache );
+repetitions=5;
+duration=2000;
 keep=median; #max min median
 
 params_i=( 128 512 2048 4096 8192 );
@@ -38,6 +43,26 @@ fi;
 
 cores=$cores_backup;
 algos_str="${algos[@]}";
+
+if [ $do_compile -eq 1 ];
+then
+    ctarget=${ds}ppopp;
+    cflags="SET_CPU=$set_cpu";
+    echo "----> Compiling" $ctarget " with flags:" $cflags;
+    make $ctarget $cflags >> /dev/null;
+    if [ $? -eq 0 ];
+    then
+	echo "----> Success!"
+    fi;
+    echo "----> Moving binaries to $ub";
+    mkdir $ub &> /dev/null;
+    mv bin/*${ds}* $ub;
+    if [ $? -eq 0 ];
+    then
+	echo "----> Success!"
+    fi;
+fi;
+
 
 for ((i=0; i < $np; i++))
 do
