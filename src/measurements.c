@@ -142,6 +142,11 @@ ecdf_calc(const size_t* vals, const size_t val_n)
   ecdf_t* e = (ecdf_t*) calloc(1, sizeof(ecdf_t));
   assert(e != NULL);
 
+  if (val_n == 0)
+    {
+      return e;
+    }
+
   size_t* vals_sorted = (size_t*) malloc(val_n * sizeof(size_t));
   assert(vals_sorted != NULL);
 
@@ -292,17 +297,24 @@ ecdf_print_boxplot(const ecdf_t* e, const double perc, const char* title)
   printf("%10s ", "max");
   printf("\n#ECDF-%-10s ", title);
 
-  printf("%10zu ", e->pairs[0].x);
-  for (p = 0; p < e->pair_n && target_cur < 5; p++)
+  if (e->val_n > 0)
     {
-      double cdf = e->pairs[p].cdf;
-      if (cdf >= target[target_cur])
+      printf("%10zu ", e->pairs[0].x);
+      for (p = 0; p < e->pair_n && target_cur < 5; p++)
 	{
-	  target_cur++;
-	  printf("%10zu ", e->pairs[p].x);
+	  double cdf = e->pairs[p].cdf;
+	  if (cdf >= target[target_cur])
+	    {
+	      target_cur++;
+	      printf("%10zu ", e->pairs[p].x);
+	    }
 	}
+      printf("%10zu \n", e->pairs[e->pair_n - 1].x);
     }
-  printf("%10zu \n", e->pairs[e->pair_n - 1].x);
+  else
+    {
+      printf("%10d %10d %10d %10d %10d %10d %10d\n", 0, 0, 0, 0, 0, 0, 0);
+    }
 }
 
 void
