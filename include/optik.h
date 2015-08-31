@@ -301,7 +301,7 @@ optik_lock_backoff(optik_t* ol)
 	  break;
 	}
       const uint32_t di = (distance > 0) ? distance : -distance;
-      cpause(di << 7);
+      cpause(di << 8);
     }
   while (1);
 

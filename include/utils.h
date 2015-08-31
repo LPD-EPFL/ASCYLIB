@@ -711,6 +711,10 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
 
 
   static inline void cdelay(ticks cycles){
+    if (unlikely(cycles == 0))
+      {
+	return;
+      }
     ticks __ts_end = getticks() + (ticks) cycles;
     while (getticks() < __ts_end);
   }
@@ -772,8 +776,10 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
   static inline void
   do_pause()
   {
-    cpause(mrand(seeds) & 1023);
+    cpause(rand() % 4000);
     /* cpause(rand() & 1023); */
+    /* cpause(512); */
+    /* cdelay((mrand(seeds) % 128000)); */
   }
 
 #ifdef __cplusplus

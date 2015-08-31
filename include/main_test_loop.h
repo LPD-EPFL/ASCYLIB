@@ -188,8 +188,7 @@
       END_TS_ELSE(5, my_removing_count - my_removing_count_succ,	\
 		  my_removing_fail);					\
       my_removing_count++;						\
-    }									\
-  ;
+    }									
   /* cdelay(1); */
   /* cpause(0); */
   /* cdelay((num_threads-1)*128); */
