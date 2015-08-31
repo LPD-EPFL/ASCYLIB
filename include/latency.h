@@ -157,6 +157,7 @@ retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
 #  define PARSE_END_INC(i)
 #  define LATENCY_DISTRIBUTION_PRINT()
 #elif PFD_TYPE == 0
+#  define LATENCY_DISTRIBUTION_PRINT()
 #  define PARSE_START_TS(s)
 #  define PARSE_END_TS(s, i)
 #  define PARSE_END_INC(i)
@@ -231,10 +232,10 @@ extern ticks** __lat_op_all[1024];
 static __attribute__ ((unused)) const char* __lat_titles[LATENCY_TYPE_NUM] =
   {
     "srch-succ",
-    "srch-fail",
     "insr-succ",
-    "insr-fail",
     "remv-succ",
+    "srch-fail",
+    "insr-fail",
     "remv-fail",
   };
 
@@ -269,24 +270,27 @@ static __attribute__ ((unused)) const char* __lat_titles[LATENCY_TYPE_NUM] =
   }
 
 
-#  define LDI_LIMIT 99
+#  define LDI_LIMIT 95
 #  define LATENCY_DISTRIBUTION_PRINT()					\
   ticks* __lats[LATENCY_TYPE_NUM];					\
   int l;								\
   for (l = 0; l < LATENCY_TYPE_NUM; l++)				\
     {									\
-      __lats[l] = malloc(num_threads * LATENCY_VAL_NUM * sizeof(ticks)); \
+      __lats[l] = calloc(num_threads * LATENCY_VAL_NUM, sizeof(ticks));	\
       assert(__lats[i] != NULL);					\
+      size_t n_val = 0;							\
       int h;								\
       for (h = 0; h < num_threads; h++)					\
 	{								\
 	  size_t e;							\
 	  for (e = 0; e < LATENCY_VAL_NUM; e++)				\
 	    {								\
-	      __lats[l][(h * LATENCY_VAL_NUM) + e] = __lat_op_all[h][l][e]; \
+	      size_t lat = __lat_op_all[h][l][e];			\
+	      if (!lat) { break; }					\
+	      __lats[l][n_val++] = lat;					\
 	    }								\
 	}								\
-      ecdf_t* ecdf = ecdf_calc(__lats[l], LATENCY_VAL_NUM * num_threads); \
+      ecdf_t* ecdf = ecdf_calc(__lats[l], n_val); \
       ecdf_print_boxplot(ecdf, LDI_LIMIT, __lat_titles[l]);		\
       ecdf_destroy(ecdf);						\
       free(__lats[l]);							\
