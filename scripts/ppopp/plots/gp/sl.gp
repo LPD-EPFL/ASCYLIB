@@ -5,7 +5,7 @@ PSIZE = "set size 0.5, 0.6"
 
 set key horiz maxrows 1
 
-set output "eps/ll_thr.eps"
+set output "eps/sl_thr.eps"
 
 set terminal postscript color "Helvetica" 24 eps enhanced
 set rmargin 0
@@ -42,11 +42,17 @@ FIRST            =    2
 OFFSET           =    3
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
-LINE0 = '"lazy"'
-LINE1 = '"MCS-gl-opt"'
-LINE2 = '"OPTIK-gl"'
-LINE3 = '"OPTIK"'
-LINE4 = '"OPTIK-cache"'
+LINE0 = '"herlihy"'
+LINE1 = '"herlihy-OPTIK"'
+LINE2 = '"OPTIK1"'
+LINE3 = '"OPTIK2"'
+LINE4 = '""'
+
+NCOL0 = 0
+NCOL1 = 3
+NCOL2 = 1
+NCOL3 = 2
+NCOL4 = 0
 
 PLOT0 = '"Very low contention\n{/*0.8(8192 elements, 1% updates)}"'
 PLOT1 = '"Low contention\n{/*0.8(4096 elements, 10% updates)}"'
@@ -65,11 +71,11 @@ set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textc
 
 
 
-FILE0 = '"data/lpdxeon2680.ll.i8192.u1.dat"'
-FILE1 = '"data/lpdxeon2680.ll.i4096.u10.dat"'
-FILE2 = '"data/lpdxeon2680.ll.i2048.u20.dat"'
-FILE3 = '"data/lpdxeon2680.ll.i512.u50.dat"'
-FILE4 = '"data/lpdxeon2680.ll.i128.u100.dat"'
+FILE0 = '"data/lpdxeon2680.sl.i8192.u1.dat"'
+FILE1 = '"data/lpdxeon2680.sl.i4096.u10.dat"'
+FILE2 = '"data/lpdxeon2680.sl.i2048.u20.dat"'
+FILE3 = '"data/lpdxeon2680.sl.i512.u50.dat"'
+FILE4 = '"data/lpdxeon2680.sl.i128.u100.dat"'
 
 unset xlabel
 set xrange [0:61]
@@ -84,13 +90,12 @@ set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
-set ytics 0.4
+set ytics 40
 plot \
-     @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE0 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 set origin 0.5 + graphs_x_offs, top_row_y
 @PSIZE
@@ -99,29 +104,27 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-set ytics 0.8
+set ytics 30
 plot \
-     @FILE1 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE1 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 
 set origin 1.0 + graphs_x_offs, top_row_y
 @PSIZE
-set ytics auto
+#set ytics auto
 @YTICS
 set ylabel ""
 unset ylabel
 set title @PLOT2
-set ytics 2
+set ytics 30
 plot \
-     @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE2 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 
 set origin 1.5 + graphs_x_offs, top_row_y
@@ -130,13 +133,12 @@ set title @PLOT3
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 7
+set ytics 20
 plot \
-     @FILE3 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE3 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 
 set origin 2.0 + graphs_x_offs, top_row_y
@@ -147,22 +149,21 @@ set ylabel ""
 unset ylabel
 set ytics 8
 plot \
-     @FILE4 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE4 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 
 # ##########################################################################################
 # OPTERON ##################################################################################
 # ##########################################################################################
 
-FILE0 = '"data/lpd48core.ll.i8192.u1.dat"'
-FILE1 = '"data/lpd48core.ll.i4096.u10.dat"'
-FILE2 = '"data/lpd48core.ll.i2048.u20.dat"'
-FILE3 = '"data/lpd48core.ll.i512.u50.dat"'
-FILE4 = '"data/lpd48core.ll.i128.u100.dat"'
+FILE0 = '"data/lpd48core.sl.i8192.u1.dat"'
+FILE1 = '"data/lpd48core.sl.i4096.u10.dat"'
+FILE2 = '"data/lpd48core.sl.i2048.u20.dat"'
+FILE3 = '"data/lpd48core.sl.i512.u50.dat"'
+FILE4 = '"data/lpd48core.sl.i128.u100.dat"'
 
 set xlabel "# Threads" offset 1.5, 0.75 font ",28"
 set xrange [0:65]
@@ -175,13 +176,12 @@ set lmargin 3
 set origin 0.0 + graphs_x_offs, bottom_row_y
 # set title @PLOT0 offset 0.2,title_offset
 set ylabel 'Throughput (Mops/s)' offset 2,-0.5
-set ytics 0.6
+set ytics 30
 plot \
-     @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE0 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 set origin 0.5 + graphs_x_offs, bottom_row_y
 @PSIZE
@@ -190,29 +190,27 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 # set title @PLOT1
-set ytics 1
+set ytics 15
 plot \
-     @FILE1 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE1 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 
 set origin 1.0 + graphs_x_offs, bottom_row_y
 @PSIZE
-set ytics auto
+#set ytics auto
 @YTICS
 set ylabel ""
 unset ylabel
 # set title @PLOT2
-set ytics 2
+set ytics 10
 plot \
-     @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE2 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 
 set origin 1.5 + graphs_x_offs, bottom_row_y
@@ -221,13 +219,12 @@ set origin 1.5 + graphs_x_offs, bottom_row_y
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 3
+set ytics 5
 plot \
-     @FILE3 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE3 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 
 set origin 2.0 + graphs_x_offs, bottom_row_y
@@ -236,13 +233,12 @@ set origin 2.0 + graphs_x_offs, bottom_row_y
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 2.5
+set ytics 2
 plot \
-     @FILE4 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     @FILE4 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
+     "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
+     "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
+     "" using 1:(column_select(NCOL3)) title @LINE3 ls 4 with linespoints
 
 
 unset origin
@@ -275,8 +271,7 @@ plot \
      NaN title @LINE0 ls 1 with linespoints, \
      NaN title @LINE1 ls 2 with linespoints, \
      NaN title @LINE2 ls 3 with linespoints, \
-     NaN title @LINE3 ls 4 with linespoints, \
-     NaN title @LINE4 ls 8 with linespoints
+     NaN title @LINE3 ls 4 with linespoints
 
 #</null>
 unset multiplot  #<--- Necessary for some terminals, but not postscript I don't thin
