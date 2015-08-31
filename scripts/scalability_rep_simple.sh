@@ -49,7 +49,10 @@ progs_num=$(echo $progs | wc -w);
 params="$@";
 
 
-print_n "#       " "%-12s " "$progs" "\n"
+progs_stripped=$(echo $progs | sed -e 's/bin//g' -e 's/[\.\/]//g');
+
+print_n "#       " "%-12s " "$progs_stripped" "\n"
+
 
 print_rep "#cores  " $progs_num "throughput   " "\n"
 

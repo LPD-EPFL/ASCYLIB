@@ -61,7 +61,6 @@ do
 	thr=$($run_script ./$p $params -n$c);
 	printf "%-9d %-9d %-9d " $thr;
 	thra=( $thr );
-	# ratio=$(echo "100*(1 - ((${thra[1]} - ${thra[0]}) / ${thra[1]}))" | bc -l)
 	ratio=$(echo "${thra[2]} / ${thra[0]}" | bc -l);
 	printf "%-7.2f" $ratio;
     done;     
