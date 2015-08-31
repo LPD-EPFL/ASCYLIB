@@ -38,14 +38,18 @@ queue_optik_find(queue_t* qu, skey_t key)
   return 1;
 }
 
+LOCK_LOCAL_DATA;
+
 int
 queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 {
   queue_node_t* node = queue_new_node(key, val, NULL);
-  optik_lock_backoff(&qu->tail_lock);
+  LOCK_A(&qu->tail_lock);
+  /* optik_lock_backoff(&qu->tail_lock); */
   qu->tail->next = node;
   qu->tail = node; 
-  optik_unlock(&qu->tail_lock);
+  UNLOCK_A(&qu->tail_lock);
+  /* optik_unlock(&qu->tail_lock); */
   return 1;
 }
 

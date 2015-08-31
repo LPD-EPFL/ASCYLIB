@@ -66,7 +66,6 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 sval_t
 queue_optik_delete(queue_t* qu)
 {
-  size_t nr = 1;
  restart:
   COMPILER_NO_REORDER(const optik_t version = qu->head_lock;);
   const queue_node_t* node = qu->head;
@@ -78,7 +77,7 @@ queue_optik_delete(queue_t* qu)
 
   if (!optik_trylock_version(&qu->head_lock, version))
     {
-      cpause(rand() % (nr++));
+      do_pause();
       goto restart;
     }
 

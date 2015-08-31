@@ -49,7 +49,6 @@ const int n_spin_elim = 1<<14;
 int
 mstack_optik_insert(mstack_t* qu, skey_t key, sval_t val)
 {
-  size_t nr = 0;
   while (1)
     {
       COMPILER_NO_REORDER(optik_t version = qu->lock;);
@@ -122,7 +121,6 @@ mstack_optik_insert(mstack_t* qu, skey_t key, sval_t val)
 sval_t
 mstack_optik_delete(mstack_t* qu)
 {
-  size_t nr = 1;
   mstack_node_t* top;
   while (1)
     {

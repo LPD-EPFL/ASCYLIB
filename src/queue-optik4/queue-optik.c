@@ -152,7 +152,7 @@ queue_optik_resize(queue_t* qu, size_t* tail_new)
 
 static const int qpt = 1024;
 
-static void
+static void UNUSED
 queue_pause(int n)
 {
   volatile int nn = n;
@@ -200,7 +200,7 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
   node->version = tailm;
   while (unlikely((uintptr_t) qu->array[spot]) != tailm)
     {
-      cpause(rand() & 1023);
+      do_pause();
     }
 
   qu->array[spot] = node;
@@ -227,12 +227,12 @@ queue_optik_delete(queue_t* qu)
       queue_node_t* node = qu->array[spot];
       if (unlikely(queue_node_is_null(node)))
 	{
-	  queue_pause(qpt);
+	  do_pause();
 	  continue;
 	}
       else if (unlikely(node->version != queue_node_set_null(head)))
 	{
-	  queue_pause(qpt);
+	  do_pause();
 	  continue;
 	}
 
@@ -247,7 +247,7 @@ queue_optik_delete(queue_t* qu)
 	  return node->val;
 	}
 
-      cpause(rand() & 1023);
+      do_pause();
     }
 
   return 1;			/* never happens */

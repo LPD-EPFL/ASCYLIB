@@ -72,7 +72,6 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct queue
   uint8_t padding3[CACHE_LINE_SIZE - 1 * sizeof(size_t)];
 } queue_t;
 
-#warning test if putting head/tail on different CLs helps
 /* STATIC_ASSERT(sizeof(queue_t) == 128, "sizeof(queue_t) == 128"); */
 STATIC_ASSERT(sizeof(queue_t) == 192, "sizeof(queue_t) == 192");
 

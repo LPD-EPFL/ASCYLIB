@@ -153,7 +153,7 @@ queue_optik_resize(queue_t* qu, size_t* tail_new)
 
 static const int qpt = 1024;
 
-static void
+static void UNUSED 
 queue_pause(int n)
 {
   volatile int nn = n;
@@ -202,11 +202,12 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
   node->version = tailm;
   while (unlikely((uintptr_t) qu->array[spot]) != tailm)
     {
-      cpause(rand() & 1023);
+      /* do_pause();  */
+      sched_yield();
     }
 
   qu->array[spot] = node;
- 
+
   queue_rcu_op_off(qu);
   return 1;
 }
@@ -219,7 +220,6 @@ queue_optik_delete(queue_t* qu)
   while (1)
     {
       optik_t version = qu->head_lock;
-      /* size_t head = qu->head_lock.version; */
       size_t head = optik_get_n_locked(qu->head_lock);
       if (queue_is_empty(qu->tail_n, head, hash))
 	{
@@ -229,14 +229,15 @@ queue_optik_delete(queue_t* qu)
       COMPILER_BARRIER();
       size_t spot = (head + 1) & hash;
       queue_node_t* node = qu->array[spot];
+
       if (unlikely(queue_node_is_null(node)))
 	{
-	  queue_pause(qpt);
+	  sched_yield(); do_pause(); sched_yield();  do_pause(); sched_yield();
 	  continue;
 	}
       else if (unlikely(node->version != queue_node_set_null(head)))
 	{
-	  queue_pause(qpt);
+	  sched_yield(); do_pause(); sched_yield();  do_pause(); sched_yield();
 	  continue;
 	}
 
@@ -252,7 +253,7 @@ queue_optik_delete(queue_t* qu)
 	  return node->val;
 	}
 
-      cpause(rand() & 1023);
+      do_pause();
     }
 
   return 1;			/* never happens */

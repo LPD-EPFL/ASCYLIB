@@ -50,7 +50,6 @@ queue_new_node(skey_t key, sval_t val, queue_node_t* next)
 void
 queue_delete_node(queue_node_t *n)
 {
-  /* DESTROY_LOCK(ND_GET_LOCK(n)); */
 #if GC == 1
   ssmem_free(alloc, (void*) n);
 #endif

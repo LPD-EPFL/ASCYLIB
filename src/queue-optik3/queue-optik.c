@@ -133,7 +133,8 @@ queue_optik_delete(queue_t* qu)
 
   if (!optik_trylock_version(&qu->head_lock, version))
     {
-      pause_rep(rand() % (nr++));
+      //      pause_rep(rand() % (nr++));
+      do_pause();
       goto restart;
     }
 
