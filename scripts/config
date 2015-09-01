@@ -122,7 +122,18 @@ then
 	cores="$(seq 2 2 40) $(seq 44 4 60)";
     elif [ $unm = "lpd48core" ];
     then
-	cores="$(seq 2 2 48) $(seq 48 4 64)";
+	cores="$(seq 2 2 48) $(seq 52 4 64)";
+    else
+	cores=$(seq 6 6 48);
+    fi;
+elif [ "$cores" = "ppoppfast" ];
+then
+    if [ $unm = "lpdxeon2680" ];
+    then
+	cores="$(seq 2 4 40) $(seq 45 5 60)";
+    elif [ $unm = "lpd48core" ];
+    then
+	cores="$(seq 2 4 48) $(seq 56 8 64)";
     else
 	cores=$(seq 6 6 48);
     fi;
