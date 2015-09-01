@@ -8,10 +8,11 @@ uo="scripts/ppopp/data";
 do_compile=1;
 set_cpu=0;
 
+skip=$#;
 
 algos=( ${ub}/lb-ll_lazy ${ub}/lb-ll_gl ${ub}/lb-ll_optik_gl ${ub}/lb-ll_optik ${ub}/lb-ll_optik_cache );
-repetitions=5;
-duration=2000;
+repetitions=11;
+duration=5000;
 keep=median; #max min median
 
 params_i=( 128 512 2048 4096 8192 );
@@ -33,13 +34,15 @@ dur_tot=$(echo "$na*$np*$nc*$repetitions*$dur_s" | bc -l);
 printf "#> $na algos, $np params, $nc cores, $repetitions reps of %.2f sec = %.2f sec\n" $dur_s $dur_tot;
 printf "#> = %.2f hours\n" $(echo $dur_tot/3600 | bc -l);
 
-printf "   Continue? [Y/n] ";
-read cont;
-if [ "$cont" = "n" ];
+if [ $skip -eq 0 ];
 then
-    exit;
+    printf "   Continue? [Y/n] ";
+    read cont;
+    if [ "$cont" = "n" ];
+    then
+	exit;
+    fi;
 fi;
-
 
 cores=$cores_backup;
 algos_str="${algos[@]}";

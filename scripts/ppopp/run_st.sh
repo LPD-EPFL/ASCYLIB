@@ -5,20 +5,20 @@ ds=st;
 ub="./bin/$(uname -n)";
 uo="scripts/ppopp/data";
 
-do_thr=1;
+do_thr=0;
 do_ldi=1;
 
 do_compile=1;
 set_cpu=0;
 
 algos=( ./${ub}/lf-st_treiber ${ub}/lb-st_lock ${ub}/lb-st_optik );
-repetitions=11;
-duration=5000;
+repetitions=3;
+duration=1000;
 keep=median; #max min median
 
 param_i=65534;
 params_p=( 40 50 60 );
-params_nc=( 5 10 15 20 30 40 );	# for latency ditribution
+params_nc=( 10 20 );		# for latency ditribution
 np=${#params_p[*]};
 
 cores=ppopp;

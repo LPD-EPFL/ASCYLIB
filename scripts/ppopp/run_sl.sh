@@ -2,12 +2,14 @@
 
 ds=sl;
 
-ub="./bin"
+ub="./bin/$(uname -n)";
 uo="scripts/ppopp/data";
 
-
-do_compile=$#;
+do_compile=1;
 set_cpu=0;
+
+skip=$#;
+
 
 algos=( ${ub}/lb-sl_herlihy ${ub}/lb-sl_optik ${ub}/lb-sl_optik1 ${ub}/lb-sl_optik2 );
 repetitions=11;
@@ -33,11 +35,14 @@ dur_tot=$(echo "$na*$np*$nc*$repetitions*$dur_s" | bc -l);
 printf "#> $na algos, $np params, $nc cores, $repetitions reps of %.2f sec = %.2f sec\n" $dur_s $dur_tot;
 printf "#> = %.2f hours\n" $(echo $dur_tot/3600 | bc -l);
 
-printf "   Continue? [Y/n] ";
-read cont;
-if [ "$cont" = "n" ];
+if [ $skip -eq 0 ];
 then
-    exit;
+    printf "   Continue? [Y/n] ";
+    read cont;
+    if [ "$cont" = "n" ];
+    then
+	exit;
+    fi;
 fi;
 
 if [ $do_compile -eq 1 ];
@@ -50,8 +55,14 @@ then
     then
 	echo "----> Success!"
     fi;
+    echo "----> Moving binaries to $ub";
+    mkdir $ub &> /dev/null;
+    mv bin/*${ds}* $ub;
+    if [ $? -eq 0 ];
+    then
+	echo "----> Success!"
+    fi;
 fi;
-
 
 cores=$cores_backup;
 algos_str="${algos[@]}";

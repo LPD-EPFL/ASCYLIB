@@ -11,14 +11,14 @@ do_ldi=1;
 do_compile=1;
 set_cpu=0;
 
-algos=( ./${ub}/lf-qu_ms ${ub}/lb-qu_ms ${ub}/lb-qu_optik0 ${ub}/lb-qu_optik1 ${ub}/lb-qu_optik2 ${ub}/lb-qu_optik2a ${ub}/lb-qu_optik3 );
-repetitions=11;
-duration=5000;
+algos=( ./${ub}/lf-qu_ms ${ub}/lb-qu_ms ${ub}/lb-qu_optik0 ${ub}/lb-qu_optik1 ${ub}/lb-qu_optik2 ${ub}/lb-qu_optik3 );
+repetitions=3;
+duration=1000;
 keep=median; #max min median
 
 param_i=65534;
 params_p=( 40 50 60 );
-params_nc=( 5 10 15 20 30 40 );	# for latency ditribution
+params_nc=( 10 );		# for latency ditribution
 np=${#params_p[*]};
 
 cores=ppopp;
