@@ -127,7 +127,7 @@ slppopp:	lbsl_herlihy_lb lbsl_optik lbsl_optik1 lbsl_optik2
 
 qu: lbqu_ms lfqu_ms lbqu_optik0 lbqu_optik1 lbqu_optik2 lbqu_optik2a lbqu_optik3 lbqu_optik4 lbqu_optik5
 
-quppopp: lbqu_ms lfqu_ms lbqu_optik0 lbqu_optik1 lbqu_optik2 lbqu_optik2a lbqu_optik3 
+quppopp: lbqu_ms lfqu_ms lbqu_optik0 lbqu_optik1 lbqu_optik2 lbqu_optik3 
 
 lbqu_ms:
 	$(MAKE) "LOCK=MCS" src/queue-ms_lb
@@ -305,6 +305,8 @@ htrcugc:
 	$(MAKE) src/hashtable-rcu
 
 ht:	seqht lfht lbht htjava htjava_optik tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl lbht_lazy_gl_no_ro lbht_pugh_gl_no_ro htcopy_no_ro htjava_no_ro
+
+htppopp: lbht_lazy_gl htjava htjava_optik lbht_optik0 lbht_optik1
 
 seqbstint:
 	$(MAKE) "STM=SEQUENTIAL" "SEQ_NO_FREE=1" src/bst-seq_internal
