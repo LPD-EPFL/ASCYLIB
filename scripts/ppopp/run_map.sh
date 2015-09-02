@@ -121,7 +121,7 @@ then
 	    update=${params_u[$i]};
 	    range=$((2*$initial));
 	    nc=${params_nc[$n]};
-	    out="$unm.${ds}.ldi.n$nc.i$put.u$update.dat"
+	    out="$unm.${ds}.ldi.n$nc.i$initial.u$update.dat"
 	    echo "### params -i$initial -u$update -n$nc / dur $duration" | tee ${uo}/$out;
 
 	    ./scripts/scalability_ldi.sh $nc "$algos_str" -d$duration -i$initial -u$update \
