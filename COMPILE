@@ -22,5 +22,6 @@ You may pass the following settings to `make`:
     * STATS=1 : enable extra stats (about retries)
     * PAD=1 : enabled node padding. NB. not all data structures support this properly for now
     * SEQ_NO_FREE=1 : make the SEQ implementations NOT use the ssmem_free (but uses SSMEM)
+    * TSX=1: use tsx-based locks
 Example:
 	`make` VERSION=DEBUG GC=0
