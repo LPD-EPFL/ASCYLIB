@@ -328,6 +328,8 @@ seqbstgc: seqbstextgc seqbstintgc
 external:
 	$(MAKE) "STM=LOCKFREE" $(EXTERNALS)
 
+mapppopp: lbmap_lock lbmap_optik
+
 lbmap_lock:
 	$(MAKE) src/map-lock
 
