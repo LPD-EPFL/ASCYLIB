@@ -12,7 +12,7 @@ skip=$#;
 
 
 algos=( ${ub}/lb-sl_herlihy ${ub}/lb-sl_optik ${ub}/lb-sl_optik1 ${ub}/lb-sl_optik2 );
-repetitions=11;
+repetitions=5;
 duration=5000;
 keep=median; #max min median
 

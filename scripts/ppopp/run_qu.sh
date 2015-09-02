@@ -11,9 +11,11 @@ do_ldi=1;
 do_compile=1;
 set_cpu=0;
 
+skip=$#;
+
 algos=( ./${ub}/lf-qu_ms ${ub}/lb-qu_ms ${ub}/lb-qu_optik0 ${ub}/lb-qu_optik1 ${ub}/lb-qu_optik2 ${ub}/lb-qu_optik3 );
-repetitions=3;
-duration=1000;
+repetitions=5;
+duration=5000;
 keep=median; #max min median
 
 param_i=65534;
@@ -40,11 +42,14 @@ printf "#> measure throughput: %-5s / ldi: %-5s\n" ${tf[$do_thr]} ${tf[$do_ldi]}
 printf "#> $na algos, $np params, $nc cores, $repetitions reps of %.2f sec = %.2f sec\n" $dur_s $dur_tot;
 printf "#> = %.2f hours\n" $(echo $dur_tot/3600 | bc -l);
 
-printf "   Continue? [Y/n] ";
-read cont;
-if [ "$cont" = "n" ];
+if [ $skip -eq 0 ];
 then
-    exit;
+    printf "   Continue? [Y/n] ";
+    read cont;
+    if [ "$cont" = "n" ];
+    then
+	exit;
+    fi;
 fi;
 
 cores=$cores_backup;

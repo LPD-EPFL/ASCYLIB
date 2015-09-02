@@ -5,15 +5,17 @@ ds=st;
 ub="./bin/$(uname -n)";
 uo="scripts/ppopp/data";
 
-do_thr=0;
+do_thr=1;
 do_ldi=1;
 
 do_compile=1;
 set_cpu=0;
 
-algos=( ./${ub}/lf-st_treiber ${ub}/lb-st_lock ${ub}/lb-st_optik );
+skip=$#;
+
+algos=( ./${ub}/lf-st_treiber ${ub}/lb-st_lock ${ub}/lb-st_optik ${ub}/lb-st_lock_tas);
 repetitions=3;
-duration=1000;
+duration=3000;
 keep=median; #max min median
 
 param_i=65534;
@@ -40,11 +42,14 @@ printf "#> measure throughput: %-5s / ldi: %-5s\n" ${tf[$do_thr]} ${tf[$do_ldi]}
 printf "#> $na algos, $np params, $nc cores, $repetitions reps of %.2f sec = %.2f sec\n" $dur_s $dur_tot;
 printf "#> = %.2f hours\n" $(echo $dur_tot/3600 | bc -l);
 
-printf "   Continue? [Y/n] ";
-read cont;
-if [ "$cont" = "n" ];
+if [ $skip -eq 0 ];
 then
-    exit;
+    printf "   Continue? [Y/n] ";
+    read cont;
+    if [ "$cont" = "n" ];
+    then
+	exit;
+    fi;
 fi;
 
 cores=$cores_backup;

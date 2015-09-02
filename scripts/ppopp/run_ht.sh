@@ -18,6 +18,7 @@ keep=median; #max min median
 
 params_i=( 128 512 2048 4096 8192 );
 params_u=( 100 50  20   10   1 );
+load_factor=2;
 np=${#params_i[*]};
 
 cores=ppopp;
@@ -72,8 +73,9 @@ do
     update=${params_u[$i]};
     range=$((2*$initial));
     out="$unm.${ds}.i$initial.u$update.dat"
-    echo "### params -i$initial -r$range -u$update / keep $keep of reps $repetitions of dur $duration" | tee ${uo}/$out;
+    echo "### params -i$initial -r$range -u$update -l$load_factor / keep $keep of reps $repetitions of dur $duration" \
+	| tee ${uo}/$out;
 
-    ./scripts/scalability_rep.sh $cores $repetitions $keep "$algos_str" -d$duration -i$initial -r$range -u$update \
+    ./scripts/scalability_rep.sh $cores $repetitions $keep "$algos_str" -d$duration -i$initial -r$range -u$update -l$load_factor \
 				 | tee -a ${uo}/$out;
 done;
