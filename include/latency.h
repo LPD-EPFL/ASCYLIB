@@ -36,9 +36,11 @@
 
 #if RETRY_STATS == 1
 #  define RETRY_STATS_VARS						\
-  __thread size_t __parse_try, __update_try, __cleanup_try, __lock_try, __lock_queue, __lock_try_once
+  __thread size_t __parse_try, __update_try, __cleanup_try, __lock_try, __lock_queue, __lock_try_once, \
+    __node_cache_hit
 #  define RETRY_STATS_VARS_GLOBAL					\
-  size_t __parse_try_global, __update_try_global, __cleanup_try_global, __lock_try_global, __lock_queue_global
+  size_t __parse_try_global, __update_try_global, __cleanup_try_global, __lock_try_global, __lock_queue_global, \
+    __node_cache_hit_global
 
 extern RETRY_STATS_VARS;
 extern RETRY_STATS_VARS_GLOBAL;
@@ -49,7 +51,8 @@ extern RETRY_STATS_VARS_GLOBAL;
   __cleanup_try = 0;				\
   __lock_try = 0;				\
   __lock_queue = 0;				\
-  __lock_try_once = 1;
+  __lock_try_once = 1;				\
+  __node_cache_hit = 0;
 
 #  define PARSE_TRY()        __parse_try++
 #  define UPDATE_TRY()       __update_try++
@@ -67,6 +70,7 @@ extern RETRY_STATS_VARS_GLOBAL;
       __lock_try_once = 0;			\
       __lock_queue += (q);			\
     }
+# define NODE_CACHE_HIT()  __node_cache_hit++;
 #  define LOCK_TRY_ONCE_CLEAR()    __lock_try_once = 1
 #  define RETRY_STATS_PRINT(thr, put, rem, upd_suc)   retry_stats_print(thr, put, rem, (upd_suc))
 #  define RETRY_STATS_SHARE()			\
@@ -74,7 +78,8 @@ extern RETRY_STATS_VARS_GLOBAL;
   __update_try_global += __update_try;		\
   __cleanup_try_global += __cleanup_try;	\
   __lock_try_global += __lock_try;		\
-  __lock_queue_global += __lock_queue
+  __lock_queue_global += __lock_queue;		\
+  __node_cache_hit_global += __node_cache_hit;
 
 static inline void 
 retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
@@ -94,6 +99,9 @@ retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
     }
   double ratio_to_succ_upd = (double) __lock_try_global / upd_suc;
   printf("#lock_all:     %-10zu %f   %f\n", __lock_try_global, ratio_all, ratio_to_succ_upd);
+  
+  printf("#cache_hit:    %-10zu %-10zu %f\n", __parse_try_global, __node_cache_hit_global,
+	 (double) __node_cache_hit_global / __parse_try_global);
 }
 
 #else  /* RETRY_STATS == 0 */
