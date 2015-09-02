@@ -379,6 +379,8 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
+#warning Setting   concurrency = initial / 2;
+  concurrency = initial / 2;
   printf("## Initial: %zu / Range: %zu / Load factor: %zu / Concurrency: %zu\n", initial, range, load_factor, concurrency);
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
