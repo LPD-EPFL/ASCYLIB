@@ -313,7 +313,7 @@ ifeq ($(STATS),1)
 endif
 
 ifeq ($(TSX),1)
-	CFLAGS += -DUSE_TSX=1
+	CFLAGS += -DUSE_TSX=1 -mrtm
 	LDFLAGS += -mrtm
 endif
 

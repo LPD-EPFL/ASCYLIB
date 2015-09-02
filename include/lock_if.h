@@ -112,9 +112,15 @@ typedef volatile UTYPE ptlock_t;
 /* GLOBAL lock */
 #  define GL_INIT_LOCK(lock)				tas_init(lock)
 #  define GL_DESTROY_LOCK(lock)			
+#ifdef USE_TSX
+#  define GL_LOCK(lock)					tas_lock_tsx(lock)
+#  define GL_TRYLOCK(lock)				tas_trylock_tsx(lock)
+#  define GL_UNLOCK(lock)              			tas_unlock_tsx(lock)
+#else 
 #  define GL_LOCK(lock)					tas_lock(lock)
 #  define GL_TRYLOCK(lock)				tas_trylock(lock)
 #  define GL_UNLOCK(lock)              			tas_unlock(lock)
+#endif
 
 #  define TAS_FREE 0
 #  define TAS_LCKD 1
@@ -124,87 +130,6 @@ extern __thread volatile ticks wait_lock;
 extern __thread ticks gt_correction;
 #endif
 
-#ifdef USE_TSX
-
-#define TSX_NUM_RETRIES 3
-
-static inline uint32_t tas_lock_tsx(ptlock_t * lock) {
-    int num_retries = TSX_NUM_RETRIES;
-    while (num_retries >= 0) {
-        num_retries--;
-        if (likely(_xbegin() == _XBEGIN_STARTED)) {
-#if WAIT_LOCK_STATS == 1
-            volatile tticket_t* t = (volatile tticket_t*) lock;
-            if (t->curr == t->tick) {
-                return 1;
-            }
-#elif RETRY_STATS == 1
-            volatile tticket_t* t = (volatile tticket_t*) lock;
-            if (t->curr == t->tick) {
-                return 1;
-            }
-#else 
-            if (likely(*lock == TAS_FREE)) {
-                return 1;
-            }
-#endif
-        }
-        _xabort(0xff);
-    }
-    return tas_lock(lock);
-}
-
-static inline uint32_t tas_trylock_tsx(ptlock_t * lock) {
-    int num_retries = TSX_NUM_RETRIES;
-    while (num_retries >= 0) {
-        num_retries--;
-        if (likely(_xbegin() == _XBEGIN_STARTED)) {
-#if WAIT_LOCK_STATS == 1
-            volatile tticket_t* t = (volatile tticket_t*) lock;
-            if (t->curr == t->tick) {
-                return 1;
-            }
-#elif RETRY_STATS == 1
-            volatile tticket_t* t = (volatile tticket_t*) lock;
-            if (t->curr == t->tick) {
-                return 1;
-            }
-#else 
-            if (likely(*lock == TAS_FREE)) {
-                return 1;
-            }
-#endif
-        }
-        _xabort(0xff);
-    }
-    return tas_trylock(lock);
-}
-
-static inline int tas_unlock_tsx(ptlock_t* lock) {
-#if WAIT_LOCK_STATS == 1
-    volatile tticket_t* t = (volatile tticket_t*) lock;
-    if (t->curr == t->tick) {
-        return 0;
-    } else {
-        return tas_unlock(lock);
-    }
-#elif RETRY_STATS == 1
-    volatile tticket_t* t = (volatile tticket_t*) lock;
-    if (t->curr == t->tick) {
-        return 0;
-    } else {
-        return tas_unlock(lock);
-    }
-#else
-    if (likely(*lock == TAS_FREE)) {
-        return 0;
-    } else {
-        return tas_unlock(lock);
-    }
-#endif
-}
-
-#endif
 
 static inline void
 tas_init(ptlock_t* l)
@@ -320,6 +245,96 @@ tas_unlock(ptlock_t* l)
   return 0;
 }
 
+
+#ifdef USE_TSX
+
+#define TSX_NUM_RETRIES 10
+
+static inline uint32_t tas_lock_tsx(ptlock_t * lock) {
+    int num_retries = TSX_NUM_RETRIES;
+    while (num_retries >= 0) {
+        num_retries--;
+        if (likely(_xbegin() == _XBEGIN_STARTED)) {
+#if WAIT_LOCK_STATS == 1
+            volatile tticket_t* t = (volatile tticket_t*) lock;
+            if (t->curr == t->tick) {
+                return 1;
+            }
+#elif RETRY_STATS == 1
+            volatile tticket_t* t = (volatile tticket_t*) lock;
+            if (t->curr == t->tick) {
+                return 1;
+            }
+#else 
+            if (likely(*lock == TAS_FREE)) {
+                return 1;
+            }
+#endif
+        _xabort(0xff);
+        }
+        PAUSE;
+    PAUSE;
+    PAUSE;
+    PAUSE;
+    PAUSE;
+    }
+    PAUSE;
+    PAUSE;
+    PAUSE;
+    return tas_lock(lock);
+}
+
+static inline uint32_t tas_trylock_tsx(ptlock_t * lock) {
+    int num_retries = TSX_NUM_RETRIES;
+    while (num_retries >= 0) {
+        num_retries--;
+        if (likely(_xbegin() == _XBEGIN_STARTED)) {
+#if WAIT_LOCK_STATS == 1
+            volatile tticket_t* t = (volatile tticket_t*) lock;
+            if (t->curr == t->tick) {
+                return 1;
+            }
+#elif RETRY_STATS == 1
+            volatile tticket_t* t = (volatile tticket_t*) lock;
+            if (t->curr == t->tick) {
+                return 1;
+            }
+#else 
+            if (likely(*lock == TAS_FREE)) {
+                return 1;
+            }
+#endif
+        }
+        _xabort(0xff);
+    }
+    return tas_trylock(lock);
+}
+
+static inline int tas_unlock_tsx(ptlock_t* lock) {
+#if WAIT_LOCK_STATS == 1
+    volatile tticket_t* t = (volatile tticket_t*) lock;
+    if (t->curr == t->tick) {
+        return 0;
+    } else {
+        return tas_unlock(lock);
+    }
+#elif RETRY_STATS == 1
+    volatile tticket_t* t = (volatile tticket_t*) lock;
+    if (t->curr == t->tick) {
+        return 0;
+    } else {
+        return tas_unlock(lock);
+    }
+#else
+    if (likely(*lock == TAS_FREE)) {
+        return 0;
+    } else {
+        return tas_unlock(lock);
+    }
+#endif
+}
+
+#endif
 #elif defined(TICKET)			/* ticket lock */
 
 struct ticket_st
