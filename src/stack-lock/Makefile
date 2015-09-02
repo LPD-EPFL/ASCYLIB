@@ -5,7 +5,11 @@ include $(ROOT)/common/Makefile.common
 ALGO_O = stack-lockb.o
 ALGO_C = stack-lockb.c
 
-BINS = "$(BINDIR)/lb-st_lock$(BIN_SUFFIX)"
+ifeq ($(BIN_SUFFIX),_gl)
+	NEW_SUFFIX = _tas
+endif
+
+BINS = "$(BINDIR)/lb-st_lock$(NEW_SUFFIX)"
 PROF = $(ROOT)/src
 
 .PHONY:	all clean
