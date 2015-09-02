@@ -30,7 +30,7 @@ void
 map_init_l(map_t* map, size_t size)
 {
   map->size = size;
-  map->array = (key_val_t*) ssalloc_aligned(CACHE_LINE_SIZE, size * sizeof(key_val_t));
+  map->array = (key_val_t*) ssalloc(size * sizeof(key_val_t));
   assert(map->array != NULL);
   memset(map->array, 0, size * sizeof(key_val_t));
   optik_init(&map->lock);

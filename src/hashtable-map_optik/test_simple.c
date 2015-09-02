@@ -422,7 +422,7 @@ main(int argc, char **argv)
   stop = 0;
     
   maxhtlength = (unsigned int) initial / load_factor;
-  maxbulength = (unsigned int) range / load_factor;
+  maxbulength = ((unsigned int) range / initial) * load_factor;
 
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
