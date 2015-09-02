@@ -5,7 +5,7 @@ ds=map;
 ub="./bin/$(uname -n)";
 uo="scripts/ppopp/data";
 
-do_thr=1;
+do_thr=0;
 do_ldi=1;
 
 do_compile=1;
@@ -117,13 +117,14 @@ then
     do
 	for ((i=0; i < $np; i++))
 	do
-	    initial=$param_i;
-	    put=${params_p[$i]};
+	    initial=${params_i[$i]};
+	    update=${params_u[$i]};
+	    range=$((2*$initial));
 	    nc=${params_nc[$n]};
-	    out="$unm.${ds}.ldi.n$nc.p$put.dat"
-	    echo "### params -i$initial -p$put -n$nc / dur $duration" | tee ${uo}/$out;
+	    out="$unm.${ds}.ldi.n$nc.i$initial.u$update.dat"
+	    echo "### params -i$initial -u$update -n$nc / dur $duration" | tee ${uo}/$out;
 
-	    ./scripts/scalability_ldi.sh $nc "$algos_str" -d$duration -i$initial -p$put \
+	    ./scripts/scalability_ldi.sh $nc "$algos_str" -d$duration -i$initial -u$update \
 		| tee -a ${uo}/$out;
 	done;
     done;
