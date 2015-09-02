@@ -150,6 +150,7 @@ optik_find(intset_l_t *set, skey_t key)
   node_l_t* curr;
   if (optik_cache_validate_plus(set, key))
     {
+      NODE_CACHE_HIT();
       /* printf("++> optik_find(%zu) cache start @%zu\n", key, node_last.key); */
       curr = node_last.node;
     }
@@ -189,6 +190,7 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 
   if (optik_cache_validate(set, key))
     {
+      NODE_CACHE_HIT();
       curr = node_last.node;
     }
   else
@@ -243,6 +245,7 @@ optik_delete(intset_l_t *set, skey_t key)
 
   if (optik_cache_validate(set, key))
     {
+      NODE_CACHE_HIT();
 #if CACHE_TYPE == 0
       curr_ver = node_last.version;
 #elif CACHE_TYPE == 1

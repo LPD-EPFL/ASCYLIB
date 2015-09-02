@@ -39,7 +39,11 @@ new_node_l(skey_t key, sval_t val, node_l_t* next, int initializing)
   else
     {
       node = (volatile node_l_t *) ssmem_alloc(alloc, sizeof(node_l_t));
-      optik_init(&node->lock);
+      if (unlikely(optik_is_locked(node->lock)))
+	{
+	  optik_unlock(&node->lock);
+	}
+      /* optik_init(&node->lock); */
     }
 #else
   node = (volatile node_l_t *) ssalloc(sizeof(node_l_t));
