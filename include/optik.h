@@ -455,7 +455,7 @@ optik_get_version_wait(optik_t* ol)
 	  return olv;
 	}
 
-      cpause(4096);
+      cpause(128);
     }
   while (1);
 }
