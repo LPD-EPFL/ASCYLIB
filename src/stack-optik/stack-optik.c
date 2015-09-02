@@ -43,11 +43,11 @@ mstack_optik_find(mstack_t* qu, skey_t key)
 int
 mstack_optik_insert(mstack_t* qu, skey_t key, sval_t val)
 {
+  mstack_node_t* node = mstack_new_node(key, val, NULL);
   while (1)
     {
-      /* COMPILER_NO_REORDER(optik_t version = qu->lock;); */
-      COMPILER_NO_REORDER(optik_t version = optik_get_version_wait(&qu->lock););
-      mstack_node_t* node = mstack_new_node(key, val, NULL);
+      COMPILER_NO_REORDER(optik_t version = qu->lock;);
+      /* COMPILER_NO_REORDER(optik_t version = optik_get_version_wait(&qu->lock);); */
       node->next = qu->top;
       if (optik_trylock_version(&qu->lock, version))
   	{
@@ -56,7 +56,6 @@ mstack_optik_insert(mstack_t* qu, skey_t key, sval_t val)
   	  break;
   	}
 
-      ssmem_free(alloc, (void*) node);
       do_pause();
     }
   return 1;
@@ -68,8 +67,8 @@ mstack_optik_delete(mstack_t* qu)
   mstack_node_t* top;
   while (1)
     {
-      /* COMPILER_NO_REORDER(optik_t version = qu->lock;); */
-      COMPILER_NO_REORDER(optik_t version = optik_get_version_wait(&qu->lock););
+      COMPILER_NO_REORDER(optik_t version = qu->lock;);
+      /* COMPILER_NO_REORDER(optik_t version = optik_get_version_wait(&qu->lock);); */
 
       top = qu->top;
       if (unlikely(top == NULL))
