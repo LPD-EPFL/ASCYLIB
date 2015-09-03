@@ -11,9 +11,9 @@ set_cpu=0;
 skip=$#;
 
 
-algos=( ${ub}/lb-ht_lazy_gl ${ub}/lb-ht_java ${ub}/lb-ht_java_optik ${ub}/lb-ht_optik0 ${ub}/lb-ht_optik1 )
-repetitions=3;
-duration=2000;
+algos=( ${ub}/lb-ht_lazy_gl ${ub}/lb-ht_java ${ub}/lb-ht_java_optik ${ub}/lb-ht_optik0 ${ub}/lb-ht_optik1 ${ub}/lb-ht_map );
+repetitions=11;
+duration=5000;
 keep=median; #max min median
 
 params_i=( 128 512 2048 4096 8192 );

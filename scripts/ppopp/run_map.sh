@@ -5,7 +5,7 @@ ds=map;
 ub="./bin/$(uname -n)";
 uo="scripts/ppopp/data";
 
-do_thr=0;
+do_thr=1;
 do_ldi=1;
 
 do_compile=1;
@@ -14,12 +14,12 @@ set_cpu=0;
 skip=$#;
 
 algos=( ${ub}/lb-map ${ub}/lb-map_optik );
-repetitions=1;
-duration=1000;
+repetitions=11;
+duration=5000;
 keep=median; #max min median
 
-params_i=( 4   4 1024 1024 );
-params_u=( 20  1 20   1);
+params_i=( 4   1024 );
+params_u=( 20  20   );
 params_nc=( 10 );		# for latency ditribution
 np=${#params_i[*]};
 
@@ -37,6 +37,8 @@ nc_ldi=${#params_nc[@]};
 dur_ldi=$(echo "$do_ldi*$na*$np*$nc_ldi*$repetitions*$dur_s" | bc -l);
 dur_tot=$(echo "$dur_thr+$dur_ldi" | bc -l);
 
+tf=( false true );
+printf "#> measure throughput: %-5s / ldi: %-5s\n" ${tf[$do_thr]} ${tf[$do_ldi]}
 printf "#> $na algos, $np params, $nc cores, $repetitions reps of %.2f sec = %.2f sec\n" $dur_s $dur_tot;
 printf "#> = %.2f hours\n" $(echo $dur_tot/3600 | bc -l);
 

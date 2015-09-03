@@ -776,11 +776,10 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
   static inline void
   do_pause()
   {
-    /* cpause(rand() % 4000); */
-    /* cpause(rand() & 1023); */
-    /* cpause((mrand(seeds) % 16536)); */
-    /* 8192 seems OK */
-    cpause((mrand(seeds) % 12000));
+    /* cpause((mrand(seeds) % 12000)); */
+    /* cpause((mrand(seeds) % 12000)); */
+    cpause((mrand(seeds) % 16384));
+    cpause((mrand(seeds) % 16384));
   }
 
 #ifdef __cplusplus

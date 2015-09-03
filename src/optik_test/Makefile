@@ -2,7 +2,7 @@ ROOT = ../..
 
 include $(ROOT)/common/Makefile.common
 
-BINS = $(BINDIR)/optik_test
+BINS = $(BINDIR)/optik_test$(OPTIK)
 PROF = $(ROOT)/src
 
 .PHONY:	all clean

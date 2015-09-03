@@ -87,8 +87,17 @@ noise:
 tests:
 	$(MAKE) $(TESTS)
 
-optik_test:
-	$(MAKE) src/optik_test
+
+optik_testppopp: optik_test0 optik_test1 optik_test2
+
+optik_test0:
+	$(MAKE) "OPTIK=0" "OPTIK_STATS=1" src/optik_test
+
+optik_test1:
+	$(MAKE) "OPTIK=1" "OPTIK_STATS=1" src/optik_test
+
+optik_test2:
+	$(MAKE) "OPTIK=2" "OPTIK_STATS=1" src/optik_test
 
 tbb:
 	$(MAKE) src/hashtable-tbb
@@ -313,7 +322,7 @@ htrcugc:
 
 ht:	seqht lfht lbht htjava htjava_optik tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl lbht_lazy_gl_no_ro lbht_pugh_gl_no_ro htcopy_no_ro htjava_no_ro
 
-htppopp: lbht_lazy_gl htjava htjava_optik lbht_optik0 lbht_optik1
+htppopp: lbht_lazy_gl htjava htjava_optik lbht_optik0 lbht_optik1 lbht_map
 
 seqbstint:
 	$(MAKE) "STM=SEQUENTIAL" "SEQ_NO_FREE=1" src/bst-seq_internal

@@ -2,11 +2,10 @@
 
 if [ $# -eq 0 ];
 then
-    echo "Usage: $0 \"cores\" num_repetitions value_to_keep \"executable1 excutable2 ...\" [params]";
+    echo "Usage: $0 \"cores\" num_repetitions \"executable1 excutable2 ...\" [params]";
     echo "  where \"cores\" can be the actual thread num to use, such as \"1 10 20\", or"
     echo "  one of the predefined specifications for that platform (e.g., socket -- see "
     echo "  scripts/config)";
-    echo "  and value_to_keep can be the min, max, or median";
     exit;
 fi;
 

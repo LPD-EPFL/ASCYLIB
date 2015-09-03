@@ -189,7 +189,7 @@
 		  my_removing_fail);					\
       my_removing_count++;						\
     }									\
-  nop_rep((num_threads-1)*32);
+  cpause((num_threads-1)*32);
 
   /* cdelay(1); */
   /* cpause(0); */

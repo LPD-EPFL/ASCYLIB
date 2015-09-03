@@ -201,7 +201,7 @@ test(void* thread)
       int key = (c & rand_max);
 
       optik_t* cur = set + key;
-      optik_t version = *cur;
+      COMPILER_NO_REORDER(optik_t version = *cur;);
 
       if (unlikely(c <= scale_put))
 	{

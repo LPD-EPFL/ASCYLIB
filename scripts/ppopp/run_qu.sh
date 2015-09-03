@@ -14,8 +14,8 @@ set_cpu=0;
 skip=$#;
 
 algos=( ./${ub}/lf-qu_ms ${ub}/lb-qu_ms ${ub}/lb-qu_optik0 ${ub}/lb-qu_optik1 ${ub}/lb-qu_optik2 ${ub}/lb-qu_optik3 );
-repetitions=5;
-duration=5000;
+repetitions=3;
+duration=3000;
 keep=median; #max min median
 
 param_i=65534;
