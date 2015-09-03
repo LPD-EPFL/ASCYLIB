@@ -58,6 +58,7 @@ PLOT0 = '"Decreasing size\n{/*0.8(40% push, 60% pop)} "'
 PLOT1 = '"Stable size\n{/*0.8(50% push, 50% pop)}"'
 PLOT2 = '"Increasing size\n{/*0.8(60% push, 40% pop)}"'
 PLOT3 = '"Stable size\n{/*0.8(on 10 threads)}"'
+PLOT4 = '"Stable size\n{/*0.8(on 20 threads)}"'
 
 # font "Helvetica Bold"
 set label 1 "Opteron" at screen 0.018, screen 0.18 rotate by 90 font ',30' textcolor rgb "red"
@@ -65,6 +66,8 @@ set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textc
 
 LDI_FILE0 = '"data/lpdxeon2680.st.ldi.n10.p50.dat"'
 LDI_FILE1 = '"data/lpd48core.st.ldi.n10.p50.dat"'
+LDI_FILE2 = '"data/lpdxeon2680.st.ldi.n20.p50.dat"'
+LDI_FILE3 = '"data/lpd48core.st.ldi.n20.p50.dat"'
 
 # ##########################################################################################
 # XEON #####################################################################################
@@ -129,7 +132,7 @@ FILE0 = '"data/lpd48core.st.thr.p40.dat"'
 FILE1 = '"data/lpd48core.st.thr.p50.dat"'
 FILE2 = '"data/lpd48core.st.thr.p60.dat"'
 
-set xlabel "# Threads" offset 1.5, 0.75 font ",28"
+set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xrange [xrange_start:65]
 set xtics ( xrange_start, 12, 24, 36, 48, 56, 64 ) offset 0,0.4
 
@@ -181,7 +184,8 @@ plot \
 ldi_pos_x=1.59
 
 set origin ldi_pos_x + graphs_x_offs, top_row_y
-@PSIZE_LARGE
+set size 0.45, 0.6
+# @PSIZE_LARGE
 set title @PLOT3 offset 0.2,title_offset font ",28"
 @YTICS
 set ylabel ""
@@ -214,8 +218,21 @@ plot for [i=1:bnv] @LDI_FILE0 \
      for [i=1:bnv] '' \
      using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
 
+set origin ldi_pos_x + graphs_x_offs + 0.45, top_row_y
+set size 0.45, 0.6
+unset title
+set ylabel "Latency distribution\n(Kcycles)" offset 2
+unset xlabel
+unset ylabel
+set title @PLOT4 offset 0.2,title_offset font ",28"
+plot for [i=1:bnv] @LDI_FILE2 \
+     using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
+     for [i=1:bnv] '' \
+     using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
+
 set origin ldi_pos_x + graphs_x_offs, bottom_row_y
-@PSIZE_LARGE
+set size 0.45, 0.6
+# @PSIZE_LARGE
 unset title
 set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
@@ -223,6 +240,18 @@ plot for [i=1:bnv] @LDI_FILE1 \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
      using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
+
+set origin ldi_pos_x + graphs_x_offs + 0.45, bottom_row_y
+set size 0.45, 0.6
+unset title
+set ylabel "Latency distribution\n(Kcycles)" offset 2
+unset xlabel
+unset ylabel
+plot for [i=1:bnv] @LDI_FILE3 \
+     using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
+     for [i=1:bnv] '' \
+     using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
+
 
 
 # ##########################################################################################

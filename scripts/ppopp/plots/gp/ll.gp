@@ -44,9 +44,9 @@ column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
 LINE0 = '"lazy"'
 LINE1 = '"MCS-gl-opt"'
-LINE2 = '"OPTIK-gl"'
-LINE3 = '"OPTIK"'
-LINE4 = '"OPTIK-cache"'
+LINE2 = '"optik-gl"'
+LINE3 = '"optik"'
+LINE4 = '"optik-cache"'
 
 PLOT0 = '"Very low contention\n{/*0.8(8192 elements, 1% updates)}"'
 PLOT1 = '"Low contention\n{/*0.8(4096 elements, 10% updates)}"'
@@ -164,7 +164,7 @@ FILE2 = '"data/lpd48core.ll.i2048.u20.dat"'
 FILE3 = '"data/lpd48core.ll.i512.u50.dat"'
 FILE4 = '"data/lpd48core.ll.i128.u100.dat"'
 
-set xlabel "# Threads" offset 1.5, 0.75 font ",28"
+set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xrange [0:65]
 set xtics ( 1, 12, 24, 36, 48, 56, 64 ) offset 0,0.4
 

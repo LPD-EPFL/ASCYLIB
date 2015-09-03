@@ -43,9 +43,9 @@ OFFSET           =    3
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
 LINE0 = '"herlihy"'
-LINE1 = '"herlihy-OPTIK"'
-LINE2 = '"OPTIK1"'
-LINE3 = '"OPTIK2"'
+LINE1 = '"herlihy-optik"'
+LINE2 = '"optik1"'
+LINE3 = '"optik2"'
 LINE4 = '""'
 
 NCOL0 = 0
@@ -165,7 +165,7 @@ FILE2 = '"data/lpd48core.sl.i2048.u20.dat"'
 FILE3 = '"data/lpd48core.sl.i512.u50.dat"'
 FILE4 = '"data/lpd48core.sl.i128.u100.dat"'
 
-set xlabel "# Threads" offset 1.5, 0.75 font ",28"
+set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xrange [0:65]
 set xtics ( 1, 12, 24, 36, 48, 56, 64 ) offset 0,0.4
 
