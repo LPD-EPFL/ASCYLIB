@@ -1,3 +1,4 @@
+load 'gp/style.gp'
 set macros
 NOYTICS = "set format y ''; unset ylabel"
 YTICS = "set ylabel 'Throughput (Mops/s)' offset 2"
@@ -13,18 +14,6 @@ set lmargin 3
 set tmargin 3
 set bmargin 2.5
 
-set style line 1 lc rgb '#0060ad' lt 1 pt 2 ps 1.6 lw 5 pi 3
-set style line 2 lc rgb '#dd181f' lt 1 pt 5 ps 1.6 lw 5 pi 3
-set style line 3 lc rgb '#8b1a0e' lt 2 pt 1 ps 1.6 lw 5 pi 3
-set style line 4 lc rgb '#5e9c36' lt 1 pt 6 ps 1.6 lw 5 pi 3
-set style line 5 lc rgb '#663399' lt 2 pt 3 ps 1.6 lw 5 pi 3
-set style line 6 lc rgb '#cd1eff' lt 1 pt 4 ps 1.6 lw 5 pi 3
-set style line 7 lc rgb '#cc6600' lt 2 pt 7 ps 1.6 lw 5 pi 3
-set style line 8 lc rgb '#299fff' lt 1 pt 8 ps 1.6 lw 5 pi 3
-set style line 9 lc rgb '#ff299f' lt 2 pt 9 ps 1.6 lw 5 pi 3
-
-set style line 12 lc rgb '#808080' lt 2 lw 1
-
 title_offset   = -0.5
 ytics_offset   = 0.65
 top_row_y      = 0.44
@@ -32,11 +21,6 @@ bottom_row_y   = 0.0
 graphs_x_offs  = 0.1
 plot_size_x    = 2.615
 plot_size_y    = 1.11
-
-# solid lines
-set style line 10 lt 1 lw 2 lc 1
-set style line 20 lt 1 lw 2 lc 2
-set style line 30 lt 1 lw 2 lc 3
 
 DIV              =    1e6
 FIRST            =    2
@@ -46,8 +30,9 @@ column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 LINE0 = '"lazy-gl"'
 LINE1 = '"java"'
 LINE2 = '"java-optik"'
-LINE3 = '"OPTIK"'
-LINE4 = '"OPTIK-gl"'
+LINE3 = '"optik"'
+LINE4 = '"optik-gl"'
+LINE5 = '"optik-map"'
 
 PLOT0 = '"Very low contention\n{/*0.8(8192 elements, 1% updates)}"'
 PLOT1 = '"Low contention\n{/*0.8(4096 elements, 10% updates)}"'
@@ -91,7 +76,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 set origin 0.5 + graphs_x_offs, top_row_y
 @PSIZE
@@ -106,7 +92,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 
 set origin 1.0 + graphs_x_offs, top_row_y
@@ -121,7 +108,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 
 set origin 1.5 + graphs_x_offs, top_row_y
@@ -136,7 +124,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 
 set origin 2.0 + graphs_x_offs, top_row_y
@@ -151,7 +140,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 
 # ##########################################################################################
@@ -164,7 +154,7 @@ FILE2 = '"data/lpd48core.ht.i2048.u20.dat"'
 FILE3 = '"data/lpd48core.ht.i512.u50.dat"'
 FILE4 = '"data/lpd48core.ht.i128.u100.dat"'
 
-set xlabel "# Threads" offset 1.5, 0.75 font ",28"
+set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xrange [0:65]
 set xtics ( 1, 12, 24, 36, 48, 56, 64 ) offset 0,0.4
 
@@ -181,7 +171,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 set origin 0.5 + graphs_x_offs, bottom_row_y
 @PSIZE
@@ -196,7 +187,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 
 set origin 1.0 + graphs_x_offs, bottom_row_y
@@ -211,7 +203,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 
 set origin 1.5 + graphs_x_offs, bottom_row_y
@@ -226,7 +219,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 
 set origin 2.0 + graphs_x_offs, bottom_row_y
@@ -241,7 +235,8 @@ plot \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
      "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints
+     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
+     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
 
 unset origin
@@ -275,7 +270,8 @@ plot \
      NaN title @LINE1 ls 2 with linespoints, \
      NaN title @LINE2 ls 3 with linespoints, \
      NaN title @LINE3 ls 4 with linespoints, \
-     NaN title @LINE4 ls 8 with linespoints
+     NaN title @LINE4 ls 8 with linespoints, \
+     NaN title @LINE5 ls 5 with linespoints
 
 #</null>
 unset multiplot  #<--- Necessary for some terminals, but not postscript I don't thin

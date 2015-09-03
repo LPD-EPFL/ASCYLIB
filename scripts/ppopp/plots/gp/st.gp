@@ -1,3 +1,4 @@
+load 'gp/style.gp'
 set macros
 NOYTICS = "set format y ''; unset ylabel"
 YTICS = "set ylabel 'Throughput (Mops/s)' offset 2"
@@ -14,18 +15,6 @@ set lmargin 3
 set tmargin 3
 set bmargin 2.5
 
-set style line 1 lc rgb '#0060ad' lt 1 pt 2 ps 1.6 lw 5 pi 3
-set style line 2 lc rgb '#dd181f' lt 1 pt 5 ps 1.6 lw 5 pi 3
-set style line 3 lc rgb '#8b1a0e' lt 2 pt 1 ps 1.6 lw 5 pi 3
-set style line 4 lc rgb '#5e9c36' lt 1 pt 6 ps 1.6 lw 5 pi 3
-set style line 5 lc rgb '#663399' lt 2 pt 3 ps 1.6 lw 5 pi 3
-set style line 6 lc rgb '#cd1eff' lt 1 pt 4 ps 1.6 lw 5 pi 3
-set style line 7 lc rgb '#cc6600' lt 2 pt 7 ps 1.6 lw 5 pi 3
-set style line 8 lc rgb '#299fff' lt 1 pt 8 ps 1.6 lw 5 pi 3
-set style line 9 lc rgb '#ff299f' lt 2 pt 9 ps 1.6 lw 5 pi 3
-
-set style line 12 lc rgb '#808080' lt 2 lw 1
-
 xrange_start   = 3
 title_offset   = -0.5
 top_row_y      = 0.44
@@ -33,14 +22,6 @@ bottom_row_y   = 0.0
 graphs_x_offs  = 0.1
 plot_size_x    = 2.615
 plot_size_y    = 1.11
-
-# solid lines
-# solid lines
-set style line 10 lt 1 lw 2 lc 1
-set style line 20 lt 1 lw 2 lc 2
-set style line 30 lt 1 lw 2 lc 3
-set style line 40 lt 1 lw 2 lc rgb '#FFDEAD'
-set style line 50 lt 1 lw 2 lc 7
 
 DIV              =    1e6
 FIRST            =    2
@@ -58,6 +39,7 @@ PLOT0 = '"Decreasing size\n{/*0.8(40% push, 60% pop)} "'
 PLOT1 = '"Stable size\n{/*0.8(50% push, 50% pop)}"'
 PLOT2 = '"Increasing size\n{/*0.8(60% push, 40% pop)}"'
 PLOT3 = '"Stable size\n{/*0.8(on 10 threads)}"'
+PLOT4 = '"Stable size\n{/*0.8(on 20 threads)}"'
 
 # font "Helvetica Bold"
 set label 1 "Opteron" at screen 0.018, screen 0.18 rotate by 90 font ',30' textcolor rgb "red"
@@ -65,6 +47,8 @@ set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textc
 
 LDI_FILE0 = '"data/lpdxeon2680.st.ldi.n10.p50.dat"'
 LDI_FILE1 = '"data/lpd48core.st.ldi.n10.p50.dat"'
+LDI_FILE2 = '"data/lpdxeon2680.st.ldi.n20.p50.dat"'
+LDI_FILE3 = '"data/lpd48core.st.ldi.n20.p50.dat"'
 
 # ##########################################################################################
 # XEON #####################################################################################
@@ -129,7 +113,7 @@ FILE0 = '"data/lpd48core.st.thr.p40.dat"'
 FILE1 = '"data/lpd48core.st.thr.p50.dat"'
 FILE2 = '"data/lpd48core.st.thr.p60.dat"'
 
-set xlabel "# Threads" offset 1.5, 0.75 font ",28"
+set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xrange [xrange_start:65]
 set xtics ( xrange_start, 12, 24, 36, 48, 56, 64 ) offset 0,0.4
 
@@ -181,7 +165,8 @@ plot \
 ldi_pos_x=1.59
 
 set origin ldi_pos_x + graphs_x_offs, top_row_y
-@PSIZE_LARGE
+set size 0.45, 0.6
+# @PSIZE_LARGE
 set title @PLOT3 offset 0.2,title_offset font ",28"
 @YTICS
 set ylabel ""
@@ -214,8 +199,21 @@ plot for [i=1:bnv] @LDI_FILE0 \
      for [i=1:bnv] '' \
      using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
 
+set origin ldi_pos_x + graphs_x_offs + 0.45, top_row_y
+set size 0.45, 0.6
+unset title
+set ylabel "Latency distribution\n(Kcycles)" offset 2
+unset xlabel
+unset ylabel
+set title @PLOT4 offset 0.2,title_offset font ",28"
+plot for [i=1:bnv] @LDI_FILE2 \
+     using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
+     for [i=1:bnv] '' \
+     using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
+
 set origin ldi_pos_x + graphs_x_offs, bottom_row_y
-@PSIZE_LARGE
+set size 0.45, 0.6
+# @PSIZE_LARGE
 unset title
 set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
@@ -223,6 +221,18 @@ plot for [i=1:bnv] @LDI_FILE1 \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
      using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
+
+set origin ldi_pos_x + graphs_x_offs + 0.45, bottom_row_y
+set size 0.45, 0.6
+unset title
+set ylabel "Latency distribution\n(Kcycles)" offset 2
+unset xlabel
+unset ylabel
+plot for [i=1:bnv] @LDI_FILE3 \
+     using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
+     for [i=1:bnv] '' \
+     using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
+
 
 
 # ##########################################################################################
