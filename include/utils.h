@@ -782,6 +782,25 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     cpause((mrand(seeds) % 16384));
   }
 
+
+  static const size_t pause_max  = 16384;
+  static const size_t pause_base = 1024;
+  static const size_t pause_min  = 1024;
+
+  static inline void
+  do_pause_exp(size_t nf)
+  {
+    if (nf > 32)
+      {
+	nf = 32;
+      }
+    const size_t p = (pause_base << nf);
+    const size_t pm = (p > pause_max) ? pause_max : p;
+    const size_t tp = pause_min + (mrand(seeds) % pm);
+    cdelay(tp);
+  }
+
+
 #ifdef __cplusplus
 }
 
