@@ -633,7 +633,7 @@ main(int argc, char **argv)
   printf("#Mops %.3f\n", throughput / 1e6);
 #ifdef TSX_STATS
   double a = (double)all_locked_total;
-  printf("Fraction actually locked %.3f\n", a/(double)(putting_count_total_succ + removing_count_total_succ));
+  printf("Fraction actually locked %.3f\n", a/(double)((putting_count_total_succ + removing_count_total_succ) * levelmax));
 #endif
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
