@@ -234,8 +234,8 @@ test(void* thread)
             //ssmem_free(alloc,popped);
 #endif
             do_remove = 0;  
-            /*fprintf(stderr, "thread %d after remove: queue size is %d\n",ID,queue_size(set));*/
-            /*print_queue(set);*/
+            /*fprintf(stderr, "thread %d after remove: stack size is %d\n",ID,stack_size(set));*/
+            /*print_stack(set);*/
         } else {
             /*c = (uint64_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	*/
             /*//TODO: use custom allocator*/
@@ -247,11 +247,11 @@ test(void* thread)
             ADD_DUR(my_putting_succ);
             my_putting_count_succ++;
             do_remove = 1;
-            /*fprintf(stderr, "thread %d after insert: queue size is %d\n",ID,queue_size(set));*/
-            /*print_queue(set);*/
+            /*fprintf(stderr, "thread %d after insert: stack size is %d\n",ID,stack_size(set));*/
+            /*print_stack(set);*/
         }
         /*if (my_putting_count_succ % 1000 == 0) {*/
-            /*fprintf(stderr, "thread %d: queue size is %d\n",ID,queue_size(set));*/
+            /*fprintf(stderr, "thread %d: stack size is %d\n",ID,stack_size(set));*/
         /*}*/
     }
 
@@ -321,7 +321,7 @@ main(int argc, char **argv)
 
     fprintf(stderr, "Data strucutre sizes\n");
     fprintf(stderr, "sizeof qnode_t %d\n", sizeof(qnode_t));
-    fprintf(stderr, "sizeof queue_t %d\n", sizeof(queue_t));
+    fprintf(stderr, "sizeof stack_t %d\n", sizeof(stack_t));
 
     int i, c;
     while(1) 
