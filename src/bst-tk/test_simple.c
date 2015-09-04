@@ -104,6 +104,11 @@ volatile ticks *removing_count;
 volatile ticks *removing_count_succ;
 volatile ticks *total;
 
+#if TSX_STATS == 1
+__thread uint64_t locked = 0;
+volatile uint64_t* all_locked;
+#endif
+
 #if WAIT_LOCK_STATS == 1
 __thread ticks getticks_correction = 0;
 ticks getticks_correction_calc() 
@@ -168,6 +173,10 @@ test(void* thread)
   DS_TYPE* set = td->set;
 
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
+#if TSX_STATS == 1
+    locked = 0;
+#endif 
+
 #if WAIT_LOCK_STATS == 1
   wait_lock = 0;
   gt_correction = getticks_correction_calc();
@@ -289,7 +298,9 @@ test(void* thread)
 #if WAIT_LOCK_STATS == 1
     printf("Thread %d cycles waiting for locks: %llu\n", ID, (long long unsigned int) wait_lock);
 #endif
-
+#if TSX_STATS == 1
+    all_locked[ID]=locked;
+#endif
 #if GC == 1
   ssmem_term();
   free(alloc);
@@ -490,6 +501,9 @@ main(int argc, char **argv)
   getting_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
+#if TSX_STATS == 1
+  all_locked = (ticks *) calloc(num_threads , sizeof(ticks));
+#endif
     
   pthread_t threads[num_threads];
   pthread_attr_t attr;
@@ -555,6 +569,9 @@ main(int argc, char **argv)
   volatile uint64_t removing_count_total = 0;
   volatile uint64_t removing_count_total_succ = 0;
     
+#ifdef TSX_STATS
+    volatile uint64_t all_locked_total = 0;
+#endif
   for(t=0; t < num_threads; t++) 
     {
       if (test_verbose)
@@ -580,6 +597,9 @@ main(int argc, char **argv)
       getting_count_total_succ += getting_count_succ[t];
       removing_count_total += removing_count[t];
       removing_count_total_succ += removing_count_succ[t];
+#ifdef TSX_STATS
+    all_locked_total+=all_locked[t];
+#endif
     }
 
 #if defined(COMPUTE_LATENCY)
@@ -620,6 +640,10 @@ main(int argc, char **argv)
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
+#ifdef TSX_STATS
+  double a = (double)all_locked_total;
+  printf("Fraction actually locked %.3f\n", a/(double)(putting_count_total_succ + removing_count_total_succ));
+#endif
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();

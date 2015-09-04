@@ -44,6 +44,10 @@
  * GLOBALS
  * ################################################################### */
 
+#if TSX_STATS == 1
+__thread uint64_t locked = 0;
+#endif
+
 RETRY_STATS_VARS_GLOBAL;
 
 size_t initial = DEFAULT_INITIAL;

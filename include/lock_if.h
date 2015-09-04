@@ -131,6 +131,10 @@ extern __thread ticks gt_correction;
 #endif
 
 
+#if TSX_STATS  == 1
+extern __thread uint64_t locked;
+#endif
+
 static inline void
 tas_init(ptlock_t* l)
 {
@@ -272,8 +276,6 @@ static inline uint32_t tas_lock_tsx(ptlock_t * lock) {
 #endif
         _xabort(0xff);
         }
-        PAUSE;
-    PAUSE;
     PAUSE;
     PAUSE;
     PAUSE;
@@ -281,6 +283,10 @@ static inline uint32_t tas_lock_tsx(ptlock_t * lock) {
     PAUSE;
     PAUSE;
     PAUSE;
+
+#if TSX_STATS  == 1
+    locked++;
+#endif
     return tas_lock(lock);
 }
 
@@ -314,6 +320,7 @@ static inline int tas_unlock_tsx(ptlock_t* lock) {
 #if WAIT_LOCK_STATS == 1
     volatile tticket_t* t = (volatile tticket_t*) lock;
     if (t->curr == t->tick) {
+        _xend();
         return 0;
     } else {
         return tas_unlock(lock);
@@ -321,12 +328,14 @@ static inline int tas_unlock_tsx(ptlock_t* lock) {
 #elif RETRY_STATS == 1
     volatile tticket_t* t = (volatile tticket_t*) lock;
     if (t->curr == t->tick) {
+        _xend();
         return 0;
     } else {
         return tas_unlock(lock);
     }
 #else
     if (likely(*lock == TAS_FREE)) {
+        _xend();
         return 0;
     } else {
         return tas_unlock(lock);

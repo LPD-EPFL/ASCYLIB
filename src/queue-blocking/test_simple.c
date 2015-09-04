@@ -45,6 +45,9 @@
  * ################################################################### */
 
 RETRY_STATS_VARS_GLOBAL;
+#if TSX_STATS == 1
+__thread uint64_t locked = 0;
+#endif
 
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
