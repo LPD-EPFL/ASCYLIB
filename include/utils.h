@@ -778,7 +778,8 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
   {
     /* cpause((mrand(seeds) % 12000)); */
     /* cpause((mrand(seeds) % 12000)); */
-    cpause((mrand(seeds) % 16384));
+    //    cpause((mrand(seeds) % 16384));
+    //    cpause((mrand(seeds) % 32768));
     cpause((mrand(seeds) % 16384));
   }
 
