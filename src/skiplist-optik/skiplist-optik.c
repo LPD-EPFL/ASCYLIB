@@ -155,14 +155,7 @@ unlock_levels_up(sl_node_t** nodes, int low, int high)
 }
 
 
-static inline void
-sl_pause(size_t num_restarts)
-{
-  cpause(rand() % num_restarts);
-}
-
-#define PAUSE_AND_RETRY() sl_pause(++nr); goto restart;
-
+#define PAUSE_AND_RETRY() DO_PAUSE(); goto restart;
 
 /*
  * Function sl_optik_insert stands for the add method of the original paper.
@@ -179,7 +172,7 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
   int inserted_upto = 0;
   /* printf("++> inserting %zu\n", key); */
 
-  size_t nr = 0;
+  NUM_RETRIES();
  restart:
   UPDATE_TRY();
   sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv);
@@ -235,7 +228,7 @@ sl_optik_delete(sl_intset_t* set, skey_t key)
   optik_t predsv[OPTIK_MAX_MAX_LEVEL];
   int my_delete = 0;
 
-  size_t nr = 0;
+  NUM_RETRIES();
  restart:
   UPDATE_TRY();
   sl_node_t* node_found = sl_optik_search(set, key, preds, succs, predsv);
