@@ -28,12 +28,14 @@
 RETRY_STATS_VARS;
 LOCK_LOCAL_DATA;
 
+const int version_every = 31;
+
 sval_t
 optik_map_contains(map_t* map, skey_t key)
 {
+  int i;
  restart:
   COMPILER_NO_REORDER(optik_t version = *map->lock;);
-  int i;
   for (i = 0; i < map->size; i++)
     {
       if (map->array[i].key == key)
@@ -46,13 +48,13 @@ optik_map_contains(map_t* map, skey_t key)
 	  goto restart;
 	}
     }
-
   return 0;
 }
 
 int
 optik_map_insert(map_t* map, skey_t key, sval_t val)
 {
+  NUM_RETRIES();
   optik_t version;
  restart:
   COMPILER_NO_REORDER(version = *map->lock;);
@@ -73,6 +75,7 @@ optik_map_insert(map_t* map, skey_t key, sval_t val)
 
   if (!optik_trylock_version(map->lock, version))
     {
+      DO_PAUSE();
       goto restart;
     }
 
@@ -90,6 +93,7 @@ optik_map_insert(map_t* map, skey_t key, sval_t val)
 sval_t
 optik_map_remove(map_t* map, skey_t key)
 {
+  NUM_RETRIES();
   optik_t version;
  restart:
   COMPILER_NO_REORDER(version = *map->lock;);  
@@ -100,6 +104,7 @@ optik_map_remove(map_t* map, skey_t key)
 	{
 	  if (!optik_trylock_version(map->lock, version))
 	    {
+	      DO_PAUSE();
 	      goto restart;
 	    }
 	  sval_t val = map->array[i].val;
