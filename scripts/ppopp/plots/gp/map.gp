@@ -122,7 +122,7 @@ column_right(i)=column(3 + (i-1)*6)/DIV
 column_keep_left(i)=column(i)/DIV
 column_keep_right(i)=column(6+i)/DIV
 
-set ytics 30
+set ytics 6
 set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 bnv=6
@@ -140,7 +140,7 @@ set size 0.5, 0.6
 # unset xlabel
 # unset ylabel
 # set title @PLOT4 offset 0.2,title_offset-0.3 font ",28"
-set ytics 150 offset 0.8
+set ytics 120 offset 0.8
 unset xlabel
 unset ylabel
 bnv=6
