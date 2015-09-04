@@ -1,7 +1,7 @@
 .PHONY:	all
 
-BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-pugh-string src/skiplist-seq src/queue-blocking
-LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-pugh-string src/bst-bronson src/bst-drachsler src/bst-tk/ src/queue-blocking
+BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-pugh-string src/skiplist-seq src/queue-blocking src/stack-blocking
+LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-pugh-string src/bst-bronson src/bst-drachsler src/bst-tk/ src/queue-blocking src/stack-blocking 
 LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 EXTERNALS = src/hashtable-rcu src/hashtable-tbb
@@ -65,7 +65,7 @@ seqgc:
 
 seq:	sequential
 
-wf_tests: lbll_lazy lbsl_herlihy_lb bst_tk lbht_lazy_gl bl_queue
+wf_tests: lbll_lazy lbsl_herlihy_lb bst_tk lbht_lazy_gl bl_queue bl_stack
 
 
 seqht:
@@ -177,6 +177,9 @@ lbll_lazy_no_ro:
 bl_queue:
 	$(MAKE) "LOCK=TAS" src/queue-blocking
 
+bl_stack:
+	$(MAKE) "LOCK=TAS" src/stack-blocking
+	
 llcopy:
 	$(MAKE) "LOCK=CLH" src/linkedlist-copy
 
@@ -260,6 +263,7 @@ clean:
 	$(MAKE) -C src/skiplist-pugh-string clean
 	$(MAKE) -C src/skiplist-seq clean
 	$(MAKE) -C src/queue-blocking clean
+	$(MAKE) -C src/stack-blocking clean
 	$(MAKE) -C src/tests clean
 	rm -rf build
 
