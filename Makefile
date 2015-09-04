@@ -346,7 +346,7 @@ external:
 mapppopp: lbmap_lock lbmap_optik
 
 lbmap_lock:
-	$(MAKE) src/map-lock
+	$(MAKE) "LOCK=MCS" src/map-lock
 
 lbmap_optik:
 	$(MAKE) src/map-optik
