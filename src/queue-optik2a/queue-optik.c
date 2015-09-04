@@ -64,7 +64,7 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 	      UNUSED void* dummy = CAS_PTR(&qu->tail, tail, next);
 	    }
 	}
-      do_pause();
+      DO_PAUSE();
     }
   return 1;
 }
@@ -73,6 +73,7 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 sval_t
 queue_optik_delete(queue_t* qu)
 {
+  NUM_RETRIES();
  restart:
   COMPILER_NO_REORDER(const optik_t version = qu->head_lock;);
   const queue_node_t* node = qu->head;
@@ -84,7 +85,7 @@ queue_optik_delete(queue_t* qu)
 
   if (!optik_trylock_version(&qu->head_lock, version))
     {
-      do_pause();
+      DO_PAUSE();
       goto restart;
     }
 

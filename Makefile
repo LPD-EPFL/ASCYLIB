@@ -15,6 +15,8 @@ default: lockfree tas seq
 
 all:	lockfree tas seq external
 
+ppopp: mapppopp llppopp htppopp slppopp quppopp stppopp
+
 mutex:
 	$(MAKE) "LOCK=MUTEX" $(LBENCHS)
 

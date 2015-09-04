@@ -801,6 +801,18 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     cdelay(tp);
   }
 
+#define DO_PAUSE_TYPE         1
+
+#if DO_PAUSE_TYPE == 0
+#define DO_PAUSE()            do_pause()
+#define NUM_RETRIES()        
+#elif DO_PAUSE_TYPE == 1
+#define DO_PAUSE()            do_pause_exp(__nr++);
+#define NUM_RETRIES()         size_t __nr;
+#else
+
+#endif
+
 
 #ifdef __cplusplus
 }

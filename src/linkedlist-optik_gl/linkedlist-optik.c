@@ -47,6 +47,7 @@ int
 optik_insert(intset_l_t *set, skey_t key, sval_t val)
 {
   node_l_t *curr, *pred, *newnode;
+  NUM_RETRIES();
 
  restart:
   PARSE_TRY();
@@ -71,7 +72,7 @@ optik_insert(intset_l_t *set, skey_t key, sval_t val)
 
   if ((!optik_trylock_version(&set->lock, version)))
     {
-      do_pause();
+      DO_PAUSE();
       node_delete_l(newnode);
       goto restart;
     }
@@ -90,6 +91,7 @@ optik_delete(intset_l_t *set, skey_t key)
 {
   node_l_t *pred, *curr;
   sval_t result = 0;
+  NUM_RETRIES();
 
  restart:
   COMPILER_NO_REORDER(optik_t version = set->lock;);
@@ -112,7 +114,7 @@ optik_delete(intset_l_t *set, skey_t key)
 
   if (unlikely(!optik_trylock_version(&set->lock, version)))
     {
-      do_pause();
+      DO_PAUSE();
       /* cpause(rand() & 1023); */
       goto restart;
     }

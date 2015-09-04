@@ -41,6 +41,7 @@ queue_ms_find(queue_t* qu, skey_t key)
 int
 queue_ms_insert(queue_t* qu, skey_t key, sval_t val)
 {
+  NUM_RETRIES();
   queue_node_t* node = queue_new_node(key, val, NULL);
   queue_node_t* tail;
   while(1)
@@ -61,7 +62,7 @@ queue_ms_insert(queue_t* qu, skey_t key, sval_t val)
 	      UNUSED void* dummy = CAS_PTR(&qu->tail, tail, next);
 	    }
 	}
-      do_pause();
+      DO_PAUSE();
     }
   UNUSED void* dummy = CAS_PTR(&qu->tail, tail, node);
   return 1;
@@ -71,6 +72,7 @@ queue_ms_insert(queue_t* qu, skey_t key, sval_t val)
 sval_t
 queue_ms_delete(queue_t* qu)
 {
+  NUM_RETRIES();
   queue_node_t* next, *head;
   while (1)
     {
@@ -95,7 +97,7 @@ queue_ms_delete(queue_t* qu)
 		}
 	    }
 	}
-      do_pause();
+      DO_PAUSE();
     }
 
 
