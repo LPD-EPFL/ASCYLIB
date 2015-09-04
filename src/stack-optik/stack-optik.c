@@ -43,6 +43,7 @@ mstack_optik_find(mstack_t* qu, skey_t key)
 int
 mstack_optik_insert(mstack_t* qu, skey_t key, sval_t val)
 {
+  NUM_RETRIES();
   mstack_node_t* node = mstack_new_node(key, val, NULL);
   while (1)
     {
@@ -56,7 +57,7 @@ mstack_optik_insert(mstack_t* qu, skey_t key, sval_t val)
   	  break;
   	}
 
-      do_pause();
+      DO_PAUSE();
     }
   return 1;
 }
@@ -64,6 +65,7 @@ mstack_optik_insert(mstack_t* qu, skey_t key, sval_t val)
 sval_t
 mstack_optik_delete(mstack_t* qu)
 {
+  NUM_RETRIES();
   mstack_node_t* top;
   while (1)
     {
@@ -83,7 +85,7 @@ mstack_optik_delete(mstack_t* qu)
 	  break;
 	}
 
-      do_pause();
+      DO_PAUSE();
     }
 
 #if GC == 1

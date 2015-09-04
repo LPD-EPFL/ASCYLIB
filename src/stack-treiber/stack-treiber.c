@@ -43,7 +43,7 @@ mstack_treiber_find(mstack_t* qu, skey_t key)
 int
 mstack_treiber_insert(mstack_t* qu, skey_t key, sval_t val)
 {
-  /* size_t nr = 1; */
+  NUM_RETRIES();
   mstack_node_t* node = mstack_new_node(key, val, NULL);
   while(1)
     {
@@ -53,7 +53,7 @@ mstack_treiber_insert(mstack_t* qu, skey_t key, sval_t val)
 	{
 	  break;
 	}
-      do_pause();
+      DO_PAUSE();
     }
   return 1;
 }
@@ -63,7 +63,7 @@ sval_t
 mstack_treiber_delete(mstack_t* qu)
 {
   mstack_node_t* top;
-  /* size_t nr = 1; */
+  NUM_RETRIES();
   while (1)
     {
       top = qu->top;
@@ -77,7 +77,7 @@ mstack_treiber_delete(mstack_t* qu)
 	  break;
 	}
 
-      do_pause();
+      DO_PAUSE();
     }
 
 #if GC == 1
