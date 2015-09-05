@@ -107,6 +107,9 @@ volatile ticks *total;
 #if TSX_STATS == 1
 __thread uint64_t locked = 0;
 volatile uint64_t* all_locked;
+
+__thread uint64_t tried = 0;
+volatile uint64_t* all_tried;
 #endif
 
 #if WAIT_LOCK_STATS == 1
@@ -175,6 +178,7 @@ test(void* thread)
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
 #if TSX_STATS == 1
     locked = 0;
+    tried = 0;
 #endif 
 
 #if WAIT_LOCK_STATS == 1
@@ -300,6 +304,7 @@ test(void* thread)
 #endif
 #if TSX_STATS == 1
     all_locked[ID]=locked;
+    all_tried[ID]=tried;
 #endif
 #if GC == 1
   ssmem_term();
@@ -503,6 +508,7 @@ main(int argc, char **argv)
   removing_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
 #if TSX_STATS == 1
   all_locked = (ticks *) calloc(num_threads , sizeof(ticks));
+  all_tried = (ticks *) calloc(num_threads , sizeof(ticks));
 #endif
     
   pthread_t threads[num_threads];
@@ -571,6 +577,7 @@ main(int argc, char **argv)
     
 #ifdef TSX_STATS
     volatile uint64_t all_locked_total = 0;
+    volatile uint64_t all_tried_total = 0;
 #endif
   for(t=0; t < num_threads; t++) 
     {
@@ -599,6 +606,7 @@ main(int argc, char **argv)
       removing_count_total_succ += removing_count_succ[t];
 #ifdef TSX_STATS
     all_locked_total+=all_locked[t];
+    all_tried_total+=all_tried[t];
 #endif
     }
 
@@ -642,7 +650,7 @@ main(int argc, char **argv)
   printf("#Mops %.3f\n", throughput / 1e6);
 #ifdef TSX_STATS
   double a = (double)all_locked_total;
-  printf("Fraction actually locked %.3f\n", a/(double)(putting_count_total_succ + removing_count_total_succ));
+  printf("Fraction actually locked %.3f\n", a/(double)(all_tried_total));
 #endif
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);

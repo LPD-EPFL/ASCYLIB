@@ -38,7 +38,8 @@ stack_t* create_stack(){
 void push(stack_t* stack, qvalue_t* value){
     qnode_t* new_node = create_qnode(value);
     LOCK(&(stack->t_lock));
-    stack->head->next = new_node;
+    /*stack->head->next = new_node;*/
+    new_node->next= stack->head;
     stack->head = new_node;
     UNLOCK(&(stack->t_lock));
 }
@@ -52,7 +53,7 @@ qvalue_t* pop(stack_t* stack) {
         UNLOCK(&(stack->t_lock));
         return NULL;
     }
-    qvalue_t* ret = new_head->value;
+    qvalue_t* ret = node->value;
     stack->head = new_head;
     UNLOCK(&(stack->t_lock));
 #if GC==1

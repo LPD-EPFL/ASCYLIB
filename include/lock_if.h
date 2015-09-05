@@ -133,6 +133,7 @@ extern __thread ticks gt_correction;
 
 #if TSX_STATS  == 1
 extern __thread uint64_t locked;
+extern __thread uint64_t tried;
 #endif
 
 static inline void
@@ -255,6 +256,9 @@ tas_unlock(ptlock_t* l)
 #define TSX_NUM_RETRIES 10
 
 static inline uint32_t tas_lock_tsx(ptlock_t * lock) {
+#if TSX_STATS  == 1
+    tried++;
+#endif
     int num_retries = TSX_NUM_RETRIES;
     while (num_retries >= 0) {
         num_retries--;
@@ -291,6 +295,9 @@ static inline uint32_t tas_lock_tsx(ptlock_t * lock) {
 }
 
 static inline uint32_t tas_trylock_tsx(ptlock_t * lock) {
+#if TSX_STATS  == 1
+    tried++;
+#endif
     int num_retries = TSX_NUM_RETRIES;
     while (num_retries >= 0) {
         num_retries--;
@@ -313,6 +320,9 @@ static inline uint32_t tas_trylock_tsx(ptlock_t * lock) {
         }
         _xabort(0xff);
     }
+#if TSX_STATS  == 1
+    locked++;
+#endif
     return tas_trylock(lock);
 }
 

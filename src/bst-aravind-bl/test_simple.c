@@ -1,6 +1,7 @@
 /*   
  *   File: test_simple.c
- *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>, 
+ *  	     Tudor David <tudor.david@epfl.ch>
  *   Description: 
  *   test_simple.c is part of ASCYLIB
  *
@@ -47,20 +48,23 @@
 #  include <sys/procset.h>
 #endif
 
-#include "intset.h"
+#include "bst-aravind-bl.h"
 
 /* ################################################################### *
  * Definition of macros: per data structure
  * ################################################################### */
 
-#define DS_CONTAINS(s,k,t)  sl_contains(s, k)
-#define DS_ADD(s,k,t)       sl_add(s, k, k)
-#define DS_REMOVE(s,k,t)    sl_remove(s, k)
-#define DS_SIZE(s)          sl_set_size(s)
-#define DS_NEW()            sl_set_new()
+#define DS_CONTAINS(k,r,t)  bst_search(r, k)
+#define DS_ADD(k,r,t)       bst_insert(r,(r+4),k)
+#define DS_REMOVE(k,r,t)    bst_remove(r,k)
+#define DS_SIZE(s)          bst_size(s)
+#define DS_NEW()            initialize_tree()
+#define DS_LOCAL()          bst_init_local()
 
-#define DS_TYPE             sl_intset_t
-#define DS_NODE             sl_node_t
+#define DS_TYPE             node_t
+#define DS_NODE             node_t
+#define DS_KEY              skey_t
+
 
 /* ################################################################### *
  * GLOBALS
@@ -68,10 +72,13 @@
 
 RETRY_STATS_VARS_GLOBAL;
 
+#if TSX_STATS == 1
+__thread uint64_t locked = 0;
+__thread uint64_t tried = 0;
+#endif
 size_t initial = DEFAULT_INITIAL;
 size_t range = DEFAULT_RANGE; 
 size_t update = DEFAULT_UPDATE;
-size_t load_factor;
 size_t num_threads = DEFAULT_NB_THREADS; 
 size_t duration = DEFAULT_DURATION;
 
@@ -103,39 +110,6 @@ volatile ticks *removing_count;
 volatile ticks *removing_count_succ;
 volatile ticks *total;
 
-#if TSX_STATS == 1
-__thread uint64_t locked = 0;
-volatile uint64_t* all_locked;
-
-__thread uint64_t tried = 0;
-volatile uint64_t* all_tried;
-#endif
-
-#if WAIT_LOCK_STATS == 1
-__thread ticks getticks_correction = 0;
-ticks getticks_correction_calc() 
-{
-#    define GETTICKS_CALC_REPS 1000000
-  ticks t_dur = 0;
-  uint32_t i;
-  for (i = 0; i < GETTICKS_CALC_REPS; i++) {
-    ticks t_start = getticks();
-    ticks t_end = getticks();
-    t_dur += t_end - t_start;
-  }
-  getticks_correction = (ticks)(t_dur / (double) GETTICKS_CALC_REPS);
-  /* printf("(cor: %llu)", (unsigned long long int) getticks_correction); */
-  return getticks_correction;
-}
-
-__thread volatile ticks wait_lock;
-__thread ticks gt_correction;
-#endif
-
-#if SLOW_CORE == 1
-__thread uint32_t slow_thread;
-#endif
-
 
 /* ################################################################### *
  * LOCALS
@@ -160,31 +134,14 @@ test(void* thread)
 {
   thread_data_t* td = (thread_data_t*) thread;
   uint32_t ID = td->id;
-#if SLOW_CORE == 1
-  if (td->id == 0) {
-    slow_thread = 1;
-  } else {
-    slow_thread = 0;
-  }
-#endif
-
   int phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();
+  DS_LOCAL();
 
   DS_TYPE* set = td->set;
 
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
-#if TSX_STATS == 1
-    locked = 0;
-    tried = 0;
-#endif 
-
-#if WAIT_LOCK_STATS == 1
-  wait_lock = 0;
-  gt_correction = getticks_correction_calc();
-#endif
-
 
 #if defined(COMPUTE_LATENCY)
   volatile ticks my_putting_succ = 0;
@@ -218,7 +175,7 @@ test(void* thread)
   RR_INIT(phys_id);
   barrier_cross(&barrier);
 
-  uint64_t key;
+  DS_KEY key;
   int c = 0;
   uint32_t scale_rem = (uint32_t) (update_rate * UINT_MAX);
   uint32_t scale_put = (uint32_t) (put_rate * UINT_MAX);
@@ -233,8 +190,8 @@ test(void* thread)
 
 #if INITIALIZE_FROM_ONE == 1
   num_elems_thread = (ID == 0) * initial;
-#endif
-    
+#endif    
+
   for(i = 0; i < num_elems_thread; i++) 
     {
       key = (my_random(&(seeds[0]), &(seeds[1]), &(seeds[2])) % (rand_max + 1)) + rand_min;
@@ -252,7 +209,6 @@ test(void* thread)
     {
       printf("#BEFORE size is: %zu\n", (size_t) DS_SIZE(set));
     }
-
 
   RETRY_STATS_ZERO();
 
@@ -300,14 +256,6 @@ test(void* thread)
   EXEC_IN_DEC_ID_ORDER_END(&barrier);
 
   SSPFDTERM();
-
-#if WAIT_LOCK_STATS == 1
-    printf("Thread %d cycles waiting for locks: %llu\n", ID, (long long unsigned int) wait_lock);
-#endif
-#if TSX_STATS == 1
-    all_locked[ID]=locked;
-    all_tried[ID]=tried;
-#endif
 #if GC == 1
   ssmem_term();
   free(alloc);
@@ -341,7 +289,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:p:b:v:f:", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -403,9 +351,6 @@ main(int argc, char **argv)
 	  put_explicit = 1;
 	  put = atoi(optarg);
 	  break;
-	case 'l':
-	  load_factor = atoi(optarg);
-	  break;
 	case 'v':
 	  print_vals_num = atoi(optarg);
 	  break;
@@ -432,8 +377,7 @@ main(int argc, char **argv)
       range = 2 * initial;
     }
 
-  printf("## Initial: %zu / Range: %zu / ", initial, range);
-  printf("Herlihy's algorithm\n");
+  printf("## Initial: %zu / Range: %zu /\n", initial, range);
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;
@@ -462,6 +406,8 @@ main(int argc, char **argv)
       put_rate = update_rate / 2;
     }
 
+
+
   get_rate = 1 - update_rate;
 
   /* printf("num_threads = %u\n", num_threads); */
@@ -479,13 +425,6 @@ main(int argc, char **argv)
   timeout.tv_nsec = (duration % 1000) * 1000000;
     
   stop = 0;
-    
-  levelmax = floor_log_2((unsigned int) initial);
-  size_pad_32 = sizeof(sl_node_t) + (levelmax * sizeof(sl_node_t *));
-  while (size_pad_32 & 31)
-    {
-      size_pad_32++;
-    }
 
   DS_TYPE* set = DS_NEW();
   assert(set != NULL);
@@ -503,10 +442,6 @@ main(int argc, char **argv)
   getting_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
-#if TSX_STATS == 1
-  all_locked = (ticks *) calloc(num_threads , sizeof(ticks));
-  all_tried = (ticks *) calloc(num_threads , sizeof(ticks));
-#endif
     
   pthread_t threads[num_threads];
   pthread_attr_t attr;
@@ -572,17 +507,8 @@ main(int argc, char **argv)
   volatile uint64_t removing_count_total = 0;
   volatile uint64_t removing_count_total_succ = 0;
     
-#ifdef TSX_STATS
-    volatile uint64_t all_locked_total = 0;
-    volatile uint64_t all_tried_total = 0;
-#endif
   for(t=0; t < num_threads; t++) 
     {
-#ifdef THROUGHPUTS
-  volatile uint64_t total_th = 0;
-  total_th+=getting_count[t] + putting_count[t] + removing_count[t];
-  printf("Thrd %lu: %zu\n", t, total_th);
-#endif
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];
@@ -595,10 +521,6 @@ main(int argc, char **argv)
       getting_count_total_succ += getting_count_succ[t];
       removing_count_total += removing_count[t];
       removing_count_total_succ += removing_count_succ[t];
-#ifdef TSX_STATS
-    all_locked_total+=all_locked[t];
-    all_tried_total+=all_tried[t];
-#endif
     }
 
 #if defined(COMPUTE_LATENCY)
@@ -639,13 +561,9 @@ main(int argc, char **argv)
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
-#ifdef TSX_STATS
-  double a = (double)all_locked_total;
-  printf("Fraction actually locked %.3f\n", a/(double)(all_tried_total));
-#endif
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
-  RR_PRINT_CORRECTED();
+  RR_PRINT_CORRECTED();    
   RETRY_STATS_PRINT(total, putting_count_total, removing_count_total, putting_count_total_succ + removing_count_total_succ);    
     
   pthread_exit(NULL);

@@ -46,6 +46,7 @@
 
 #if TSX_STATS == 1
 __thread uint64_t locked = 0;
+__thread uint64_t tried = 0;
 #endif
 
 RETRY_STATS_VARS_GLOBAL;

@@ -1,8 +1,8 @@
 .PHONY:	all
 
-BENCHS = src/bst-aravind src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-pugh-string src/skiplist-seq src/queue-blocking src/stack-blocking
+BENCHS = src/bst-aravind src/bst-aravind-bl src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-seq_internal src/bst-tk src/hashtable-copy src/hashtable-coupling src/hashtable-harris src/hashtable-java src/hashtable-lazy src/hashtable-pugh src/hashtable-rcu src/hashtable-seq src/hashtable-tbb  src/linkedlist-copy src/linkedlist-coupling src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-lazy src/linkedlist-michael src/linkedlist-pugh src/linkedlist-seq src/noise src/skiplist-fraser src/skiplist-herlihy_lb src/skiplist-herlihy_lf src/skiplist-pugh src/skiplist-pugh-string src/skiplist-seq src/queue-blocking src/stack-blocking
 LBENCHS = src/linkedlist-coupling src/linkedlist-lazy src/linkedlist-pugh src/linkedlist-copy src/hashtable-pugh src/hashtable-coupling src/hashtable-lazy src/hashtable-java src/hashtable-copy src/skiplist-herlihy_lb src/skiplist-pugh src/skiplist-pugh-string src/bst-bronson src/bst-drachsler src/bst-tk/ src/queue-blocking src/stack-blocking 
-LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind
+LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michael src/hashtable-harris src/skiplist-fraser src/skiplist-herlihy_lf src/bst-ellen src/bst-howley src/bst-aravind src/bst-aravind-bl
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 EXTERNALS = src/hashtable-rcu src/hashtable-tbb
 NOISE = src/noise
@@ -40,7 +40,10 @@ bst_tk:
 	$(MAKE) "LOCK=TAS" src/bst-tk/
 
 bst_aravind:
-	$(MAKE) "STM=LOCKFREE" src/bst-aravind
+	$(make) "stm=lockfree" src/bst-aravind
+
+bst_aravind-bl:
+	$(make) "stm=lockfree" src/bst-aravind-bl
 
 bst_howley:
 	$(MAKE) "STM=LOCKFREE" src/bst-howley
@@ -231,6 +234,7 @@ external:
 
 clean:
 	$(MAKE) -C src/bst-aravind clean
+	$(MAKE) -C src/bst-aravind-bl clean
 	$(MAKE) -C src/bst-bronson clean
 	$(MAKE) -C src/bst-drachsler clean
 	$(MAKE) -C src/bst-ellen clean
