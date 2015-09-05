@@ -14,12 +14,12 @@ set_cpu=0;
 skip=$#;
 
 algos=( ${ub}/lb-map ${ub}/lb-map_optik );
-repetitions=11;
-duration=5000;
+repetitions=1;
+duration=3000;
 keep=median; #max min median
 
-params_i=( 4   1024 );
-params_u=( 20  20   );
+params_i=(   1024 );
+params_u=(   20   );
 params_nc=( 10 );		# for latency ditribution
 np=${#params_i[*]};
 
