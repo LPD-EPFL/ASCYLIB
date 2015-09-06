@@ -68,7 +68,7 @@ set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
-set ytics 0.4
+set ytics 0.5
 plot \
      @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -83,7 +83,7 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-set ytics 0.8
+set ytics 0.5
 plot \
      @FILE1 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -99,7 +99,7 @@ set ytics auto
 set ylabel ""
 unset ylabel
 set title @PLOT2
-set ytics 2
+set ytics 1
 plot \
      @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -114,7 +114,7 @@ set title @PLOT3
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 7
+set ytics 5
 plot \
      @FILE3 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -159,7 +159,7 @@ set lmargin 3
 set origin 0.0 + graphs_x_offs, bottom_row_y
 # set title @PLOT0 offset 0.2,title_offset
 set ylabel 'Throughput (Mops/s)' offset 2,-0.5
-set ytics 0.6
+set ytics 0.5
 plot \
      @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -190,7 +190,7 @@ set ytics auto
 set ylabel ""
 unset ylabel
 # set title @PLOT2
-set ytics 2
+set ytics 1.5
 plot \
      @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
