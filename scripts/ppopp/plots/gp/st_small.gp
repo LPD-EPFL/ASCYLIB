@@ -98,7 +98,7 @@ set lmargin 3
 set origin 0.0 + graphs_x_offs, bottom_row_y
 # set title @PLOT0 offset 0.2,title_offset
 set ylabel 'Throughput (Mops/s)' offset 1,-0.5
-set ytics 2
+set ytics 1
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -109,10 +109,10 @@ plot \
 # LDI ######################################################################################
 # ##########################################################################################
 
-ldi_pos_x=0.615
+ldi_pos_x=0.6
 
 set origin ldi_pos_x + graphs_x_offs, top_row_y
-set size 0.45, 0.6
+set size 0.47, 0.6
 # @PSIZE_LARGE
 # set title @PLOT3 offset 0.2,title_offset font ",28"
 @YTICS
@@ -140,7 +140,7 @@ set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 ldi_xoffs=0.20
 bnv=3
-set ytics 10
+set ytics 15 offset 0.5
 plot for [i=1:bnv] @LDI_FILE0 \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
@@ -160,7 +160,7 @@ plot for [i=1:bnv] @LDI_FILE0 \
 #      using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
 
 set origin ldi_pos_x + graphs_x_offs, bottom_row_y
-set size 0.45, 0.6
+set size 0.47, 0.6
 # @PSIZE_LARGE
 unset title
 set ylabel "Latency distribution\n(Kcycles)" offset 2

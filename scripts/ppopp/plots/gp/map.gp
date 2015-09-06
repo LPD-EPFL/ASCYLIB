@@ -67,7 +67,7 @@ set multiplot layout 5, 2
 set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
-set ylabel 'Throughput (Mops/s)' offset 1,0
+set ylabel 'Throughput (Mops/s)' offset 0.5,0
 set ytics 20
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
@@ -80,7 +80,7 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-set ytics 0.7
+set ytics 0.5 offset 0.5
 # set key inside top right font ",28"
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
@@ -101,7 +101,6 @@ unset title
 @YTICS
 set ylabel ""
 unset ylabel
-#set ytics 7
 set style fill solid 0.3 border -1
 set style boxplot fraction 1
 set style data boxplot
@@ -122,10 +121,10 @@ column_right(i)=column(3 + (i-1)*6)/DIV
 column_keep_left(i)=column(i)/DIV
 column_keep_right(i)=column(6+i)/DIV
 
-set ytics 6
 set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 bnv=6
+set ytics 12
 plot for [i=1:bnv] @LDI_FILE0 \
      using (i):(column_keep_left(i)) ls (i*10) pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
@@ -140,10 +139,10 @@ set size 0.5, 0.6
 # unset xlabel
 # unset ylabel
 # set title @PLOT4 offset 0.2,title_offset-0.3 font ",28"
-set ytics 120 offset 0.8
 unset xlabel
 unset ylabel
 bnv=6
+set ytics 100 offset 0.7
 plot for [i=1:bnv] @LDI_FILE1 \
      using (i):(column_keep_left(i)) ls (i*10) pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \

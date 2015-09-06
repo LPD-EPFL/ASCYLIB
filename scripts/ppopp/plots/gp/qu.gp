@@ -72,7 +72,8 @@ set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
-set ytics 2.5
+set yrange [0:10]
+set ytics 2
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -104,7 +105,7 @@ set origin 1.0 + graphs_x_offs, top_row_y
 set ylabel ""
 unset ylabel
 set title @PLOT2
-set ytics 2.5
+set ytics 2
 plot \
      @FILE2 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -113,6 +114,7 @@ plot \
      "" using 1:(column_select(ncol(4))) title @LINE4 ls 8 with linespoints, \
      "" using 1:(column_select(ncol(5))) title @LINE5 ls 5 with linespoints
 
+set yrange [*:*]
 
 # ##########################################################################################
 # OPTERON ##################################################################################
@@ -132,8 +134,8 @@ set lmargin 3
 @PSIZE
 set origin 0.0 + graphs_x_offs, bottom_row_y
 # set title @PLOT0 offset 0.2,title_offset
-set ylabel 'Throughput (Mops/s)' offset 2,-0.5
-set ytics 1.2
+set ylabel 'Throughput (Mops/s)' offset 1,-0.5
+set ytics 1
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -149,6 +151,7 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 # set title @PLOT1
+set yrange [0:5]
 set ytics 1
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
@@ -180,7 +183,7 @@ plot \
 # LDI ######################################################################################
 # ##########################################################################################
 
-
+set yrange [*:*]
 ldi_pos_x=1.59
 
 set origin ldi_pos_x + graphs_x_offs, top_row_y
@@ -211,7 +214,7 @@ set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 ldi_xoffs=0.20
 bnv=6
-set ytics 10
+set ytics 15 offset 0.5
 plot for [i=1:bnv] 'data/lpdxeon2680.qu.ldi.n10.p50.dat' \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
