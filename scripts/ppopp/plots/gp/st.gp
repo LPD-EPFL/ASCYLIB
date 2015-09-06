@@ -72,7 +72,7 @@ set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
-#set ytics 0.4
+set ytics 4
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -85,7 +85,7 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-#set ytics 0.8
+set ytics 3
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -123,8 +123,8 @@ set lmargin 3
 @PSIZE
 set origin 0.0 + graphs_x_offs, bottom_row_y
 # set title @PLOT0 offset 0.2,title_offset
-set ylabel 'Throughput (Mops/s)' offset 2,-0.5
-#set ytics 0.6
+set ylabel 'Throughput (Mops/s)' offset 1,-0.5
+set ytics 1
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -171,7 +171,7 @@ set title @PLOT3 offset 0.2,title_offset font ",28"
 @YTICS
 set ylabel ""
 unset ylabel
-#set ytics 7
+
 set style fill solid 0.3 border -1
 set style boxplot fraction 1
 set style data boxplot
@@ -194,6 +194,7 @@ set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 ldi_xoffs=0.20
 bnv=3
+set ytics 15 offset 0.5
 plot for [i=1:bnv] @LDI_FILE0 \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
@@ -206,6 +207,7 @@ set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 unset ylabel
 set title @PLOT4 offset 0.2,title_offset font ",28"
+set ytics 25 offset 0.5
 plot for [i=1:bnv] @LDI_FILE2 \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
@@ -217,6 +219,7 @@ set size 0.45, 0.6
 unset title
 set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
+set ytics 20 offset 0.5
 plot for [i=1:bnv] @LDI_FILE1 \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
@@ -228,6 +231,7 @@ unset title
 set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 unset ylabel
+set ytics 50 offset 0.5
 plot for [i=1:bnv] @LDI_FILE3 \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \

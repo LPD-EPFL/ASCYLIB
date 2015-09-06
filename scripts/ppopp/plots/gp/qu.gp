@@ -28,12 +28,12 @@ FIRST            =    2
 OFFSET           =    3
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
-LINE0 = '"MS-LF"'
-LINE1 = '"MS-LB"'
-LINE2 = '"OPTIK0"'
-LINE3 = '"OPTIK1"'
-LINE4 = '"OPTIK2"'
-LINE5 = '"OPTIK3"'
+LINE0 = '"ms-lf"'
+LINE1 = '"ms-lb"'
+LINE2 = '"optik0"'
+LINE3 = '"optik1"'
+LINE4 = '"optik2"'
+LINE5 = '"optik3"'
 
 ncols="0 1 2 3 4 5"
 ncol(i)=word(ncols, i+1);
@@ -72,7 +72,8 @@ set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
-#set ytics 0.4
+set yrange [0:10]
+set ytics 2
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -88,7 +89,7 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-#set ytics 0.8
+set ytics 2
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -100,12 +101,11 @@ plot \
 
 set origin 1.0 + graphs_x_offs, top_row_y
 @PSIZE
-#set ytics auto
 @YTICS
 set ylabel ""
 unset ylabel
 set title @PLOT2
-#set ytics 2
+set ytics 2
 plot \
      @FILE2 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -114,6 +114,7 @@ plot \
      "" using 1:(column_select(ncol(4))) title @LINE4 ls 8 with linespoints, \
      "" using 1:(column_select(ncol(5))) title @LINE5 ls 5 with linespoints
 
+set yrange [*:*]
 
 # ##########################################################################################
 # OPTERON ##################################################################################
@@ -133,8 +134,8 @@ set lmargin 3
 @PSIZE
 set origin 0.0 + graphs_x_offs, bottom_row_y
 # set title @PLOT0 offset 0.2,title_offset
-set ylabel 'Throughput (Mops/s)' offset 2,-0.5
-#set ytics 0.6
+set ylabel 'Throughput (Mops/s)' offset 1,-0.5
+set ytics 1
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -150,7 +151,8 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 # set title @PLOT1
-#set ytics 1
+set yrange [0:5]
+set ytics 1
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -162,12 +164,11 @@ plot \
 
 set origin 1.0 + graphs_x_offs, bottom_row_y
 @PSIZE
-#set ytics auto
 @YTICS
 set ylabel ""
 unset ylabel
 # set title @PLOT2
-#set ytics 2
+set ytics 1
 plot \
      @FILE2 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -182,7 +183,7 @@ plot \
 # LDI ######################################################################################
 # ##########################################################################################
 
-
+set yrange [*:*]
 ldi_pos_x=1.59
 
 set origin ldi_pos_x + graphs_x_offs, top_row_y
@@ -191,7 +192,6 @@ set title "Stable size\n{/*0.8(on 10 threads)} " offset 0.2,title_offset font ",
 @YTICS
 set ylabel ""
 unset ylabel
-#set ytics 7
 set style fill solid 0.3 border -1
 set style boxplot fraction 1
 set style data boxplot
@@ -203,7 +203,7 @@ set xrange [*:*]
 set xtics auto
 at(x)=x;
 cs(x)=column(x);
-set xtics ("MS-LF" 1, "MS-LB" 2, "OPTIK0" 3, "OPTIK1" 4, "OPTIK2" 5, "OPTIK3" 6) scale 0.0
+set xtics ("ms-lf" 1, "ms-lb" 2, "optik0" 3, "optik1" 4, "optik2" 5, "optik3" 6) scale 0.0
 # set xtics rotate by -45 # 29 offset -2.2,-1.2 # -45 
 
 DIV=1000
@@ -214,14 +214,16 @@ set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 ldi_xoffs=0.20
 bnv=6
+set ytics 15 offset 0.5
 plot for [i=1:bnv] 'data/lpdxeon2680.qu.ldi.n10.p50.dat' \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
      using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
 
-set origin 1.58 + graphs_x_offs, bottom_row_y
+set origin ldi_pos_x + graphs_x_offs, bottom_row_y
 @PSIZE_LARGE
 unset title
+set ytics 20
 plot for [i=1:bnv] 'data/lpd48core.qu.ldi.n10.p50.dat' \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \

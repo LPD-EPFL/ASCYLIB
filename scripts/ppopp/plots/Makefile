@@ -9,4 +9,5 @@ all:
 	gnuplot gp/sl.gp	
 	gnuplot gp/qu.gp	
 	gnuplot gp/st.gp	
+	gnuplot gp/st_small.gp	
 

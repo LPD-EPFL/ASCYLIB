@@ -30,7 +30,7 @@ FIRST            =    2
 OFFSET           =    4
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
-LINE0 = '"MCS"'
+LINE0 = '"TTAS"'
 LINE1 = '"optik-ticket"'
 LINE2 = '"optik-versioned"'
 
@@ -57,7 +57,7 @@ set multiplot layout 5, 2
 
 set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
-set ylabel 'Throughput (Mops/s)' offset 2,-0.5
+set ylabel 'Throughput (Mops/s)' offset 1,-0.5
 set yrange [*:8]
 set ytics 2
 plot \
@@ -77,7 +77,7 @@ set lmargin 4
 @YTICS
 set ylabel '# CAS per validation' offset 2,-0.5
 set yrange [*:*]
-set ytics 50
+set ytics 50 offset 0.5
 # set title @PLOT1
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
