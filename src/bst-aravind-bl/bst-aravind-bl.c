@@ -39,7 +39,7 @@ node_t* initialize_tree(){
     inf0 = create_node(INF0,0,1);
     inf1 = create_node(INF1,0,1);
     inf2 = create_node(INF2,0,1);
-    
+
     asm volatile("" ::: "memory");
     r->left = s;
     r->right = inf2;
@@ -51,8 +51,8 @@ node_t* initialize_tree(){
 }
 
 void bst_init_local() {
-  seek_record = (seek_record_t*) memalign(CACHE_LINE_SIZE, sizeof(seek_record_t));
-  assert(seek_record != NULL);
+    seek_record = (seek_record_t*) memalign(CACHE_LINE_SIZE, sizeof(seek_record_t));
+    assert(seek_record != NULL);
 }
 
 node_t* create_node(skey_t k, sval_t value, int initializing) {
@@ -80,7 +80,7 @@ node_t* create_node(skey_t k, sval_t value, int initializing) {
 }
 
 seek_record_t * bst_seek(skey_t key, node_t* node_r){
-  PARSE_TRY();
+    PARSE_TRY();
     volatile seek_record_t seek_record_l;
     node_t* node_s = node_r->left;
     seek_record_l.grandparent = node_r;
@@ -107,45 +107,36 @@ seek_record_t * bst_seek(skey_t key, node_t* node_r){
 }
 
 sval_t bst_search(skey_t key, node_t* node_r) {
-   bst_seek(key, node_r);
-   if (seek_record->leaf->key == key) {
+    bst_seek(key, node_r);
+    if (seek_record->leaf->key == key) {
         return seek_record->leaf->value;
-   } else {
+    } else {
         return 0;
-   }
+    }
 }
 
 
 bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
     node_t* new_internal = NULL;
     node_t* new_node = NULL;
-    uint created = 0;
 
     while (1) {
-      UPDATE_TRY();
+        UPDATE_TRY();
 
         bst_seek(key, node_r);
         if (seek_record->leaf->key == key) {
-#if GC == 1
-            if (created) {
-                ssmem_free(alloc, new_internal);
-                ssmem_free(alloc, new_node);
-            }
-#endif
             return FALSE;
         }
+
         node_t* parent = seek_record->parent;
         node_t* leaf = seek_record->leaf;
 
         if (bst_lock_and_validate(parent, leaf) == FALSE) continue;
 
-        if (likely(created==0)) {
+
             new_internal=create_node(max(key,leaf->key),0,0);
             new_node = create_node(key,val,0);
-            created=1;
-        } else {
-            new_internal->key=max(key,leaf->key);
-        }
+
         if ( key < leaf->key) {
             new_internal->left = new_node;
             new_internal->right = leaf; 
@@ -154,14 +145,13 @@ bool_t bst_insert(skey_t key, sval_t val, node_t* node_r) {
             new_internal->left = leaf;
         }
 #ifdef __tile__
-    MEM_BARRIER;
+        MEM_BARRIER;
 #endif
         if (key < parent->key) {
             parent->left = new_internal;
         } else {
             parent->right = new_internal;
         }
-
         bst_unlock(parent);
         return TRUE;
     }
@@ -171,23 +161,22 @@ sval_t bst_remove(skey_t key, node_t* node_r) {
     node_t* leaf;
     sval_t val = 0;
     while (1) {
-      UPDATE_TRY();
+        UPDATE_TRY();
 
         bst_seek(key, node_r);
 
-            leaf = seek_record->leaf;
-            if (leaf->key != key) {
-                return 0;
-            }
+        leaf = seek_record->leaf;
 
-        val = seek_record->leaf->value;
+        if (leaf->key != key) {
+            return 0;
+        }
+
         node_t* parent = seek_record->parent;
-        
+        node_t* grandparent = seek_record->grandparent;
+
         bool_t result = bst_lock_and_validate(parent, leaf);
         if (result == FALSE) continue;
-
-        node_t* grandparent = seek_record->grandparent;
-        result = bst_lock_and_validate(parent, leaf);
+        result = bst_lock_and_validate(grandparent, parent);
 
         if (result == FALSE) {
             bst_unlock(parent);
@@ -208,12 +197,13 @@ sval_t bst_remove(skey_t key, node_t* node_r) {
             grandparent->right = sibling;
         }
 
+        val = leaf->value;
         bst_unlock(grandparent);
         bst_unlock(parent);
 
 #if GC == 1
-    ssmem_free(alloc, leaf);
-    ssmem_free(alloc, parent);
+        ssmem_free(alloc, leaf);
+        ssmem_free(alloc, parent);
 #endif
         return val;
     }
@@ -223,14 +213,14 @@ sval_t bst_remove(skey_t key, node_t* node_r) {
 uint32_t bst_size(volatile node_t* node) {
     if (node == NULL) return 0; 
     if ((node->left == NULL) && (node->right == NULL)) {
-       if (node->key < INF0 ) return 1;
+        if (node->key < INF0 ) return 1;
     }
     uint32_t l = 0;
     uint32_t r = 0;
-    if ( !GETMARK(node->left->lock)) {
+    if ( node->left!=NULL)  {
         l = bst_size(node->left);
     }
-    if ( !GETMARK(node->right->lock)){ 
+    if  (node->right!=NULL) { 
         r = bst_size(node->right);
     }
     return l+r;

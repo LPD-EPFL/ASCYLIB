@@ -89,7 +89,7 @@ typedef ALIGNED(CACHE_LINE_SIZE) struct seek_record_t{
     node_t* grandparent;
     node_t* parent;
     node_t* leaf;
-  uint8_t padding[32];
+  uint8_t padding[40];
 } seek_record_t;
 
 //extern __thread seek_record_t* seek_record;
@@ -104,42 +104,21 @@ sval_t bst_remove(skey_t key, node_t* node_r);
 bool_t bst_cleanup(skey_t key);
 uint32_t bst_size(volatile node_t* r);
 
-static inline uint64_t GETMARK(uint64_t lock) {
-    return lock & 1;
-}
-
-static inline uint64_t GETLOCK(uint64_t lock) {
-    return lock & 2;
-}
-
-static inline uint64_t MARK(uint64_t lock) {
-    return lock | 1;
-}
-
-static inline uint64_t APPLYLOCK(uint64_t lock) {
-    return lock | 2;
-}
-
-static inline uint64_t UNMARK(uint64_t lock) {
-    return lock & 0xfffffffffffffffd;
-}
-
-
 
 static inline bool_t bst_lock_and_validate(node_t* node, node_t* child) {
 #ifdef USE_TSX
+#if TSX_STATS  == 1
+    tried++;
+#endif
     int num_retries = TSX_NUM_RETRIES;
     while (num_retries >= 0) {
         num_retries--;
-        if (node->lock == 1) {
-            return FALSE;
-        }
         if (likely(_xbegin() == _XBEGIN_STARTED)) {
-            if (likely(node->lock == 0)) {
+            if ((node->lock == 0) && ((node->left == child) || (node->right == child))) {
                 return TRUE;
             }
-        _xabort(0xff);
-        }
+            _xabort(0xff);
+         }
     PAUSE;
     PAUSE;
     PAUSE;
@@ -152,34 +131,53 @@ static inline bool_t bst_lock_and_validate(node_t* node, node_t* child) {
     locked++;
 #endif
 #endif
-    while (1) {
-        if (GETMARK(node->lock)) return FALSE;
-
-        if (CAS_UTYPE(&(node->lock), 0, 2) == 0) {
-            return TRUE;
-        }
-        sched_yield();
+    uint64_t old_u;
+    old_u = node->lock & 1;
+    while (CAS_U64(&(node->lock), old_u, (old_u | 2)) != old_u) {
+        old_u = node->lock & 1;
+        PAUSE;
     }
+        if (node->lock & 1) { 
+            node->lock = 1;
+            return FALSE;
+        }
+        if ((node->left != child) && (node->right != child))  {
+            node->lock = node->lock & 1;
+             return FALSE;
+        }
+
+    return TRUE;
+        //if (CAS_U64(&(node->lock), 0, 2) == 0) {
+            //if (node->lock!=2) fprintf(stderr, "error lock\n");
+            //return TRUE;
+        //}
+        //sched_yield();
+    //}
 }
 
 
 static inline int bst_unlock(node_t* node) {
 #ifdef USE_TSX
-    if (likely((GETLOCK(node->lock)) == 0)) {
+        if (likely((node->lock & 2) == 0)) {
         _xend();
         return 0;
     } else {
+        MEM_BARRIER;
         node->lock = node->lock & 0x1;
         return 0;
     }
+    return 0;
 #else
+    asm volatile("" ::: "memory");
+    MEM_BARRIER;
     node->lock = node->lock & 0x1;
     return 0;
 #endif
 }
 
 static inline void mark(node_t* node) {
-    node->lock = MARK(node->lock);
+    asm volatile("" ::: "memory");
+    node->lock = node->lock | 1;
 }
 
 #endif

@@ -42,7 +42,7 @@ bst_tk:
 bst_aravind:
 	$(make) "stm=lockfree" src/bst-aravind
 
-bst_aravind-bl:
+bst-aravind-bl:
 	$(make) "stm=lockfree" src/bst-aravind-bl
 
 bst_howley:
