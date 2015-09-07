@@ -65,8 +65,8 @@
  * GLOBALS
  * ################################################################### */
 
-size_t initial = 1024;
-size_t range = 2048;
+size_t initial = 1;
+size_t range = 1;
 size_t load_factor;
 double update = 0;
 size_t num_threads = 1;
@@ -183,8 +183,7 @@ test(void* thread)
   size_t fair_delay = 0;
   if (num_threads > 1)
     {
-      fair_delay = ((((num_threads + 9) / 10) * 300) + (num_threads<<3));
-      fair_delay = 0;
+      fair_delay = ((num_threads - 1) * 128);
       if (ID == 0)
 	{
 	  printf(" /// fair delay: %zu\n", fair_delay);
@@ -274,7 +273,7 @@ test(void* thread)
 	  my_getting_count++;
 	}
 
-      cpause(fair_delay);
+      cdelay(fair_delay);
     }
 
   barrier_cross(&barrier);
