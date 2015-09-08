@@ -6,7 +6,7 @@ PSIZE = "set size 0.5, 0.6"
 
 set key horiz maxrows 1
 
-set output "eps/ht_thr.eps"
+set output "eps/ht_small.eps"
 
 set terminal postscript color "Helvetica" 24 eps enhanced
 set rmargin 0
@@ -19,8 +19,8 @@ ytics_offset   = 0.65
 top_row_y      = 0.44
 bottom_row_y   = 0.0
 graphs_x_offs  = 0.1
-plot_size_x    = 2.615
-plot_size_y    = 1.11
+plot_size_x    = 1.15
+plot_size_y    = 1.17
 
 DIV              =    1e6
 FIRST            =    2
@@ -79,56 +79,7 @@ plot \
      "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
      "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
-set origin 0.5 + graphs_x_offs, top_row_y
-@PSIZE
-set lmargin 4
-@YTICS
-set ylabel ""
-unset ylabel
-set title @PLOT1
-set ytics 200
-plot \
-     @FILE1 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
-
-
-set origin 1.0 + graphs_x_offs, top_row_y
-@PSIZE
-@YTICS
-set ylabel ""
-unset ylabel
-set title @PLOT2
-set ytics 150
-plot \
-     @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
-
-
-set origin 1.5 + graphs_x_offs, top_row_y
-@PSIZE
-set title @PLOT3
-@YTICS
-set ylabel ""
-unset ylabel
-set ytics 100
-plot \
-     @FILE3 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
-
-
-set origin 2.0 + graphs_x_offs, top_row_y
+set origin 0.53 + graphs_x_offs, top_row_y
 @PSIZE
 set title @PLOT4
 @YTICS
@@ -163,7 +114,6 @@ unset title
 set lmargin 3
 @PSIZE
 set origin 0.0 + graphs_x_offs, bottom_row_y
-# set title @PLOT0 offset 0.2,title_offset
 set ylabel 'Throughput (Mops/s)' offset 2,-0.5
 set ytics 150
 plot \
@@ -174,58 +124,8 @@ plot \
      "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
      "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
 
-set origin 0.5 + graphs_x_offs, bottom_row_y
+set origin 0.53 + graphs_x_offs, bottom_row_y
 @PSIZE
-set lmargin 4
-@YTICS
-set ylabel ""
-unset ylabel
-# set title @PLOT1
-set ytics 50
-plot \
-     @FILE1 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
-
-
-set origin 1.0 + graphs_x_offs, bottom_row_y
-@PSIZE
-@YTICS
-set ylabel ""
-unset ylabel
-# set title @PLOT2
-set ytics 40
-plot \
-     @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
-
-
-set origin 1.5 + graphs_x_offs, bottom_row_y
-@PSIZE
-# set title @PLOT3
-@YTICS
-set ylabel ""
-unset ylabel
-set ytics 30
-plot \
-     @FILE3 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
-
-
-set origin 2.0 + graphs_x_offs, bottom_row_y
-@PSIZE
-# set title @PLOT4
 @YTICS
 set ylabel ""
 unset ylabel
@@ -259,7 +159,9 @@ set origin 0.0, 1.1
 set key font ",28"
 set key spacing 1.5
 set key horiz
-set key at screen 1.3, screen 1.108 center top
+# set key width -2
+# set key samplen 2.5
+set key at screen 0.54, screen 1.178 center top
 
 #We need to set an explicit xrange.  Anything will work really.
 set xrange [-1:1]

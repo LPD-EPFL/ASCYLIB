@@ -72,7 +72,7 @@ set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
-set yrange [0:10]
+set yrange [0:*]
 set ytics 2
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
@@ -151,7 +151,6 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 # set title @PLOT1
-set yrange [0:5]
 set ytics 1
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
@@ -214,7 +213,8 @@ set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 ldi_xoffs=0.20
 bnv=6
-set ytics 15 offset 0.5
+set yrange [0:40.7]
+set ytics 10 offset 0.5
 plot for [i=1:bnv] 'data/lpdxeon2680.qu.ldi.n10.p50.dat' \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
@@ -223,6 +223,7 @@ plot for [i=1:bnv] 'data/lpdxeon2680.qu.ldi.n10.p50.dat' \
 set origin ldi_pos_x + graphs_x_offs, bottom_row_y
 @PSIZE_LARGE
 unset title
+set yrange[*:*]
 set ytics 20
 plot for [i=1:bnv] 'data/lpd48core.qu.ldi.n10.p50.dat' \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\

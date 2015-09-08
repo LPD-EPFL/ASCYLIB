@@ -48,11 +48,11 @@ LINE2 = '"OPTIK1"'
 LINE3 = '"OPTIK2"'
 LINE4 = '""'
 
-PLOT0 = '"Very low contention\n{/*0.8(8192 elements, 1% updates)}"'
+PLOT0 = '"Very-low contention\n{/*0.8(8192 elements, 1% updates)}"'
 PLOT1 = '"Low contention\n{/*0.8(4096 elements, 10% updates)}"'
 PLOT2 = '"Medium contention\n{/*0.8(2048 elements, 20% updates)}"'
 PLOT3 = '"High contention\n{/*0.8(512 elements, 50% updates)}"'
-PLOT4 = '"Very high contention\n{/*0.8(128 elements, 100% updates)}"'
+PLOT4 = '"Very-high contention\n{/*0.8(128 elements, 100% updates)}"'
 
 # font "Helvetica Bold"
 set label 1 "Opteron" at screen 0.018, screen 0.18 rotate by 90 font ',30' textcolor rgb "red"

@@ -124,7 +124,7 @@ column_keep_right(i)=column(6+i)/DIV
 set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 bnv=6
-set ytics 12
+set ytics 10
 plot for [i=1:bnv] @LDI_FILE0 \
      using (i):(column_keep_left(i)) ls (i*10) pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
