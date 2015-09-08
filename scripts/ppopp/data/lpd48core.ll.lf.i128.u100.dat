@@ -1,0 +1,5 @@
+### ./bin/lpd48core/lf-ll_harris_opt / params -i128 -r256 -u100  / keep median of reps 11 of dur 5000
+# Result from 11 repetitions: median
+#       ./bin/lpd48core/lf-ll_harris_opt
+#cores  throughput  %linear scalability 
+1       
