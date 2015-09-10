@@ -35,7 +35,8 @@ optik_map_contains(map_t* map, skey_t key)
 {
   int i;
  restart:
-  COMPILER_NO_REORDER(optik_t version = *map->lock;);
+  /* COMPILER_NO_REORDER(optik_t version = *map->lock;); */
+  COMPILER_NO_REORDER(optik_t version = optik_get_version_wait(map->lock););
   for (i = 0; i < map->size; i++)
     {
       if (map->array[i].key == key)

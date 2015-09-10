@@ -1,0 +1,11 @@
+### params -i4 -r8 -u20 / keep median of reps 1 of dur 1000
+# Result from 1 repetitions: median
+#       ./bin/iccluster029/lb-map       ./bin/iccluster029/lb-map_optik 
+#cores  throughput  %linear scalability throughput  %linear scalability 
+1       56235039    100.00  1           82749734    100.00  1           
+6       6112797     1.81    0.11        56055053    11.29   0.68        
+12      5170599     0.77    0.09        35497776    3.57    0.43        
+18      6005223     0.59    0.11        30309593    2.03    0.37        
+24      5293813     0.39    0.09        30987519    1.56    0.37        
+30      5393092     0.32    0.10        30176725    1.22    0.36        
+36      5665493     0.28    0.10        

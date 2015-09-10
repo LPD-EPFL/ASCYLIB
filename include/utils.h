@@ -773,6 +773,8 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     return x+1;
   }
 
+  static const size_t pause_fixed = 16384;
+
   static inline void
   do_pause()
   {
@@ -780,18 +782,18 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     /* cpause((mrand(seeds) % 12000)); */
     //    cpause((mrand(seeds) % 16384));
     //    cpause((mrand(seeds) % 32768));
-    cpause((mrand(seeds) % 16384));
+    cpause((mrand(seeds) % pause_fixed));
   }
 
 
-  static const size_t pause_max  = 16384;
-  static const size_t pause_base = 1024;
-  static const size_t pause_min  = 1024;
+  static const size_t pause_max   = 16384;
+  static const size_t pause_base  = 512;
+  static const size_t pause_min   = 512;
 
   static inline void
   do_pause_exp(size_t nf)
   {
-    if (nf > 32)
+    if (unlikely(nf > 32))
       {
 	nf = 32;
       }
@@ -801,7 +803,9 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     cdelay(tp);
   }
 
-#define DO_PAUSE_TYPE         1
+#define DO_PAUSE_TYPE         1       // 0: fixed max pause
+                                      // 1: exponentially increasing pause
+
 
 #if DO_PAUSE_TYPE == 0
 #define DO_PAUSE()            do_pause()

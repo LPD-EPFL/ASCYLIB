@@ -2,28 +2,19 @@
 
 ds=map;
 
-ub="./bin/$(uname -n)";
-uo="scripts/ppopp/data";
+. ./scripts/ppopp/run.config
 
 do_thr=1;
 do_ldi=1;
 
-do_compile=1;
-set_cpu=0;
-
 skip=$#;
 
 algos=( ${ub}/lb-map ${ub}/lb-map_optik );
-repetitions=1;
-duration=3000;
-keep=median; #max min median
 
-params_i=(   1024 );
-params_u=(   20   );
+params_i=( 4  1024 );
+params_u=( 20  20   );
 params_nc=( 10 );		# for latency ditribution
 np=${#params_i[*]};
-
-cores=ppopp;
 
 cores_backup=$cores;
 . ./scripts/config;
@@ -84,7 +75,12 @@ then
 	initial=${params_i[$i]};
 	update=${params_u[$i]};
 	range=$((2*$initial));
-	out="$unm.${ds}.i$initial.u$update.dat"
+	if [ $fixed_file_dat -ne 1 ];
+	then
+	    out="$unm.${ds}.i$initial.u$update.dat"
+	else
+	    out="data.${ds}.i$initial.u$update.dat"
+	fi;
 	echo "### params -i$initial -r$range -u$update / keep $keep of reps $repetitions of dur $duration" | tee ${uo}/$out;
 
 	./scripts/scalability_rep.sh $cores $repetitions $keep "$algos_str" -d$duration -i$initial -r$range -u$update \
@@ -123,7 +119,14 @@ then
 	    update=${params_u[$i]};
 	    range=$((2*$initial));
 	    nc=${params_nc[$n]};
-	    out="$unm.${ds}.ldi.n$nc.i$initial.u$update.dat"
+	    if [ $fixed_file_dat -ne 1 ];
+	    then
+		out="$unm.${ds}.ldi.n$nc.i$initial.u$update.dat"
+	    else
+		out="data.${ds}.ldi.n$nc.i$initial.u$update.dat"
+	    fi;
+	    echo $out;
+
 	    echo "### params -i$initial -u$update -n$nc / dur $duration" | tee ${uo}/$out;
 
 	    ./scripts/scalability_ldi.sh $nc "$algos_str" -d$duration -i$initial -u$update \

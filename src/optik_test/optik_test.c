@@ -183,7 +183,7 @@ test(void* thread)
   size_t fair_delay = 0;
   if (num_threads > 1)
     {
-      fair_delay = ((num_threads - 1) * 128);
+      fair_delay = ((num_threads - 1) * 128) + ((num_threads-1)<<5);
       if (ID == 0)
 	{
 	  printf(" /// fair delay: %zu\n", fair_delay);
