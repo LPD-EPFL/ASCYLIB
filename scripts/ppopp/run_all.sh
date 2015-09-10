@@ -2,15 +2,17 @@
 
 sf=./scripts/ppopp
 
-echo "--> Will use pausing:";
+pinclude=./include/utils.h;
+echo "--> Will use pausing (defined in $pinclude):";
 echo;
 
-grep -A1 "define DO_PAUSE_TYPE" ./include/utils.h;
-grep "size_t pause_" ./include/utils.h;
+grep -A1 "define DO_PAUSE_TYPE" $pinclude;
+grep "size_t pause_" $pinclude;
 
 echo;
 echo "--> And will run on the following cores:";
-cores=ppopp;
+. ./scripts/ppopp/run.config;
+cconfig=$cores;
 . ./scripts/config;
 
 echo $cores;

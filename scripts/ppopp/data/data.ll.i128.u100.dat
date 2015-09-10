@@ -1,0 +1,6 @@
+### params -i128 -r256 -u100 / keep median of reps 1 of dur 1000
+# Result from 1 repetitions: median
+#       ./bin/iccluster029/lf-ll_harris_opt./bin/iccluster029/lb-ll_lazy   ./bin/iccluster029/lb-ll_gl     ./bin/iccluster029/lb-ll_optik_gl./bin/iccluster029/lb-ll_optik  ./bin/iccluster029/lb-ll_optik_cache
+#cores  throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability 
+1       6157136     100.00  1           8620723     100.00  1           7237383     100.00  1           9295494     100.00  1           6895406     100.00  1           9036117     100.00  1           
+10      15256612    24.78   2.48        15675980    18.18   1.82        1117941     1.54    0.15        3816867     4.11    0.41        15307192    22.20   2.22        18710899    20.71   2.07        
