@@ -3,24 +3,15 @@
 ds=ot;
 to_move=optik_test;
 
-ub="./bin/$(uname -n)";
-uo="scripts/ppopp/data";
-
-do_compile=1;
-set_cpu=0;
+. ./scripts/ppopp/run.config
 
 skip=$#;
 
 algos=( ${ub}/optik_test2 ${ub}/optik_test0 ${ub}/optik_test1 );
-repetitions=11;
-duration=5000;
 
 params_i=( 1 );
 params_u=( 0 );
 np=${#params_i[*]};
-
-cores=ppopp;
-
 
 cores_backup=$cores;
 . ./scripts/config;
@@ -72,7 +63,12 @@ do
     initial=${params_i[$i]};
     update=${params_u[$i]};
     range=$initial;
-    out="$unm.${ds}.i$initial.u$update.dat"
+    if [ $fixed_file_dat -ne 1 ];
+    then
+	out="$unm.${ds}.i$initial.u$update.dat"
+    else
+	out="data.${ds}.i$initial.u$update.dat"
+    fi;
     echo "### params -i$initial -r$range -u$update / keep $keep of reps $repetitions of dur $duration" | tee ${uo}/$out;
 
     ./scripts/scalability_optik.sh $cores $repetitions "$algos_str" -d$duration -i$initial -r$range -u$update \

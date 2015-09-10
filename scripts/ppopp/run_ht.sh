@@ -2,26 +2,16 @@
 
 ds=ht;
 
-ub="./bin/$(uname -n)";
-uo="scripts/ppopp/data";
-
-do_compile=1;
-set_cpu=0;
+. ./scripts/ppopp/run.config
 
 skip=$#;
 
-
 algos=( ${ub}/lb-ht_lazy_gl ${ub}/lb-ht_java ${ub}/lb-ht_java_optik ${ub}/lb-ht_optik0 ${ub}/lb-ht_optik1 ${ub}/lb-ht_map );
-repetitions=11;
-duration=5000;
-keep=median; #max min median
 
 params_i=( 128 512 2048 4096 8192 );
 params_u=( 100 50  20   10   1 );
 load_factor=2;
 np=${#params_i[*]};
-
-cores=ppopp;
 
 cores_backup=$cores;
 . ./scripts/config;
@@ -72,7 +62,13 @@ do
     initial=${params_i[$i]};
     update=${params_u[$i]};
     range=$((2*$initial));
-    out="$unm.${ds}.i$initial.u$update.dat"
+    if [ $fixed_file_dat -ne 1 ];
+    then
+	out="$unm.${ds}.i$initial.u$update.dat"
+    else
+	out="data.${ds}.i$initial.u$update.dat"
+    fi;
+    
     echo "### params -i$initial -r$range -u$update -l$load_factor / keep $keep of reps $repetitions of dur $duration" \
 	| tee ${uo}/$out;
 
