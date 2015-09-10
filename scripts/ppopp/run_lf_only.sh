@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ds=sl;
+
 
 ub="./bin/$(uname -n)";
 uo="scripts/ppopp/data";
@@ -10,18 +10,20 @@ set_cpu=0;
 
 skip=$#;
 
+algos=( ${ub}/lf-ll_harris_opt ${ub}/lf-ht_harris  ${ub}/lf-sl_fraser  );
+to_make="lfll_harris_opt lfht lfsl_fraser";
 
-algos=( ${ub}/lb-sl_herlihy ${ub}/lb-sl_optik ${ub}/lb-sl_optik1 ${ub}/lb-sl_optik2 );
 repetitions=11;
 duration=5000;
 keep=median; #max min median
 
+dss=( ll ht sl );
 params_i=( 128 512 2048 4096 8192 );
 params_u=( 100 50  20   10   1 );
+params_extra[1]="-l2";
 np=${#params_i[*]};
 
 cores=ppopp;
-
 
 cores_backup=$cores;
 . ./scripts/config;
@@ -45,9 +47,12 @@ then
     fi;
 fi;
 
+cores=$cores_backup;
+algos_str="${algos[@]}";
+
 if [ $do_compile -eq 1 ];
 then
-    ctarget=${ds}ppopp;
+    ctarget="$to_make"
     cflags="SET_CPU=$set_cpu";
     echo "----> Compiling" $ctarget " with flags:" $cflags;
     make $ctarget $cflags >> /dev/null;
@@ -57,24 +62,33 @@ then
     fi;
     echo "----> Moving binaries to $ub";
     mkdir $ub &> /dev/null;
-    mv bin/*${ds}* $ub;
-    if [ $? -eq 0 ];
-    then
-	echo "----> Success!"
-    fi;
+    for b in ${algos[@]};
+    do
+	bb=$(echo $b | sed "s/$(uname -n)//g");
+	echo "------> $bb -> $b!"
+	mv $bb $b;
+	if [ $? -eq 0 ];
+	then
+	    echo "----> Success!"
+	fi;
+    done;
 fi;
-
-cores=$cores_backup;
-algos_str="${algos[@]}";
 
 for ((i=0; i < $np; i++))
 do
+ for ((a=0; a < $na; a++))
+ do
     initial=${params_i[$i]};
     update=${params_u[$i]};
     range=$((2*$initial));
-    out="$unm.${ds}.i$initial.u$update.dat"
-    echo "### params -i$initial -r$range -u$update / keep $keep of reps $repetitions of dur $duration" | tee ${uo}/$out;
+    pextra=${params_extra[$a]};
+    ds=${dss[$a]};
+    algo=${algos[$a]};
+    out="$unm.${ds}.lf.i$initial.u$update.dat"
+    echo "### $algo / params -i$initial -r$range -u$update $pextra / keep $keep of reps $repetitions of dur $duration" \
+	| tee ${uo}/$out;
 
-    ./scripts/scalability_rep.sh $cores $repetitions $keep "$algos_str" -d$duration -i$initial -r$range -u$update \
-				 | tee -a ${uo}/$out;
+    ./scripts/scalability_rep.sh $cores $repetitions $keep "$algo" -d$duration -i$initial -r$range -u$update \
+    				 | tee -a ${uo}/$out;
+ done;
 done;

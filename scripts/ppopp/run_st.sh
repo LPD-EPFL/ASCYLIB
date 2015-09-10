@@ -13,9 +13,9 @@ set_cpu=0;
 
 skip=$#;
 
-algos=( ./${ub}/lf-st_treiber ${ub}/lb-st_lock ${ub}/lb-st_optik ${ub}/lb-st_lock_tas);
-repetitions=3;
-duration=3000;
+algos=( ./${ub}/lf-st_treiber ${ub}/lb-st_lock ${ub}/lb-st_optik );
+repetitions=11;
+duration=5000;
 keep=median; #max min median
 
 param_i=65534;

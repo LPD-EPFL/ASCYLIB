@@ -127,7 +127,10 @@ then
     then
 	cores="2 $(seq 8 8 256) 288 320 352";
     else
-	cores=$(seq 6 6 48);
+        max=$(nproc);
+	maxp4=$(($max+4));
+	max15=$(echo "1.5*$max" | bc);
+	cores="1 $(seq 2 2 $max) $(seq $maxp4 4 $max15)";
     fi;
 elif [ "$cores" = "ppoppfast" ];
 then

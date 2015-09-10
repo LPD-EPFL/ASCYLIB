@@ -1,6 +1,7 @@
 #!/bin/bash
 
-ds=sl;
+ds=ot;
+to_move=optik_test;
 
 ub="./bin/$(uname -n)";
 uo="scripts/ppopp/data";
@@ -10,14 +11,12 @@ set_cpu=0;
 
 skip=$#;
 
-
-algos=( ${ub}/lb-sl_herlihy ${ub}/lb-sl_optik ${ub}/lb-sl_optik1 ${ub}/lb-sl_optik2 );
+algos=( ${ub}/optik_test2 ${ub}/optik_test0 ${ub}/optik_test1 );
 repetitions=11;
 duration=5000;
-keep=median; #max min median
 
-params_i=( 128 512 2048 4096 8192 );
-params_u=( 100 50  20   10   1 );
+params_i=( 1 );
+params_u=( 0 );
 np=${#params_i[*]};
 
 cores=ppopp;
@@ -45,6 +44,9 @@ then
     fi;
 fi;
 
+cores=$cores_backup;
+algos_str="${algos[@]}";
+
 if [ $do_compile -eq 1 ];
 then
     ctarget=${ds}ppopp;
@@ -57,24 +59,22 @@ then
     fi;
     echo "----> Moving binaries to $ub";
     mkdir $ub &> /dev/null;
-    mv bin/*${ds}* $ub;
+    mv bin/${to_move}* $ub;
     if [ $? -eq 0 ];
     then
 	echo "----> Success!"
     fi;
 fi;
 
-cores=$cores_backup;
-algos_str="${algos[@]}";
 
 for ((i=0; i < $np; i++))
 do
     initial=${params_i[$i]};
     update=${params_u[$i]};
-    range=$((2*$initial));
+    range=$initial;
     out="$unm.${ds}.i$initial.u$update.dat"
     echo "### params -i$initial -r$range -u$update / keep $keep of reps $repetitions of dur $duration" | tee ${uo}/$out;
 
-    ./scripts/scalability_rep.sh $cores $repetitions $keep "$algos_str" -d$duration -i$initial -r$range -u$update \
+    ./scripts/scalability_optik.sh $cores $repetitions "$algos_str" -d$duration -i$initial -r$range -u$update \
 				 | tee -a ${uo}/$out;
 done;

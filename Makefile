@@ -90,7 +90,7 @@ tests:
 	$(MAKE) $(TESTS)
 
 
-optik_testppopp: optik_test0 optik_test1 optik_test2
+otppopp: optik_test0 optik_test1 optik_test2
 
 optik_test0:
 	$(MAKE) "OPTIK=0" "OPTIK_STATS=1" src/optik_test
