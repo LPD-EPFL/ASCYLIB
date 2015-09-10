@@ -6,7 +6,7 @@ PSIZE = "set size 0.5, 0.6"
 
 set key horiz maxrows 1
 
-set output "eps/ht_small.eps"
+set output "eps/fig09_ht.eps"
 
 set terminal postscript color "Helvetica" 24 eps enhanced
 set rmargin 0
@@ -16,11 +16,11 @@ set bmargin 2.5
 
 title_offset   = -0.5
 ytics_offset   = 0.65
-top_row_y      = 0.44
+top_row_y      = 0.0
 bottom_row_y   = 0.0
 graphs_x_offs  = 0.1
 plot_size_x    = 1.15
-plot_size_y    = 1.17
+plot_size_y    = 0.73
 
 DIV              =    1e6
 FIRST            =    2
@@ -41,8 +41,8 @@ PLOT3 = '"High contention\n{/*0.8(512 elements, 50% updates)}"'
 PLOT4 = '"Very-high contention\n{/*0.8(128 elements, 100% updates)}"'
 
 # font "Helvetica Bold"
-set label 1 "Opteron" at screen 0.018, screen 0.18 rotate by 90 font ',30' textcolor rgb "red"
-set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textcolor rgb "red"
+# set label 1 "Opteron" at screen 0.018, screen 0.18 rotate by 90 font ',30' textcolor rgb "red"
+# set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textcolor rgb "red"
 
 
 # ##########################################################################################
@@ -51,15 +51,14 @@ set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textc
 
 
 
-FILE0 = '"data/lpdxeon2680.ht.i8192.u1.dat"'
-FILE1 = '"data/lpdxeon2680.ht.i4096.u10.dat"'
-FILE2 = '"data/lpdxeon2680.ht.i2048.u20.dat"'
-FILE3 = '"data/lpdxeon2680.ht.i512.u50.dat"'
-FILE4 = '"data/lpdxeon2680.ht.i128.u100.dat"'
+FILE0 = '"data/data.ht.i8192.u1.dat"'
+FILE1 = '"data/data.ht.i4096.u10.dat"'
+FILE2 = '"data/data.ht.i2048.u20.dat"'
+FILE3 = '"data/data.ht.i512.u50.dat"'
+FILE4 = '"data/data.ht.i128.u100.dat"'
 
-unset xlabel
-set xrange [0:61]
-set xtics ( 1, 10, 20, 30, 40, 50, 60 ) offset 0,0.4
+set xlabel "# Threads" offset 0, 0.75 font ",28"
+set xtics offset 0,0.4
 unset key
 
 
@@ -70,7 +69,7 @@ set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 3,0.5
-set ytics 300 offset ytics_offset
+set ytics offset ytics_offset
 plot \
      @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -85,51 +84,6 @@ set title @PLOT4
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 25
-plot \
-     @FILE4 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
-
-
-# ##########################################################################################
-# OPTERON ##################################################################################
-# ##########################################################################################
-
-FILE0 = '"data/lpd48core.ht.i8192.u1.dat"'
-FILE1 = '"data/lpd48core.ht.i4096.u10.dat"'
-FILE2 = '"data/lpd48core.ht.i2048.u20.dat"'
-FILE3 = '"data/lpd48core.ht.i512.u50.dat"'
-FILE4 = '"data/lpd48core.ht.i128.u100.dat"'
-
-set xlabel "# Threads" offset 0, 0.75 font ",28"
-set xrange [0:65]
-set xtics ( 1, 12, 24, 36, 48, 56, 64 ) offset 0,0.4
-
-unset title
-
-set lmargin 3
-@PSIZE
-set origin 0.0 + graphs_x_offs, bottom_row_y
-set ylabel 'Throughput (Mops/s)' offset 2,-0.5
-set ytics 150
-plot \
-     @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(3)) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(4)) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(5)) title @LINE4 ls 5 with linespoints, \
-
-set origin 0.53 + graphs_x_offs, bottom_row_y
-@PSIZE
-@YTICS
-set ylabel ""
-unset ylabel
-set ytics 15
 plot \
      @FILE4 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
@@ -161,7 +115,7 @@ set key spacing 1.5
 set key horiz
 # set key width -2
 # set key samplen 2.5
-set key at screen 0.54, screen 1.178 center top
+set key at screen 0.54, screen 0.728 center top
 
 #We need to set an explicit xrange.  Anything will work really.
 set xrange [-1:1]

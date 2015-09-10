@@ -43,6 +43,8 @@ then
     if [ $? -eq 0 ];
     then
 	echo "----> Success!"
+    else
+	echo "----> Compilation error!"; exit;
     fi;
     echo "----> Moving binaries to $ub";
     mkdir $ub &> /dev/null;
@@ -50,6 +52,8 @@ then
     if [ $? -eq 0 ];
     then
 	echo "----> Success!"
+    else
+	echo "----> Cannot mv executables in $ub!"; exit;
     fi;
 fi;
 

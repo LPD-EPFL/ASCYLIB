@@ -1,13 +1,13 @@
 load 'gp/style.gp'
 set macros
 NOYTICS = "set format y ''; unset ylabel"
-YTICS = "set ylabel 'Throughput (Mops/s)' offset 2"
+YTICS = "set ylabel 'Throughput (Mops/s)' offset 0"
 PSIZE = "set size 0.5, 0.6"
 PSIZE_LARGE = "set size 0.9, 0.6"
 
 set key horiz maxrows 1
 
-set output "eps/fig05_optik_test_fixed.eps"
+set output "eps/fig05_optik_test.eps"
 
 set terminal postscript color "Helvetica" 24 eps enhanced
 set rmargin 0
@@ -21,8 +21,8 @@ xrange_start   = 1
 title_offset   = -0.5
 top_row_y      = 0.0
 bottom_row_y   = 0.0
-graphs_x_offs  = 0.03
-plot_size_x    = 1.119
+graphs_x_offs  = 0.08
+plot_size_x    = 1.185
 plot_size_y    = 0.57
 
 DIV              =    1e6
@@ -44,7 +44,7 @@ ncol(i)=word(ncols, i+1);
 # XEON #####################################################################################
 # ##########################################################################################
 
-FILE0 = '"data/data.optik_test.dat"'
+FILE0 = '"data/data.ot.i1.u0.dat"'
 FILE1 = FILE0
 
 set xtics offset 0,0.4
@@ -54,9 +54,11 @@ unset key
 set size plot_size_x, plot_size_y
 set multiplot layout 5, 2
 
+set xrange [2:*]
+
 set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
-set ylabel 'Throughput (Mops/s)' offset 1,-0.5
+set ylabel 'Throughput (Mops/s)' offset 2,-0.5
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -68,7 +70,7 @@ FIRST            =    5
 OFFSET           =    4
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
-set origin 0.5 + 3*graphs_x_offs, top_row_y
+set origin 0.5 + 1.5*graphs_x_offs, top_row_y
 @PSIZE
 set lmargin 4
 @YTICS

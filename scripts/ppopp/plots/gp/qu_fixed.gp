@@ -7,7 +7,7 @@ PSIZE_LARGE = "set size 0.9, 0.6"
 
 set key horiz maxrows 1
 
-set output "eps/qu.eps"
+set output "eps/fig11_qu.eps"
 
 set terminal postscript color "Helvetica" 24 eps enhanced
 set rmargin 0
@@ -17,11 +17,11 @@ set bmargin 2.5
 
 xrange_start   = 3
 title_offset   = -0.5
-top_row_y      = 0.44
+top_row_y      = 0.0
 bottom_row_y   = 0.0
 graphs_x_offs  = 0.1
 plot_size_x    = 2.615
-plot_size_y    = 1.11
+plot_size_y    = 0.67
 
 DIV              =    1e6
 FIRST            =    2
@@ -43,25 +43,22 @@ PLOT1 = '"Stable size\n{/*0.8(50% enqueue, 50% dequeue)}"'
 PLOT2 = '"Increasing size\n{/*0.8(60% enqueue, 40% dequeue)}"'
 PLOT3 = '"Stable size\n{/*0.8(on 10 threads)}"'
 
-# font "Helvetica Bold"
-set label 1 "Opteron" at screen 0.018, screen 0.18 rotate by 90 font ',30' textcolor rgb "red"
-set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textcolor rgb "red"
 
-LDI_FILE0 = '"data/lpdxeon2680.qu.ldi.n10.p50.dat"'
-LDI_FILE1 = '"data/lpd48core.qu.ldi.n10.p50.dat"'
+LDI_FILE0 = '"data/data.qu.ldi.n10.p50.dat"'
 
 # ##########################################################################################
 # XEON #####################################################################################
 # ##########################################################################################
 
 
-FILE0 = '"data/lpdxeon2680.qu.thr.p40.dat"'
-FILE1 = '"data/lpdxeon2680.qu.thr.p50.dat"'
-FILE2 = '"data/lpdxeon2680.qu.thr.p60.dat"'
+FILE0 = '"data/data.qu.thr.p40.dat"'
+FILE1 = '"data/data.qu.thr.p50.dat"'
+FILE2 = '"data/data.qu.thr.p60.dat"'
 
 unset xlabel
-set xrange [xrange_start:61]
-set xtics ( xrange_start, 10, 20, 30, 40, 50, 60 ) offset 0,0.4
+set xrange [3:*]
+set xlabel "# Threads" offset 0, 0.75 font ",28"
+set xtics offset 0,0.4
 unset key
 
 
@@ -73,7 +70,6 @@ set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 1,0.5
 set yrange [0:*]
-set ytics 2
 plot \
      @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -89,7 +85,6 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-set ytics 2
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -105,7 +100,6 @@ set origin 1.0 + graphs_x_offs, top_row_y
 set ylabel ""
 unset ylabel
 set title @PLOT2
-set ytics 2
 plot \
      @FILE2 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
@@ -115,68 +109,6 @@ plot \
      "" using 1:(column_select(ncol(5))) title @LINE5 ls 5 with linespoints
 
 set yrange [*:*]
-
-# ##########################################################################################
-# OPTERON ##################################################################################
-# ##########################################################################################
-
-FILE0 = '"data/lpd48core.qu.thr.p40.dat"'
-FILE1 = '"data/lpd48core.qu.thr.p50.dat"'
-FILE2 = '"data/lpd48core.qu.thr.p60.dat"'
-
-set xlabel "# Threads" offset 0, 0.75 font ",28"
-set xrange [xrange_start:65]
-set xtics ( xrange_start, 12, 24, 36, 48, 56, 64 ) offset 0,0.4
-
-unset title
-
-set lmargin 3
-@PSIZE
-set origin 0.0 + graphs_x_offs, bottom_row_y
-# set title @PLOT0 offset 0.2,title_offset
-set ylabel 'Throughput (Mops/s)' offset 1,-0.5
-set ytics 1
-plot \
-     @FILE0 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(ncol(2))) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(ncol(3))) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(ncol(4))) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(ncol(5))) title @LINE5 ls 5 with linespoints
-
-set origin 0.5 + graphs_x_offs, bottom_row_y
-@PSIZE
-set lmargin 4
-@YTICS
-set ylabel ""
-unset ylabel
-# set title @PLOT1
-set ytics 1
-plot \
-     @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(ncol(2))) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(ncol(3))) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(ncol(4))) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(ncol(5))) title @LINE5 ls 5 with linespoints
-
-
-set origin 1.0 + graphs_x_offs, bottom_row_y
-@PSIZE
-@YTICS
-set ylabel ""
-unset ylabel
-# set title @PLOT2
-set ytics 1
-plot \
-     @FILE2 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
-     "" using 1:(column_select(ncol(1))) title @LINE1 ls 2 with linespoints, \
-     "" using 1:(column_select(ncol(2))) title @LINE2 ls 3 with linespoints, \
-     "" using 1:(column_select(ncol(3))) title @LINE3 ls 4 with linespoints, \
-     "" using 1:(column_select(ncol(4))) title @LINE4 ls 8 with linespoints, \
-     "" using 1:(column_select(ncol(5))) title @LINE5 ls 5 with linespoints
-
-
 
 # ##########################################################################################
 # LDI ######################################################################################
@@ -213,23 +145,11 @@ set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 ldi_xoffs=0.20
 bnv=6
-set yrange [0:40.7]
-set ytics 10 offset 0.5
-plot for [i=1:bnv] 'data/lpdxeon2680.qu.ldi.n10.p50.dat' \
+set ytics offset 0.5
+plot for [i=1:bnv] 'data/data.qu.ldi.n10.p50.dat' \
      using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
      using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
-
-set origin ldi_pos_x + graphs_x_offs, bottom_row_y
-@PSIZE_LARGE
-unset title
-set yrange[*:*]
-set ytics 15
-plot for [i=1:bnv] 'data/lpd48core.qu.ldi.n10.p50.dat' \
-     using (i-ldi_xoffs):(column_left(i)) ls 10 pt 7 ps 0.5 notitle,\
-     for [i=1:bnv] '' \
-     using (i+ldi_xoffs):(column_right(i)) ls 40 pt 7 ps 0.5 notitle
-
 
 # ##########################################################################################
 # LEGENDS ##################################################################################
@@ -255,7 +175,7 @@ set origin 0.0, 1.1
 set key font ",28"
 set key spacing 1.5
 set key horiz
-set key at screen 1.6, screen 1.108 right top
+set key at screen 1.6, screen 0.65 right top
 
 #We need to set an explicit xrange.  Anything will work really.
 set xrange [-1:1]
@@ -284,7 +204,7 @@ set key font ",28"
 set key horiz
 set key width 0
 set key samplen 2
-set key at screen 1.95, screen 1.108 left top
+set key at screen 1.95, screen 0.65 left top
 
 plot \
      NaN t "enqueue" ls 10 with boxes, \

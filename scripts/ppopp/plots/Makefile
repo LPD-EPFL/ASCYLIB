@@ -14,3 +14,13 @@ all:
 	gnuplot gp/st.gp	
 	gnuplot gp/st_small.gp	
 
+fixed:
+	gnuplot gp/ot_fixed.gp	
+	gnuplot gp/map_fixed.gp	
+	gnuplot gp/ll_fixed.gp
+	gnuplot gp/ht_fixed.gp
+	gnuplot gp/ht_fixed_all.gp
+	gnuplot gp/sl_fixed.gp
+	gnuplot gp/sl_fixed_all.gp	
+	gnuplot gp/qu_fixed.gp	
+	gnuplot gp/st_fixed.gp	
