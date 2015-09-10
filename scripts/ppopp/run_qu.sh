@@ -74,7 +74,7 @@ then
     do
 	initial=$param_i;
 	put=${params_p[$i]};
-	if [ $fixed_file_dat -eq 1 ];
+	if [ $fixed_file_dat -ne 1 ];
 	then
 	    out="$unm.${ds}.thr.p$put.dat"
 	else
@@ -117,7 +117,7 @@ then
 	    initial=$param_i;
 	    put=${params_p[$i]};
 	    nc=${params_nc[$n]};
-	    if [ $fixed_file_dat -eq 1 ];
+	    if [ $fixed_file_dat -ne 1 ];
 	    then
 		out="$unm.${ds}.ldi.n$nc.p$put.dat"
 	    else

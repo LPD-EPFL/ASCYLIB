@@ -62,7 +62,7 @@ do
     initial=${params_i[$i]};
     update=${params_u[$i]};
     range=$((2*$initial));
-    if [ $fixed_file_dat -eq 1 ];
+    if [ $fixed_file_dat -ne 1 ];
     then
 	out="$unm.${ds}.i$initial.u$update.dat"
     else
