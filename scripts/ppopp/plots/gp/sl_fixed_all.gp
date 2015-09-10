@@ -61,7 +61,7 @@ FILE2 = '"data/data.sl.i2048.u20.dat"'
 FILE3 = '"data/data.sl.i512.u50.dat"'
 FILE4 = '"data/data.sl.i128.u100.dat"'
 
-unset xlabel
+set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xtics offset 0,0.4
 unset key
 

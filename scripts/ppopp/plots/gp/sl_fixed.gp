@@ -15,11 +15,11 @@ set tmargin 3
 set bmargin 2.5
 
 title_offset   = -0.5
-top_row_y      = 0.44
+top_row_y      = 0.0
 bottom_row_y   = 0.0
 graphs_x_offs  = 0.1
-plot_size_x    = 1.15
-plot_size_y    = 1.11
+plot_size_x    = 1.18
+plot_size_y    = 0.67
 
 DIV              =    1e6
 FIRST            =    2
@@ -61,7 +61,7 @@ FILE2 = '"data/data.sl.i2048.u20.dat"'
 FILE3 = '"data/data.sl.i512.u50.dat"'
 FILE4 = '"data/data.sl.i128.u100.dat"'
 
-unset xlabel
+set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xtics offset 0,0.4
 unset key
 
@@ -117,7 +117,7 @@ set key spacing 1.5
 set key horiz
 set key width -3
 set key samplen 2.5
-set key at screen 0.568, screen 1.108 center top
+set key at screen 0.568, screen 0.65 center top
 
 #We need to set an explicit xrange.  Anything will work really.
 set xrange [-1:1]
