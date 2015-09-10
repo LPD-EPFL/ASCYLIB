@@ -130,7 +130,13 @@ then
         max=$(nproc);
 	maxp4=$(($max+4));
 	max15=$(echo "1.5*$max" | bc);
-	cores="1 $(seq 2 2 $max) $(seq $maxp4 4 $max15)";
+	max15i=$(printf "%.0f" $max15);
+	if [ $maxp4 -le $max15i ];
+	then 
+	   cores="1 $(seq 2 2 $max) $(seq $maxp4 4 $max15)";
+	else
+	    cores="1 $(seq 2 2 $max) $max15i";
+	fi;
     fi;
 elif [ "$cores" = "ppoppfast" ];
 then

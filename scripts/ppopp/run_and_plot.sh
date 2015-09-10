@@ -6,6 +6,12 @@ echo "## Running experiments: begin";
 
 ${at}/run_all.sh;
 
+if [ $? -ne 0 ];
+then
+    echo "## Abort!"; exit;
+fi;
+
+
 echo "## Running experiments: end";
 echo "## Plotting: begin";
 

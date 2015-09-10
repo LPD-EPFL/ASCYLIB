@@ -6,7 +6,7 @@ sf=./scripts/ppopp
 pinclude=./include/utils.h;
 echo "--> Settings in ./scripts/ppopp/run.config;"
 echo "--> # Repetitions      : "$repetitions;
-echo "--> Duration (ms)      : "$duration;
+echo "--> Duration/rep (ms)  : "$duration;
 echo "--> Pin threads        : "$set_cpu;
 echo "--> On cores setting   : "$cores;
 echo "--> Keep value         : "$keep;
@@ -29,7 +29,7 @@ printf "\n   Continue? [Y/n] ";
 read cont;
 if [ "$cont" = "n" ];
 then
-    exit;
+    exit 1;
 fi;
 
 ds="ot map ll ht sl qu st";
