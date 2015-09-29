@@ -135,10 +135,6 @@ parse_delete(intset_l_t *set, skey_t key)
 #if LAZY_RO_FAIL ==1 
       if (curr->key != key)
 	{
-	  if (unlikely(curr->marked))
-	    {
-	      continue;
-	    }
 	  return false;
 	}
 #endif
