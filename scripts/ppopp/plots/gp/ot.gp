@@ -44,10 +44,10 @@ ncol(i)=word(ncols, i+1);
 # XEON #####################################################################################
 # ##########################################################################################
 
-FILE0 = '"data/lpdxeon2680.optik_test.dat"'
+FILE0 = '"data/lpdxeon2680.ot.i1.u0.dat"'
 FILE1 = FILE0
 
-set xrange [xrange_start:41]
+set xrange [xrange_start:61]
 set xtics ( xrange_start, 10, 20, 30, 40, 50, 60 ) offset 0,0.4
 unset key
 
@@ -77,7 +77,7 @@ set lmargin 4
 @YTICS
 set ylabel '# CAS per validation' offset 2,-0.5
 set yrange [*:*]
-set ytics 50 offset 0.5
+set ytics 12 offset 0.5
 # set title @PLOT1
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \

@@ -1,5 +1,5 @@
 psize1=1.7
-psize2=2
+psize2=2.2
 
 set style line 1 lc rgb '#0060ad' lt 1 pt 2 ps psize1 lw 5 pi 3
 set style line 2 lc rgb '#dd181f' lt 1 pt 5 ps psize1 lw 5 pi 5

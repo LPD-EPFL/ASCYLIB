@@ -58,7 +58,7 @@ PLOT0 = '"Decreasing size\n{/*0.8(40% enqueue, 60% dequeue)}"'
 PLOT1 = '"Stable size\n{/*0.8(50% enqueue, 50% dequeue)}"'
 PLOT2 = '"Increasing size\n{/*0.8(60% enqueue, 40% dequeue)}"'
 PLOT3 = '"High contention\n{/*0.8(512 elements, 50% updates)}"'
-PLOT4 = '"Very high contention\n{/*0.8(128 elements, 100% updates)}"'
+PLOT4 = '"Very-high contention\n{/*0.8(128 elements, 100% updates)}"'
 
 # font "Helvetica Bold"
 set label 1 "Opteron" at screen 0.018, screen 0.18 rotate by 90 font ',30' textcolor rgb "red"

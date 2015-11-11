@@ -27,16 +27,17 @@ OFFSET           =    3
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
 LINE0 = '"lazy"'
-LINE1 = '"MCS-gl-opt"'
+LINE0lf = '"harris"'
+LINE1 = '"mcs-gl-opt"'
 LINE2 = '"optik-gl"'
 LINE3 = '"optik"'
 LINE4 = '"optik-cache"'
 
-PLOT0 = '"Very low contention\n{/*0.8(8192 elements, 1% updates)}"'
+PLOT0 = '"Very-low contention\n{/*0.8(8192 elements, 1% updates)}"'
 PLOT1 = '"Low contention\n{/*0.8(4096 elements, 10% updates)}"'
 PLOT2 = '"Medium contention\n{/*0.8(2048 elements, 20% updates)}"'
 PLOT3 = '"High contention\n{/*0.8(512 elements, 50% updates)}"'
-PLOT4 = '"Very high contention\n{/*0.8(128 elements, 100% updates)}"'
+PLOT4 = '"Very-high contention\n{/*0.8(128 elements, 100% updates)}"'
 
 # font "Helvetica Bold"
 set label 1 "Opteron" at screen 0.018, screen 0.18 rotate by 90 font ',30' textcolor rgb "red"
@@ -54,6 +55,11 @@ FILE1 = '"data/lpdxeon2680.ll.i4096.u10.dat"'
 FILE2 = '"data/lpdxeon2680.ll.i2048.u20.dat"'
 FILE3 = '"data/lpdxeon2680.ll.i512.u50.dat"'
 FILE4 = '"data/lpdxeon2680.ll.i128.u100.dat"'
+FILE0lf = '"data/lpdxeon2680.ll.lf.i8192.u1.dat"'
+FILE1lf = '"data/lpdxeon2680.ll.lf.i4096.u10.dat"'
+FILE2lf = '"data/lpdxeon2680.ll.lf.i2048.u20.dat"'
+FILE3lf = '"data/lpdxeon2680.ll.lf.i512.u50.dat"'
+FILE4lf = '"data/lpdxeon2680.ll.lf.i128.u100.dat"'
 
 unset xlabel
 set xrange [0:61]
@@ -70,6 +76,7 @@ set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
 set ytics 0.5
 plot \
+     @FILE0lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -83,8 +90,9 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-set ytics 0.5
+set ytics 1
 plot \
+     @FILE1lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE1 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -101,6 +109,7 @@ unset ylabel
 set title @PLOT2
 set ytics 1
 plot \
+     @FILE2lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -116,6 +125,7 @@ set ylabel ""
 unset ylabel
 set ytics 5
 plot \
+     @FILE3lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE3 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -131,6 +141,7 @@ set ylabel ""
 unset ylabel
 set ytics 8
 plot \
+     @FILE4lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE4 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -147,6 +158,12 @@ FILE1 = '"data/lpd48core.ll.i4096.u10.dat"'
 FILE2 = '"data/lpd48core.ll.i2048.u20.dat"'
 FILE3 = '"data/lpd48core.ll.i512.u50.dat"'
 FILE4 = '"data/lpd48core.ll.i128.u100.dat"'
+FILE0lf = '"data/lpd48core.ll.lf.i8192.u1.dat"'
+FILE1lf = '"data/lpd48core.ll.lf.i4096.u10.dat"'
+FILE2lf = '"data/lpd48core.ll.lf.i2048.u20.dat"'
+FILE3lf = '"data/lpd48core.ll.lf.i512.u50.dat"'
+FILE4lf = '"data/lpd48core.ll.lf.i128.u100.dat"'
+
 
 set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xrange [0:65]
@@ -161,6 +178,7 @@ set origin 0.0 + graphs_x_offs, bottom_row_y
 set ylabel 'Throughput (Mops/s)' offset 2,-0.5
 set ytics 0.5
 plot \
+     @FILE0lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE0 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -176,6 +194,7 @@ unset ylabel
 # set title @PLOT1
 set ytics 1
 plot \
+     @FILE1lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE1 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -190,8 +209,9 @@ set ytics auto
 set ylabel ""
 unset ylabel
 # set title @PLOT2
-set ytics 1.5
+set ytics 2
 plot \
+     @FILE2lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE2 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -207,6 +227,7 @@ set ylabel ""
 unset ylabel
 set ytics 3
 plot \
+     @FILE3lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE3 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -220,8 +241,9 @@ set origin 2.0 + graphs_x_offs, bottom_row_y
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 2.5
+set ytics 2
 plot \
+     @FILE4lf using 1:(column_select(0)) title @LINE0lf ls 6 with linespoints, \
      @FILE4 using 1:(column_select(0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(2)) title @LINE2 ls 3 with linespoints, \
@@ -256,6 +278,7 @@ set xrange [-1:1]
 @NOYTICS
 set yrange [-1:1]
 plot \
+     NaN title @LINE0lf ls 6 with linespoints, \
      NaN title @LINE0 ls 1 with linespoints, \
      NaN title @LINE1 ls 2 with linespoints, \
      NaN title @LINE2 ls 3 with linespoints, \

@@ -27,22 +27,23 @@ OFFSET           =    3
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
 LINE0 = '"herlihy"'
+LINE0lf = '"fraser"'
 LINE1 = '"herlihy-optik"'
 LINE2 = '"optik1"'
 LINE3 = '"optik2"'
 LINE4 = '""'
 
 NCOL0 = 0
+NCOL0lf = 0
 NCOL1 = 3
 NCOL2 = 1
 NCOL3 = 2
-NCOL4 = 0
 
-PLOT0 = '"Very low contention\n{/*0.8(8192 elements, 1% updates)}"'
+PLOT0 = '"Very-low contention\n{/*0.8(8192 elements, 1% updates)}"'
 PLOT1 = '"Low contention\n{/*0.8(4096 elements, 10% updates)}"'
 PLOT2 = '"Medium contention\n{/*0.8(2048 elements, 20% updates)}"'
 PLOT3 = '"High contention\n{/*0.8(512 elements, 50% updates)}"'
-PLOT4 = '"Very high contention\n{/*0.8(128 elements, 100% updates)}"'
+PLOT4 = '"Very-high contention\n{/*0.8(128 elements, 100% updates)}"'
 
 # font "Helvetica Bold"
 set label 1 "Opteron" at screen 0.018, screen 0.18 rotate by 90 font ',30' textcolor rgb "red"
@@ -54,18 +55,21 @@ set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textc
 # ##########################################################################################
 
 
-
 FILE0 = '"data/lpdxeon2680.sl.i8192.u1.dat"'
 FILE1 = '"data/lpdxeon2680.sl.i4096.u10.dat"'
 FILE2 = '"data/lpdxeon2680.sl.i2048.u20.dat"'
 FILE3 = '"data/lpdxeon2680.sl.i512.u50.dat"'
 FILE4 = '"data/lpdxeon2680.sl.i128.u100.dat"'
+FILE0lf = '"data/lpdxeon2680.sl.lf.i8192.u1.dat"'
+FILE1lf = '"data/lpdxeon2680.sl.lf.i4096.u10.dat"'
+FILE2lf = '"data/lpdxeon2680.sl.lf.i2048.u20.dat"'
+FILE3lf = '"data/lpdxeon2680.sl.lf.i512.u50.dat"'
+FILE4lf = '"data/lpdxeon2680.sl.lf.i128.u100.dat"'
 
 unset xlabel
 set xrange [0:61]
 set xtics ( 1, 10, 20, 30, 40, 50, 60 ) offset 0,0.4
 unset key
-
 
 set size plot_size_x, plot_size_y
 set multiplot layout 5, 2
@@ -76,6 +80,7 @@ set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
 set ytics 40
 plot \
+     @FILE0lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE0 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -90,6 +95,7 @@ unset ylabel
 set title @PLOT1
 set ytics 30
 plot \
+     @FILE1lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE1 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -105,6 +111,7 @@ unset ylabel
 set title @PLOT2
 set ytics 30
 plot \
+     @FILE2lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE2 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -119,6 +126,7 @@ set ylabel ""
 unset ylabel
 set ytics 20
 plot \
+     @FILE3lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE3 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -133,6 +141,7 @@ set ylabel ""
 unset ylabel
 set ytics 8
 plot \
+     @FILE4lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE4 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -148,6 +157,11 @@ FILE1 = '"data/lpd48core.sl.i4096.u10.dat"'
 FILE2 = '"data/lpd48core.sl.i2048.u20.dat"'
 FILE3 = '"data/lpd48core.sl.i512.u50.dat"'
 FILE4 = '"data/lpd48core.sl.i128.u100.dat"'
+FILE0lf = '"data/lpd48core.sl.lf.i8192.u1.dat"'
+FILE1lf = '"data/lpd48core.sl.lf.i4096.u10.dat"'
+FILE2lf = '"data/lpd48core.sl.lf.i2048.u20.dat"'
+FILE3lf = '"data/lpd48core.sl.lf.i512.u50.dat"'
+FILE4lf = '"data/lpd48core.sl.lf.i128.u100.dat"'
 
 set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xrange [0:65]
@@ -162,6 +176,7 @@ set origin 0.0 + graphs_x_offs, bottom_row_y
 set ylabel 'Throughput (Mops/s)' offset 2,-0.5
 set ytics 30
 plot \
+     @FILE0lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE0 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -176,6 +191,7 @@ unset ylabel
 # set title @PLOT1
 set ytics 15
 plot \
+     @FILE1lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE1 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -191,6 +207,7 @@ unset ylabel
 # set title @PLOT2
 set ytics 10
 plot \
+     @FILE2lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE2 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -205,6 +222,7 @@ set ylabel ""
 unset ylabel
 set ytics 5
 plot \
+     @FILE3lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE3 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -219,6 +237,7 @@ set ylabel ""
 unset ylabel
 set ytics 2
 plot \
+     @FILE4lf using 1:(column_select(NCOL0lf)) title @LINE0lf ls 6 with linespoints, \
      @FILE4 using 1:(column_select(NCOL0)) title @LINE0 ls 1 with linespoints, \
      "" using 1:(column_select(NCOL1)) title @LINE1 ls 2 with linespoints, \
      "" using 1:(column_select(NCOL2)) title @LINE2 ls 3 with linespoints, \
@@ -252,6 +271,7 @@ set xrange [-1:1]
 @NOYTICS
 set yrange [-1:1]
 plot \
+     NaN title @LINE0lf ls 6 with linespoints, \
      NaN title @LINE0 ls 1 with linespoints, \
      NaN title @LINE1 ls 2 with linespoints, \
      NaN title @LINE2 ls 3 with linespoints, \

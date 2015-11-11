@@ -2,25 +2,15 @@
 
 ds=ll;
 
-ub="./bin/$(uname -n)";
-uo="scripts/ppopp/data";
-
-do_compile=1;
-set_cpu=0;
+. ./scripts/ppopp/run.config
 
 skip=$#;
 
-algos=( ${ub}/lb-ll_lazy ${ub}/lb-ll_gl ${ub}/lb-ll_optik_gl ${ub}/lb-ll_optik ${ub}/lb-ll_optik_cache );
-repetitions=11;
-duration=5000;
-keep=median; #max min median
+algos=( ${ub}/lf-ll_harris_opt ${ub}/lb-ll_lazy ${ub}/lb-ll_gl ${ub}/lb-ll_optik_gl ${ub}/lb-ll_optik ${ub}/lb-ll_optik_cache );
 
 params_i=( 128 512 2048 4096 8192 );
 params_u=( 100 50  20   10   1 );
 np=${#params_i[*]};
-
-cores=ppopp;
-
 
 cores_backup=$cores;
 . ./scripts/config;
@@ -56,6 +46,8 @@ then
     if [ $? -eq 0 ];
     then
 	echo "----> Success!"
+    else
+	echo "----> Compilation error!"; exit;
     fi;
     echo "----> Moving binaries to $ub";
     mkdir $ub &> /dev/null;
@@ -63,6 +55,8 @@ then
     if [ $? -eq 0 ];
     then
 	echo "----> Success!"
+    else
+	echo "----> Cannot mv executables in $ub!"; exit;
     fi;
 fi;
 
@@ -72,7 +66,13 @@ do
     initial=${params_i[$i]};
     update=${params_u[$i]};
     range=$((2*$initial));
-    out="$unm.${ds}.i$initial.u$update.dat"
+    if [ $fixed_file_dat -ne 1 ];
+    then
+	out="$unm.${ds}.i$initial.u$update.dat"
+    else
+	out="data.${ds}.i$initial.u$update.dat"
+    fi;
+
     echo "### params -i$initial -r$range -u$update / keep $keep of reps $repetitions of dur $duration" | tee ${uo}/$out;
 
     ./scripts/scalability_rep.sh $cores $repetitions $keep "$algos_str" -d$duration -i$initial -r$range -u$update \

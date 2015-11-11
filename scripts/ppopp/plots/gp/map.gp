@@ -28,7 +28,7 @@ FIRST            =    2
 OFFSET           =    3
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
-LINE0 = '"MCS"'
+LINE0 = '"mcs"'
 LINE1 = '"optik"'
 
 ncols="0 1 2 3 4 6"
@@ -80,7 +80,7 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-set ytics 0.5 offset 0.5
+set ytics 1 offset 0.5
 # set key inside top right font ",28"
 plot \
      @FILE1 using 1:(column_select(ncol(0))) title @LINE0 ls 1 with linespoints, \
@@ -112,7 +112,7 @@ set xrange [*:*]
 set xtics auto
 at(x)=x;
 cs(x)=column(x);
-set xtics ("MCS" 3.5, "optik" 10.5 ) scale 0.0
+set xtics ("mcs" 3.5, "optik" 10.5 ) scale 0.0
 # set xtics rotate by -45 # 29 offset -2.2,-1.2 # -45 
 
 DIV=1000
@@ -121,15 +121,33 @@ column_right(i)=column(3 + (i-1)*6)/DIV
 column_keep_left(i)=column(i)/DIV
 column_keep_right(i)=column(6+i)/DIV
 
+
+perc="05% 25% 50% 75% 95%"
+nperc(i)=word(perc, i+1);
+
+do for [v=15:35:5] {
+set arrow v from 3.2,v to 2.2,v
+set label v nperc((v-15)/5) at 3.3,v font ',21'
+}
+
+set obj 4 rect at 3,25 size 5,28 lw 2
+
 set ylabel "Latency distribution\n(Kcycles)" offset 2
 unset xlabel
 bnv=6
-set ytics 12
+set ytics 10
 plot for [i=1:bnv] @LDI_FILE0 \
      using (i):(column_keep_left(i)) ls (i*10) pt 7 ps 0.5 notitle,\
      for [i=1:bnv] '' \
-     using (i+7):(column_keep_right(i)) ls (i*10) pt 7 ps 0.5 notitle
+     using (i+7):(column_keep_right(i)) ls (i*10) pt 7 ps 0.5 notitle,\
+     "data/ldi_example" using (1.5):(column_keep_left(1)) ls 10 pt 7 ps 0.5 notitle
 
+
+do for [v=15:35:5] {
+unset arrow v
+unset label v
+}
+unset obj 4
 
 set origin 0.5 + graphs_x_offs, bottom_row_y
 set size 0.5, 0.6
@@ -180,7 +198,7 @@ set key spacing 1.5
 set key horiz
 set key samplen 3
 set key width -1
-set key at screen 1.1, screen 0.93 right top
+set key at screen 0.6, screen 0.93 right top
 
 # We need to set an explicit xrange.  Anything will work really.
 set xrange [-1:1]
@@ -204,7 +222,7 @@ set key font ",25"
 set key horiz
 set key width -2.4
 set key samplen 1
-set key at screen 0.07, screen 0.48 left top
+set key at screen 0.07, screen 0.487 left top
 
 plot \
      NaN t "srch-suc" ls 10 with boxes, \
