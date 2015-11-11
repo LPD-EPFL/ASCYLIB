@@ -1,5 +1,5 @@
 /*
- * File: mcs_in.h
+ * File: mcs.h
  * Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
  *
  * The MIT License (MIT)

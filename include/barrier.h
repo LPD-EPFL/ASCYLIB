@@ -66,7 +66,7 @@ barrier_cross(barrier_t *b)
   { int __i;					\
   for (__i = nthr - 1; __i >= 0; __i--)		\
     {						\
-  if (id == __i)				\
+  if ((int) id == __i)				\
     {
 
 #define EXEC_IN_DEC_ID_ORDER_END(barrier)	\

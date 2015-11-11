@@ -19,7 +19,10 @@ You may pass the following settings to `make`:
     * POWER=1 : enable power measurements with rapl_read library (default is 0)      	    
     * RO_FAIL=0 : disables read-only unsuccessful updates in linked lists (pugh, lazy, copy) 
       		  and hash tables (pug, lazy, copy, lea:java)
-    * STATS=1 : enable extra stats (about retries) (not implemented on all structures yet)
+    * (STATS not implemented on structures yet)
+      STATS=1 : enable extra stats (about retries)
+            2 : enable stats for per-thread completed ops
+	    3 : enable both 1 and 2
     * PAD=1 : enabled node padding. NB. not all data structures support this properly for now
     * SEQ_NO_FREE=1 : make the SEQ implementations NOT use the ssmem_free (but uses SSMEM)
 Example:

@@ -352,20 +352,12 @@ typedef struct
   size_t values[ECDF_BOXPLOT_VALS];
 } ecdf_boxplot_t;
 
-typedef struct ecdf_stats_plus
-{
-  double avg;
-  double stdev;
-  double stdevp;
-} ecdf_stats_plus_t;
-
 typedef struct 
 {
   size_t* vals_sorted;
   size_t val_n;
   size_t pair_n;
   ecdf_pair_t* pairs;
-  ecdf_stats_plus_t plus;
 } ecdf_t;
 
 typedef struct 
@@ -374,32 +366,9 @@ typedef struct
   size_t x_max;
 } ecdf_clust_t;
 
-typedef struct 
-{
-  size_t clust_n;
-  ecdf_clust_t* clusts;
-} ecdf_clustering_t;
-
-
 ecdf_t* ecdf_calc(const size_t* vals, const size_t val_n);
-ecdf_t* ecdf_calc_plus(const size_t* vals, const size_t val_n);
-void ecdf_print(const ecdf_t* e);
 void ecdf_print_boxplot(const ecdf_t* e, const double perc, const char* title);
-void ecdf_print_boxplot_limits(const ecdf_t* e, const double* limits, const char* title);
-void ecdf_print_avg(const ecdf_t* e);
-void ecdf_plot(const ecdf_t* e);
-ecdf_clustering_t* ecdf_cluster(const ecdf_t* e, const int cluster_offset);
-size_t ecdf_clust_get_val(const ecdf_clustering_t* c, const size_t val);
 void ecdf_destroy(ecdf_t* e);
-void ecdf_clustering_destroy(ecdf_clustering_t* c);
-
-void ecdf_boxplot_print(const ecdf_boxplot_t* b, const char* title);
-void ecdf_boxplot_get(ecdf_boxplot_t* b, const ecdf_t* e, const double perc);
-size_t ecdf_boxplot_get_median(ecdf_boxplot_t* b);
-size_t ecdf_boxplot_get_min(ecdf_boxplot_t* b);
-void ecdf_boxplot_diff(ecdf_boxplot_t* d, const ecdf_boxplot_t* a, const ecdf_boxplot_t* b);
-void ecdf_boxplot_minus(ecdf_boxplot_t* d, const size_t minus);
-
 
 #ifdef	__cplusplus
 }

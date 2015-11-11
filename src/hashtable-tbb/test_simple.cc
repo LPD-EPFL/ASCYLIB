@@ -161,7 +161,7 @@ test(void* thread)
 
   unsigned int i;
   uint32_t num_elems_thread = (uint32_t) (initial / num_threads);
-  int32_t missing = (uint32_t) initial - (num_elems_thread * num_threads);
+  uint32_t missing = (uint32_t) initial - (num_elems_thread * num_threads);
   if (ID < missing)
     {
       num_elems_thread++;
