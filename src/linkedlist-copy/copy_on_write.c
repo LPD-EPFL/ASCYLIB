@@ -24,17 +24,19 @@
 #include "copy_on_write.h"
 
 __thread ssmem_allocator_t* alloc;
-
+LOCK_LOCAL_DATA;
 
 size_t array_ll_fixed_size;
 
 inline void 
 cpy_delete_copy(ssmem_allocator_t* alloc, array_ll_t* a)
 {
-#if CPY_ON_WRITE_USE_MEM_RELEAS == 1
+#if GC == 1
+#  if CPY_ON_WRITE_USE_MEM_RELEAS == 1
   ssmem_release(alloc, (void*) a);
-#else
+#  else
   ssmem_free(alloc, (void*) a);
+#  endif
 #endif
 }
 
@@ -55,7 +57,11 @@ static inline array_ll_t*
 array_ll_new(size_t size)
 {
   array_ll_t* all;
+#if GC == 1
   all = ssmem_alloc(alloc, sizeof(array_ll_t) + (array_ll_fixed_size * sizeof(kv_t)));
+#else
+  all = ssalloc(sizeof(array_ll_t) + (array_ll_fixed_size * sizeof(kv_t)));
+#endif
   assert(all != NULL);
   
   all->size = size;
