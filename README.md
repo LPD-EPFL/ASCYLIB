@@ -1,16 +1,21 @@
-ASCYLIB
-=======
+ASCYLIB + OPTIK
+===============
 
-ASCYLIB is a concurrent-search data-structure library. It contains over 30 implementations of linked lists, hash tables, skip lists, and binary search trees (BST). ASCYLIB contains sequential, lock-based, and lock-free implementations for each data structure.
+ASCYLIB (with OPTIK) is a concurrent data-structure library. It contains over 40 implementations of linked lists, hash tables, skip lists, binary search trees (BSTs), queues, priority queues, and stacks. ASCYLIB contains sequential, lock-based, and lock-free implementations for each data structure.
 
 ASCYLIB works on x86, SPARC, and Tilera architectures and contains tests to evaluate the throughput, latency, latency distribution, and energy efficiency of the included data structures.
 
-* Website             : http://lpd.epfl.ch/site/ascylib
-* Author              : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+OPTIK is a new design pattern for easily implementing fast and scalable concurrent data structures. We have merged several concurrent data structures developed with OPTIK in ASCYLIB. More details can be found here: http://lpd.epfl.ch/site/optik.
+
+* Website             : http://lpd.epfl.ch/site/ascylib - http://lpd.epfl.ch/site/optik
+* Authors             : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
                         Tudor David <tudor.david@epfl.ch> 
-* Related Publications: ASCYLIB was developed for:
-  *Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*,
-  Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),
+* Related Publications:
+  * *Optimistic Concurrency with OPTIK*,  
+    Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),  
+  PPoPP '16 *(to appear)*
+  * *Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*,  
+  Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),  
   ASPLOS '15
 
 BST-TK is a new lock-based BST, introduced in ASCYLIB. 
@@ -66,4 +71,5 @@ Scripts
 ASCYLIB includes tons of usefull scripts (in the `scripts` folders). Some particularly useful ones are:
 * `scalability.sh` and `scalability_rep.h`: run the given list of executable on the given (list of) number of threads, with the given parameters, and report throughput and scalability over single-threaded execution.
 * scripts in `apslos/` directory: they were used to create the plots for the ASPLOS '15 paper. In particular, `apslos/run_scy.sh` accepts configuration files (see `asplos/config`) so it can be configured to execute almost any per-data-structure scenario.
+* scripts in `ppopp/` directory: they were used to create the plots for the PPoPP '16 paper. In particular, `ppopp/run_and_plot.sh` can run and plot graphs for all the tests in the paper.
 
