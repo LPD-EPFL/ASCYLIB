@@ -2,6 +2,14 @@
 
 at=./scripts/ppopp
 
+have_gp=$(which gnuplot);
+if [ "${have_gp}0" = 0 ];
+then
+    echo "## !! WARNING: no gnuplot installation found. The plots cannot be created."
+    echo "               you can later create the graphs manually using ./scipts/ppopp/plot.sh";
+    echo "";
+fi;
+
 echo "## Running experiments: begin";
 
 ${at}/run_all.sh;
@@ -13,21 +21,5 @@ fi;
 
 
 echo "## Running experiments: end";
-echo "## Plotting: begin";
 
-cd ${at}/plots;
-make -k fixed;
-
-figs=$(ls eps/fig*);
-figss=$(echo "$figs" | sed 's/^eps\///g');
-
-echo "## Plotting: end";
-echo "## Figures in ${at}/plots/eps";
-echo "## Available figures #############";
-for f in $figs;
-do
-    printf "#    %-27s #\n" $f;
-done
-echo "##################################"
-cd -;
-
+${at}/plot.sh;

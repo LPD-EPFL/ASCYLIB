@@ -10,11 +10,11 @@ echo "--> Duration/rep (ms)  : "$duration;
 echo "--> Pin threads        : "$set_cpu;
 echo "--> On cores setting   : "$cores;
 echo "--> Keep value         : "$keep;
-echo "--> Will use pausing (defined in $pinclude):";
-echo;
+# echo "--> Will use pausing (defined in $pinclude):";
+# echo;
 
-grep -A1 "define DO_PAUSE_TYPE" $pinclude;
-grep "size_t pause_" $pinclude;
+# grep -A1 "define DO_PAUSE_TYPE" $pinclude;
+# grep "size_t pause_" $pinclude;
 
 cconfig=$cores;
 . ./scripts/config;
