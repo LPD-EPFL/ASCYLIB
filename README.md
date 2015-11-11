@@ -71,4 +71,5 @@ Scripts
 ASCYLIB includes tons of usefull scripts (in the `scripts` folders). Some particularly useful ones are:
 * `scalability.sh` and `scalability_rep.h`: run the given list of executable on the given (list of) number of threads, with the given parameters, and report throughput and scalability over single-threaded execution.
 * scripts in `apslos/` directory: they were used to create the plots for the ASPLOS '15 paper. In particular, `apslos/run_scy.sh` accepts configuration files (see `asplos/config`) so it can be configured to execute almost any per-data-structure scenario.
+* scripts in `ppopp/` directory: they were used to create the plots for the PPoPP '16 paper. In particular, `ppopp/run_and_plot.sh` can run and plot graphs for all the tests in the paper.
 
