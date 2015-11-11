@@ -60,9 +60,9 @@ typedef struct
 
 typedef struct
 {
-  key_val_t* array;
   size_t size;
   optik_t lock;
+  key_val_t array[7];
 } map_t;
 
 void map_init_l(map_t* map, size_t size);
