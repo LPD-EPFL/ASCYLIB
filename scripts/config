@@ -69,6 +69,9 @@ fi;
 if [ "$cores" = "all" ];
 then
     cores=$(seq 2 1 $max_cores);
+elif [ "$cores" = "allover" ];
+then
+    cores="$(seq 2 1 $((max_cores-1))) $(seq $max_cores 2 $max_over)";
 elif [ "$cores" = "two" ];
 then
     cores=$(seq 2 2 $max_cores);
