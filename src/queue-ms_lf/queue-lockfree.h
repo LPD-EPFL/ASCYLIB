@@ -51,11 +51,9 @@ typedef struct queue_node
 typedef ALIGNED(CACHE_LINE_SIZE) struct queue
 {
   queue_node_t* head;
-  ptlock_t head_lock;
-  uint8_t padding1[CACHE_LINE_SIZE - sizeof(queue_node_t*) - sizeof(ptlock_t)];
+  uint8_t padding1[CACHE_LINE_SIZE - sizeof(queue_node_t*)];
   queue_node_t* tail;
-  ptlock_t tail_lock;
-  uint8_t padding2[CACHE_LINE_SIZE - sizeof(queue_node_t*) - sizeof(ptlock_t)];
+  uint8_t padding2[CACHE_LINE_SIZE - sizeof(queue_node_t*)];
 } queue_t;
 
 int floor_log_2(unsigned int n);
