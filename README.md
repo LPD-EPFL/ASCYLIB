@@ -22,6 +22,28 @@ BST-TK is a new lock-based BST, introduced in ASCYLIB.
 Additionally, CLHT is a new hash hash table, introduced in ASCYLIB. We provide lock-free and lock-based variants of CLHT as a separate repository (https://github.com/LPD-EPFL/CLHT).
 Details of the algorithms and a proofs/sketches of correctness can be found in the following technical report: https://infoscience.epfl.ch/record/203822
 
+We have developed the following algorithms using OPTIK:
+1. A simple array map (in `src/hashtable-map_optik`);
+   We use this map in a hash table (in `src/hashtable-optik0`);
+2. An optimistic global-lock-based linked list (in `src/linkedlist-optik_gl`).  
+   We use this list in a hash table (in `src/hashtable-optik1`);
+3. A fine-grained linked list (in `src/linkedlist-optik`).__
+   We use this list in a hash table (in `src/hashtable-optik0`);
+4. A skip list algorithm (in `src/skiplist-optik1`).  
+   We also provide a variant of the same algorithm (in ``src/skiplist-optik1`).
+
+Additionally, we have optimized existing algorithms using OPTIK:
+1. Java's ConcurrentHashMap algorithm (in`src/hashtable-java_optik`);
+2. Herlihy's optimistic skip list (in `src/skiplist-optik2`);
+3. The classic Michael-Scott queues:
+   * lock-based `push`, `pop` optimized with ``optik_lock_version_backoff` (in `src/queue-optik0`)
+   * lock-based `push`, `pop` optimized with ``optik_trylock_version` (in `src/queue-optik1`)
+   * lock-free `push`, `pop` optimized with ``optik_trylock_version` (in `src/queue-optik2`)
+
+Finally, we have introduced two optimization techniques inspired by OPTIK:
+1. Node caching for optimizing lists (in `src/linkedlist-optik_cache`);
+2. Victim queue for optimizing `push` in queues (in `src/queue-optik3`).
+
 
 Some of the initial implementations used in ASCYLIB were taken from Synchrobench (https://github.com/gramoli/synchrobench -  V. Gramoli. More than You Ever Wanted to Know about Synchronization. PPoPP 2015.). 
 

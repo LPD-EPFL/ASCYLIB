@@ -1,8 +1,9 @@
 /*   
  *   File: herlihy.c
- *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
- *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *  	     Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *   Description:  Fine-grained locking skip list.
+ *   Optimized with OPTIK.
  *   C implementation of the Herlihy et al. algorithm originally 
  *   designed for managed programming language.
  *   "A Simple Optimistic Skiplist Algorithm" 
