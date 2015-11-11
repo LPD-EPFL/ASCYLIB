@@ -537,7 +537,9 @@ main(int argc, char **argv)
   if (size_after != (initial + pr))
     {
       printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
+#if ASSERT_SIZE == 1
       assert(size_after == (initial + pr));
+#endif
     }
 
   printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success", "succ %", "total %", "effective %");

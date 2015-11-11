@@ -161,7 +161,6 @@ test(void* thread)
   ssmem_alloc_init_fs_size(alloc, SSMEM_DEFAULT_MEM_SIZE, SSMEM_GC_FREE_SET_SIZE, ID);
 #endif
 
-  RR_INIT(phys_id);
   barrier_cross(&barrier);
 
   uint64_t key;
@@ -202,15 +201,12 @@ test(void* thread)
 
   barrier_cross(&barrier_global);
 
-  RR_START_SIMPLE();
-
   while (stop == 0) 
     {
       TEST_LOOP(NULL);
     }
 
   barrier_cross(&barrier);
-  RR_STOP_SIMPLE();
 
   if (!ID)
     {
@@ -254,9 +250,11 @@ test(void* thread)
 int
 main(int argc, char **argv) 
 {
-  set_cpu(the_cores[0]);
+  /* set_cpu(the_cores[0]); */
   ssalloc_init();
   seeds = seed_rand();
+
+  RR_INIT_ALL();
 
   struct option long_options[] = {
     // These options don't set a flag
@@ -469,7 +467,10 @@ main(int argc, char **argv)
     
   barrier_cross(&barrier_global);
   gettimeofday(&start, NULL);
+
+  RR_START_UNPROTECTED_ALL();
   nanosleep(&timeout, NULL);
+  RR_STOP_UNPROTECTED_ALL();
 
   stop = 1;
   gettimeofday(&end, NULL);
@@ -533,7 +534,9 @@ main(int argc, char **argv)
   if (size_after != (initial + pr))
     {
       printf("// WRONG size. %zu + %d != %zu\n", initial, pr, size_after);
+#if ASSERT_SIZE == 1 
       assert(size_after == (initial + pr));
+#endif
     }
 
   printf("    : %-10s | %-10s | %-11s | %-11s | %s\n", "total", "success", "succ %", "total %", "effective %");
