@@ -45,7 +45,6 @@ mstack_new_node(skey_t key, sval_t val, mstack_node_t* next)
 void
 mstack_delete_node(mstack_node_t *n)
 {
-  DESTROY_LOCK(ND_GET_LOCK(n));
   ssfree_alloc(1, (void*) n);
 }
 
