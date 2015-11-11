@@ -23,6 +23,16 @@
 #ifndef _MAIN_TEST_LOOP_H_
 #define _MAIN_TEST_LOOP_H_
 
+#if OPS_PER_THREAD == 1
+#  define PRINT_OPS_PER_THREAD()					\
+  printf("%-3lu  %-8zu %-8zu %-8zu\n",					\
+	 t, getting_count[t], putting_count[t], removing_count[t]);
+#else
+#  define PRINT_OPS_PER_THREAD()					
+#endif
+
+
+
 #define TEST_VARS_GLOBAL						\
   volatile int phase_put = 0;						\
   volatile uint32_t phase_put_threshold_start = 0.99999 * UINT_MAX;	\
@@ -145,6 +155,46 @@
 		  my_getting_fail);					\
       my_getting_count++;						\
     }
+
+#  define TEST_LOOP_ONLY_UPDATES()					\
+  c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	\
+  if (unlikely(c < scale_put))						\
+    {									\
+      key = (c & rand_max) + rand_min;					\
+      int res;								\
+      START_TS(1);							\
+      res = DS_ADD(set, key, key);					\
+      if(res)								\
+	{								\
+	  END_TS(1, my_putting_count_succ);				\
+	  ADD_DUR(my_putting_succ);					\
+	  my_putting_count_succ++;					\
+	}								\
+      END_TS_ELSE(4, my_putting_count - my_putting_count_succ,		\
+		  my_putting_fail);					\
+      my_putting_count++;						\
+    }									\
+  else if(unlikely(c <= scale_rem))					\
+    {									\
+      int removed;							\
+      START_TS(2);							\
+      removed = DS_REMOVE(set);						\
+      if(removed != 0)							\
+	{								\
+	  END_TS(2, my_removing_count_succ);				\
+	  ADD_DUR(my_removing_succ);					\
+	  my_removing_count_succ++;					\
+	}								\
+      END_TS_ELSE(5, my_removing_count - my_removing_count_succ,	\
+		  my_removing_fail);					\
+      my_removing_count++;						\
+    }									\
+  cpause((num_threads-1)*32);
+
+  /* cdelay(1); */
+  /* cpause(0); */
+  /* cdelay((num_threads-1)*128); */
+
 
 #endif	/* UNIFORM_WORKLOAD */
 

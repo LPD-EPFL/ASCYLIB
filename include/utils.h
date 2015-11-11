@@ -227,7 +227,7 @@ extern "C" {
   static inline void
   pause_rep(uint32_t num_reps)
   {
-    uint32_t i;
+    volatile uint32_t i;
     for (i = 0; i < num_reps; i++)
       {
 	PAUSE;
@@ -471,7 +471,8 @@ extern "C" {
       0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 
       20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
       10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
-      30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 
+      30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+      40, 41, 42, 43, 44, 45, 46, 47, 48, 49 /* extra 10 cores used on other machines */
     }; 
 
 static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] = 
@@ -523,6 +524,7 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     {
       0, 20, 1, 21, 2, 22, 3, 23, 4, 24, 5, 25, 6, 26, 7, 27, 8, 28, 9, 29,
       10, 30, 11, 32, 12, 32, 13, 33, 14, 34, 15, 35, 16, 36, 17, 37, 18, 38, 19, 39, 
+      40, 41, 42, 43, 44, 45, 46, 47, 48, 49 /* extra 10 cores used on other machines */
     }; 
 
 #  else
@@ -533,6 +535,8 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
       10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 
       20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 
       30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 
+      40, 41, 42, 43, 44, 45, 46, 47, 48, 49 /* extra 10 cores used on other machines */
+
     };
 
   static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] = 
@@ -615,6 +619,19 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
 #  endif
 #endif 
 
+#if !defined(PREFETCH)
+#  if defined(__x86_64__)
+#    define PREFETCH(x)		     asm volatile("prefetch %0" :: "m" (*(unsigned long *)x))
+#  elif defined(__sparc__)
+#    define PREFETCH(x)		
+#  elif defined(XEON)
+#    define PREFETCH(x)		
+#  else
+#    define PREFETCH(x)		
+#  endif
+#endif 
+
+
   //debugging functions
 #ifdef DEBUG
 #  define DPRINT(args...) fprintf(stderr,args);
@@ -660,28 +677,33 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
   {
 #ifndef NO_SET_CPU
 #  ifdef __sparc__
-    processor_bind(P_LWPID,P_MYID, cpu, NULL);
+    processor_bind(P_LWPID,P_MYID, the_cores[cpu], NULL);
 #  elif defined(__tile__)
     if (cpu>=tmc_cpus_grid_total()) {
       perror("Thread id too high");
     }
     // cput_set_t cpus;
-    if (tmc_cpus_set_my_cpu(cpu)<0) {
+    if (tmc_cpus_set_my_cpu(the_cores[cpu])<0) {
       tmc_task_die("tmc_cpus_set_my_cpu() failed."); 
     }    
 #  else
-    cpu %= (NUMBER_OF_SOCKETS * CORES_PER_SOCKET);
 
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(cpu, &mask);
-#    if defined(PLATFORM_NUMA)
-    numa_set_preferred(get_cluster(cpu));
-#    endif
-    pthread_t thread = pthread_self();
-    if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &mask) != 0) 
+    int n_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    //    cpu %= (NUMBER_OF_SOCKETS * CORES_PER_SOCKET);
+    if (cpu < n_cpus)
       {
-	fprintf(stderr, "Error setting thread affinity\n");
+	int cpu_use = the_cores[cpu];
+	cpu_set_t mask;
+	CPU_ZERO(&mask);
+	CPU_SET(cpu_use, &mask);
+#    if defined(PLATFORM_NUMA)
+	numa_set_preferred(get_cluster(cpu_use));
+#    endif
+	pthread_t thread = pthread_self();
+	if (pthread_setaffinity_np(thread, sizeof(cpu_set_t), &mask) != 0) 
+	  {
+	    fprintf(stderr, "Error setting thread affinity\n");
+	  }
       }
 #  endif
 #endif
@@ -689,6 +711,10 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
 
 
   static inline void cdelay(ticks cycles){
+    if (unlikely(cycles == 0))
+      {
+	return;
+      }
     ticks __ts_end = getticks() + (ticks) cycles;
     while (getticks() < __ts_end);
   }
@@ -746,6 +772,51 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
     x |= x >> 16;
     return x+1;
   }
+
+  static const size_t pause_fixed = 16384;
+
+  static inline void
+  do_pause()
+  {
+    /* cpause((mrand(seeds) % 12000)); */
+    /* cpause((mrand(seeds) % 12000)); */
+    //    cpause((mrand(seeds) % 16384));
+    //    cpause((mrand(seeds) % 32768));
+    cpause((mrand(seeds) % pause_fixed));
+  }
+
+
+  static const size_t pause_max   = 16384;
+  static const size_t pause_base  = 512;
+  static const size_t pause_min   = 512;
+
+  static inline void
+  do_pause_exp(size_t nf)
+  {
+    if (unlikely(nf > 32))
+      {
+	nf = 32;
+      }
+    const size_t p = (pause_base << nf);
+    const size_t pm = (p > pause_max) ? pause_max : p;
+    const size_t tp = pause_min + (mrand(seeds) % pm);
+    cdelay(tp);
+  }
+
+#define DO_PAUSE_TYPE         1       // 0: fixed max pause
+                                      // 1: exponentially increasing pause
+
+
+#if DO_PAUSE_TYPE == 0
+#define DO_PAUSE()            do_pause()
+#define NUM_RETRIES()        
+#elif DO_PAUSE_TYPE == 1
+#define DO_PAUSE()            do_pause_exp(__nr++);
+#define NUM_RETRIES()         size_t __nr;
+#else
+
+#endif
+
 
 #ifdef __cplusplus
 }

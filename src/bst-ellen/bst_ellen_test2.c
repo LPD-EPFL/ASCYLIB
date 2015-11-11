@@ -107,7 +107,7 @@ void *test(void *data) {
     thread_data_t *d = (thread_data_t *)data;
 
     //place the thread on the apropriate cpu
-    set_cpu(the_cores[d->id]);
+    set_cpu(d->id);
     int op_count = 10000;
 
     ssalloc_init();
@@ -164,7 +164,7 @@ int main(int argc, char* const argv[]) {
 	int i;
     
 	//place thread on the first cpu
-    set_cpu(the_cores[7]);
+    set_cpu(7);
 
 	ssalloc_init();
 	//alignment in the custom memory allocator to a 64 byte boundary 

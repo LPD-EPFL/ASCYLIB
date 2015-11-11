@@ -1,0 +1,8 @@
+### params -i65534 -p50 / keep median of reps 11 of dur 5000
+# Result from 11 repetitions: median
+#       ././bin/lpd48core/lf-st_treiber ./bin/lpd48core/lb-st_lock      ./bin/lpd48core/lb-st_optik     
+#cores  throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability 
+1       29122324    100.00  1           23399866    100.00  1           25710015    100.00  1           
+2       9741231     16.72   0.33        1446050     3.09    0.06        9162511     17.82   0.36        
+4       3373658     2.90    0.12        1526822     1.63    0.07        3287214     3.20    0.13        
+6       2012646     1.15    0.07        1500514     1.07    0.06        

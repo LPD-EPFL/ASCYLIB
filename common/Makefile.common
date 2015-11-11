@@ -302,6 +302,11 @@ ifeq ($(LATENCY),5)
 	LDFLAGS += $(SSPFD) -lm
 endif
 
+ifeq ($(LATENCY),6)
+	CFLAGS += -DCOMPUTE_LATENCY -DDO_TIMINGS -DPFD_TYPE=2
+	LDFLAGS += $(SSPFD) -lm
+endif
+
 
 ifeq ($(INIT),all)
 	CFLAGS += -DINITIALIZE_FROM_ONE=0
@@ -326,6 +331,14 @@ ifeq ($(STATS),1)
 	CFLAGS += -DRETRY_STATS=1
 endif
 
+ifeq ($(STATS),2)
+	CFLAGS += -DOPS_PER_THREAD=1
+endif
+
+ifeq ($(STATS),3)
+	CFLAGS += -DRETRY_STATS=1 -DOPS_PER_THREAD=1
+endif
+
 ifeq ($(PAD),1)
 	CFLAGS += -DDO_PAD=1
 endif
@@ -333,3 +346,12 @@ endif
 ifeq ($(SEQ_NO_FREE),1)
 	CFLAGS += -DSEQ_SSMEM_NO_FREE=1
 endif
+
+ifneq ($(OPTIK),)
+	CFLAGS += -DOPTIK_VERSION=$(OPTIK)
+endif
+
+ifneq ($(OPTIK_STATS),)
+	CFLAGS += -DOPTIK_STATS=$(OPTIK_STATS)
+endif
+

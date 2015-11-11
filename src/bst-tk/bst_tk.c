@@ -113,7 +113,7 @@ bst_tk_delete(intset_t* set, skey_t key)
 #endif
 
   return curr->val;
-}
+} 
 
 sval_t
 bst_tk_find(intset_t* set, skey_t key) 

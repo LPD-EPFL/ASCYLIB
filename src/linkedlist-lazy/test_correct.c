@@ -115,7 +115,7 @@ barrier_t barrier, barrier_global;
 
 typedef struct thread_data
 {
-  uint8_t id;
+  uint32_t id;
   DS_TYPE* set;
 } thread_data_t;
 
@@ -123,9 +123,8 @@ void*
 test(void* thread) 
 {
   thread_data_t* td = (thread_data_t*) thread;
-  uint8_t ID = td->id;
-  phys_id = the_cores[ID];
-  set_cpu(phys_id);
+  uint32_t ID = td->id;
+  set_cpu(ID);
   ssalloc_init();
 
   DS_TYPE* set = td->set;
@@ -322,7 +321,7 @@ test(void* thread)
 int
 main(int argc, char **argv) 
 {
-  set_cpu(the_cores[0]);
+  set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();
 
@@ -567,6 +566,7 @@ main(int argc, char **argv)
     
   for(t=0; t < num_threads; t++) 
     {
+      PRINT_OPS_PER_THREAD();
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];

@@ -127,8 +127,7 @@ test(void* thread)
 {
   thread_data_t* td = (thread_data_t*) thread;
   uint32_t ID = td->id;
-  int phys_id = the_cores[ID];
-  set_cpu(phys_id);
+  set_cpu(ID);
   ssalloc_init();
 
   DS_TYPE* set = td->set;
@@ -263,7 +262,7 @@ main(int argc, char **argv)
   init_clh_thread(&clh_local_p);
 #endif
 
-  set_cpu(the_cores[0]);
+  set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();
 
@@ -526,6 +525,7 @@ main(int argc, char **argv)
 		 t, getting_count[t], getting_count_succ[t], putting_count[t], putting_count_succ[t],
 		 removing_count[t], removing_count_succ[t]);
 	}
+      PRINT_OPS_PER_THREAD();
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];
