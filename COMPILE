@@ -5,6 +5,9 @@ You may pass the following settings to `make`:
 		 O1 : compile with -O1
 		 O2 : compile with -O2
 		 O3 : compile with -O3 (default)
+    * OPTIK= 0 : compile with ticket-lock-based OPTIK
+             1 : compile with versioned-lock-based OPTIK
+	     2 : compile with non-atomic TTAS+version OPTIK (version is accessed in critical section)
     * GC=0 or GC=1 : disable/enable GC (default is 1)
     * TEST=old : use the old test.c file (disables GC)
     * TEST=correct : use the test_correct.c file (enables GC)
@@ -13,6 +16,7 @@ You may pass the following settings to `make`:
 	       3 : enable per operation latency measurements with sspfd (all cores print results)
 	       4 : enable latency measurements of the parse phase of ops (only id==0 prints results)
 	       5 : enable latency measurements of the parse phase of ops (all cores print results)
+	       6 : enable latency distribution measurements (boxplot)
     * GRANULARITY=GLOBAL_LOCK (or G=GL) for global lock
     * INIT=all : initialize the structure from all threads (default is from one)
     * SET_CPU=0 : does not pin threads to cores (does this by default) 
