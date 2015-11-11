@@ -75,7 +75,7 @@ The TBB-based hash table requires an installation of Intel's TBB library (https:
 
 To build all data structures except from those two, you can issue `make`.
 
-ASCYLIB includes a default configuration that uses `gcc` and tries to infer the number of cores and the frequency of the target/build platform. If this configuration is incorrect, you can always create a manual configurations in `common/Makefile.common` and `include/utils.h` (look in these files for examples).
+ASCYLIB includes a default configuration that uses `gcc` and tries to infer the number of cores and the frequency of the target/build platform. If this configuration is incorrect, you can always create a manual configurations in `common/Makefile.common` and `include/utils.h` (look in these files for examples). If you do not care about pinning threads to cores, these settings do not matter. You can compile with `make SET_CPU=0 ...` to disable thread pinning.
 
 ASCYLIB accepts various compilation parameters. Please refer to the `COMPILE` file.
 
