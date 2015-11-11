@@ -1,16 +1,21 @@
-ASCYLIB
-=======
+ASCYLIB + OPTIK
+===============
 
-ASCYLIB is a concurrent-search data-structure library. It contains over 30 implementations of linked lists, hash tables, skip lists, and binary search trees (BST). ASCYLIB contains sequential, lock-based, and lock-free implementations for each data structure.
+ASCYLIB (with OPTIK) is a concurrent data-structure library. It contains over 40 implementations of linked lists, hash tables, skip lists, binary search trees (BSTs), queues, priority queues, and stacks. ASCYLIB contains sequential, lock-based, and lock-free implementations for each data structure.
 
 ASCYLIB works on x86, SPARC, and Tilera architectures and contains tests to evaluate the throughput, latency, latency distribution, and energy efficiency of the included data structures.
 
-* Website             : http://lpd.epfl.ch/site/ascylib
-* Author              : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+OPTIK is a new design pattern for easily implementing fast and scalable concurrent data structures. We have merged several concurrent data structures developed with OPTIK in ASCYLIB. More details can be found here: http://lpd.epfl.ch/site/optik.
+
+* Website             : http://lpd.epfl.ch/site/ascylib - http://lpd.epfl.ch/site/optik
+* Authors             : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
                         Tudor David <tudor.david@epfl.ch> 
-* Related Publications: ASCYLIB was developed for:
-  *Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*,
-  Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),
+* Related Publications:
+  * *Optimistic Concurrency with OPTIK*,  
+    Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),  
+  PPoPP '16 *(to appear)*
+  * *Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*,  
+  Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),  
   ASPLOS '15
 
 BST-TK is a new lock-based BST, introduced in ASCYLIB. 
