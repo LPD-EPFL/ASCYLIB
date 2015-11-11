@@ -203,8 +203,7 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
   node->version = tailm;
   while (unlikely((uintptr_t) qu->array[spot]) != tailm)
     {
-      /* DO_PAUSE();  */
-      sched_yield();
+      DO_PAUSE();
     }
 
   qu->array[spot] = node;
@@ -216,6 +215,7 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 sval_t
 queue_optik_delete(queue_t* qu)
 {
+  NUM_RETRIES();
   queue_wait_resize(qu);
   size_t hash = qu->hash;
   while (1)
@@ -233,12 +233,12 @@ queue_optik_delete(queue_t* qu)
 
       if (unlikely(queue_node_is_null(node)))
 	{
-	  sched_yield(); DO_PAUSE(); sched_yield();  DO_PAUSE(); sched_yield();
+	  DO_PAUSE();
 	  continue;
 	}
       else if (unlikely(node->version != queue_node_set_null(head)))
 	{
-	  sched_yield(); DO_PAUSE(); sched_yield();  DO_PAUSE(); sched_yield();
+	  DO_PAUSE();
 	  continue;
 	}
 

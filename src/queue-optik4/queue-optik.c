@@ -213,6 +213,7 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 sval_t
 queue_optik_delete(queue_t* qu)
 {
+  NUM_RETRIES();
   queue_wait_resize(qu);
   size_t hash = qu->hash;
   while (1)

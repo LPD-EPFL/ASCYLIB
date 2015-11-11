@@ -41,6 +41,7 @@ queue_optik_find(queue_t* qu, skey_t key)
 int
 queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 {
+  NUM_RETRIES();
   queue_node_t* node = queue_new_node(key, val, NULL);
   while(1)
     {

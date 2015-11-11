@@ -8,6 +8,8 @@ ALGO_C = queue-optik.c
 BINS = "$(BINDIR)/lb-qu_optik3$(BIN_SUFFIX)"
 PROF = $(ROOT)/src
 
+CFLAGS += -DOPTIK_VERSION=0 # optik on top of tikcet
+
 .PHONY:	all clean
 
 all:	main
