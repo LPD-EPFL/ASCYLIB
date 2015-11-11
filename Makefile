@@ -6,7 +6,7 @@ LFBENCHS = src/linkedlist-harris src/linkedlist-harris_opt src/linkedlist-michae
 SEQBENCHS = src/linkedlist-seq src/hashtable-seq src/skiplist-seq src/bst-seq_internal src/bst-seq_external
 EXTERNALS = src/hashtable-rcu src/hashtable-tbb
 NOISE = src/noise
-TESTS = src/tests
+TESTS = src/tests src/optik_test
 BSTS = src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-aravind src/bst-tk/
 
 .PHONY:	clean all external $(BENCHS) $(LBENCHS) $(NOISE) $(TESTS) $(SEQBENCHS)
@@ -14,6 +14,8 @@ BSTS = src/bst-bronson src/bst-drachsler src/bst-ellen src/bst-howley src/bst-ar
 default: lockfree tas seq
 
 all:	lockfree tas seq external
+
+ppopp: mapppopp llppopp htppopp slppopp quppopp stppopp
 
 mutex:
 	$(MAKE) "LOCK=MUTEX" $(LBENCHS)
@@ -86,6 +88,18 @@ noise:
 
 tests:
 	$(MAKE) $(TESTS)
+
+
+otppopp: optik_test0 optik_test1 optik_test2
+
+optik_test0:
+	$(MAKE) "OPTIK=0" "OPTIK_STATS=1" src/optik_test
+
+optik_test1:
+	$(MAKE) "OPTIK=1" "OPTIK_STATS=1" src/optik_test
+
+optik_test2:
+	$(MAKE) "OPTIK=2" "OPTIK_STATS=1" src/optik_test
 
 tbb:
 	$(MAKE) src/hashtable-tbb
@@ -192,9 +206,12 @@ seqllgc:
 
 
 lfll: lfll_harris lfll_michael lfll_harris_opt
-lbll: seqll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro llcopy_no_ro lbll_pugh_no_ro
-ll: seqll lfll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro llcopy_no_ro lbll_pugh_no_ro
+lbll: seqll llcopy lbll_coupling lbll_gl lbll_pugh lbll_lazy lbll_lazy_no_ro lbll_optik lbll_optik_no_ro llcopy_no_ro lbll_pugh_no_ro
+ll: seqll lfll llcopy lbll_coupling lbll_gl lbll_pugh lbll_lazy lbll_lazy_no_ro lbll_optik lbll_optik_no_ro llcopy_no_ro lbll_pugh_no_ro
 
+llppopp: lfll_harris_opt lbll_lazy lbll_gl lbll_optik_gl lbll_optik lbll_optik_cache
+
+optik: lbll_optik lbht_optik0 lbht_optik0_gl lbht_optik1 lbht_optik1_gl
 
 lbht_coupling:
 	$(MAKE) src/hashtable-coupling
@@ -204,6 +221,22 @@ lbht_pugh:
 
 lbht_lazy:
 	$(MAKE) src/hashtable-lazy
+
+lbht_optik0:
+	$(MAKE) src/hashtable-optik0
+
+lbht_optik0_gl:
+	$(MAKE) "G=GL" src/hashtable-optik0
+
+lbht_optik1:
+	$(MAKE) src/hashtable-optik1
+
+lbht_optik1_gl:
+	$(MAKE) "G=GL" src/hashtable-optik1
+
+lbht_map:
+	$(MAKE) src/hashtable-map_optik
+
 
 lbht_coupling_gl:
 	$(MAKE) "G=GL" src/hashtable-coupling
@@ -223,6 +256,9 @@ lbht_lazy_gl_no_ro:
 lbll_coupling:
 	$(MAKE) src/linkedlist-coupling
 
+lbll_gl:
+	$(MAKE) "LOCK=MCS" src/linkedlist-gl_opt
+
 lbll_pugh:
 	$(MAKE) src/linkedlist-pugh
 
@@ -234,6 +270,21 @@ lbll_lazy:
 
 lbll_lazy_no_ro:
 	$(MAKE) "RO_FAIL=0" src/linkedlist-lazy
+
+lbll_optik:
+	$(MAKE) src/linkedlist-optik
+
+lbll_optik_no_ro:
+	$(MAKE) "RO_FAIL=0" src/linkedlist-optik
+
+lbll_optik_cache:
+	$(MAKE) src/linkedlist-optik_cache
+
+lbll_optik_cache_no_ro:
+	$(MAKE) "RO_FAIL=0" src/linkedlist-optik_cache
+
+lbll_optik_gl:
+	$(MAKE) src/linkedlist-optik_gl
 
 llcopy:
 	$(MAKE) src/linkedlist-copy
@@ -259,13 +310,18 @@ htjava:
 htjava_no_ro:
 	$(MAKE) "RO_FAIL=0" src/hashtable-java
 
+htjava_optik:
+	$(MAKE) src/hashtable-java_optik
+
 htrcu:
 	$(MAKE) "GC=0" src/hashtable-rcu
 
 htrcugc:
 	$(MAKE) src/hashtable-rcu
 
-ht:	seqht lfht lbht htjava tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl lbht_lazy_gl_no_ro lbht_pugh_gl_no_ro htcopy_no_ro htjava_no_ro
+ht:	seqht lfht lbht htjava htjava_optik tbb htcopy htrcu lbht_coupling lbht_lazy lbht_pugh lbht_coupling_gl lbht_lazy_gl lbht_pugh_gl lbht_lazy_gl_no_ro lbht_pugh_gl_no_ro htcopy_no_ro htjava_no_ro
+
+htppopp: lbht_lazy_gl htjava htjava_optik lbht_optik0 lbht_optik1 lbht_map
 
 seqbstint:
 	$(MAKE) "STM=SEQUENTIAL" "SEQ_NO_FREE=1" src/bst-seq_internal
@@ -319,22 +375,32 @@ clean:
 	$(MAKE) -C src/hashtable-coupling clean
 	$(MAKE) -C src/hashtable-harris clean
 	$(MAKE) -C src/hashtable-java clean
+	$(MAKE) -C src/hashtable-java_optik clean
 	$(MAKE) -C src/hashtable-lazy clean
+	$(MAKE) -C src/hashtable-optik0 clean
+	$(MAKE) -C src/hashtable-optik1 clean
+	$(MAKE) -C src/hashtable-map_optik clean
 	$(MAKE) -C src/hashtable-pugh clean
 	$(MAKE) -C src/hashtable-rcu clean
 	$(MAKE) -C src/hashtable-seq clean
 	$(MAKE) -C src/hashtable-tbb clean
 	$(MAKE) -C src/linkedlist-copy clean
 	$(MAKE) -C src/linkedlist-coupling clean
+	$(MAKE) -C src/linkedlist-gl_opt clean
 	$(MAKE) -C src/linkedlist-harris clean
 	$(MAKE) -C src/linkedlist-harris_opt clean
 	$(MAKE) -C src/linkedlist-lazy clean
+	$(MAKE) -C src/linkedlist-optik clean
+	$(MAKE) -C src/linkedlist-optik_cache clean
 	$(MAKE) -C src/linkedlist-michael clean
 	$(MAKE) -C src/linkedlist-pugh clean
 	$(MAKE) -C src/linkedlist-seq clean
 	$(MAKE) -C src/noise clean
 	$(MAKE) -C src/skiplist-fraser clean
 	$(MAKE) -C src/skiplist-herlihy_lb clean
+	$(MAKE) -C src/skiplist-optik clean
+	$(MAKE) -C src/skiplist-optik1 clean
+	$(MAKE) -C src/skiplist-optik2 clean
 	$(MAKE) -C src/skiplist-herlihy_lf clean
 	$(MAKE) -C src/skiplist-pugh clean
 	$(MAKE) -C src/skiplist-seq clean
