@@ -50,7 +50,7 @@
 #elif defined(LAPTOP) | defined(IGORLAPTOPLINUX) | defined(OANALAPTOPLINUX)
 #  define SSALLOC_SIZE (100 * 1024 * 1024)
 #else
-#  define SSALLOC_SIZE (1024 * 1024 * 1024)
+#  define SSALLOC_SIZE (4 * 1024 * 1024 * 1024LL)
 #endif
 
 
