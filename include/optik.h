@@ -38,6 +38,10 @@
 #include "common.h"
 #include "utils.h"
 
+#ifdef __tile__
+#  error OPTIK does not yet include the appropriate memory barriers for TILERA.
+#endif
+
 #ifndef OPTIK_STATS
 #  define OPTIK_STATS 0
 #endif
