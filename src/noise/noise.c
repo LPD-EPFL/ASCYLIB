@@ -36,6 +36,7 @@ typedef struct thd
 void* 
 test(void* d)
 {
+#warning set_cpu has changed, so must the core placement!
   thd_t* td = (thd_t*) d;
   int id = td->id;
   int my_core = the_cores[core + td->core];

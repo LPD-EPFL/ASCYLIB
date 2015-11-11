@@ -1,11 +1,11 @@
 #!/bin/bash
 
 gc=1;
-cpu=1;
-power=1;
+cpu=0;
+power=0;
 ro_fail=1;
 
-locks="NONE TAS TTAS TICKET CLH MUTEX UPMUTEX4"
+locks="TAS TTAS TICKET MCS MUTEX"
 
 ds=bin/lb-ll_copy;
 

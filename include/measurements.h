@@ -328,6 +328,48 @@ extern "C" {
 #  define KILL_ENTRY_TIME_POS(X)
 #endif
 
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <malloc.h>
+#include <inttypes.h>
+#include <assert.h>
+
+
+typedef struct 
+{
+  size_t x;
+  double cdf;
+} ecdf_pair_t;
+
+#define ECDF_BOXPLOT_VALS 7
+
+typedef struct
+{
+  double confidence;
+  size_t limits[ECDF_BOXPLOT_VALS];
+  size_t values[ECDF_BOXPLOT_VALS];
+} ecdf_boxplot_t;
+
+typedef struct 
+{
+  size_t* vals_sorted;
+  size_t val_n;
+  size_t pair_n;
+  ecdf_pair_t* pairs;
+} ecdf_t;
+
+typedef struct 
+{
+  size_t x_min;
+  size_t x_max;
+} ecdf_clust_t;
+
+ecdf_t* ecdf_calc(const size_t* vals, const size_t val_n);
+void ecdf_print_boxplot(const ecdf_t* e, const double perc, const char* title);
+void ecdf_destroy(ecdf_t* e);
+
 #ifdef	__cplusplus
 }
 #endif

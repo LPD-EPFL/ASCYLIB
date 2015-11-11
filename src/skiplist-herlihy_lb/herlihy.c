@@ -57,6 +57,7 @@ ok_to_delete(sl_node_t *node, int found)
 inline int
 optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **succs, int fast)
 {
+ restart:
   PARSE_TRY();
   int found, i;
   sl_node_t *pred, *curr;
@@ -72,8 +73,14 @@ optimistic_search(sl_intset_t *set, skey_t key, sl_node_t **preds, sl_node_t **s
 	  pred = curr;
 	  curr = pred->next[i];
 	}
-      if (preds != NULL) 
-	preds[i] = pred;
+      if (preds != NULL)
+	{
+	  preds[i] = pred;
+	  if (unlikely(pred->marked))
+	    {
+	      goto restart;
+	    }
+	}
       succs[i] = curr;
       if (found == -1 && key == curr->key)
 	{

@@ -114,7 +114,7 @@ void *test(void *data) {
     thread_data_t *d = (thread_data_t *)data;
 
     //place the thread on the apropriate cpu
-    set_cpu(the_cores[d->id]);
+    set_cpu(d->id);
 
     ssalloc_init();
 
@@ -178,7 +178,7 @@ int main(int argc, char* const argv[]) {
     }
     
 	//place thread on the first cpu
-    set_cpu(the_cores[0]);
+    set_cpu(0);
 
     ssalloc_init();
 

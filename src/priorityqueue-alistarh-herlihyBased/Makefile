@@ -34,4 +34,4 @@ main: measurements.o ssalloc.o skiplist.o $(ALGO_O) intPriorityQueue.o test.o
 	$(CC) $(CFLAGS) $(BUILDIR)/measurements.o $(BUILDIR)/ssalloc.o $(BUILDIR)/skiplist.o $(BUILDIR)/$(ALGO_O) $(BUILDIR)/intPriorityQueue.o $(BUILDIR)/test.o -o $(BINS) $(LDFLAGS)
 
 clean:
-	-rm -f $(BINS)`
+	-rm $(BINS)

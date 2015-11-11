@@ -5,8 +5,8 @@ include $(ROOT)/common/Makefile.common
 BINS  = $(BINDIR)/lf-ht_rcu
 PROF = $(ROOT)/src
 
-LDFLAGS += -L$(URCU_PATH)/lib -lurcu-cds -lurcu-qsbr -lurcu-signal -lurcu
-CFLAGS += -I$(URCU_PATH)/include
+LDFLAGS += -L$(URCU_PATH) -lurcu-cds -lurcu-qsbr -lurcu-signal -lurcu
+CFLAGS += -I$(URCU_PATH)
 
 .PHONY:	all clean
 

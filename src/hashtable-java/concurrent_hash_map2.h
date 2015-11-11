@@ -42,7 +42,7 @@
 /* on the tilera we need to keep the ht small to avoid the TLB issues */
 #  define CHM_LOAD_FACTOR                 3
 #else
-#  define CHM_LOAD_FACTOR                 0.75
+#  define CHM_LOAD_FACTOR                 1
 #endif
 #define CHM_TRY_PREFETCH                0
 #define CHM_MAX_SCAN_RETRIES            64

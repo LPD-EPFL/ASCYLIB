@@ -143,7 +143,7 @@ void *test(void *data)
     uint32_t read_thresh = 256 * finds / 100;
     //uint32_t write_thresh = 256 * (finds + inserts) / 100;
     //place the thread on the apropriate cpu
-    set_cpu(the_cores[d->id]);
+    set_cpu(d->id);
     //initialize the custom memeory allocator for this thread (we do not use malloc due to concurrency bottleneck issues)
     ssalloc_init();
     //for fine-grain latency measurements, we need to get the lenght of a getticks() function call, which is also counted
@@ -226,7 +226,7 @@ void catcher(int sig)
 
 int main(int argc, char* const argv[]) {
     //place thread on the first cpu
-    set_cpu(the_cores[0]);
+    set_cpu(0);
     //initialize the custom memory allocator
     ssalloc_init();
     pthread_t *threads;

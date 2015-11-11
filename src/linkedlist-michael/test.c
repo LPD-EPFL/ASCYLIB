@@ -74,7 +74,7 @@ test(void *data)
 	
   thread_data_t *d = (thread_data_t *)data;
 	
-  set_cpu(the_cores[d->id]);
+  set_cpu(d->id);
   /* Wait on barrier */
   ssalloc_init();
   PF_CORRECTION;
@@ -174,7 +174,7 @@ int test_verbose = 0;
 int
 main(int argc, char **argv) 
 {
-  set_cpu(the_cores[0]);
+  set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();
 

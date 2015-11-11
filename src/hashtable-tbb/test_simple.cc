@@ -114,16 +114,15 @@ barrier_t barrier, barrier_global;
 
 typedef struct thread_data
 {
-  uint8_t id;
+  uint32_t id;
 } thread_data_t;
 
 void*
 test(void* thread) 
 {
   thread_data_t* td = (thread_data_t*) thread;
-  uint8_t ID = td->id;
-  int phys_id = the_cores[ID];
-  set_cpu(phys_id);
+  uint32_t ID = td->id;
+  set_cpu(ID);
   ssalloc_init();
 
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
@@ -162,7 +161,7 @@ test(void* thread)
 
   unsigned int i;
   uint32_t num_elems_thread = (uint32_t) (initial / num_threads);
-  int32_t missing = (uint32_t) initial - (num_elems_thread * num_threads);
+  uint32_t missing = (uint32_t) initial - (num_elems_thread * num_threads);
   if (ID < missing)
     {
       num_elems_thread++;
@@ -298,7 +297,7 @@ test(void* thread)
 int
 main(int argc, char **argv) 
 {
-  set_cpu(the_cores[0]);
+  set_cpu(0);
   ssalloc_init();
   seeds = seed_rand();
 

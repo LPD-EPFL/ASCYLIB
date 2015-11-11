@@ -69,6 +69,9 @@ fi;
 if [ "$cores" = "all" ];
 then
     cores=$(seq 2 1 $max_cores);
+elif [ "$cores" = "allover" ];
+then
+    cores="$(seq 2 1 $((max_cores-1))) $(seq $max_cores 2 $max_over)";
 elif [ "$cores" = "two" ];
 then
     cores=$(seq 2 2 $max_cores);
@@ -104,6 +107,51 @@ then
     elif [ $unm = "ol-collab1" ];
     then
 	cores=$(seq 64 64 256);
+    else
+	cores=$(seq 6 6 48);
+    fi;
+elif [ "$cores" = "socketover" ];
+then
+    if [ $unm = "lpdxeon2680" ];
+    then
+	cores=$(seq 10 10 60);
+    else
+	cores=$(seq 6 6 48);
+    fi;
+elif [ "$cores" = "ppopp" ];
+then
+    if [ $unm = "lpdxeon2680" ];
+    then
+	cores="$(seq 2 2 40) $(seq 44 4 60)";
+    elif [ $unm = "lpd48core" ];
+    then
+	cores="$(seq 2 2 48) $(seq 52 4 64)";
+    elif [ $unm = "ol-collab1" ];
+    then
+	cores="2 $(seq 8 8 256) 288 320 352";
+    else
+        max=$(nproc);
+	maxp4=$(($max+4));
+	max15=$(echo "1.5*$max" | bc);
+	max15i=$(printf "%.0f" $max15);
+	if [ $maxp4 -le $max15i ];
+	then 
+	   cores="1 $(seq 2 2 $max) $(seq $maxp4 4 $max15)";
+	else
+	    cores="1 $(seq 2 2 $max) $max15i";
+	fi;
+    fi;
+elif [ "$cores" = "ppoppfast" ];
+then
+    if [ $unm = "lpdxeon2680" ];
+    then
+	cores="$(seq 2 4 40) $(seq 45 5 60)";
+    elif [ $unm = "lpd48core" ];
+    then
+	cores="$(seq 2 4 48) $(seq 56 8 64)";
+    elif [ $unm = "ol-collab1" ];
+    then
+	cores="2 $(seq 16 16 256) 288 320 352";
     else
 	cores=$(seq 6 6 48);
     fi;

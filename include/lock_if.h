@@ -30,6 +30,7 @@
 
 #if defined(MUTEX)
 typedef pthread_mutex_t ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_mutex_init((pthread_mutex_t *) lock, NULL)
 #  define DESTROY_LOCK(lock)			        pthread_mutex_destroy((pthread_mutex_t *) lock)
@@ -44,6 +45,7 @@ typedef pthread_mutex_t ptlock_t;
 #  define GL_UNLOCK(lock)				pthread_mutex_unlock((pthread_mutex_t *) lock)
 #elif defined(SPIN)		/* pthread spinlock */
 typedef pthread_spinlock_t ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define PTLOCK_SIZE sizeof(ptlock_t)
 #  define INIT_LOCK(lock)				pthread_spin_init((pthread_spinlock_t *) lock, PTHREAD_PROCESS_PRIVATE);
 #  define DESTROY_LOCK(lock)			        pthread_spin_destroy((pthread_spinlock_t *) lock)
@@ -80,6 +82,7 @@ typedef struct tticket
 #  define EVALUATE2(sz) PASTER2(CAS_U, sz)
 #  define CAS_UTYPE EVALUATE2(PTLOCK_SIZE)
 typedef volatile UTYPE ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define INIT_LOCK(lock)				tas_init(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					tas_lock(lock)
@@ -188,6 +191,7 @@ tas_unlock(ptlock_t* l)
 #  define EVALUATE2(sz) PASTER2(CAS_U, sz)
 #  define CAS_UTYPE EVALUATE2(PTLOCK_SIZE)
 typedef volatile UTYPE ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define INIT_LOCK(lock)				ttas_init(lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					ttas_lock(lock)
@@ -257,6 +261,7 @@ struct ticket_st
 };
 
 typedef struct ticket_st ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define INIT_LOCK(lock)				ticket_init((volatile ptlock_t*) lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					ticket_lock((volatile ptlock_t*) lock)
@@ -395,6 +400,23 @@ ticket_unlock(volatile ptlock_t* l)
 #  define GL_UNLOCK(lock)				clh_local_p.my_qnode = \
     clh_release(clh_local_p.my_qnode, clh_local_p.my_pred);
 
+#elif defined(MCS)		/* MCS lock */
+
+#  include "mcs.h"
+
+typedef mcs_lock_t ptlock_t;
+#define LOCK_LOCAL_DATA                                 __thread mcs_lock_local_t __mcs_local
+
+#  define INIT_LOCK(lock)				mcs_lock_init((mcs_lock_t*) lock, NULL)
+#  define DESTROY_LOCK(lock)			        mcs_lock_destroy((mcs_lock_t*) lock)
+#  define LOCK(lock)					mcs_lock_lock((mcs_lock_t*) lock)
+#  define UNLOCK(lock)					mcs_lock_unlock((mcs_lock_t*) lock)     
+/* GLOBAL lock */
+#  define GL_INIT_LOCK(lock)				mcs_lock_init((mcs_lock_t*) lock, NULL) 
+#  define GL_DESTROY_LOCK(lock)				mcs_lock_destroy((mcs_lock_t*) lock)	  
+#  define GL_LOCK(lock)					mcs_lock_lock((mcs_lock_t*) lock)	  
+#  define GL_UNLOCK(lock)				mcs_lock_unlock((mcs_lock_t*) lock)     
+
 #elif defined(NONE)			/* no locking */
 
 struct none_st
@@ -403,6 +425,7 @@ struct none_st
 };
 
 typedef struct none_st ptlock_t;
+#  define LOCK_LOCAL_DATA                                
 #  define INIT_LOCK(lock)				none_init((volatile ptlock_t*) lock)
 #  define DESTROY_LOCK(lock)			
 #  define LOCK(lock)					none_lock((volatile ptlock_t*) lock)
@@ -469,6 +492,10 @@ none_unlock(volatile ptlock_t* l)
 #  define UNLOCK_A(lock)          GL_UNLOCK(lock)
 #  define PREFETCHW_LOCK_A(lock)  
 
+/* optik */
+#  define OPTIK_WITHOUT_GL_DO(a)             
+#  define OPTIK_WITH_GL_DO(a)                 a
+
 #else  /* !LL_GLOBAL_LOCK */
 #  define ND_GET_LOCK(nd)                 &nd->lock
 
@@ -488,6 +515,11 @@ none_unlock(volatile ptlock_t* l)
 #  define TRYLOCK_A(lock)         TRYLOCK(lock)
 #  define UNLOCK_A(lock)          UNLOCK(lock)
 #  define PREFETCHW_LOCK_A(lock)  PREFETCHW_LOCK(lock)
+
+/* optik */
+#  define OPTIK_WITHOUT_GL_DO(a)              a
+#  define OPTIK_WITH_GL_DO(a)                 
+
 
 #endif
 
