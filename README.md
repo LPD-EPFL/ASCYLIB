@@ -30,7 +30,7 @@ We have developed the following algorithms using OPTIK:
   3. A fine-grained linked list (in `src/linkedlist-optik`).  
   We use this list in a hash table (in `src/hashtable-optik0`);
   4. A skip list algorithm (in `src/skiplist-optik1`).   
-  We also provide a variant of the same algorithm (in `src/skiplist-optik1`).
+  We also provide a variant of the same algorithm (in `src/skiplist-optik`).
 
 Additionally, we have optimized existing algorithms using OPTIK:
   1. Java's ConcurrentHashMap algorithm (in`src/hashtable-java_optik`);
