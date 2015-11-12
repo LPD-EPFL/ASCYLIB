@@ -287,10 +287,10 @@ lbll_optik_gl:
 	$(MAKE) src/linkedlist-optik_gl
 
 llcopy:
-	$(MAKE) src/linkedlist-copy
+	$(MAKE) "LOCK=MCS" src/linkedlist-copy
 
 llcopy_no_ro:
-	$(MAKE) "LOCK=CLH" "RO_FAIL=0" src/linkedlist-copy
+	$(MAKE) "LOCK=MCS" "RO_FAIL=0" src/linkedlist-copy
 
 htcopy:
 	$(MAKE) src/hashtable-copy
