@@ -1,3 +1,33 @@
+/*   
+ *   File: ssmem.h
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   Description: ssmem interface and structures
+ *   ssmem.h is part of ASCYLIB
+ *
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *	      	      Distributed Programming Lab (LPD), EPFL
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+
 /* December 10, 2013 */
 #ifndef _SSMEM_H_
 #define _SSMEM_H_
@@ -9,22 +39,31 @@
 /* parameters */
 /* **************************************************************************************** */
 
-#if defined(__sparc__)
-#  define SSMEM_GC_FREE_SET_SIZE 507
-#  define SSMEM_DEFAULT_MEM_SIZE (2 * 1024 * 1024L)
-#elif defined(__tile__)
-#  define SSMEM_GC_FREE_SET_SIZE 123
-#  define SSMEM_DEFAULT_MEM_SIZE (256 * 1024L)
-#else
-#  define SSMEM_GC_FREE_SET_SIZE 507
-#  define SSMEM_DEFAULT_MEM_SIZE (256 * 1024L)
-#endif
+#define SSMEM_TRANSPARENT_HUGE_PAGES 0 /* Use or not Linux transparent huge pages */
+#define SSMEM_ZERO_MEMORY            0 /* Initialize allocated memory to 0 or not */
+#define SSMEM_GC_FREE_SET_SIZE 507 /* mem objects to free before doing a GC pass */
+#define SSMEM_GC_RLSE_SET_SIZE 3   /* num of released object before doing a GC pass */
+#define SSMEM_DEFAULT_MEM_SIZE (32 * 1024 * 1024L) /* memory-chunk size that each threads
+						    gives to the allocators */
+#define SSMEM_MEM_SIZE_DOUBLE  1 /* if the allocator is out of memory, should it allocate
+				  a 2x larger chunk than before? (in order to stop asking
+				 for memory again and again */
+#define SSMEM_MEM_SIZE_MAX     (4 * 1024 * 1024 * 1024LL) /* absolute max chunk size 
+							   (e.g., if doubling is 1) */
 
-#if defined(SSMEM_GC_FREE_SET_SIZE_OVERRIDE)
-#  undef SSMEM_GC_FREE_SET_SIZE
-#  define SSMEM_GC_FREE_SET_SIZE SSMEM_GC_FREE_SET_SIZE_OVERRIDE
-#endif
+/* increase the thread-local timestamp of activity on each ssmem_alloc() and/or ssmem_free() 
+   call. If enabled (>0), after some memory is alloced and/or freed, the thread should not 
+   access ANY ssmem-protected memory that was read (the reference were taken) before the
+   current alloc or free invocation. If disabled (0), the program should employ manual 
+   SSMEM_SAFE_TO_RECLAIM() calls to indicate when the thread does not hold any ssmem-allocated
+   memory references. */
 
+#define SSMEM_TS_INCR_ON_NONE   0
+#define SSMEM_TS_INCR_ON_BOTH   1
+#define SSMEM_TS_INCR_ON_ALLOC  2
+#define SSMEM_TS_INCR_ON_FREE   3
+
+#define SSMEM_TS_INCR_ON        SSMEM_TS_INCR_ON_FREE
 /* **************************************************************************************** */
 /* help definitions */
 /* **************************************************************************************** */
@@ -35,7 +74,7 @@
 /* data structures used by ssmem */
 /* **************************************************************************************** */
 
-/* a ssmem allocator */
+/* an ssmem allocator */
 typedef struct ALIGNED(CACHE_LINE_SIZE) ssmem_allocator
 {
   union
@@ -74,7 +113,7 @@ typedef struct ALIGNED(CACHE_LINE_SIZE) ssmem_ts
     struct
     {
       size_t version;
-      uint8_t id;
+      size_t id;
       struct ssmem_ts* next;
     };
   };
@@ -143,6 +182,12 @@ inline void ssmem_free(ssmem_allocator_t* a, void* obj);
 
 /* release some memory to the OS using allocator a */
 inline void ssmem_release(ssmem_allocator_t* a, void* obj);
+
+/* increment the thread-local activity counter. Invoking this function suggests that
+ no memory references to ssmem-allocated memory are held by the current thread beyond
+this point. */
+inline void ssmem_ts_next();
+#define SSMEM_SAFE_TO_RECLAIM() ssmem_ts_next()
 
 
 /* debug/help functions */
