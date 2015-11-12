@@ -1,11 +1,25 @@
 /*   
- *   File: optik.c
+ *   File: sl_optik.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description:  
- *   optik.c is part of ASCYLIB
+ *   Description:  A skip-list algorithm design with OPTIK.
+ *   Algorithm: High-level description:
+ *   -Search: Simply traverse the levels of the skip list
+ *   -Parse (i.e., traverse to the point you want to modify): Traverse
+ *   and keep track of the predecessor node for the target key at each level
+ *   as well as the OPTIK version of each predecessor. Unlike other skip lists
+ *   this one does not need to keep track of successor nodes for validation.
+ *   optik_trylock_version takes care of validation.
+ *   -insert: do the parse and the start from level 0, lock with trylock_version
+ *   and insert the new node. If the trylock fails, reparse and continue from the 
+ *   previous level. The state flag of a node indicates whether a node is fully
+ *   linked.
+ *   -delete: parse and then try to do optik_trylock_vdelete on the node. If 
+ *   successful, try to grab the lock with optik_trylock_version on all levels
+ *   and then unlink the node. If one of the trylock calls fail, release all locks
+ *   and retry.
+ *   sl_optik.c is part of ASCYLIB
  *
- * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
- * 	     	      Tudor David <tudor.david@epfl.ch>
+ * Copyright (c) 2015 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  *	      	      Distributed Programming Lab (LPD), EPFL
  *
  * ASCYLIB is free software: you can redistribute it and/or
@@ -38,8 +52,8 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 #define OPTIK_MAX_MAX_LEVEL 64 /* covers up to 2^64 elements */
 
 /*
- * finds the predecessors and the successors of a key, 
- * if return value is >= 0, then the succs[found] contains the node with the key we are looking for
+ * finds the predecessors of a key, 
+ * if return value is >= 0, then the contains the node with the key we are looking for
  */
 static sl_node_t*
 sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, optik_t* predsv, optik_t* node_foundv)
@@ -156,8 +170,7 @@ unlock_levels_up(sl_node_t** nodes, int low, int high)
 
 
 /*
- * Function sl_optik_insert stands for the add method of the original paper.
- * Unlocking and freeing the memory are done at the right places.
+ * 
  */
 int
 sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)

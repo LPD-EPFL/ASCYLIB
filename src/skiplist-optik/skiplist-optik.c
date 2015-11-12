@@ -4,8 +4,7 @@
  *   Description:  
  *   optik.c is part of ASCYLIB
  *
- * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
- * 	     	      Tudor David <tudor.david@epfl.ch>
+ * Copyright (c) 2015 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  *	      	      Distributed Programming Lab (LPD), EPFL
  *
  * ASCYLIB is free software: you can redistribute it and/or
@@ -39,7 +38,6 @@ extern ALIGNED(CACHE_LINE_SIZE) unsigned int levelmax;
 
 /*
  * finds the predecessors and the successors of a key, 
- * if return value is >= 0, then the succs[found] contains the node with the key we are looking for
  */
 static sl_node_t*
 sl_optik_search(sl_intset_t* set, skey_t key, sl_node_t** preds, sl_node_t** succs, optik_t* predsv)
@@ -157,10 +155,6 @@ unlock_levels_up(sl_node_t** nodes, int low, int high)
 
 #define PAUSE_AND_RETRY() DO_PAUSE(); goto restart;
 
-/*
- * Function sl_optik_insert stands for the add method of the original paper.
- * Unlocking and freeing the memory are done at the right places.
- */
 int
 sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 {

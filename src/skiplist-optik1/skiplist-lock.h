@@ -5,7 +5,6 @@
  *   skiplist-lock.h is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
- * 	     	      Tudor David <tudor.david@epfl.ch>
  *	      	      Distributed Programming Lab (LPD), EPFL
  *
  * ASCYLIB is free software: you can redistribute it and/or
