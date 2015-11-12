@@ -33,6 +33,7 @@ cpy_delete_copy(ssmem_allocator_t* alloc, array_ll_t* a)
 {
 #if GC == 1
 #  if CPY_ON_WRITE_USE_MEM_RELEAS == 1
+  SSMEM_SAFE_TO_RECLAIM();
   ssmem_release(alloc, (void*) a);
 #  else
   ssmem_free(alloc, (void*) a);
@@ -44,7 +45,7 @@ static inline volatile array_ll_t*
 array_ll_new_init(size_t size)
 {
   array_ll_t* all;
-  all = ssalloc_aligned(CACHE_LINE_SIZE, sizeof(array_ll_t) + (array_ll_fixed_size * sizeof(kv_t)));
+  all = memalign(CACHE_LINE_SIZE, sizeof(array_ll_t) + (array_ll_fixed_size * sizeof(kv_t)));
   assert(all != NULL);
   
   all->size = size;
@@ -58,7 +59,7 @@ array_ll_new(size_t size)
 {
   array_ll_t* all;
 #if GC == 1
-  all = ssmem_alloc(alloc, sizeof(array_ll_t) + (array_ll_fixed_size * sizeof(kv_t)));
+  all = malloc(sizeof(array_ll_t) + (array_ll_fixed_size * sizeof(kv_t)));
 #else
   all = ssalloc(sizeof(array_ll_t) + (array_ll_fixed_size * sizeof(kv_t)));
 #endif
@@ -145,17 +146,15 @@ cpy_delete(copy_on_write_t* set, skey_t key)
   MEM_BARRIER;
 #endif
 
+  void* to_delete = (void*) all_new;
   if (removed)
     {
       set->array = all_new;
-      cpy_delete_copy(alloc, (void*) all_old);
-    }
-  else
-    {
-      cpy_delete_copy(alloc, (void*) all_new);
+      to_delete = (void*) all_old;
     }
 
   UNLOCK_A(set->lock);
+  cpy_delete_copy(alloc, (void*) to_delete);
   return removed;
 }
 
@@ -175,14 +174,13 @@ cpy_insert(copy_on_write_t* set, skey_t key, sval_t val)
   volatile array_ll_t* all_old = set->array;
   array_ll_t* all_new = array_ll_new(all_old->size + 1);
 
-
   int i;
   for (i = 0; i < all_old->size; i++)
     {
       if (unlikely(all_old->kvs[i].key == key))
 	{
-	  cpy_delete_copy(alloc, all_new);
 	  UNLOCK_A(set->lock);
+	  cpy_delete_copy(alloc, all_new);
 	  return 0;
 	}
       all_new->kvs[i].key = all_old->kvs[i].key;
@@ -197,9 +195,8 @@ cpy_insert(copy_on_write_t* set, skey_t key, sval_t val)
 #endif
 
   set->array = all_new;
-  cpy_delete_copy(alloc, (void*) all_old);
-
   UNLOCK_A(set->lock);
+  cpy_delete_copy(alloc, (void*) all_old);
   return 1;
 }
 
