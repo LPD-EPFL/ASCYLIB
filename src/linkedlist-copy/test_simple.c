@@ -184,10 +184,12 @@ test(void* thread)
       num_elems_thread++;
     }
 
-#if INITIALIZE_FROM_ONE == 1
-  num_elems_thread = (ID == 0) * initial;
-  key = range;
-#endif
+  /* do not initialize from one for llcopy */
+  /* otherwise GC does not work properly */
+  /* #if INITIALIZE_FROM_ONE == 1 */
+  /*   num_elems_thread = (ID == 0) * initial; */
+  /*   key = range; */
+  /* #endif */
 
   for(i = 0; i < num_elems_thread; i++) 
     {
@@ -196,6 +198,13 @@ test(void* thread)
 	{
 	  i--;
 	}
+      else if (test_verbose && ID == 0 && (i & 1023) == 0)
+	{
+	  size_t ni = i * num_threads;
+	  double perc = 100.0 * ni / initial;
+	  printf(" #inserted = %-10zu ~%.2f%%\n", ni, perc);
+	}
+	
     }
   MEM_BARRIER;
 
