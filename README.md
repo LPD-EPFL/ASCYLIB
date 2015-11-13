@@ -13,14 +13,14 @@ OPTIK is a new design pattern for easily implementing fast and scalable concurre
 * Related Publications:
   * *Optimistic Concurrency with OPTIK*,  
     Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),  
-  PPoPP '16 *(to appear)*
+  PPoPP 2016 *(to appear)*
   * *Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*,  
   Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),  
-  ASPLOS '15
+  ASPLOS 2015
 
 BST-TK is a new lock-based BST, introduced in ASCYLIB. 
 Additionally, CLHT is a new hash hash table, introduced in ASCYLIB. We provide lock-free and lock-based variants of CLHT as a separate repository (https://github.com/LPD-EPFL/CLHT).
-Details of the algorithms and a proofs/sketches of correctness can be found in the following technical report: https://infoscience.epfl.ch/record/203822
+Details of the algorithms and proofs/sketches of correctness can be found in the following technical report: https://infoscience.epfl.ch/record/203822
 
 We have developed the following algorithms using OPTIK:
   1. A simple array map (in `src/hashtable-map_optik`).  
