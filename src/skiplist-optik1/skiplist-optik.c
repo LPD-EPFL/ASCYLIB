@@ -197,7 +197,7 @@ sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
 #if GC == 1
 		  ssmem_free(alloc, (void*) node_new);
 #else
-		  ssalloc_free(node_new);
+		  ssfree(node_new);
 #endif
 		} 
 	      return 0;
