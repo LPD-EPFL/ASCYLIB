@@ -72,7 +72,7 @@ The following table contains the algorithms (and various implementations of some
 | [OPTIK fine-grained list with cache](./src/linkedlist-optik_cache/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
 | **Hash Tables** ||||
 | [Sequential hash table](./src/hashtable-seq/) |	sequential | | |
-| [Sequential hash table](./src/hashtable-seq2/) |	sequential | | |
+| [Sequential hash table - less pointer indirections ](./src/hashtable-seq2/) |	sequential | | |
 | [Using hand-over-hand-locking lists](./src/hashtable-coupling/) |	lock-based | | [[HS+12]](#HS+12) |
 | [Using Pugh's list](./src/hashtable-pugh/) |	lock-based | 1990 | [[P+90]](#P+90) |
 | [Using Harris' list](./src/hashtable-harris/) |	lock-free | 2001 | [[H+01]](#H+01) |
