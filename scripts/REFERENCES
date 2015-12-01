@@ -1,18 +1,6 @@
-<a name="ref-knuth-1997"></a>D. E. Knuth. *The Art of Computer Programming, Volume 1 (3rd Ed.): Fundamental Algorithms.* Addison Wesley, Redwood City, CA, USA, 1997.
-
-<a name="AMS+07"></a>
-M. Aguilera, A. Merchant, M. Shah, A. Veitch, and C. Karamanolis.
-*Sinfonia: A New Paradigm for Building Scalable Distributed Systems*.
-SOSP '07.
-
-<a name="AA+14"></a>
-M. Arbel and H. Attiya.
-*Concurrent Updates with RCU: Search Tree As an Example*.
-PODC '14.
-
-<a name="AM+15"></a>
-M. Arbel and A. Morrison.
-*Predicate RCU: An RCU for Scalable Concurrent Updates*.
+<a name="AKL+15"></a>
+D. Alistarh, J. Kopinsky, J. Li, N. Shavit. The SprayList:
+*A Scalable Relaxed Priority Queue*. 
 PPoPP '15.
 
 <a name="BCH+10"></a>
@@ -20,141 +8,70 @@ N. G. Bronson, J. Casper, H. Chafi, and K. Olukotun.
 *A Practical Concurrent Binary Search Tree*.
 PPoPP '10.
 
-<a name="CBM+08"></a>
-C. Cascaval, C. Blundell, M. Michael, H. W. Cain, P. Wu, S. Chiras, and S. Chatterjee.
-*Software Transactional Memory: Why Is It Only a Research Toy*?
-ACM Queue '08.
-
-<a name="CKD+10"></a>
-P. Conway, N. Kalyanasundharam, G. Donley, K. Lepak, and B. Hughes.
-*Cache Hierarchy and Memory Subsystem of the AMD Opteron Processor*.
-MICRO '10.
-
-<a name="DSM+10"></a>
-L. Dalessandro, M. F. Spear, and M. L. Scott.
-*NOrec: Streamlining STM by Abolishing Ownership Records*.
-PPoPP '10.
-
-<a name="DGT+13"></a>
-T. David, R. Guerraoui, and V. Trigonakis.
-*Everything You Always Wanted to Know About Synchronization but Were Afraid to Ask*.
-SOSP '13.
-
 <a name="DGT+15"></a>
 T. David, R. Guerraoui, and V. Trigonakis.
 *Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*.
 ASPLOS '15.
 
-<a name="GT+16"></a>
-R. Guerraoui, and V. Trigonakis.
-*Optimistic Concurrency with OPTIK*.
-PPoPP '16.
-
-<a name="DSS+06"></a>
-D. Dice, O. Shalev, and N. Shavit.
-*Transactional Locking II*.
-DISC '06.
+<a name="DMS+12"></a>
+M. Desnoyers, P. E. McKenney, A. S. Stern, M. R. Dagenais, and J. Walpole.
+*User-level implementations of read-copy update*.
+PDS '12.
 
 <a name="DVY+14"></a>
 D. Drachsler, M. Vechev, and E. Yahav.
 *Practical Concurrent Binary Search Trees via Logical Ordering*.
 PPoPP '14.
 
-<a name="DNH+14"></a>
-A. Dragojevic, D. Narayanan, O. Hodson, and M. Castro.
-*FaRM: Fast Remote Memory*.
-NSDI '14.
-
 <a name="EFR+10"></a>
 F. Ellen, P. Fatourou, E. Ruppert, and F. van Breugel.
 *Non-blocking Binary Search Trees*.
 PODC '10.
-
-<a name="FFR+08"></a>
-P. Felber, C. Fetzer, and T. Riegel.
-*Dynamic Performance Tuning of Word-based Software Transactional*.
-Memory.
-PPoPP '08.
 
 <a name="F+03"></a>
 K. Fraser.
 *Practical Lock-Freedom*.
 PhD thesis, University of Cambridge, 2004.
 
-<a name="G+15"></a>
-V. Gramoli.
-*More than You Ever Wanted to Know about Synchronization*.
-PPoPP '15.
-
-<a name="GK+08"></a>
-R. Guerraoui and M. Kapalka.
-*On the Correctness of Transactional Memory*.
-PPoPP '08.
+<a name="GT+16"></a>
+R. Guerraoui, and V. Trigonakis.
+*Optimistic Concurrency with OPTIK*.
+PPoPP '16.
 
 <a name="H+01"></a>
 T. Harris.
 *A Pragmatic Implementation of Non-blocking Linked Lists*.
 DISC '01.
 
-<a name="BSS+05"></a>
-B. He, W. N. Scherer, and M. L. Scott.
-*Preemption adaptivity in time-published queue-based spin locks*.
-HiPC '05.
-
 <a name="HHL+06"></a>
 S. Heller, M. Herlihy, V. Luchangco, M. Moir, W. N. Scherer, and N. Shavit.
 *A Lazy Concurrent List-Based Set Algorithm*.
 OPODIS '05.
-
-<a name="HIS+10"></a>
-D. Hendler, I. Incze, N. Shavit, and M. Tzafrir.
-*Flat Combining and the Synchronization-parallelism Tradeoff*.
-SPAA '10.
-
-<a name="HSY+04"></a>
-D. Hendler, N. Shavit, and L. Yerushalmi.
-*A Scalable Lock-free Stack Algorithm*.
-SPAA '04.
-
-<a name="H+91"></a>
-M. Herlihy.
-*Wait-Free Synchronization*.
-TOPLAS '91.
-
-<a name="HM+93"></a>
-M. Herlihy and J. Moss.
-*Transactional Memory: Architectural Support for Lock-free Data Structures*.
-ISCA '93.
 
 <a name="HS+12"></a>
 M. Herlihy and N. Shavit.
 *The Art of Multiprocessor Programming, Revised First Edition*.
 2012.
 
-<a name="HW+91"></a>
-M. Herlihy and J. Wing.
-*Linearizability: A Correctness Condition for Concurrent Objects*.
-TOPLAS '90.
-
 <a name="HLL+07"></a>
 M. Herlihy, Y. Lev, V. Luchangco, and N. Shavit.
 *A Simple Optimistic Skiplist Algorithm*.
 SIROCCO '07.
+
+<a name="HLS+11"></a>
+M. Herlihy, Y. Lev, and N. Shavit.
+*Concurrent lock-free skiplist with wait-free contains operator*, May 3 2011.
+US Patent 7,937,378.
 
 <a name="HJ+12"></a>
 S. V. Howley and J. Jones. 
 *A non-blocking internal binary search tree*. 
 SPAA '12.
 
-<a name="KR+81"></a>
-H.-T. Kung and J. Robinson.
-*On Optimistic Methods for Concurrency Control*.
-TODS '81.
-
-<a name="L+05"></a>
-C. Lameter.
-*Effective Synchronization on Linux/NUMA Systems*.
-Gelato Federation Meeting '05.
+<a name="INTEL+06"></a>
+Intel.
+*Intel Thread Building Blocks*.
+https://www.threadingbuildingblocks.org.
 
 <a name="L+03"></a>
 D. Lea.
@@ -162,16 +79,10 @@ D. Lea.
 http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html,
 2003.
 
-<a name="MS+98"></a>
-P. E. McKenney and J. D. Slingwine.
-*Read-copy Update: Using Execution History to Solve Concurrency*.
-Problems.
-PDCS '98.
-
-<a name="MCS+91"></a>
-J. M. Mellor-Crummey and M. L. Scott.
-*Algorithms for Scalable Synchronization on Shared-Memory Multiprocessors*.
-TOCS '91.
+<a name="LS+00"></a>
+I. Lotan and N. Shavit. 
+*Skiplist-based concurrent priority queues*.
+IPDPS '00.
 
 <a name="M+02"></a>
 M. M. Michael.
@@ -183,86 +94,22 @@ M. M. Michael and M. L. Scott.
 *Simple, Fast, and Practical Non-blocking and Blocking Concurrent Queue Algorithms*.
 PODC '96.
 
-<a name="MA+13"></a>
-A. Morrison and Y. Afek.
-*Fast Concurrent Queues for x86 Processors*.
-PPoPP '13.
-
 <a name="NM+14"></a>
 A. Natarajan and N. Mittal.
 *Fast Concurrent Lock-free Binary Search Trees*.
 PPoPP '14.
+
+<a name="ORACLE+04"></a>
+Oracle.
+*Java CopyOnWriteArrayList*.
+http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CopyOnWriteArrayList.html.
 
 <a name="P+90"></a>
 W. Pugh.
 *Concurrent Maintenance of Skip Lists*.
 Technical report, 1990.
 
-<a name="RG+01"></a>
-R. Rajwar and J. Goodman.
-*Speculative Lock Elision: Enabling Highly Concurrent Multithreaded Execution*.
-MICRO '01.
-
-<a name="RHH+09"></a>
-A. Roy, S. Hand, and T. Harris.
-*A Runtime System for Software Lock Elision*.
-EuroSys '09.
-
-<a name="ST+97"></a>
-N. Shavit and D. Touitou.
-*Software transactional memory*.
-PODC '97.
-
-<a name="ST+05"></a>
-H. Sundell and P. Tsigas.
-*Fast and Lock-free Concurrent Priority Queues for Multi-thread Systems*.
-JPDC '05.
-
 <a name="T+86"></a>
 R. Treiber.
 *Systems Programming: Coping with Parallelism*.
 Technical report, 1986.
-
-<a name="TMW+11"></a>
-J. Triplett, P. E. McKenney, and J. Walpole.
-*Resizable, Scalable, Concurrent Hash Tables via Relativistic Programming*.
-ATC '11.
-
-<a name="TZ+01"></a>
-P. Tsigas and Y. Zhang.
-*A Simple, Fast and Scalable Non-blocking Concurrent FIFO Queue for Shared Memory Multiprocessor Systems*.
-SPAA '01.
-
-<a name="XS+15"></a>
-L. Xiang and M. L. Scott.
-*Software Partitioning of Hardware Transactions*.
-PPoPP '15.
-
-<a name="javacopy"></a>
-Oracle.
-*Java CopyOnWriteArrayList*.
-http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CopyOnWriteArrayList.html.
-
-<a name="DMS+12"></a>
-M. Desnoyers, P. E. McKenney, A. S. Stern, M. R. Dagenais, and J. Walpole.
-*User-level implementations of read-copy update*.
-PDS '12.
-
-<a name="tbb"></a>
-*Intel Thread Building Blocks*.
-https://www.threadingbuildingblocks.org.
-
-<a name="HLS+11"></a>
-M. Herlihy, Y. Lev, and N. Shavit.
-*Concurrent lock-free skiplist with wait-free contains operator*, May 3 2011.
-US Patent 7,937,378.
-
-<a name="AKL+15"></a>
-D. Alistarh, J. Kopinsky, J. Li, N. Shavit. The SprayList:
-*A Scalable Relaxed Priority Queue*. 
-PPoPP '15.
-
-<a name="LS+00"></a>
-I. Lotan and N. Shavit. 
-*Skiplist-based concurrent priority queues*.
-IPDPS '00.

@@ -1,5 +1,5 @@
 | **Array Maps** ||||
-| [Java's CopyOnWrite array map](./src/linkedlist-copy/) |	lock-based | 2004 | [[xxx]](#javacopy) |
+| [Java's CopyOnWrite array map](./src/linkedlist-copy/) |	lock-based | 2004 | [[xxx]](#ORACLE+04) |
 | [Global-lock map](./src/map-lock/) |	lock-based | 2016 | [[xxx]](#GT+16) |
 | [OPTIK global-lock map](./src/map-optik/) |	lock-based | 2016 | [[xxx]](#GT+16) |
 | **Linked lists** ||||
@@ -21,8 +21,8 @@
 | [Using Pugh's list](./src/hashtable-pugh/) |	lock-based | 1990 | [[xxx]](#P+90) |
 | [Using Harris' list](./src/hashtable-harris/) |	lock-free | 2001 | [[xxx]](#H+01) |
 | [Java's ConcurrentHashMap](./src/hashtable-java/) |	lock-based | 2003 | [[xxx]](#L+03) |
-| [Using Java's CopyOnWrite array map](./src/hashtable-copy/) |	lock-based | 2004 | [[xxx]](#javacopy) |
-| [Intel's TBB hash table](./src/hashtable-tbb/) |	lock-based | 2006 | [[xxx]](#tbb) |
+| [Using Java's CopyOnWrite array map](./src/hashtable-copy/) |	lock-based | 2004 | [[xxx]](#ORACLE+04) |
+| [Intel's TBB hash table](./src/hashtable-tbb/) |	lock-based | 2006 | [[xxx]](#INTEL+06) |
 | [Using lazy list](./src/hashtable-lazy/) |	lock-based | 2006 | [[xxx]](#HHL+06) |
 | [URCU hash table](./src/hashtable-rcu/) |	lock-free | 2012 | [[xxx]](#DMS+12) |
 | [Java's ConcurrentHashMap with OPTIK](./src/hashtable-java_optik/) |	lock-based | 2016 | [[xxx]](#GT+16) |
@@ -44,7 +44,7 @@
 | [Bronson et al. tree](./src/bst-bronson/) |	lock-based | 2010 | [[xxx]](#BCH+10) |
 | [Ellen et al. tree](./src/bst-ellen/) |	lock-free | 2010 | [[xxx]](#EFR+10) |
 | [Howley and Jones  tree](./src/bst-howley/) |	lock-based | 2012 | [[xxx]](#HJ+12) |
-| [Natarajan and Mittal tree](./src/bst-aravind/) |	lock-free | 2014 | [[xxx](#NM+14) |
+| [Natarajan and Mittal tree](./src/bst-aravind/) |	lock-free | 2014 | [[xxx]](#NM+14) |
 | [Drachsler et al. tree](./src/bst-drachsler/) |	lock-free | 2014 | [[xxx]](#DVY+14) |
 | [BST-TK tree](./src/bst-tk/) |	lock-based | 2015 | [[xxx]](#DGT+15) |
 | **Queues** ||||
