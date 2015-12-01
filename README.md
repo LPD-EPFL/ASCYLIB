@@ -47,6 +47,199 @@ Finally, we have introduced two optimization techniques inspired by OPTIK:
 
 Some of the initial implementations used in ASCYLIB were taken from Synchrobench (https://github.com/gramoli/synchrobench -  V. Gramoli. More than You Ever Wanted to Know about Synchronization. PPoPP 2015.). 
 
+Algorithms
+----------
+
+The following table contains the algorithms (and various implementations of some algorithms) included in ASCYLIB:
+
+|    Name   |  Progress  |  Year | Referece |
+|-----------|:-----:|:-----:|:-----:|
+| **Array Maps** ||||
+| [Java's CopyOnWrite array map](./src/linkedlist-copy/) |	lock-based | 2004 | [[ORACLE+04]](#ORACLE+04) |
+| [Global-lock map](./src/map-lock/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [OPTIK global-lock map](./src/map-optik/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| **Linked lists** ||||
+| [Sequential linked list](./src/linkedlist-seq/) |	sequential | | |
+| [Hand-over-hand locking list](./src/linkedlist-coupling/) |	lock-based | | [[HS+12]](#HS+12) |
+| [Pugh's list](./src/linkedlist-pugh/) |	lock-based | 1990 | [[P+90]](#P+90) |
+| [Harris list](./src/linkedlist-harris/) |	lock-free | 2001 | [[H+01]](#H+01) |
+| [Michael list](./src/linkedlist-michael/) |	lock-free | 2002 | [[M+02]](#M+02) |
+| [Lazy list](./src/linkedlist-lazy/) |	lock-based | 2006 | [[HHL+06]](#HHL+06) |
+| [Harris list with ASCY](./src/linkedlist-harris_opt/) |	lock-free | 2015 | [[DGT+15]](#DGT+15) |
+| [Global-lock list with wait-free search](./src/linkedlist-gl_opt/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [OPTIK global-lock list](./src/linkedlist-optik_gl/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [OPTIK fine-grained list](./src/linkedlist-optik/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [OPTIK fine-grained list with cache](./src/linkedlist-optik_cache/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| **Hash Tables** ||||
+| [Sequential hash table](./src/hashtable-seq/) |	sequential | | |
+| [Sequential hash table](./src/hashtable-seq2/) |	sequential | | |
+| [Using hand-over-hand-locking lists](./src/hashtable-coupling/) |	lock-based | | [[HS+12]](#HS+12) |
+| [Using Pugh's list](./src/hashtable-pugh/) |	lock-based | 1990 | [[P+90]](#P+90) |
+| [Using Harris' list](./src/hashtable-harris/) |	lock-free | 2001 | [[H+01]](#H+01) |
+| [Java's ConcurrentHashMap](./src/hashtable-java/) |	lock-based | 2003 | [[L+03]](#L+03) |
+| [Using Java's CopyOnWrite array map](./src/hashtable-copy/) |	lock-based | 2004 | [[ORACLE+04]](#ORACLE+04) |
+| [Intel's TBB hash table](./src/hashtable-tbb/) |	lock-based | 2006 | [[INTEL+06]](#INTEL+06) |
+| [Using lazy list](./src/hashtable-lazy/) |	lock-based | 2006 | [[HHL+06]](#HHL+06) |
+| [URCU hash table](./src/hashtable-rcu/) |	lock-free | 2012 | [[DMS+12]](#DMS+12) |
+| [Java's ConcurrentHashMap with OPTIK](./src/hashtable-java_optik/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [Using fine-grained OPTIK list](./src/hashtable-optik0/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [Using global-lock OPTIK list](./src/hashtable-optik1/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [Using OPTIK array map](./src/hashtable-map_optik/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| **Skip Lists** ||||
+| [Sequential skip list](./src/skiplist-seq/) |	sequential | | |
+| [Pugh list](./src/skiplist-pugh/) |	lock-based | 1990 | [[P+90]](#P+90) |
+| [Fraser list](./src/skiplist-fraser/) |	lock-free | 2003 | [[F+03]](#F+03) |
+| [Herlihy et al. list](./src/skiplist-herlihy_lb/) |	lock-based | 2007 | [[HLL+07]](#HLL+07) |
+| [Fraser list with Herlihy's optimization](./src/skiplist-herlihy_lf/) |	lock-free | 2011 | [[HLS+11]](#HLS+11) |
+| [Herlihy's list with OPTIK](./src/skiplist-optik2/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [OPTIK list lock-version](./src/skiplist-optik/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [OPTIK list using trylocks](./src/skiplist-optik1/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| **BSTs** ||||
+| [Sequential external tree](./src/bst-seq_external/) |	sequential | | |
+| [Sequential internal tree](./src/bst-seq_internal/) |	sequential | | |
+| [Bronson et al. tree](./src/bst-bronson/) |	lock-based | 2010 | [[BCH+10]](#BCH+10) |
+| [Ellen et al. tree](./src/bst-ellen/) |	lock-free | 2010 | [[EFR+10]](#EFR+10) |
+| [Howley and Jones  tree](./src/bst-howley/) |	lock-based | 2012 | [[HJ+12]](#HJ+12) |
+| [Natarajan and Mittal tree](./src/bst-aravind/) |	lock-free | 2014 | [[NM+14]](#NM+14) |
+| [Drachsler et al. tree](./src/bst-drachsler/) |	lock-free | 2014 | [[DVY+14]](#DVY+14) |
+| [BST-TK tree](./src/bst-tk/) |	lock-based | 2015 | [[DGT+15]](#DGT+15) |
+| **Queues** ||||
+| [Michael and Scott (MS) lock-based queue](./src/queue-ms_lb/) |	lock-based | 1996 | [[MS+96]](#MS+96) |
+| [Michael and Scott (MS) lock-free queue](./src/queue-ms_lf/) |	lock-free | 1996 | [[MS+96]](#MS+96) |
+| [Michael and Scott (MS) hybrid queue](./src/queue-ms_hybrid/) |	lock-based | 1996 | [[MS+96]](#MS+96) |
+| [MS queue with OPTIK lock-version](./src/queue-optik0/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [MS queue with OPTIK trylock](./src/queue-optik1/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [MS queue with OPTIK trylock](./src/queue-optik2/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| **Priority Queues** ||||
+| [Lotan and Shavit queue](./src/priorityqueue-lotanshavit_lf/) |	lock-free | 2000 | [[LS+00]](#LS+00) |
+| [Alistarh et al. queue based on Fraser's skip list](./src/priorityqueue-alistarh/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
+| [Alistarh et al. queue based on Herlihy's skip list](./src/priorityqueue-alistarh-herlihyBased/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
+| [Alistarh et al. queue based on Pugh's skip list](./src/priorityqueue-alistarh-pughBased/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
+| **Stacks** ||||
+| [Global-lock stack](./src/stack-lock/) |	lock-based | | |
+| [Treiber stack](./src/stack-treiber/) |	lock-free | 1986 | [[T+86]](#T+86) |
+| [Treiber stack with OPTIK trylocks](./src/stack-optik/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+
+References
+----------
+
+<a name="AKL+15">**[AKL+15]**</a>
+D. Alistarh, J. Kopinsky, J. Li, N. Shavit. The SprayList:
+*A Scalable Relaxed Priority Queue*. 
+PPoPP '15.
+
+<a name="BCH+10">**[BCH+10]**</a>
+N. G. Bronson, J. Casper, H. Chafi, and K. Olukotun.
+*A Practical Concurrent Binary Search Tree*.
+PPoPP '10.
+
+<a name="DGT+15">**[DGT+15]**</a>
+T. David, R. Guerraoui, and V. Trigonakis.
+*Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*.
+ASPLOS '15.
+
+<a name="DMS+12">**[DMS+12]**</a>
+M. Desnoyers, P. E. McKenney, A. S. Stern, M. R. Dagenais, and J. Walpole.
+*User-level implementations of read-copy update*.
+PDS '12.
+
+<a name="DVY+14">**[DVY+14]**</a>
+D. Drachsler, M. Vechev, and E. Yahav.
+*Practical Concurrent Binary Search Trees via Logical Ordering*.
+PPoPP '14.
+
+<a name="EFR+10">**[EFR+10]**</a>
+F. Ellen, P. Fatourou, E. Ruppert, and F. van Breugel.
+*Non-blocking Binary Search Trees*.
+PODC '10.
+
+<a name="F+03">**[F+03]**</a>
+K. Fraser.
+*Practical Lock-Freedom*.
+PhD thesis, University of Cambridge, 2004.
+
+<a name="GT+16">**[GT+16]**</a>
+R. Guerraoui, and V. Trigonakis.
+*Optimistic Concurrency with OPTIK*.
+PPoPP '16.
+
+<a name="H+01">**[H+01]**</a>
+T. Harris.
+*A Pragmatic Implementation of Non-blocking Linked Lists*.
+DISC '01.
+
+<a name="HHL+06">**[HHL+06]**</a>
+S. Heller, M. Herlihy, V. Luchangco, M. Moir, W. N. Scherer, and N. Shavit.
+*A Lazy Concurrent List-Based Set Algorithm*.
+OPODIS '05.
+
+<a name="HS+12">**[HS+12]**</a>
+M. Herlihy and N. Shavit.
+*The Art of Multiprocessor Programming, Revised First Edition*.
+2012.
+
+<a name="HLL+07">**[HLL+07]**</a>
+M. Herlihy, Y. Lev, V. Luchangco, and N. Shavit.
+*A Simple Optimistic Skiplist Algorithm*.
+SIROCCO '07.
+
+<a name="HLS+11">**[HLS+11]**</a>
+M. Herlihy, Y. Lev, and N. Shavit.
+*Concurrent lock-free skiplist with wait-free contains operator*, May 3 2011.
+US Patent 7,937,378.
+
+<a name="HJ+12">**[HJ+12]**</a>
+S. V. Howley and J. Jones. 
+*A non-blocking internal binary search tree*. 
+SPAA '12.
+
+<a name="INTEL+06">**[INTEL+06]**</a>
+Intel.
+*Intel Thread Building Blocks*.
+https://www.threadingbuildingblocks.org.
+
+<a name="L+03">**[L+03]**</a>
+D. Lea.
+*Overview of Package util.concurrent Release 1.3.4*.
+http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html,
+2003.
+
+<a name="LS+00">**[LS+00]**</a>
+I. Lotan and N. Shavit. 
+*Skiplist-based concurrent priority queues*.
+IPDPS '00.
+
+<a name="M+02">**[M+02]**</a>
+M. M. Michael.
+*High Performance Dynamic Lock-free Hash tables and List-based Sets*.
+SPAA '02.
+
+<a name="MS+96">**[MS+96]**</a>
+M. M. Michael and M. L. Scott.
+*Simple, Fast, and Practical Non-blocking and Blocking Concurrent Queue Algorithms*.
+PODC '96.
+
+<a name="NM+14">**[NM+14]**</a>
+A. Natarajan and N. Mittal.
+*Fast Concurrent Lock-free Binary Search Trees*.
+PPoPP '14.
+
+<a name="ORACLE+04">**[ORACLE+04]**</a>
+Oracle.
+*Java CopyOnWriteArrayList*.
+http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CopyOnWriteArrayList.html.
+
+<a name="P+90">**[P+90]**</a>
+W. Pugh.
+*Concurrent Maintenance of Skip Lists*.
+Technical report, 1990.
+
+<a name="T+86">**[T+86]**</a>
+R. Treiber.
+*Systems Programming: Coping with Parallelism*.
+Technical report, 1986.
+
+
 Compilation
 -----------
 
