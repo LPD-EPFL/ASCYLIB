@@ -1,0 +1,65 @@
+| **Array Maps** ||||
+| [Java's CopyOnWrite array map](./src/linkedlist-copy/) |	lock-based | 2004 | [[xxx]](#javacopy) |
+| [Global-lock map](./src/map-lock/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [OPTIK global-lock map](./src/map-optik/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| **Linked lists** ||||
+| [Sequential linked list](./src/linkedlist-seq/) |	sequential | | |
+| [Hand-over-hand locking list](./src/linkedlist-coupling/) |	lock-based | | [[xxx]](#HS+12) |
+| [Pugh's list](./src/linkedlist-pugh/) |	lock-based | 1990 | [[xxx]](#P+90) |
+| [Harris list](./src/linkedlist-harris/) |	lock-free | 2001 | [[xxx]](#H+01) |
+| [Michael list](./src/linkedlist-michael/) |	lock-free | 2002 | [[xxx]](#M+02) |
+| [Lazy list](./src/linkedlist-lazy/) |	lock-based | 2006 | [[xxx]](#HHL+06) |
+| [Harris list with ASCY](./src/linkedlist-harris_opt/) |	lock-free | 2015 | [[xxx]](#DGT+15) |
+| [Global-lock list with wait-free search](./src/linkedlist-gl_opt/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [OPTIK global-lock list](./src/linkedlist-optik_gl/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [OPTIK fine-grained list](./src/linkedlist-optik/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [OPTIK fine-grained list with cache](./src/linkedlist-optik_cache/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| **Hash Tables** ||||
+| [Sequential hash table](./src/hashtable-seq/) |	sequential | | |
+| [Sequential hash table](./src/hashtable-seq2/) |	sequential | | |
+| [Using hand-over-hand-locking lists](./src/hashtable-coupling/) |	lock-based | | [[xxx]](#HS+12) |
+| [Using Pugh's list](./src/hashtable-pugh/) |	lock-based | 1990 | [[xxx]](#P+90) |
+| [Using Harris' list](./src/hashtable-harris/) |	lock-free | 2001 | [[xxx]](#H+01) |
+| [Java's ConcurrentHashMap](./src/hashtable-java/) |	lock-based | 2003 | [[xxx]](#L+03) |
+| [Using Java's CopyOnWrite array map](./src/hashtable-copy/) |	lock-based | 2004 | [[xxx]](#javacopy) |
+| [Intel's TBB hash table](./src/hashtable-tbb/) |	lock-based | 2006 | [[xxx]](#tbb) |
+| [Using lazy list](./src/hashtable-lazy/) |	lock-based | 2006 | [[xxx]](#HHL+06) |
+| [URCU hash table](./src/hashtable-rcu/) |	lock-free | 2012 | [[xxx]](#DMS+12) |
+| [Java's ConcurrentHashMap with OPTIK](./src/hashtable-java_optik/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [Using fine-grained OPTIK list](./src/hashtable-optik0/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [Using global-lock OPTIK list](./src/hashtable-optik1/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [Using OPTIK array map](./src/hashtable-map_optik/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| **Skip Lists** ||||
+| [Sequential skip list](./src/skiplist-seq/) |	sequential | | |
+| [Pugh list](./src/skiplist-pugh/) |	lock-based | 1990 | [[xxx]](#P+90) |
+| [Fraser list](./src/skiplist-fraser/) |	lock-free | 2003 | [[xxx]](#F+03) |
+| [Herlihy et al. list](./src/skiplist-herlihy_lb/) |	lock-based | 2007 | [[xxx]](#HLL+07) |
+| [Fraser list with Herlihy's optimization](./src/skiplist-herlihy_lf/) |	lock-free | 2011 | [[xxx]](#HLS+11) |
+| [Herlihy's list with OPTIK](./src/skiplist-optik2/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [OPTIK list lock-version](./src/skiplist-optik/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [OPTIK list using trylocks](./src/skiplist-optik1/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| **BSTs** ||||
+| [Sequential external tree](./src/bst-seq_external/) |	sequential | | |
+| [Sequential internal tree](./src/bst-seq_internal/) |	sequential | | |
+| [Bronson et al. tree](./src/bst-bronson/) |	lock-based | 2010 | [[xxx]](#BCH+10) |
+| [Ellen et al. tree](./src/bst-ellen/) |	lock-free | 2010 | [[xxx]](#EFR+10) |
+| [Howley and Jones  tree](./src/bst-howley/) |	lock-based | 2012 | [[xxx]](#HJ+12) |
+| [Natarajan and Mittal tree](./src/bst-aravind/) |	lock-free | 2014 | [[xxx](#NM+14) |
+| [Drachsler et al. tree](./src/bst-drachsler/) |	lock-free | 2014 | [[xxx]](#DVY+14) |
+| [BST-TK tree](./src/bst-tk/) |	lock-based | 2015 | [[xxx]](#DGT+15) |
+| **Queues** ||||
+| [Michael and Scott (MS) lock-based queue](./src/queue-ms_lb/) |	lock-based | 1996 | [[xxx]](#MS+96) |
+| [Michael and Scott (MS) lock-free queue](./src/queue-ms_lf/) |	lock-free | 1996 | [[xxx]](#MS+96) |
+| [Michael and Scott (MS) hybrid queue](./src/queue-ms_hybrid/) |	lock-based | 1996 | [[xxx]](#MS+96) |
+| [MS queue with OPTIK lock-version](./src/queue-optik0/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [MS queue with OPTIK trylock](./src/queue-optik1/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| [MS queue with OPTIK trylock](./src/queue-optik2/) |	lock-based | 2016 | [[xxx]](#GT+16) |
+| **Priority Queues** ||||
+| [Lotan and Shavit queue](./src/priorityqueue-lotanshavit_lf/) |	lock-free | 2000 | [[xxx]](#LS+00) |
+| [Alistarh et al. queue based on Fraser's skip list](./src/priorityqueue-alistarh/) |	lock-based | 2015 | [[xxx]](#AKL+15) |
+| [Alistarh et al. queue based on Herlihy's skip list](./src/priorityqueue-alistarh-herlihyBased/) |	lock-based | 2015 | [[xxx]](#AKL+15) |
+| [Alistarh et al. queue based on Pugh's skip list](./src/priorityqueue-alistarh-pughBased/) |	lock-based | 2015 | [[xxx]](#AKL+15) |
+| **Stacks** ||||
+| [Global-lock stack](./src/stack-lock/) |	lock-based | | |
+| [Treiber stack](./src/stack-treiber/) |	lock-free | 1986 | [[xxx]](#T+86) |
+| [Treiber stack with OPTIK trylocks](./src/stack-optik/) |	lock-based | 2016 | [[xxx]](#GT+16) |
