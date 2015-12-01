@@ -1,115 +1,93 @@
-<a name="AKL+15">**[AKL+15]**</a>
+* <a name="AKL+15">**[AKL+15]**</a>
 D. Alistarh, J. Kopinsky, J. Li, N. Shavit. The SprayList:
 *A Scalable Relaxed Priority Queue*. 
 PPoPP '15.
-
-<a name="BCH+10">**[BCH+10]**</a>
+* <a name="BCH+10">**[BCH+10]**</a>
 N. G. Bronson, J. Casper, H. Chafi, and K. Olukotun.
 *A Practical Concurrent Binary Search Tree*.
 PPoPP '10.
-
-<a name="DGT+15">**[DGT+15]**</a>
+* <a name="DGT+15">**[DGT+15]**</a>
 T. David, R. Guerraoui, and V. Trigonakis.
 *Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*.
 ASPLOS '15.
-
-<a name="DMS+12">**[DMS+12]**</a>
+* <a name="DMS+12">**[DMS+12]**</a>
 M. Desnoyers, P. E. McKenney, A. S. Stern, M. R. Dagenais, and J. Walpole.
 *User-level implementations of read-copy update*.
 PDS '12.
-
-<a name="DVY+14">**[DVY+14]**</a>
+* <a name="DVY+14">**[DVY+14]**</a>
 D. Drachsler, M. Vechev, and E. Yahav.
 *Practical Concurrent Binary Search Trees via Logical Ordering*.
 PPoPP '14.
-
-<a name="EFR+10">**[EFR+10]**</a>
+* <a name="EFR+10">**[EFR+10]**</a>
 F. Ellen, P. Fatourou, E. Ruppert, and F. van Breugel.
 *Non-blocking Binary Search Trees*.
 PODC '10.
-
-<a name="F+03">**[F+03]**</a>
+* <a name="F+03">**[F+03]**</a>
 K. Fraser.
 *Practical Lock-Freedom*.
 PhD thesis, University of Cambridge, 2004.
-
-<a name="GT+16">**[GT+16]**</a>
+* <a name="GT+16">**[GT+16]**</a>
 R. Guerraoui, and V. Trigonakis.
 *Optimistic Concurrency with OPTIK*.
 PPoPP '16.
-
-<a name="H+01">**[H+01]**</a>
+* <a name="H+01">**[H+01]**</a>
 T. Harris.
 *A Pragmatic Implementation of Non-blocking Linked Lists*.
 DISC '01.
-
-<a name="HHL+06">**[HHL+06]**</a>
+* <a name="HHL+06">**[HHL+06]**</a>
 S. Heller, M. Herlihy, V. Luchangco, M. Moir, W. N. Scherer, and N. Shavit.
 *A Lazy Concurrent List-Based Set Algorithm*.
 OPODIS '05.
-
-<a name="HS+12">**[HS+12]**</a>
+* <a name="HS+12">**[HS+12]**</a>
 M. Herlihy and N. Shavit.
 *The Art of Multiprocessor Programming, Revised First Edition*.
 2012.
-
-<a name="HLL+07">**[HLL+07]**</a>
+* <a name="HLL+07">**[HLL+07]**</a>
 M. Herlihy, Y. Lev, V. Luchangco, and N. Shavit.
 *A Simple Optimistic Skiplist Algorithm*.
 SIROCCO '07.
-
-<a name="HLS+11">**[HLS+11]**</a>
+* <a name="HLS+11">**[HLS+11]**</a>
 M. Herlihy, Y. Lev, and N. Shavit.
 *Concurrent lock-free skiplist with wait-free contains operator*, May 3 2011.
 US Patent 7,937,378.
-
-<a name="HJ+12">**[HJ+12]**</a>
+* <a name="HJ+12">**[HJ+12]**</a>
 S. V. Howley and J. Jones. 
 *A non-blocking internal binary search tree*. 
 SPAA '12.
-
-<a name="INTEL+06">**[INTEL+06]**</a>
+* <a name="INTEL+06">**[INTEL+06]**</a>
 Intel.
 *Intel Thread Building Blocks*.
 https://www.threadingbuildingblocks.org.
-
-<a name="L+03">**[L+03]**</a>
+* <a name="L+03">**[L+03]**</a>
 D. Lea.
 *Overview of Package util.concurrent Release 1.3.4*.
 http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html,
 2003.
-
-<a name="LS+00">**[LS+00]**</a>
+* <a name="LS+00">**[LS+00]**</a>
 I. Lotan and N. Shavit. 
 *Skiplist-based concurrent priority queues*.
 IPDPS '00.
-
-<a name="M+02">**[M+02]**</a>
+* <a name="M+02">**[M+02]**</a>
 M. M. Michael.
 *High Performance Dynamic Lock-free Hash tables and List-based Sets*.
 SPAA '02.
-
-<a name="MS+96">**[MS+96]**</a>
+* <a name="MS+96">**[MS+96]**</a>
 M. M. Michael and M. L. Scott.
 *Simple, Fast, and Practical Non-blocking and Blocking Concurrent Queue Algorithms*.
 PODC '96.
-
-<a name="NM+14">**[NM+14]**</a>
+* <a name="NM+14">**[NM+14]**</a>
 A. Natarajan and N. Mittal.
 *Fast Concurrent Lock-free Binary Search Trees*.
 PPoPP '14.
-
-<a name="ORACLE+04">**[ORACLE+04]**</a>
+* <a name="ORACLE+04">**[ORACLE+04]**</a>
 Oracle.
 *Java CopyOnWriteArrayList*.
 http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CopyOnWriteArrayList.html.
-
-<a name="P+90">**[P+90]**</a>
+* <a name="P+90">**[P+90]**</a>
 W. Pugh.
 *Concurrent Maintenance of Skip Lists*.
 Technical report, 1990.
-
-<a name="T+86">**[T+86]**</a>
+* <a name="T+86">**[T+86]**</a>
 R. Treiber.
 *Systems Programming: Coping with Parallelism*.
 Technical report, 1986.
