@@ -1,7 +1,6 @@
 /*   
- *   File: optik.c
- *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
- *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   File: linkedlist-optik.c
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
  *   Description: 
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
@@ -24,16 +23,6 @@
 
 RETRY_STATS_VARS;
 
-/*
- * Checking that both curr and pred are both unmarked and that pred's next pointer
- * points to curr to verify that the entries are adjacent and present in the list.
- */
-inline int
-optik_validate(node_l_t* pred, node_l_t* curr) 
-{
-  return 1;
-}
-
 sval_t
 optik_find(intset_l_t *set, skey_t key)
 {
@@ -52,8 +41,6 @@ optik_find(intset_l_t *set, skey_t key)
 
   return res;
 }
-
-/* static int __dc = 0, __r = 0; */
 
 int
 optik_insert(intset_l_t *set, skey_t key, sval_t val)

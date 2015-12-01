@@ -1,12 +1,10 @@
 /*   
- *   File: linkedlist-lock.c
- *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
- *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   File: set-lock.c
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
  *   Description: 
- *   linkedlist-lock.c is part of ASCYLIB
+ *   set-lock.c is part of ASCYLIB
  *
- * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
- * 	     	      Tudor David <tudor.david@epfl.ch>
+ * Copyright (c) 2015 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  *	      	      Distributed Programming Lab (LPD), EPFL
  *
  * ASCYLIB is free software: you can redistribute it and/or

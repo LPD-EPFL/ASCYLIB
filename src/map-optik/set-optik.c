@@ -1,14 +1,10 @@
 /*   
- *   File: lazy.c
- *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
- *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: A Lazy Concurrent List-Based Set Algorithm,
- *   S. Heller, M. Herlihy, V. Luchangco, M. Moir, W.N. Scherer III, N. Shavit
- *   p.3-16, OPODIS 2005
- *   lazy.c is part of ASCYLIB
+ *   File: set-optik.c
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   Description: A simple OPTIK-based array map
+ *   set-optik.c is part of ASCYLIB
  *
- * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
- * 	     	      Tudor David <tudor.david@epfl.ch>
+ * Copyright (c) 2015 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  *	      	      Distributed Programming Lab (LPD), EPFL
  *
  * ASCYLIB is free software: you can redistribute it and/or
@@ -35,7 +31,6 @@ optik_map_contains(map_t* map, skey_t key)
 {
   int i;
  restart:
-  /* COMPILER_NO_REORDER(optik_t version = *map->lock;); */
   COMPILER_NO_REORDER(optik_t version = optik_get_version_wait(map->lock););
   for (i = 0; i < map->size; i++)
     {

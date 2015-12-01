@@ -1,5 +1,5 @@
 /*   
- *   File: herlihy.c
+ *   File: skiplist-optik.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
  *  	     Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *   Description:  Fine-grained locking skip list.
@@ -9,7 +9,7 @@
  *   "A Simple Optimistic Skiplist Algorithm" 
  *   M. Herlihy, Y. Lev, V. Luchangco, N. Shavit 
  *   p.124-138, SIROCCO 2007
- *   herlihy.c is part of ASCYLIB
+ *   skiplist-optik.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  * 	     	      Tudor David <tudor.david@epfl.ch>

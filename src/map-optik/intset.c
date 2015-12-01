@@ -1,11 +1,11 @@
 /*   
- *   File: intmap.c
+ *   File: intset.c
  *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
  *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
  *   Description: 
  *   intmap.c is part of ASCYLIB
  *
- * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+ * Copyright (c) 2015 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  * 	     	      Tudor David <tudor.david@epfl.ch>
  *	      	      Distributed Programming Lab (LPD), EPFL
  *

@@ -1,14 +1,9 @@
 /*   
- *   File: lazy.h
- *   Author: Vincent Gramoli <vincent.gramoli@sydney.edu.au>, 
- *  	     Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description: A Lazy Concurrent List-Based Set Algorithm,
- *   S. Heller, M. Herlihy, V. Luchangco, M. Moir, W.N. Scherer III, N. Shavit
- *   p.3-16, OPODIS 2005
- *   lazy.h is part of ASCYLIB
+ *   File: set.h
+ *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
+ *   set.h is part of ASCYLIB
  *
- * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
- * 	     	      Tudor David <tudor.david@epfl.ch>
+ * Copyright (c) 2015 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  *	      	      Distributed Programming Lab (LPD), EPFL
  *
  * ASCYLIB is free software: you can redistribute it and/or

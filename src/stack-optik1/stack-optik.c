@@ -1,8 +1,10 @@
 /*   
- *   File: ms.c
+ *   File: stack-treiber.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
- *   Description:  
- *   ms.c is part of ASCYLIB
+ *   Description: 
+ *   Treiber stack with OPTIK and some sort elimination --  
+ *   DOES NOT work properly
+ *   stack-treiber.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  * 	     	      Tudor David <tudor.david@epfl.ch>
