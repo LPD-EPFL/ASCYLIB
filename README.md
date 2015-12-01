@@ -108,8 +108,8 @@ The following table contains the algorithms (and various implementations of some
 | [Michael and Scott (MS) lock-free queue](./src/queue-ms_lf/) |	lock-free | 1996 | [[MS+96]](#MS+96) |
 | [Michael and Scott (MS) hybrid queue](./src/queue-ms_hybrid/) |	lock-based | 1996 | [[MS+96]](#MS+96) |
 | [MS queue with OPTIK lock-version](./src/queue-optik0/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
-| [MS queue with OPTIK trylock](./src/queue-optik1/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
-| [MS queue with OPTIK trylock](./src/queue-optik2/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [MS queue with OPTIK trylock-version](./src/queue-optik1/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [MS queue with OPTIK trylock-version](./src/queue-optik2/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
 | **Priority Queues** ||||
 | [Lotan and Shavit queue](./src/priorityqueue-lotanshavit_lf/) |	lock-free | 2000 | [[LS+00]](#LS+00) |
 | [Alistarh et al. queue based on Fraser's skip list](./src/priorityqueue-alistarh/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
