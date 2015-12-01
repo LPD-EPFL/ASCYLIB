@@ -93,7 +93,7 @@ The following table contains the algorithms (and various implementations of some
 | [Fraser list with Herlihy's optimization](./src/skiplist-herlihy_lf/) |	lock-free | 2011 | [[HLS+11]](#HLS+11) |
 | [Herlihy's list with OPTIK](./src/skiplist-optik2/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
 | [OPTIK list lock-version](./src/skiplist-optik/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
-| [OPTIK list using trylocks](./src/skiplist-optik1/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+| [OPTIK list using trylocks (default OPTIK skip list)](./src/skiplist-optik1/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
 | **BSTs** ||||
 | [Sequential external tree](./src/bst-seq_external/) |	sequential | | |
 | [Sequential internal tree](./src/bst-seq_internal/) |	sequential | | |
