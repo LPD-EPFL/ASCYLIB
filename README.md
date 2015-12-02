@@ -82,15 +82,16 @@ The following table contains the algorithms (and various implementations of some
 |48| [MS queue with OPTIK lock-version](./src/queue-optik0/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
 |49| [MS queue with OPTIK trylock-version](./src/queue-optik1/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
 |50| [MS queue with OPTIK trylock-version](./src/queue-optik2/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+|51| [MS queue with OPTIK and victim queue](./src/queue-optik3/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
 || **Priority Queues** ||||
-|51| [Lotan and Shavit priority queue](./src/priorityqueue-lotanshavit_lf/) |	lock-free | 2000 | [[LS+00]](#LS+00) |
-|52| [Alistarh et al. priority queue based on Fraser's skip list](./src/priorityqueue-alistarh/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
-|53| [Alistarh et al. priority queue based on Herlihy's skip list](./src/priorityqueue-alistarh-herlihyBased/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
-|54| [Alistarh et al. priority queue based on Pugh's skip list](./src/priorityqueue-alistarh-pughBased/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
+|52| [Lotan and Shavit priority queue](./src/priorityqueue-lotanshavit_lf/) |	lock-free | 2000 | [[LS+00]](#LS+00) |
+|53| [Alistarh et al. priority queue based on Fraser's skip list](./src/priorityqueue-alistarh/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
+|54| [Alistarh et al. priority queue based on Herlihy's skip list](./src/priorityqueue-alistarh-herlihyBased/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
+|55| [Alistarh et al. priority queue based on Pugh's skip list](./src/priorityqueue-alistarh-pughBased/) |	lock-based | 2015 | [[AKL+15]](#AKL+15) |
 || **Stacks** ||||
-|55| [Global-lock stack](./src/stack-lock/) |	lock-based | | |
-|56| [Treiber stack](./src/stack-treiber/) |	lock-free | 1986 | [[T+86]](#T+86) |
-|57| [Treiber stack with OPTIK trylocks](./src/stack-optik/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
+|56| [Global-lock stack](./src/stack-lock/) |	lock-based | | |
+|57| [Treiber stack](./src/stack-treiber/) |	lock-free | 1986 | [[T+86]](#T+86) |
+|58| [Treiber stack with OPTIK trylocks](./src/stack-optik/) |	lock-based | 2016 | [[GT+16]](#GT+16) |
 
 References
 ----------
