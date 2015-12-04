@@ -31,17 +31,32 @@
 #  define PRINT_OPS_PER_THREAD()					
 #endif
 
+#define THREAD_INIT()				\
+  __zipf_arr = zipf_get_rand_array(ZIPF_ALPHA, ZIPF_ARR_SIZE * (rand_max + 1), rand_max + 1)
+
+#define THREAD_END()					\
+  ZIPF_STATS_DO(					\
+		if (ID == 0)				\
+		  {					\
+		    zipf_print_stats(__zipf_arr);	\
+		  }					\
+		free(__zipf_arr->stats);		\
+						);	\
+  free(__zipf_arr);					\
 
 
 #define TEST_VARS_GLOBAL						\
   volatile int phase_put = 0;						\
   volatile uint32_t phase_put_threshold_start = 0.99999 * UINT_MAX;	\
-  volatile uint32_t phase_put_threshold_stop  = 0.9999999 * UINT_MAX;  \
-  __thread volatile ticks phase_start, phase_stop;			
+  volatile uint32_t phase_put_threshold_stop  = 0.9999999 * UINT_MAX;	\
+  __thread volatile ticks phase_start, phase_stop;			\
+  ZIPF_RAND_DECLARATIONS();
 
-#define UNIFORM_WORKLOAD 1
+#ifndef WORKLOAD
+#  define WORKLOAD 0		/* normal workload */
+#endif 
 
-#if UNIFORM_WORKLOAD == 0
+#if WORKLOAD == 1		/* with phases */
 #  define TEST_LOOP(algo_type)						\
   c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	\
   key = (c & rand_max) + rand_min;					\
@@ -104,7 +119,7 @@
       my_getting_count++;						\
     }
 
-#else
+#elif WORKLOAD == 0	/* normal uniform workload */
 
 #  define TEST_LOOP(algo_type)						\
   c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	\
@@ -196,7 +211,60 @@
   /* cdelay((num_threads-1)*128); */
 
 
-#endif	/* UNIFORM_WORKLOAD */
+#elif WORKLOAD == 2	/* zipf workload */
+
+#  define TEST_LOOP(algo_type)						\
+  c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	\
+  key = rand_max - zipf_get_next(__zipf_arr) + rand_min;		\
+  ZIPF_STATS_DO(__zipf_arr->stats[key]++);                              \
+				  					\
+  if (unlikely(c <= scale_put))						\
+    {									\
+      int res;								\
+      START_TS(1);							\
+      res = DS_ADD(set, key, algo_type);				\
+      if(res)								\
+	{								\
+	  END_TS(1, my_putting_count_succ);				\
+	  ADD_DUR(my_putting_succ);					\
+	  my_putting_count_succ++;					\
+	}								\
+      END_TS_ELSE(4, my_putting_count - my_putting_count_succ,		\
+		  my_putting_fail);					\
+      my_putting_count++;						\
+    }									\
+  else if(unlikely(c <= scale_rem))					\
+    {									\
+      int removed;							\
+      START_TS(2);							\
+      removed = DS_REMOVE(set, key, algo_type);				\
+      if(removed != 0)							\
+	{								\
+	  END_TS(2, my_removing_count_succ);				\
+	  ADD_DUR(my_removing_succ);					\
+	  my_removing_count_succ++;					\
+	}								\
+      END_TS_ELSE(5, my_removing_count - my_removing_count_succ,	\
+		  my_removing_fail);					\
+      my_removing_count++;						\
+    }									\
+  else									\
+    {									\
+      int res;								\
+      START_TS(0);							\
+      res = (sval_t) DS_CONTAINS(set, key, algo_type);			\
+      if(res != 0)							\
+	{								\
+	  END_TS(0, my_getting_count_succ);				\
+	  ADD_DUR(my_getting_succ);					\
+	  my_getting_count_succ++;					\
+	}								\
+      END_TS_ELSE(3, my_getting_count - my_getting_count_succ,		\
+		  my_getting_fail);					\
+      my_getting_count++;						\
+    }
+
+#endif	/* WORKLOAD */
 
 #define POW_CORRECTED 0
 

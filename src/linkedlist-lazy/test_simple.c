@@ -133,6 +133,7 @@ test(void* thread)
 
   DS_TYPE* set = td->set;
 
+  THREAD_INIT();
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
 
 #if defined(COMPUTE_LATENCY)
@@ -251,7 +252,7 @@ test(void* thread)
   ssmem_term();
   free(alloc);
 #endif
-
+  THREAD_END();
   pthread_exit(NULL);
 }
 

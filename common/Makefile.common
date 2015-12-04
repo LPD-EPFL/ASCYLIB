@@ -355,3 +355,7 @@ ifneq ($(OPTIK_STATS),)
 	CFLAGS += -DOPTIK_STATS=$(OPTIK_STATS)
 endif
 
+ifneq ($(WORKLOAD),)
+	CFLAGS += -DWORKLOAD=$(WORKLOAD)
+endif
+
