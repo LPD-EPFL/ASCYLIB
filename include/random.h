@@ -118,5 +118,142 @@ rand_range_re(unsigned int *seed, long r)
   return v;
 }
 
+//===========================================================================
+//=  Functions to generate Zipf (power law) distributed random variables    =
+//=    - Inputs: alpha and max_val                                          =
+//===========================================================================
+// modified from http://www.csee.usf.edu/~christen/tools/genzipf.c
+
+/* ZIPF related settings */
+#define ZIPF_ALPHA             0.99
+#define ZIPF_ARR_SIZE          8 /* pre-allocate an array with skewed vals
+				  of size (rand_rage)*ZIPF_ARR_SIZE */
+#define ZIPF_STATS             0
+
+
+#if ZIPF_STATS == 1
+#  define ZIPF_STATS_DO(x) x
+#else
+#  define ZIPF_STATS_DO(x)
+#endif
+
+struct zipf_arr
+{
+  size_t size;
+  int max;
+  int i;
+  ZIPF_STATS_DO(int* stats);
+  int vals[0];
+};
+
+extern __thread double __zipf_norm_constant;
+extern __thread int __zipf_initialized;
+extern __thread unsigned long* __zipf_seeds;
+extern __thread struct zipf_arr* __zipf_arr;
+#define ZIPF_RAND_DECLARATIONS()		\
+  __thread double __zipf_norm_constant = 0;	\
+  __thread int __zipf_initialized = 0;		\
+  __thread unsigned long* __zipf_seeds = NULL;	\
+  __thread struct zipf_arr* __zipf_arr;
+  
+#define likely(x)       __builtin_expect((x), 1)
+#define unlikely(x)     __builtin_expect((x), 0)
+
+static inline double
+zipf_init(const double alpha, const int max)
+{
+  if (unlikely(__zipf_initialized == 0))
+    {
+      __zipf_seeds = seed_rand();
+
+      int i;
+      for (i=1; i <= max; i++)
+	{
+	  __zipf_norm_constant = __zipf_norm_constant + (1.0 / pow((double) i, alpha));
+	}
+      __zipf_norm_constant = 1.0 / __zipf_norm_constant;
+      __zipf_initialized = 1;
+    }
+  return __zipf_norm_constant;
+}
+
+
+static inline int 
+zipf(double alpha, const int max)
+{
+  static double c = 0;          // Normalization constant
+  double z;                     // Uniform random number (0 < z < 1)
+  double sum_prob;              // Sum of probabilities
+  double zipf_value = 0;        // Computed exponential value to be returned
+
+  // Compute normalization constant on first call only
+  c = zipf_init(alpha, max);
+
+  // Pull a uniform random number (0 < z < 1)
+  do
+    {
+      z = my_random(&(__zipf_seeds[0]),&(__zipf_seeds[1]),&(__zipf_seeds[2])) / (double) ((unsigned long) (-1));
+    }
+  while ((z == 0) || (z == 1));
+
+  // Map z to the value
+  sum_prob = 0;
+  int i;
+  for (i = 1; i <= max; i++)
+    {
+      sum_prob = sum_prob + c / pow((double) i, alpha);
+      if (sum_prob >= z)
+	{
+	  zipf_value = i;
+	  break;
+	}
+    }
+
+  // Assert that zipf_value is between 1 and N
+  /* assert((zipf_value >=1) && (zipf_value <= max)); */
+
+  return (zipf_value - 1);
+}
+
+static inline struct zipf_arr*
+zipf_get_rand_array(double zipf_alpha, const size_t num_vals, const int max)
+{
+  struct zipf_arr* za = malloc(sizeof(struct zipf_arr) + num_vals * sizeof(int));
+  assert(za != NULL);
+  za->size = num_vals;
+  za->max = max;
+  za->i = 0;
+  int i;
+  for (i = 0; i < num_vals; i++)
+    {
+      za->vals[i] = zipf(zipf_alpha, max);
+    }
+
+#if ZIPF_STATS == 1
+		za->stats = calloc(max, sizeof(int));
+		assert(za->stats != NULL);
+#endif
+
+  return za;
+}
+
+static inline int
+zipf_get_next(struct zipf_arr* za)
+{
+  return za->vals[(za->i++) % za->size];
+}
+
+static inline void
+zipf_print_stats(struct zipf_arr* za)
+{
+#if ZIPF_STATS == 1
+  int i;
+  for (i = 0; i < za->max; i++)
+    {
+      printf("%-4d : %d\n", i, za->stats[i]);
+    }
+#endif
+}
+
 
 #endif
