@@ -71,7 +71,7 @@ The following table contains the algorithms (and various implementations of some
 |38| [Sequential internal binary search tree](./src/bst-seq_internal/) |	sequential | | |
 |39| [Bronson et al. binary search tree](./src/bst-bronson/) |	lock-based | 2010 | [[BCH+10]](#BCH+10) |
 |40| [Ellen et al. binary search tree](./src/bst-ellen/) |	lock-free | 2010 | [[EFR+10]](#EFR+10) |
-|41| [Howley and Jones  binary search tree](./src/bst-howley/) |	lock-based | 2012 | [[HJ+12]](#HJ+12) |
+|41| [Howley and Jones binary search tree](./src/bst-howley/) |	lock-free | 2012 | [[HJ+12]](#HJ+12) |
 |42| [Natarajan and Mittal binary search tree](./src/bst-aravind/) |	lock-free | 2014 | [[NM+14]](#NM+14) |
 |43| [Drachsler et al. binary search tree](./src/bst-drachsler/) |	lock-free | 2014 | [[DVY+14]](#DVY+14) |
 |44| [BST-TK binary search tree](./src/bst-tk/) |	lock-based | 2015 | [[DGT+15]](#DGT+15) |
