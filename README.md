@@ -73,7 +73,7 @@ The following table contains the algorithms (and various implementations of some
 |40| [Ellen et al. binary search tree](./src/bst-ellen/) |	lock-free | 2010 | [[EFR+10]](#EFR+10) |
 |41| [Howley and Jones binary search tree](./src/bst-howley/) |	lock-free | 2012 | [[HJ+12]](#HJ+12) |
 |42| [Natarajan and Mittal binary search tree](./src/bst-aravind/) |	lock-free | 2014 | [[NM+14]](#NM+14) |
-|43| [Drachsler et al. binary search tree](./src/bst-drachsler/) |	lock-free | 2014 | [[DVY+14]](#DVY+14) |
+|43| [Drachsler et al. binary search tree](./src/bst-drachsler/) |	lock-based | 2014 | [[DVY+14]](#DVY+14) |
 |44| [BST-TK binary search tree](./src/bst-tk/) |	lock-based | 2015 | [[DGT+15]](#DGT+15) |
 || **Queues** ||||
 |45| [Michael and Scott (MS) lock-based queue](./src/queue-ms_lb/) |	lock-based | 1996 | [[MS+96]](#MS+96) |
