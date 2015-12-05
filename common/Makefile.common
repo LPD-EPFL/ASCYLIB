@@ -137,11 +137,11 @@ ifeq ($(PC_NAME), lpd48core)
     CFLAGS += -DOPTERON -DPLATFORM_MCORE 
     PLATFORM_NUMA = 1
 endif
-ifeq ($(PC_NAME), lpdxeon2680)
-    PLATFORM_KNOWN = 1
-    CFLAGS += -DLPDXEON -DPLATFORM_MCORE
-    PLATFORM_NUMA = 1
-endif
+# ifeq ($(PC_NAME), lpdxeon2680)
+#     PLATFORM_KNOWN = 1
+#     CFLAGS += -DLPDXEON -DPLATFORM_MCORE
+#     PLATFORM_NUMA = 1
+# endif
 
 ifeq ($(PC_NAME), lpdpc34)
     PLATFORM_KNOWN = 1
@@ -357,5 +357,13 @@ endif
 
 ifneq ($(WORKLOAD),)
 	CFLAGS += -DWORKLOAD=$(WORKLOAD)
+endif
+
+ifeq ($(WORKLOAD),2)
+    $(info ***************************************************************)
+    $(info *** Notice: Skewed workload tests might take long.          ***)
+    $(info *** Initializing tests takes time proportional to the range ***)
+    $(info *** used for the test. Zipf random numbers are precomputed. ***)
+    $(info ***************************************************************)
 endif
 
