@@ -31,10 +31,13 @@
 #  define PRINT_OPS_PER_THREAD()					
 #endif
 
-#define THREAD_INIT()				\
-  __zipf_arr = zipf_get_rand_array(ZIPF_ALPHA, ZIPF_ARR_SIZE * (rand_max + 1), rand_max + 1)
+#if WORKLOAD == 2 //skewed workload
+#  define THREAD_INIT()				\
+  printf("- Creating zipf random numbers array\n");
+__zipf_arr = zipf_get_rand_array(ZIPF_ALPHA, ZIPF_ARR_SIZE * (rand_max + 1), rand_max + 1); \
+  printf("- Done\n");
 
-#define THREAD_END()					\
+#  define THREAD_END()					\
   ZIPF_STATS_DO(					\
 		if (ID == 0)				\
 		  {					\
@@ -42,7 +45,12 @@
 		  }					\
 		free(__zipf_arr->stats);		\
 						);	\
-  free(__zipf_arr);					\
+  free(__zipf_arr);
+
+#else
+#  define THREAD_INIT()
+#  define THREAD_END()
+#endif
 
 
 #define TEST_VARS_GLOBAL						\
