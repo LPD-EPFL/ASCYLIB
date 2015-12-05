@@ -75,6 +75,10 @@ ifeq ($(STM),LOCKFREE)
   CFLAGS	+= -DLOCKFREE
 endif
 
+ifeq ($(CACHE),1)
+  SSMEM_SUFFIX=_manual
+endif
+
 #############################
 # Platform dependent settings
 #############################
@@ -202,7 +206,7 @@ ifeq ($(ARCH_NAME), i386)
     CFLAGS += -m32
     LDFLAGS += -m32
     SSPFD = -lsspfd_x86
-    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_x86
+    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_x86$(SSMEM_SUFFIX)
 endif
 
 ifeq ($(ARCH_NAME), i686)
@@ -210,7 +214,7 @@ ifeq ($(ARCH_NAME), i686)
     CFLAGS += -m32
     LDFLAGS += -m32
     SSPFD = -lsspfd_x86
-    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_x86
+    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_x86$(SSMEM_SUFFIX)
 endif
 
 ifeq ($(ARCH_NAME), x86_64)
@@ -218,7 +222,7 @@ ifeq ($(ARCH_NAME), x86_64)
     CFLAGS += -m64
     LDFLAGS += -m64
     SSPFD = -lsspfd_x86_64
-    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_x86_64
+    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_x86_64$(SSMEM_SUFFIX)
 endif
 
 ifeq ($(ARCH_NAME), sun4v)
@@ -226,11 +230,11 @@ ifeq ($(ARCH_NAME), sun4v)
     CFLAGS += -DSPARC=1 -DINLINED=1 -m64
     LDFLAGS += -lrt -m64
     SSPFD = -lsspfd_sparc64
-    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_sparc64
+    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_sparc64$(SSMEM_SUFFIX)
 endif
 
 ifeq ($(ARCH_NAME), tile)
-    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_tile
+    LDFLAGS += -L$(LIBSSMEM)/lib -lssmem_tile$(SSMEM_SUFFIX)
     SSPFD = -lsspfd_tile
 endif
 
