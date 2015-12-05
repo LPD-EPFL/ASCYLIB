@@ -1,0 +1,7 @@
+### params -i64 -r128 -u40 / keep median of reps 11 of dur 10000
+# Result from 11 repetitions: median
+#       ./bin/lpdxeon2680/lf-ll_harris_opt_2./bin/lpdxeon2680/lb-ll_lazy_2  ./bin/lpdxeon2680/lb-ll_gl_2    ./bin/lpdxeon2680/lb-ll_optik_gl_2./bin/lpdxeon2680/lb-ll_optik_2 ./bin/lpdxeon2680/lb-ll_optik_cache_2./bin/lpdxeon2680/lb-ll_lazy_cache_2
+#cores  throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability throughput  %linear scalability 
+1       6484903     100.00  1           8805047     100.00  1           6617135     100.00  1           8891896     100.00  1           7747087     100.00  1           11702418    100.00  1           12586235    100.00  1           
+2       9212121     71.03   1.42        8543623     48.52   0.97        4320492     32.65   0.65        6729513     37.84   0.76        12088934    78.02   1.56        11056260    47.24   0.94        10855386    43.12   0.86        
+6       14961431    38.45   2.31        13918720    26.35   1.58        3679758     9.27    0.56        6431482     12.05   0.72        
