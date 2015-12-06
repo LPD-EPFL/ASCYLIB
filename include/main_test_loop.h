@@ -31,18 +31,26 @@
 #  define PRINT_OPS_PER_THREAD()					
 #endif
 
-#define THREAD_INIT()				\
-  __zipf_arr = zipf_get_rand_array(ZIPF_ALPHA, ZIPF_ARR_SIZE * (rand_max + 1), rand_max + 1)
+#if WORKLOAD == 2 //skewed workload
+#  define THREAD_INIT()							\
+  if (!ID) { printf("- Creating zipf random numbers array\n"); }	\
+  __zipf_arr = zipf_get_rand_array(ZIPF_ALPHA, ZIPF_ARR_SIZE * (rand_max + 1), rand_max + 1); \
+  if (!ID) { printf("- Done\n"); }
 
-#define THREAD_END()					\
-  ZIPF_STATS_DO(					\
-		if (ID == 0)				\
-		  {					\
-		    zipf_print_stats(__zipf_arr);	\
-		  }					\
-		free(__zipf_arr->stats);		\
-						);	\
-  free(__zipf_arr);					\
+#  define THREAD_END()						\
+  ZIPF_STATS_DO(						\
+		if (ID == 0)					\
+		  {						\
+		    zipf_print_stats(__zipf_arr);		\
+		  }						\
+		free(__zipf_arr->stats);			\
+							);	\
+  free(__zipf_arr);
+
+#else
+#  define THREAD_INIT()
+#  define THREAD_END()
+#endif
 
 
 #define TEST_VARS_GLOBAL						\
@@ -206,9 +214,9 @@
     }									\
   cpause((num_threads-1)*32);
 
-  /* cdelay(1); */
-  /* cpause(0); */
-  /* cdelay((num_threads-1)*128); */
+/* cdelay(1); */
+/* cpause(0); */
+/* cdelay((num_threads-1)*128); */
 
 
 #elif WORKLOAD == 2	/* zipf workload */
@@ -216,53 +224,53 @@
 #  define TEST_LOOP(algo_type)						\
   c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	\
   key = rand_max - zipf_get_next(__zipf_arr) + rand_min;		\
-  ZIPF_STATS_DO(__zipf_arr->stats[key]++);                              \
+					     ZIPF_STATS_DO(__zipf_arr->stats[key]++); \
 				  					\
-  if (unlikely(c <= scale_put))						\
-    {									\
-      int res;								\
-      START_TS(1);							\
-      res = DS_ADD(set, key, algo_type);				\
-      if(res)								\
-	{								\
-	  END_TS(1, my_putting_count_succ);				\
-	  ADD_DUR(my_putting_succ);					\
-	  my_putting_count_succ++;					\
-	}								\
-      END_TS_ELSE(4, my_putting_count - my_putting_count_succ,		\
-		  my_putting_fail);					\
-      my_putting_count++;						\
-    }									\
-  else if(unlikely(c <= scale_rem))					\
-    {									\
-      int removed;							\
-      START_TS(2);							\
-      removed = DS_REMOVE(set, key, algo_type);				\
-      if(removed != 0)							\
-	{								\
-	  END_TS(2, my_removing_count_succ);				\
-	  ADD_DUR(my_removing_succ);					\
-	  my_removing_count_succ++;					\
-	}								\
-      END_TS_ELSE(5, my_removing_count - my_removing_count_succ,	\
-		  my_removing_fail);					\
-      my_removing_count++;						\
-    }									\
-  else									\
-    {									\
-      int res;								\
-      START_TS(0);							\
-      res = (sval_t) DS_CONTAINS(set, key, algo_type);			\
-      if(res != 0)							\
-	{								\
-	  END_TS(0, my_getting_count_succ);				\
-	  ADD_DUR(my_getting_succ);					\
-	  my_getting_count_succ++;					\
-	}								\
-      END_TS_ELSE(3, my_getting_count - my_getting_count_succ,		\
-		  my_getting_fail);					\
-      my_getting_count++;						\
-    }
+					     if (unlikely(c <= scale_put)) \
+					       {			\
+						 int res;		\
+						 START_TS(1);		\
+						 res = DS_ADD(set, key, algo_type); \
+						 if(res)		\
+						   {			\
+						     END_TS(1, my_putting_count_succ); \
+						     ADD_DUR(my_putting_succ); \
+						     my_putting_count_succ++; \
+						   }			\
+						 END_TS_ELSE(4, my_putting_count - my_putting_count_succ, \
+							     my_putting_fail); \
+						 my_putting_count++;	\
+					       }			\
+					     else if(unlikely(c <= scale_rem)) \
+					       {			\
+						 int removed;		\
+						 START_TS(2);		\
+						 removed = DS_REMOVE(set, key, algo_type); \
+						 if(removed != 0)	\
+						   {			\
+						     END_TS(2, my_removing_count_succ);	\
+						     ADD_DUR(my_removing_succ);	\
+						     my_removing_count_succ++; \
+						   }			\
+						 END_TS_ELSE(5, my_removing_count - my_removing_count_succ, \
+							     my_removing_fail);	\
+						 my_removing_count++;	\
+					       }			\
+					     else			\
+					       {			\
+						 int res;		\
+						 START_TS(0);		\
+						 res = (sval_t) DS_CONTAINS(set, key, algo_type); \
+						 if(res != 0)		\
+						   {			\
+						     END_TS(0, my_getting_count_succ); \
+						     ADD_DUR(my_getting_succ); \
+						     my_getting_count_succ++; \
+						   }			\
+						 END_TS_ELSE(3, my_getting_count - my_getting_count_succ, \
+							     my_getting_fail); \
+						 my_getting_count++;	\
+					       }
 
 #endif	/* WORKLOAD */
 
@@ -290,7 +298,7 @@
 	  static_pow += static_power[si + 1];				\
 	}								\
     }									\
-  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS] - static_pow;	\
+  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS] - static_pow; \
   printf("#Total Power Corrected                     : %11f (correction= %10f) W\n", \
 	 pow_tot_corrected, static_pow);				\
   double eop = (1e6 * s.power_total[NUMBER_OF_SOCKETS]) / throughput;	\
@@ -304,7 +312,7 @@
     {									\
       num_threads = (CORES_PER_SOCKET*NUMBER_OF_SOCKETS);		\
     }									\
-  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS];	\
+  double pow_tot_corrected = s.power_total[NUMBER_OF_SOCKETS];		\
   printf("#Total Power Corrected                     : %11f (correction= %10f) W\n",  pow_tot_corrected, 0.0); \
   double eop = (1e6 * s.power_total[NUMBER_OF_SOCKETS]) / throughput;	\
   double eop_corrected = eop;						\
