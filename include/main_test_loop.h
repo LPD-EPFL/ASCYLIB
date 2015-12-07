@@ -49,7 +49,7 @@
   free(__zipf_arr);
 
 #else
-#  define THREAD_INIT()
+#  define THREAD_INIT(id)
 #  define THREAD_END()
 #endif
 
