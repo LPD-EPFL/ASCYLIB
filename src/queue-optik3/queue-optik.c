@@ -92,6 +92,7 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
   if (optik_num_queued(qu->tail_lock) > 2)
     {
       node->next = SWAP_PTR(&qu->overflow, node);
+
       if (node->next == NULL)
 	{
 	  optik_lock_backoff(&qu->tail_lock);
@@ -102,10 +103,16 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 	}
       else
 	{
-	  while (qu->overflow != NULL)
+	  volatile queue_node_t* qn;
+	  do
 	    {
-	      pause_rep(16);
+	      COMPILER_NO_REORDER(qn = qu->overflow;);
+	      if (qn == NULL)
+		{
+		  break;
+		}
 	    }
+	  while (1);
 	}
 
       return 1;
