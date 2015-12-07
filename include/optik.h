@@ -224,13 +224,6 @@ optik_trylock_version(optik_t* ol, optik_t ol_old)
 
   OPTIK_STATS_TRYLOCK_CAS_INC();
 
-/* #  if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6 */
-/*   optik_t olo = { .version = version, .ticket = version }; */
-/*   optik_t oln = { .version = version, .ticket = (version + 1) }; */
-/* #  else */
-/*   optik_t olo = { version, version }; */
-/*   optik_t oln = { version, (version + 1) }; */
-/* #  endif */
   optik_t olo = ol_old;
   ol_old.ticket++;
   optik_t oln = ol_old;
@@ -273,8 +266,8 @@ optik_trylock(optik_t* ol)
   optik_t olo = { .version = version, .ticket = version };
   optik_t oln = { .version = version, .ticket = (version + 1) };
 #  else
-  optik_t olo = { version, version };
-  optik_t oln = { version, (version + 1) };
+  optik_t olo = {{ version, version }};
+  optik_t oln = {{ version, (version + 1) }};
 #  endif
   return CAS_U64(&ol->to_uint64, olo.to_uint64, oln.to_uint64) == olo.to_uint64;
 }

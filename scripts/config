@@ -129,6 +129,9 @@ then
     elif [ $unm = "ol-collab1" ];
     then
 	cores="2 $(seq 8 8 256) 288 320 352";
+    elif [ $unm = "diassrv8" ];
+    then
+	cores="2 $(seq 10 5 200)";
     else
         max=$(nproc);
 	maxp4=$(($max+4));
