@@ -13,9 +13,9 @@ algos=( ${ub}/lf-ll_harris_opt ${ub}/lb-ll_lazy ${ub}/lb-ll_gl ${ub}/lb-ll_optik
 params_i=( 64 1024 8192 64  8192 );
 params_u=( 40 40   40   40  40 );
 params_w=( 0   0   0    2   2 );
-params_i=( 64  8192 );
-params_u=( 40  40 );
-params_w=( 2   2 );
+# params_i=( 64  8192 );
+# params_u=( 40  40 );
+# params_w=( 2   2 );
 np=${#params_i[*]};
 
 cores_backup=$cores;
@@ -95,6 +95,6 @@ do
 
     echo "### params -i$initial -r$range -u$update / keep $keep of reps $repetitions of dur $duration" | tee ${uo}/$out;
 
-    ./scripts/scalability_rep.sh $cores $repetitions $keep "$algos_str" -d$duration -i$initial -r$range -u$update \
+    ./scripts/scalability_rep_simple.sh $cores $repetitions $keep "$algos_str" -d$duration -i$initial -r$range -u$update \
 				 | tee -a ${uo}/$out;
 done;
