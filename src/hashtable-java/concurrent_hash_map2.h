@@ -37,7 +37,7 @@
  * parameters
  */
 
-#define CHM_NUM_SEGMENTS                512
+#define CHM_NUM_SEGMENTS                128
 #if defined(__tile__)
 /* on the tilera we need to keep the ht small to avoid the TLB issues */
 #  define CHM_LOAD_FACTOR                 3
