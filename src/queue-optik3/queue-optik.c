@@ -107,12 +107,8 @@ queue_optik_insert(queue_t* qu, skey_t key, sval_t val)
 	  do
 	    {
 	      COMPILER_NO_REORDER(qn = qu->overflow;);
-	      if (qn == NULL)
-		{
-		  break;
-		}
 	    }
-	  while (1);
+	  while (qn != NULL);
 	}
 
       return 1;
