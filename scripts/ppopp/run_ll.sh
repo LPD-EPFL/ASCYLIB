@@ -58,12 +58,10 @@ then
 	fi;
 	echo "----> Moving binaries to $ub";
 	mkdir $ub &> /dev/null;
-	# mv bin/*${ds}* $ub;
 	bins=$(ls bin/*${ds}*);
 	for b in $bins;
 	do
 	    target=$(echo $ub/${b}"_"$WORKLOAD | sed 's/bin\///2g');
-	    # echo $b " -> " $target ;
 	    mv $b $target;
 	done
 	if [ $? -eq 0 ];
@@ -94,7 +92,6 @@ do
     fi;
 
     echo "### params -i$initial -r$range -u$update / keep $keep of reps $repetitions of dur $duration" | tee ${uo}/$out;
-
     ./scripts/scalability_rep_simple.sh $cores $repetitions $keep "$algos_str" -d$duration -i$initial -r$range -u$update \
 				 | tee -a ${uo}/$out;
 done;
