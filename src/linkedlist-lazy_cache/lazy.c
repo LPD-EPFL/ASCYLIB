@@ -53,6 +53,13 @@ lazy_cache_validate(intset_l_t* set, skey_t key)
       SSMEM_SAFE_TO_RECLAIM();
 #endif
     }
+  else
+    {
+      if (node_last.node == NULL)
+	{
+	  printf("valid == 1, but node_last == 0\n");
+	}
+    }
   return valid;
 }
 
@@ -66,23 +73,18 @@ lazy_cache_validate_plus(intset_l_t* set, skey_t key)
     }
 
   int valid = key >= node_last.key && !node_last.node->marked;
-  if (!valid)
-    {
-#if GC == 1
-      SSMEM_SAFE_TO_RECLAIM();
-#endif
-    }
   return valid;
 }
 
 static inline void
 lazy_cache(node_l_t* pred)
 {
-  if (pred->key > INT_MIN)
+  if (pred->key == INT_MIN)
     {
-      node_last.key = pred->key;
-      node_last.node = pred;
+      pred = pred->next;	/* get list head node */
     }
+  node_last.key = pred->key;
+  node_last.node = pred;
 }
 
 
@@ -195,6 +197,7 @@ parse_insert(intset_l_t *set, skey_t key, sval_t val)
 	    {
 	      continue;
 	    }
+	  lazy_cache(pred);	/* in order to change node_cache and allow GC */
 	  return false;
 	}
 #endif
@@ -259,6 +262,7 @@ parse_delete(intset_l_t *set, skey_t key)
 #if LAZY_RO_FAIL == 1 
       if (curr->key != key)
 	{
+	  lazy_cache(pred);	/* in order to change node_cache and allow GC */
 	  return false;
 	}
 #endif
@@ -277,7 +281,6 @@ parse_delete(intset_l_t *set, skey_t key)
 	      pred->next = c_nxt;
 #if GC == 1
 	      ssmem_free(alloc, (void*) curr);
-	      SSMEM_SAFE_TO_RECLAIM();
 #endif
 	    }
 	  done = 1;
