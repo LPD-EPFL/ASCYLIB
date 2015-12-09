@@ -126,6 +126,9 @@ then
     elif [ $unm = "lpd48core" ];
     then
 	cores="$(seq 2 2 48) $(seq 52 4 64)";
+    elif [ $unm = "lpdquad" ];
+    then
+	cores="$(seq 2 4 96) $(seq 104 8 164)";
     elif [ $unm = "ol-collab1" ];
     then
 	cores="2 $(seq 8 8 256) 288 320 352";
