@@ -10,9 +10,9 @@ algos=( ${ub}/lf-sl_fraser ${ub}/lb-sl_herlihy ${ub}/lb-sl_optik ${ub}/lb-sl_opt
 
 # params_i=( 128 512 2048 4096 8192 );
 # params_u=( 100 50  20   10   1 );
-params_i=( 64 1024 8192 64  8192 );
-params_u=( 40 40   40   40  40 );
-params_w=( 0   0   0    2   2 );
+params_i=( 1024 16384 65536 1024 16384 65536 );
+params_u=( 40   40    40    40   40    40 );
+params_w=( 0    0     0     2    2     2 );
 np=${#params_i[*]};
 
 cores_backup=$cores;
