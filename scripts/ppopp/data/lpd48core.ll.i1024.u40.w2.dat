@@ -1,0 +1,12 @@
+### params -i1024 -r2048 -u40 / keep median of reps 7 of dur 5000
+# Result from 7 repetitions: median
+#       lpd48corelf-ll_harris_opt_2 lpd48corelb-ll_lazy_2 lpd48corelb-ll_gl_2 lpd48corelb-ll_optik_gl_2 lpd48corelb-ll_optik_2 lpd48corelb-ll_optik_cache_2 lpd48corelb-ll_lazy_cache_2 
+#cores  throughput   throughput   throughput   throughput   throughput   throughput   throughput   
+1       376227       506899       178292       509263       447185       874538       942486       
+2       514890       611458       278248       553042       561553       1040837      1130310      
+4       862621       1005405      338570       723424       911849       1642112      1814575      
+6       1208002      1397329      272927       819523       1273149      2229129      2478165      
+8       1556322      1769220      232702       886115       1614775      2761365      3055676      
+10      1886589      2114169      212105       940111       1951351      3261999      3620024      
+12      2212465      2446276      195804       973152       2277508      3745624      4129575      
+14      2513141      2789126      185568       1006058      2588077      
