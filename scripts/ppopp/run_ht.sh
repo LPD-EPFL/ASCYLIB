@@ -13,6 +13,9 @@ algos=( ${ub}/lb-ht_lazy_gl ${ub}/lb-ht_java ${ub}/lb-ht_java_optik ${ub}/lb-ht_
 params_i=( 512 8192 65536 512 65536 );
 params_u=( 40  40   40    40  40 );
 params_w=( 0   0   0      2   2 );
+params_i=( 8192 );
+params_u=( 40 );
+params_w=( 2 );
 
 load_factor=2;
 np=${#params_i[*]};
