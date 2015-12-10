@@ -10,12 +10,15 @@ algos=( ${ub}/lf-ll_harris_opt ${ub}/lb-ll_lazy ${ub}/lb-ll_gl ${ub}/lb-ll_optik
 
 # params_i=( 128 512 2048 4096 8192 );
 # params_u=( 100 50  20   10   1 );
-params_i=( 64 1024 8192 64  8192 );
-params_u=( 40 40   40   40  40 );
-params_w=( 0   0   0    2   2 );
+params_i=( 64 1024 8192 64 1024 8192 );
+params_u=( 40 40   40   40 40   40 );
+params_w=( 0   0   0    2  2    2);
 params_i=( 1024 );
 params_u=( 40 );
-params_w=( 2 );
+params_w=( 2);
+# params_i=( 64  8192 );
+# params_u=( 40  40 );
+# params_w=( 2   2 );
 np=${#params_i[*]};
 
 cores_backup=$cores;
@@ -81,6 +84,11 @@ do
     range=$((2*$initial));
 
     workload=${params_w[$i]};
+    if [ "${workload}0" = "0" ];
+    then
+	workload=0;
+    fi;
+
     algos_w=( "${algos[@]/%/_$workload}" )
     algos_str="${algos_w[@]}";
 

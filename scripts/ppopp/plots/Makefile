@@ -27,3 +27,4 @@ fixed:
 
 camera:
 	gnuplot gp/ll2.gp
+	gnuplot gp/ht2.gp
