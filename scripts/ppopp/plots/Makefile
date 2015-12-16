@@ -28,3 +28,6 @@ fixed:
 camera:
 	gnuplot gp/ll2.gp
 	gnuplot gp/ht2.gp
+	gnuplot gp/ht_small2.gp
+	gnuplot gp/sl2.gp
+	gnuplot gp/sl_small2.gp

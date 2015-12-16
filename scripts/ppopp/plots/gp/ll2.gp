@@ -14,6 +14,8 @@ set lmargin 3
 set tmargin 3
 set bmargin 2.5
 
+n_algo = 7
+
 title_offset   = -0.5
 top_row_y      = 0.44
 bottom_row_y   = 0.0
@@ -70,7 +72,7 @@ set origin 0.0 + graphs_x_offs, top_row_y
 set title @PLOT0 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
 set ytics 0.2
-plot for [i=1:7] @FILE0 using ($1):(column(i+1) / DIV) ls i with linespoints
+plot for [i=1:n_algo] @FILE0 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 
 set origin 0.5 + graphs_x_offs, top_row_y
@@ -80,8 +82,8 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 set title @PLOT1
-set ytics 1
-plot for [i=1:7] @FILE1 using ($1):(column(i+1) / DIV) ls i with linespoints
+set ytics 2
+plot for [i=1:n_algo] @FILE1 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 set origin 1.0 + graphs_x_offs, top_row_y
 @PSIZE
@@ -90,8 +92,8 @@ set ytics auto
 set ylabel ""
 unset ylabel
 set title @PLOT2
-# set ytics 1
-plot for [i=1:7] @FILE2 using ($1):(column(i+1) / DIV) ls i with linespoints
+set ytics 10
+plot for [i=1:n_algo] @FILE2 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 set origin 1.5 + graphs_x_offs, top_row_y
 @PSIZE
@@ -99,8 +101,8 @@ set title @PLOT3
 @YTICS
 set ylabel ""
 unset ylabel
-# set ytics 5
-plot for [i=1:7] @FILE3 using ($1):(column(i+1) / DIV) ls i with linespoints
+set ytics 0.2
+plot for [i=1:n_algo] @FILE3 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 set origin 2.0 + graphs_x_offs, top_row_y
 @PSIZE
@@ -109,7 +111,7 @@ set title @PLOT4
 set ylabel ""
 unset ylabel
 set ytics 8
-plot for [i=1:7] @FILE4 using ($1):(column(i+1) / DIV) ls i with linespoints
+plot for [i=1:n_algo] @FILE4 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 # ##########################################################################################
 # OPTERON ##################################################################################
@@ -132,8 +134,8 @@ set lmargin 3
 set origin 0.0 + graphs_x_offs, bottom_row_y
 # set title @PLOT0 offset 0.2,title_offset
 set ylabel 'Throughput (Mops/s)' offset 2,-0.5
-set ytics 0.5
-plot for [i=1:7] @FILE0 using ($1):(column(i+1) / DIV) ls i with linespoints
+set ytics 0.4
+plot for [i=1:n_algo] @FILE0 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 set origin 0.5 + graphs_x_offs, bottom_row_y
 @PSIZE
@@ -142,18 +144,17 @@ set lmargin 4
 set ylabel ""
 unset ylabel
 # set title @PLOT1
-set ytics 1
-plot for [i=1:7] @FILE1 using ($1):(column(i+1) / DIV) ls i with linespoints
+set ytics 2
+plot for [i=1:n_algo] @FILE1 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 set origin 1.0 + graphs_x_offs, bottom_row_y
 @PSIZE
-set ytics auto
 @YTICS
 set ylabel ""
 unset ylabel
 # set title @PLOT2
-set ytics 2
-plot for [i=1:7] @FILE2 using ($1):(column(i+1) / DIV) ls i with linespoints
+set ytics 3
+plot for [i=1:n_algo] @FILE2 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 set origin 1.5 + graphs_x_offs, bottom_row_y
 @PSIZE
@@ -161,8 +162,8 @@ set origin 1.5 + graphs_x_offs, bottom_row_y
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 3
-plot for [i=1:7] @FILE3 using ($1):(column(i+1) / DIV) ls i with linespoints
+set ytics 0.4
+plot for [i=1:n_algo] @FILE3 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 set origin 2.0 + graphs_x_offs, bottom_row_y
 @PSIZE
@@ -170,8 +171,8 @@ set origin 2.0 + graphs_x_offs, bottom_row_y
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 2
-plot for [i=1:7] @FILE4 using ($1):(column(i+1) / DIV) ls i with linespoints
+set ytics 3
+plot for [i=1:n_algo] @FILE4 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 unset origin
 unset border

@@ -6,7 +6,7 @@ PSIZE = "set size 0.5, 0.6"
 
 set key horiz maxrows 1
 
-set output "eps/ht_thr2.eps"
+set output "eps/ht_small2.eps"
 
 set terminal postscript color "Helvetica" 24 eps enhanced
 set rmargin 0
@@ -17,11 +17,12 @@ set bmargin 2.5
 n_algo = 6
 
 title_offset   = -0.5
+ytics_offset   = 0.65
 top_row_y      = 0.44
 bottom_row_y   = 0.0
 graphs_x_offs  = 0.1
-plot_size_x    = 2.615
-plot_size_y    = 1.11
+plot_size_x    = 1.15
+plot_size_y    = 1.17
 
 DIV              =    1e6
 FIRST            =    2
@@ -50,7 +51,6 @@ set label 2 "Xeon"    at screen 0.018, screen 0.66 rotate by 90 font ',30' textc
 # XEON #####################################################################################
 # ##########################################################################################
 
-
 FILE0 = '"data/lpdxeon2680.ht.i65536.u40.w0.dat"'
 FILE1 = '"data/lpdxeon2680.ht.i8192.u40.w0.dat"'
 FILE2 = '"data/lpdxeon2680.ht.i512.u40.w0.dat"'
@@ -68,48 +68,20 @@ set multiplot layout 5, 2
 
 set size 0.5, 0.6
 set origin 0.0 + graphs_x_offs, top_row_y
-set title @PLOT0 offset 0.2,title_offset font ",28"
+set title @PLOT1 offset 0.2,title_offset font ",28"
 set ylabel 'Throughput (Mops/s)' offset 2,0.5
-plot for [i=1:n_algo] @FILE0 using ($1):(column(i+1) / DIV) ls i with linespoints
-
-
-set origin 0.5 + graphs_x_offs, top_row_y
-@PSIZE
-set lmargin 4
-@YTICS
-set ylabel ""
-unset ylabel
-set title @PLOT1
-# set ytics 1
+set ytics 150 offset ytics_offset
 plot for [i=1:n_algo] @FILE1 using ($1):(column(i+1) / DIV) ls i with linespoints
- 
-set origin 1.0 + graphs_x_offs, top_row_y
-@PSIZE
-set ytics auto
-@YTICS
-set ylabel ""
-unset ylabel
-set title @PLOT2
-# set ytics 1
-plot for [i=1:n_algo] @FILE2 using ($1):(column(i+1) / DIV) ls i with linespoints
 
-set origin 1.5 + graphs_x_offs, top_row_y
-@PSIZE
-set title @PLOT3
-@YTICS
-set ylabel ""
-unset ylabel
-# set ytics 5
-plot for [i=1:n_algo] @FILE3 using ($1):(column(i+1) / DIV) ls i with linespoints
-
-set origin 2.0 + graphs_x_offs, top_row_y
+set origin 0.53 + graphs_x_offs, top_row_y
 @PSIZE
 set title @PLOT4
 @YTICS
 set ylabel ""
 unset ylabel
-set ytics 8
+set ytics 50
 plot for [i=1:n_algo] @FILE4 using ($1):(column(i+1) / DIV) ls i with linespoints
+
 
 # ##########################################################################################
 # OPTERON ##################################################################################
@@ -130,47 +102,16 @@ unset title
 set lmargin 3
 @PSIZE
 set origin 0.0 + graphs_x_offs, bottom_row_y
-# set title @PLOT0 offset 0.2,title_offset
 set ylabel 'Throughput (Mops/s)' offset 2,-0.5
-# set ytics 0.5
-plot for [i=1:n_algo] @FILE0 using ($1):(column(i+1) / DIV) ls i with linespoints
-
-set origin 0.5 + graphs_x_offs, bottom_row_y
-@PSIZE
-set lmargin 4
-@YTICS
-set ylabel ""
-unset ylabel
-# set title @PLOT1
-# set ytics 1
+set ytics 40
 plot for [i=1:n_algo] @FILE1 using ($1):(column(i+1) / DIV) ls i with linespoints
 
-set origin 1.0 + graphs_x_offs, bottom_row_y
+set origin 0.53 + graphs_x_offs, bottom_row_y
 @PSIZE
-set ytics auto
 @YTICS
 set ylabel ""
 unset ylabel
-# set title @PLOT2
-# set ytics 2
-plot for [i=1:n_algo] @FILE2 using ($1):(column(i+1) / DIV) ls i with linespoints
-
-set origin 1.5 + graphs_x_offs, bottom_row_y
-@PSIZE
-# set title @PLOT3
-@YTICS
-set ylabel ""
-unset ylabel
-# set ytics 3
-plot for [i=1:n_algo] @FILE3 using ($1):(column(i+1) / DIV) ls i with linespoints
-
-set origin 2.0 + graphs_x_offs, bottom_row_y
-@PSIZE
-# set title @PLOT4
-@YTICS
-set ylabel ""
-unset ylabel
-# set ytics 2
+set ytics 15
 plot for [i=1:n_algo] @FILE4 using ($1):(column(i+1) / DIV) ls i with linespoints
 
 unset origin
@@ -193,7 +134,9 @@ set origin 0.0, 1.1
 set key font ",28"
 set key spacing 1.5
 set key horiz
-set key at screen 1.3, screen 1.108 center top
+# set key width -2
+# set key samplen 2.5
+set key at screen 0.54, screen 1.178 center top
 
 #We need to set an explicit xrange.  Anything will work really.
 set xrange [-1:1]
