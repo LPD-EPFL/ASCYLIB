@@ -65,5 +65,6 @@ int ht_move(ht_intset_t *set, int val1, int val2);
  * TODO: make a coarse-grain version of the snapshot.
  */
 int ht_snapshot(ht_intset_t *set);
+void ht_print(ht_intset_t *set);
 
 #define IO_FLUSH fflush(stdout)

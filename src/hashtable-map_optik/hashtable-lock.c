@@ -251,3 +251,13 @@ int ht_snapshot(ht_intset_t *set) {
 	
 	return 1;
 }
+
+void
+ht_print(ht_intset_t* set)
+{
+  int i;
+  for (i=0; i < maxhtlength; i++) 
+    {
+      map_print_l(set->buckets + i);
+    }
+}

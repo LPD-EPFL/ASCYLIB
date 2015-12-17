@@ -51,6 +51,18 @@ int map_size_l(map_t *map)
   return size;
 }
 
+void
+map_print_l(map_t* map)
+{
+  printf("[%-10zu]: ", map->lock);
+  int i;
+  for (i = 0; i < map->size; i++)
+    {
+      printf("%-5zu ", map->array[i].key);
+    }
+  printf("\n");
+}
 
 
-	
+
+      
