@@ -146,7 +146,7 @@ extern size_t __optik_trylock_calls_suc_tot;
 #define OPTIK_RLS_ATOMIC   0
 #define OPTIK_RLS_STORE    1
 #define OPTIK_RLS_BARRIER  2
-#define OPTIK_RLS_TYPE     OPTIK_RLS_STORE
+#define OPTIK_RLS_TYPE     OPTIK_RLS_ATOMIC
 
 #define OPTIK_PAUSE() asm volatile ("mfence");
 
@@ -729,6 +729,13 @@ optik_lock(optik_t* ol)
   while (1);
   return 1;
 }
+
+static inline int
+optik_is_same_version(optik_t v1, optik_t v2)
+{
+  return v1.version == v2.version;
+}
+
 
 static inline int
 optik_trylock_version(optik_t* ol, optik_t ol_old)
