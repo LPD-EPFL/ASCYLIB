@@ -2,9 +2,18 @@
 
 ds=ll;
 
-. ./scripts/ppopp/run.config
+file=$1;
 
 skip=$#;
+
+if [ -f "$file" ];
+then
+    echo "//Using config file $file";
+    . $file;
+    skip=0;
+else
+. ./scripts/ppopp/run.config;
+fi;
 
 algos=( ${ub}/lf-ll_harris_opt ${ub}/lb-ll_lazy ${ub}/lb-ll_gl ${ub}/lb-ll_optik_gl ${ub}/lb-ll_optik ${ub}/lb-ll_optik_cache ${ub}/lb-ll_lazy_cache );
 
@@ -13,12 +22,7 @@ algos=( ${ub}/lf-ll_harris_opt ${ub}/lb-ll_lazy ${ub}/lb-ll_gl ${ub}/lb-ll_optik
 params_i=( 64 1024 8192 64 1024 8192 );
 params_u=( 40 40   40   40 40   40 );
 params_w=( 0   0   0    2  2    2);
-params_i=( 1024 );
-params_u=( 40 );
-params_w=( 2);
-# params_i=( 64  8192 );
-# params_u=( 40  40 );
-# params_w=( 2   2 );
+
 np=${#params_i[*]};
 
 cores_backup=$cores;
