@@ -153,7 +153,7 @@ unlock_levels_up(sl_node_t** nodes, int low, int high)
 }
 
 
-#define PAUSE_AND_RETRY() DO_PAUSE(); goto restart;
+#define PAUSE_AND_RETRY() OPTIK_PAUSE(); goto restart;
 
 int
 sl_optik_insert(sl_intset_t* set, skey_t key, sval_t val)
