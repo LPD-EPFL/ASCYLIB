@@ -127,7 +127,7 @@ rand_range_re(unsigned int *seed, long r)
 // modified from http://www.csee.usf.edu/~christen/tools/genzipf.c
 
 /* ZIPF related settings */
-#define ZIPF_ALPHA             0.99
+#define ZIPF_ALPHA             0.9
 #define ZIPF_ARR_SIZE_MUL      16 /* pre-allocate an array with skewed vals
 				  of size (rand_rage)*ZIPF_ARR_SIZE_MUL */
 #define ZIPF_ARR_SIZE_MUL_MIN  3
@@ -236,7 +236,6 @@ zipf_get_rand_array(double zipf_alpha,
 	  multi = ZIPF_ARR_SIZE_MUL_MIN;
 	}
       num_vals = multi * max;
-      printf("num vals %zu\n", num_vals);
     }
 
 
