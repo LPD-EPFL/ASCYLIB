@@ -146,7 +146,7 @@ lbqu_ms_hybrid:
 lfqu_ms:
 	$(MAKE) src/queue-ms_lf
 
-lfqu_k:
+lbqu_k:
 	$(MAKE) src/queue-k
 
 lbqu_optik0:
