@@ -212,12 +212,38 @@
       END_TS_ELSE(5, my_removing_count - my_removing_count_succ,	\
 		  my_removing_fail);					\
       my_removing_count++;						\
-    }									\
-  cpause((num_threads-1)*32);
+    }								       
 
-/* cdelay(1); */
-/* cpause(0); */
-/* cdelay((num_threads-1)*128); */
+#  define TEST_LOOP_ONLY_UPDATES_TURNS()				\
+  c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	\
+  key = (c & rand_max) + rand_min;					\
+  int res;								\
+  START_TS(1);								\
+  res = DS_ADD(set, key, key);						\
+  if(res)								\
+    {									\
+      END_TS(1, my_putting_count_succ);					\
+      ADD_DUR(my_putting_succ);						\
+      my_putting_count_succ++;						\
+    }									\
+  END_TS_ELSE(4, my_putting_count - my_putting_count_succ,		\
+	      my_putting_fail);						\
+  my_putting_count++;							\
+  c = (uint32_t)(my_random(&(seeds[0]),&(seeds[1]),&(seeds[2])));	\
+  key = (c & rand_max) + rand_min;					\
+  int removed;								\
+  START_TS(2);								\
+  removed = DS_REMOVE(set);						\
+  if(removed != 0)							\
+    {									\
+      END_TS(2, my_removing_count_succ);				\
+      ADD_DUR(my_removing_succ);					\
+      my_removing_count_succ++;						\
+    }									\
+  END_TS_ELSE(5, my_removing_count - my_removing_count_succ,		\
+	      my_removing_fail);					\
+  my_removing_count++;							\
+
 
 
 #elif WORKLOAD == 2	/* zipf workload */

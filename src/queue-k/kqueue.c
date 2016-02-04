@@ -1,8 +1,8 @@
 /*   
- *   File: ms.c
+ *   File: kqueue.c
  *   Author: Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>
  *   Description:  
- *   ms.c is part of ASCYLIB
+ *   kqueue.c is part of ASCYLIB
  *
  * Copyright (c) 2014 Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
  * 	     	      Tudor David <tudor.david@epfl.ch>
@@ -40,25 +40,53 @@ pqueue_get_low_local(pqueue_t* pq)
   return pq->queues + __pq_thread_id;
 }
 
+static inline queue_low_t*
+pqueue_get_low_n(pqueue_t* pq, const int n)
+{
+  return pq->queues + n;
+}
+
+
 sval_t
 pqueue_optik_find(pqueue_t* qu, skey_t key)
 { 
   return 1;
 }
 
+#define PQUEUE_K 4
+
 int
 pqueue_optik_insert(pqueue_t* qu, skey_t key, sval_t val)
 {
   queue_low_t* ql = pqueue_get_low_local(qu);
-  int ret = queue_low_push(ql, key, val);
-  return ret;
+  queue_low_push(ql, key, val);
+  return 1;
 }
 
 
 sval_t
 pqueue_optik_delete(pqueue_t* qu)
 {
-  queue_low_t* ql = pqueue_get_low_local(qu);
-  sval_t ret = queue_low_pop(ql, 1);
+  queue_low_t* qls[PQUEUE_K];
+  qls[0] = pqueue_get_low_local(qu);
+  skey_t key_min = queue_low_get_min(qls[0]);
+  int key_min_i = 0;
+
+  int k;
+  for (k = 1; k < PQUEUE_K && k < qu->size; k++)
+    {
+      int qi = mrand(seeds) % qu->size;
+      qls[k] = qu->queues + qi;
+      skey_t key = queue_low_get_min(qls[k]);
+      if (key < key_min)
+  	{
+  	  key_min = key;
+  	  key_min_i = k;
+  	}
+    }
+
+  sval_t ret = queue_low_pop(qls[key_min_i]);
+  /* queue_low_t* ql = pqueue_get_low_n(qu, 0); //pqueue_get_low_local(qu); */
+  /* sval_t ret = queue_low_pop(ql); */
   return ret;
 }

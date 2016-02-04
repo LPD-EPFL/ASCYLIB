@@ -74,6 +74,7 @@ size_t update = 100;
 size_t load_factor;
 size_t num_threads = DEFAULT_NB_THREADS; 
 size_t duration = DEFAULT_DURATION;
+size_t test_turns = 0;
 
 size_t print_vals_num = 100; 
 size_t pf_vals_num = 1023;
@@ -208,9 +209,19 @@ test(void* thread)
 
   RR_START_SIMPLE();
 
-  while (stop == 0) 
+  if (test_turns == 0)
     {
-      TEST_LOOP_ONLY_UPDATES();
+      while (stop == 0) 
+	{
+	  TEST_LOOP_ONLY_UPDATES();
+	}
+    }
+  else
+    {
+      while (stop == 0)
+	{
+	  TEST_LOOP_ONLY_UPDATES_TURNS();
+	}
     }
 
   barrier_cross(&barrier);
@@ -274,6 +285,7 @@ main(int argc, char **argv)
     {"num-buckets",               required_argument, NULL, 'b'},
     {"print-vals",                required_argument, NULL, 'v'},
     {"vals-pf",                   required_argument, NULL, 'f'},
+    {"turns",                     no_argument,       NULL, 't'},
     {NULL, 0, NULL, 0}
   };
 
@@ -281,7 +293,7 @@ main(int argc, char **argv)
   while(1) 
     {
       i = 0;
-      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:", long_options, &i);
+      c = getopt_long(argc, argv, "hAf:d:i:n:r:s:u:m:a:l:p:b:v:f:t", long_options, &i);
 		
       if(c == -1)
 	break;
@@ -352,6 +364,9 @@ main(int argc, char **argv)
 	case 'f':
 	  pf_vals_num = pow2roundup(atoi(optarg)) - 1;
 	  break;
+	case 't':
+	  test_turns = 1;
+	  break;
 	case '?':
 	default:
 	  printf("Use -h or --help for help\n");
@@ -366,6 +381,8 @@ main(int argc, char **argv)
       printf("** rounding up initial (to make it power of 2): old: %zu / new: %zu\n", initial, initial_pow2);
       initial = initial_pow2;
     }
+
+  initial *= num_threads;
 
   if (range < initial)
     {

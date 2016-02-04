@@ -129,14 +129,9 @@ queue_low_push(queue_low_t *ql, skey_t key, sval_t val)
 
       curr = curr->next;
     }
-  while (likely(curr->key < key));
+  while (likely(curr->key <= key));
 
   UPDATE_TRY();
-
-  if (curr->key == key)
-    {
-      return false;
-    }
 
   queue_node_t* newnode = queue_node_new(key, val, curr);
 
@@ -146,9 +141,6 @@ queue_low_push(queue_low_t *ql, skey_t key, sval_t val)
       goto restart;
     }
 
-#ifdef __tile__
-  MEM_BARRIER;
-#endif
   pred->next = newnode;
   optik_unlock(&pred->lock);
 
@@ -156,31 +148,21 @@ queue_low_push(queue_low_t *ql, skey_t key, sval_t val)
 }
 
 sval_t
-queue_low_pop(queue_low_t *ql, skey_t key)
+queue_low_pop(queue_low_t *ql)
 {
-  optik_t pred_ver = OPTIK_INIT, curr_ver = OPTIK_INIT;
  restart:
   PARSE_TRY();
 
-  queue_node_t* curr = ql->head, *pred;
-  curr_ver = curr->lock;
-
-  do
+  queue_node_t* pred = ql->head;
+  COMPILER_NO_REORDER(optik_t pred_ver = pred->lock;);
+  queue_node_t* curr = pred->next;
+  if (unlikely(curr == NULL || curr->key == KEY_MAX))
     {
-      pred = curr;
-      pred_ver = curr_ver;
-
-      curr = curr->next;
-      curr_ver = curr->lock;
+      return 0;
     }
-  while (likely(curr->key < key));
+  COMPILER_NO_REORDER(optik_t curr_ver = curr->lock;);
 
   UPDATE_TRY();
-
-  if (curr->key != key)
-    {
-      return false;
-    }
 
   queue_node_t* cnxt = curr->next;
 
@@ -201,4 +183,17 @@ queue_low_pop(queue_low_t *ql, skey_t key)
   sval_t result = curr->val;
   queue_node_delete(curr);
   return result;
+}
+
+
+inline sval_t
+queue_low_get_min(queue_low_t *ql)
+{
+  queue_node_t* pred = ql->head;
+  queue_node_t* curr = pred->next;
+  if (unlikely(curr == NULL || curr->key == KEY_MAX))
+    {
+      return KEY_MAX;
+    }
+  return curr->key;
 }

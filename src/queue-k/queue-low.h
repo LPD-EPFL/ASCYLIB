@@ -43,6 +43,7 @@ queue_node_t* queue_node_new(skey_t key, sval_t val, queue_node_t* next);
 void queue_low_init(queue_low_t* ql);
 int queue_low_size(queue_low_t* ql);
 int queue_low_push(queue_low_t *ql, skey_t key, sval_t val);
-sval_t queue_low_pop(queue_low_t *ql, skey_t key);
+sval_t queue_low_pop(queue_low_t *ql);
+sval_t queue_low_get_min(queue_low_t *ql);
 
 #endif	/* _H_QUEUE_LOW */
