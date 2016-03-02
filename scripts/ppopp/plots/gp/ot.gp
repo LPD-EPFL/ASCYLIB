@@ -30,7 +30,7 @@ FIRST            =    2
 OFFSET           =    4
 column_select(i) = column(FIRST + (i*OFFSET)) / (DIV);
 
-LINE0 = '"TTAS"'
+LINE0 = '"ttas"'
 LINE1 = '"optik-ticket"'
 LINE2 = '"optik-versioned"'
 

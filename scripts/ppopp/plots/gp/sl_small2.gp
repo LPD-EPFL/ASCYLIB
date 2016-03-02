@@ -34,11 +34,11 @@ LINE2 = '"herl-optik"'
 LINE3 = '"optik1"'
 LINE4 = '"optik2"'
 
-NCOL0 = 0
-NCOL0lf = 0
-NCOL1 = 3
-NCOL2 = 1
-NCOL3 = 2
+# LINE0 = '"fraser"'
+# LINE1 = '"herlihy"'
+# LINE2 = '"optik2"'
+# LINE3 = '"optik1"'
+# LINE4 = '"herl-optik"'
 
 PLOT0 = '"Large\n{/*0.8(65536 elements, 20% updates)}"'
 PLOT1 = '"Medium\n{/*0.8(16384 elements, 20% updates)}"'
