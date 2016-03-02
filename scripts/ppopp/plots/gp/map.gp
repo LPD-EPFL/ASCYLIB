@@ -35,8 +35,8 @@ ncols="0 1 2 3 4 6"
 ncol(i)=word(ncols, i+1);
 
 
-PLOT0 = '"Small map\n{/*0.8(4 elements, 20% updates)} "'
-PLOT1 = '"Large map\n{/*0.8(1024 elements, 20% updates)} "'
+PLOT0 = '"Small map\n{/*0.8(4 elements, 10% updates)} "'
+PLOT1 = '"Large map\n{/*0.8(1024 elements, 10% updates)} "'
 PLOT3 = '"{/*0.8(on 10 threads)}"'
 PLOT4 = '"{/*0.8(on 10 threads)}"'
 

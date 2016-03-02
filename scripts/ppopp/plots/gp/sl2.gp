@@ -34,6 +34,12 @@ LINE2 = '"herlihy-optik"'
 LINE3 = '"optik1"'
 LINE4 = '"optik2"'
 
+# LINE0 = '"fraser"'
+# LINE1 = '"herlihy"'
+# LINE2 = '"optik2"'
+# LINE3 = '"optik1"'
+# LINE4 = '"herlihy-optik"'
+
 PLOT0 = '"Large\n{/*0.8(65536 elements, 20% updates)}"'
 PLOT1 = '"Medium\n{/*0.8(16384 elements, 20% updates)}"'
 PLOT2 = '"Small\n{/*0.8(1024 elements, 20% updates)}"'

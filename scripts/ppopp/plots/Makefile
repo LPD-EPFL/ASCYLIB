@@ -26,6 +26,7 @@ fixed:
 	gnuplot gp/st_fixed.gp	
 
 camera:
+	gnuplot gp/map.gp	
 	gnuplot gp/ll2.gp
 	gnuplot gp/ht2.gp
 	gnuplot gp/ht_small2.gp
