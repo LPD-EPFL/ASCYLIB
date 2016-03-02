@@ -25,7 +25,9 @@
 #define _H_RANDOM_
 
 #include <malloc.h>
+#include <stdio.h>
 #include "measurements.h"
+#include "atomic_ops_if.h"
 #include "ssalloc.h"
 
 #define LOCAL_RAND
@@ -125,9 +127,10 @@ rand_range_re(unsigned int *seed, long r)
 // modified from http://www.csee.usf.edu/~christen/tools/genzipf.c
 
 /* ZIPF related settings */
-#define ZIPF_ALPHA             0.99
-#define ZIPF_ARR_SIZE          8 /* pre-allocate an array with skewed vals
-				  of size (rand_rage)*ZIPF_ARR_SIZE */
+#define ZIPF_ALPHA             0.9
+#define ZIPF_ARR_SIZE_MUL      16 /* pre-allocate an array with skewed vals
+				  of size (rand_rage)*ZIPF_ARR_SIZE_MUL */
+#define ZIPF_ARR_SIZE_MUL_MIN  3
 #define ZIPF_STATS             0
 
 
@@ -215,23 +218,71 @@ zipf(double alpha, const int max)
   return (zipf_value - 1);
 }
 
+/* Create and return an array of num_vals zipf random values.
+   @param num_vals: if num_vals == 0: automatically infers the num_vals to allocate
+ */
 static inline struct zipf_arr*
-zipf_get_rand_array(double zipf_alpha, const size_t num_vals, const int max)
+zipf_get_rand_array(double zipf_alpha,
+		    size_t num_vals,
+		    const int max,
+		    const int id)
 {
+  if (num_vals == 0)
+    {
+      int log2 = log2f((double) max);
+      int multi = ZIPF_ARR_SIZE_MUL - log2;
+      if (multi < ZIPF_ARR_SIZE_MUL_MIN)
+	{
+	  multi = ZIPF_ARR_SIZE_MUL_MIN;
+	}
+      num_vals = multi * max;
+    }
+
+
   struct zipf_arr* za = malloc(sizeof(struct zipf_arr) + num_vals * sizeof(int));
   assert(za != NULL);
   za->size = num_vals;
   za->max = max;
   za->i = 0;
-  int i;
-  for (i = 0; i < num_vals; i++)
+  
+  char fname[128];
+  sprintf(fname, "data/zipf_rand_%d_%zu_%d.dat", id, num_vals, max);
+  //  printf("--- %s\n", fname);
+  FILE* rand_file = fopen(fname, "r");
+  if (rand_file == NULL)
     {
-      za->vals[i] = zipf(zipf_alpha, max);
+      printf("--- [%-2d] Creating rand file with %zu vals\n", id, num_vals);
+      rand_file = fopen(fname, "w+");
+      int file_ok = (rand_file != NULL);
+      int i;
+      for (i = 0; i < num_vals; i++)
+	{
+	  za->vals[i] = zipf(zipf_alpha, max);
+	  if (file_ok)
+	    {
+	      fprintf(rand_file, "%d\n", za->vals[i]);
+	    }
+	}
+    }
+  else
+    {
+      int i;
+      for (i = 0; i < num_vals; i++)
+	{
+	  int val;
+	  __attribute__((unused)) int ret = fscanf(rand_file, "%d", &val);
+	  za->vals[i] = val;
+	}      
+    }
+
+  if (rand_file != NULL)
+    {
+      fclose(rand_file);
     }
 
 #if ZIPF_STATS == 1
-		za->stats = calloc(max, sizeof(int));
-		assert(za->stats != NULL);
+  za->stats = calloc(max, sizeof(int));
+  assert(za->stats != NULL);
 #endif
 
   return za;

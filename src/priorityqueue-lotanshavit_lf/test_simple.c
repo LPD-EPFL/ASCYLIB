@@ -134,7 +134,7 @@ test(void* thread)
 
   DS_TYPE* set = td->set;
 
-  THREAD_INIT();
+  THREAD_INIT(ID);
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
 
 #if defined(COMPUTE_LATENCY)

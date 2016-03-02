@@ -24,3 +24,10 @@ fixed:
 	gnuplot gp/sl_fixed_all.gp	
 	gnuplot gp/qu_fixed.gp	
 	gnuplot gp/st_fixed.gp	
+
+camera:
+	gnuplot gp/ll2.gp
+	gnuplot gp/ht2.gp
+	gnuplot gp/ht_small2.gp
+	gnuplot gp/sl2.gp
+	gnuplot gp/sl_small2.gp

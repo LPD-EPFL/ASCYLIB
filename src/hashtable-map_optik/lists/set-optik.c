@@ -32,7 +32,8 @@ sval_t
 optik_map_contains(map_t* map, skey_t key)
 {
  restart:
-  COMPILER_NO_REORDER(optik_t version = map->lock;);
+  //  optik_t version = map->lock;);
+  COMPILER_NO_REORDER(optik_t version = optik_get_version_wait(&map->lock));
   int i;
   for (i = 0; i < map->size; i++)
     {
@@ -43,6 +44,7 @@ optik_map_contains(map_t* map, skey_t key)
 	    {
 	      return val;
 	    }
+	  do_pause();
 	  goto restart;
 	}
     }
@@ -55,7 +57,8 @@ optik_map_insert(map_t* map, skey_t key, sval_t val)
 {
   optik_t version;
  restart:
-  COMPILER_NO_REORDER(version = map->lock;);
+  COMPILER_NO_REORDER(version = optik_get_version_wait(&map->lock));
+  /* COMPILER_NO_REORDER(version = map->lock;); */
   int free_idx = -1;
   int i;
   for (i = 0; i < map->size; i++)
@@ -92,7 +95,8 @@ optik_map_remove(map_t* map, skey_t key)
 {
   optik_t version;
  restart:
-  COMPILER_NO_REORDER(version = map->lock;);  
+  COMPILER_NO_REORDER(version = optik_get_version_wait(&map->lock));
+  /* COMPILER_NO_REORDER(version = map->lock;);   */
   int i;
   for (i = 0; i < map->size; i++)
     {

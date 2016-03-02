@@ -15,7 +15,7 @@ then
     echo ">> without ${grep_out[@]}";
 fi;
 echo ">> Comparing columns $c0 vs. $c1";
-files=$(ls *.${ds}.* | grep -v ldi);
+files=$(ls *.${ds}.*w* | grep -v ldi);
 for g in ${grep_out[@]};
 do
     files=$(echo "$files" | grep -v $g);

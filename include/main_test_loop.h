@@ -32,14 +32,15 @@
 #endif
 
 #if WORKLOAD == 2 //skewed workload
-#  define THREAD_INIT()							\
+#  define THREAD_INIT(id)						\
   if (!ID) { printf("- Creating zipf random numbers array\n"); }	\
-  __zipf_arr = zipf_get_rand_array(ZIPF_ALPHA, ZIPF_ARR_SIZE * (rand_max + 1), rand_max + 1); \
+  __zipf_arr = zipf_get_rand_array(ZIPF_ALPHA, 0, rand_max + 1, id); \
+  barrier_cross(&barrier);						\
   if (!ID) { printf("- Done\n"); }
 
-#  define THREAD_END()						\
+#  define THREAD_END(id)					\
   ZIPF_STATS_DO(						\
-		if (ID == 0)					\
+		if (id == 0)					\
 		  {						\
 		    zipf_print_stats(__zipf_arr);		\
 		  }						\
@@ -48,7 +49,7 @@
   free(__zipf_arr);
 
 #else
-#  define THREAD_INIT()
+#  define THREAD_INIT(id)
 #  define THREAD_END()
 #endif
 

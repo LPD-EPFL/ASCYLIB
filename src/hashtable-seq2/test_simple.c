@@ -137,7 +137,7 @@ test(void* thread)
   assert(set != NULL);
 
 
-  THREAD_INIT();
+  THREAD_INIT(ID);
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
 
 #if defined(COMPUTE_LATENCY)

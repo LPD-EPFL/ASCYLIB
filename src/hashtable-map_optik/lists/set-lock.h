@@ -55,18 +55,19 @@ extern __thread ssmem_allocator_t* alloc;
 typedef struct
 {
   skey_t key;
-  skey_t val;
+  sval_t val;
 } key_val_t;
 
 typedef struct
 {
   size_t size;
   optik_t lock;
-  key_val_t array[7];
+  key_val_t array[3];
 } map_t;
 
 void map_init_l(map_t* map, size_t size);
 void map_delete_l(map_t* map);
 int map_size_l(map_t* map);
+void map_print_l(map_t* map);
 
 #endif	/* _H_MAP_LOCK_ */

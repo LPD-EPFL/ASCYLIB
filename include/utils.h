@@ -808,7 +808,7 @@ static __attribute__ ((unused)) double eng_per_test_iter_nj[40][5] =
 #define NUM_RETRIES()        
 #elif DO_PAUSE_TYPE == 1
 #define DO_PAUSE()            do_pause_exp(__nr++);
-#define NUM_RETRIES()         size_t __nr;
+#define NUM_RETRIES()         UNUSED size_t __nr;
 #else
 
 #endif
