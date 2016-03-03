@@ -7,7 +7,7 @@ PSIZE_LARGE = "set size 0.9, 0.6"
 
 set key horiz maxrows 1
 
-set output "eps/fig12_st.eps"
+set output "eps/fig13_st.eps"
 
 set terminal postscript color "Helvetica" 24 eps enhanced
 set rmargin 0
@@ -15,7 +15,7 @@ set lmargin 3
 set tmargin 3
 set bmargin 2.5
 
-xrange_start   = 3
+xrange_start   = 1
 title_offset   = -0.5
 top_row_y      = 0.0
 bottom_row_y   = 0.0
@@ -54,7 +54,7 @@ FILE1 = '"data/data.st.thr.p50.dat"'
 FILE2 = '"data/data.st.thr.p60.dat"'
 
 unset xlabel
-set xrange [3:*]
+set xrange [xrange_start:*]
 set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xtics offset 0,0.4
 unset key

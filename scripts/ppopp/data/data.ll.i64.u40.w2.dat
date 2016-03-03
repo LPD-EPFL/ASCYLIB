@@ -1,0 +1,8 @@
+### params -i64 -r128 -u40 / keep median of reps 1 of dur 1000
+# Result from 1 repetitions: median
+#       trigonak-laptoplf-ll_harris_opt_2 trigonak-laptoplb-ll_lazy_2 trigonak-laptoplb-ll_gl_2 trigonak-laptoplb-ll_optik_gl_2 trigonak-laptoplb-ll_optik_2 trigonak-laptoplb-ll_optik_cache_2 trigonak-laptoplb-ll_lazy_cache_2 
+#cores  throughput   throughput   throughput   throughput   throughput   throughput   throughput   
+1       4217219      5652193      4797937      5390449      5002421      8306872      7950891      
+2       6356647      7011059      6126421      4722210      7087451      10300305     11776815     
+4       7003434      7968528      2280807      4982906      7861345      8771753      11655346     
+6       5622286      4523647      56533        3773426      5777003      6860575      5781241      

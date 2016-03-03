@@ -1,0 +1,8 @@
+### params -i512 -r1024 -u40 / keep median of reps 1 of dur 1000
+# Result from 1 repetitions: median
+#       trigonak-laptoplb-ht_lazy_gl_2 trigonak-laptoplb-ht_java_2 trigonak-laptoplb-ht_java_optik_2 trigonak-laptoplb-ht_optik0_2 trigonak-laptoplb-ht_optik1_2 trigonak-laptoplb-ht_map_2 
+#cores  throughput   throughput   throughput   throughput   throughput   throughput   
+1       15742078     17824362     20551418     16746018     17575672     20232430     
+2       24258926     26814429     31481760     24099356     25227063     28952673     
+4       31271162     29070069     25689607     28256192     28775544     28239888     
+6       20746792     24743395     17825102     19098118     22194368     28866570     

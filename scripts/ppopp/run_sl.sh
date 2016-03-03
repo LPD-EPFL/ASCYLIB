@@ -90,7 +90,7 @@ do
     then
 	out="$unm.${ds}.i$initial.u$update.w$workload.dat"
     else
-	out="data.${ds}.i$initial.u$update.dat"
+	out="data.${ds}.i$initial.u$update.w$workload.dat"
     fi;
 
     echo "### params -i$initial -r$range -u$update / keep $keep of reps $repetitions of dur $duration" | tee ${uo}/$out;

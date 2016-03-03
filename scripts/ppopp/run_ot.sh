@@ -3,9 +3,18 @@
 ds=ot;
 to_move=optik_test;
 
-. ./scripts/ppopp/run.config
+file=$1;
 
 skip=$#;
+
+if [ -f "$file" ];
+then
+    echo "//Using config file $file";
+    . $file;
+    skip=0;
+else
+. ./scripts/ppopp/run.config;
+fi;
 
 algos=( ${ub}/optik_test2 ${ub}/optik_test0 ${ub}/optik_test1 );
 

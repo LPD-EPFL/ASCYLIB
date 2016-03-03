@@ -7,7 +7,7 @@ PSIZE_LARGE = "set size 0.9, 0.6"
 
 set key horiz maxrows 1
 
-set output "eps/fig11_qu.eps"
+set output "eps/fig12_qu.eps"
 
 set terminal postscript color "Helvetica" 24 eps enhanced
 set rmargin 0
@@ -15,7 +15,7 @@ set lmargin 3
 set tmargin 3
 set bmargin 2.5
 
-xrange_start   = 3
+xrange_start   = 1
 title_offset   = -0.5
 top_row_y      = 0.0
 bottom_row_y   = 0.0
@@ -56,7 +56,7 @@ FILE1 = '"data/data.qu.thr.p50.dat"'
 FILE2 = '"data/data.qu.thr.p60.dat"'
 
 unset xlabel
-set xrange [3:*]
+set xrange [*:*]
 set xlabel "# Threads" offset 0, 0.75 font ",28"
 set xtics offset 0,0.4
 unset key
@@ -130,7 +130,7 @@ set style boxplot nooutliers
 
 set boxwidth 0.3
 set pointsize 0.5
-set xrange [*:*]
+set xrange [xrange_start:*]
 set xtics auto
 at(x)=x;
 cs(x)=column(x);
