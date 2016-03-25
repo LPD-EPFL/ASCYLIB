@@ -275,8 +275,10 @@ else
 
 		ifeq ($(GC),0)
 			CFLAGS += -DGC=0
-		else
+		else ifeq ($(GC),1)
 			CFLAGS += -DGC=1
+		else	
+			CFLAGS += -DGC=2
 		endif
 	endif
 
