@@ -37,7 +37,8 @@
 #include <inttypes.h>
 #include <string.h>
 
-#if GC == 1			/* don't even allocate ssalloc if we have ssmem */
+#if GC >= 1			/* don't even allocate ssalloc if we have ssmem 
+				 or if GC==2 */
 #  define SSALLOC_USE_MALLOC
 #endif
 

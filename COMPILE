@@ -9,6 +9,7 @@ You may pass the following settings to `make`:
              1 : compile with versioned-lock-based OPTIK
 	     2 : compile with non-atomic TTAS+version OPTIK (version is accessed in critical section)
     * GC=0 or GC=1 : disable/enable GC (default is 1)
+    *         GC=2 : disable GC and use malloc
     * WORKLOAD= 0 : normal uniform workload
       		1 : workload with phases where everyone is doing insertions
 		2 : skewed workload with zipfian keys (configura skew: ZIPF_ALPHA in random.h)
