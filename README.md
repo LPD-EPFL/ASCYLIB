@@ -11,10 +11,10 @@ OPTIK is a new design pattern for easily implementing fast and scalable concurre
 * Authors             : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
                         Tudor David <tudor.david@epfl.ch> 
 * Related Publications:
-  * *Optimistic Concurrency with OPTIK*,  
+  * [*Optimistic Concurrency with OPTIK*](https://dl.acm.org/citation.cfm?id=2851146),  
     Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),  
-  PPoPP 2016 *(to appear)*
-  * *Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*,  
+  PPoPP 2016
+  * [*Asynchronized Concurrency: The Secret to Scaling Concurrent Search Data Structures*](https://dl.acm.org/citation.cfm?id=2694359),  
   Tudor David, Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),  
   ASPLOS 2015
 
