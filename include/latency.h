@@ -92,10 +92,16 @@ static inline void
 retry_stats_print(size_t thr, size_t put, size_t rem, size_t upd_suc)
 {
  int i;
+ size_t ret=0;
+ size_t four=0;
     printf("Retries: ");
  for (i=0;i<HIST_SIZE;i++) {
     printf("%zu ",rest_gl[i]);
+    if (i) ret+=rest_gl[i];
+    if (i>3) four+=rest_gl[i];
  }
+ printf("\n Total retries %zu \n", ret);
+ printf("More than 3 retries %zu \n", four);
  printf("\n");
     printf("Latencies: ");
  for (i=0;i<HIST_SIZE;i++) {

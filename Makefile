@@ -68,7 +68,7 @@ seqgc:
 
 seq:	sequential
 
-wf_tests: lbll_lazy lbsl_herlihy_lb bst_tk lbht_lazy_gl bl_queue bl_stack
+wf_tests: lbll_lazy lbsl_herlihy_lb bst_tk lbht_lazy_gl
 
 
 seqht:
@@ -136,7 +136,7 @@ lfll: lfll_harris lfll_michael lfll_harris_opt
 
 # ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy
 
-ll: seqll lfll lbll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro llcopy_no_ro lbll_pugh_no_ro
+ll: seqll lfll llcopy lbll_coupling lbll_pugh lbll_lazy lbll_lazy_no_ro llcopy_no_ro lbll_pugh_no_ro
 
 lbht_coupling:
 	$(MAKE) "LOCK=TAS" src/hashtable-coupling

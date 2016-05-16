@@ -104,6 +104,38 @@ volatile ticks *removing_count;
 volatile ticks *removing_count_succ;
 volatile ticks *total;
 
+#if TSX_STATS == 1
+__thread uint64_t locked = 0;
+volatile uint64_t* all_locked;
+
+__thread uint64_t tried = 0;
+volatile uint64_t* all_tried;
+#endif
+
+#if WAIT_LOCK_STATS == 1
+__thread ticks getticks_correction = 0;
+ticks getticks_correction_calc() 
+{
+#    define getticks_calc_reps 1000000
+  ticks t_dur = 0;
+  uint32_t i;
+  for (i = 0; i < getticks_calc_reps; i++) {
+    ticks t_start = getticks();
+    ticks t_end = getticks();
+    t_dur += t_end - t_start;
+  }
+  getticks_correction = (ticks)(t_dur / (double) getticks_calc_reps);
+  /* printf("(cor: %llu)", (unsigned long long int) getticks_correction); */
+  return getticks_correction;
+}
+
+__thread volatile ticks wait_lock;
+__thread ticks gt_correction;
+#endif
+
+#if SLOW_CORE == 1
+__thread uint32_t slow_thread;
+#endif
 
 /* ################################################################### *
  * LOCALS
@@ -128,6 +160,13 @@ test(void* thread)
 {
   thread_data_t* td = (thread_data_t*) thread;
   uint32_t ID = td->id;
+#if SLOW_CORE == 1
+  if (td->id == 0) {
+    slow_thread = 1;
+  } else {
+    slow_thread = 0;
+  }
+#endif
   int phys_id = the_cores[ID];
   set_cpu(phys_id);
   ssalloc_init();
@@ -135,6 +174,15 @@ test(void* thread)
   DS_TYPE* set = td->set;
 
   PF_INIT(3, SSPFD_NUM_ENTRIES, ID);
+#if TSX_STATS == 1
+    locked = 0;
+    tried = 0;
+#endif 
+
+#if WAIT_LOCK_STATS == 1
+  wait_lock = 0;
+  gt_correction = getticks_correction_calc();
+#endif
 
 #if defined(COMPUTE_LATENCY)
   volatile ticks my_putting_succ = 0;
@@ -248,6 +296,13 @@ test(void* thread)
   EXEC_IN_DEC_ID_ORDER_END(&barrier);
 
   SSPFDTERM();
+#if WAIT_LOCK_STATS == 1
+    printf("Thread %d cycles waiting for locks: %llu\n", ID, (long long unsigned int) wait_lock);
+#endif
+#if TSX_STATS == 1
+    all_locked[ID]=locked;
+    all_tried[ID]=tried;
+#endif
 #if GC == 1
   ssmem_term();
   free(alloc);
@@ -442,6 +497,10 @@ main(int argc, char **argv)
   getting_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count = (ticks *) calloc(num_threads , sizeof(ticks));
   removing_count_succ = (ticks *) calloc(num_threads , sizeof(ticks));
+#if TSX_STATS == 1
+  all_locked = (ticks *) calloc(num_threads , sizeof(ticks));
+  all_tried = (ticks *) calloc(num_threads , sizeof(ticks));
+#endif
     
   pthread_t threads[num_threads];
   pthread_attr_t attr;
@@ -507,6 +566,10 @@ main(int argc, char **argv)
   volatile uint64_t removing_count_total = 0;
   volatile uint64_t removing_count_total_succ = 0;
     
+#ifdef TSX_STATS
+    volatile uint64_t all_locked_total = 0;
+    volatile uint64_t all_tried_total = 0;
+#endif
   for(t=0; t < num_threads; t++) 
     {
       if (test_verbose)
@@ -515,6 +578,11 @@ main(int argc, char **argv)
 		 t, getting_count[t], getting_count_succ[t], putting_count[t], putting_count_succ[t],
 		 removing_count[t], removing_count_succ[t]);
 	}
+#ifdef THROUGHPUTS
+  volatile uint64_t total_th = 0;
+  total_th+=getting_count[t] + putting_count[t] + removing_count[t];
+  printf("Thrd %lu: %zu\n", t, total_th);
+#endif
       putting_suc_total += putting_succ[t];
       putting_fal_total += putting_fail[t];
       getting_suc_total += getting_succ[t];
@@ -527,6 +595,10 @@ main(int argc, char **argv)
       getting_count_total_succ += getting_count_succ[t];
       removing_count_total += removing_count[t];
       removing_count_total_succ += removing_count_succ[t];
+#ifdef TSX_STATS
+    all_locked_total+=all_locked[t];
+    all_tried_total+=all_tried[t];
+#endif
     }
 
 #if defined(COMPUTE_LATENCY)
@@ -567,6 +639,10 @@ main(int argc, char **argv)
   double throughput = (putting_count_total + getting_count_total + removing_count_total) * 1000.0 / duration;
   printf("#txs %zu\t(%-10.0f\n", num_threads, throughput);
   printf("#Mops %.3f\n", throughput / 1e6);
+#ifdef TSX_STATS
+  double a = (double)all_locked_total;
+  printf("Fraction actually locked %.3f\n", a/(double)(all_tried_total));
+#endif
 
   RR_PRINT_UNPROTECTED(RAPL_PRINT_POW);
   RR_PRINT_CORRECTED();    
