@@ -53,13 +53,13 @@ pqueue_optik_find(pqueue_t* qu, skey_t key)
   return 1;
 }
 
-#define PQUEUE_K 4
+#define PQUEUE_K 2
 
 int
 pqueue_optik_insert(pqueue_t* qu, skey_t key, sval_t val)
 {
   queue_low_t* ql = pqueue_get_low_local(qu);
-  queue_low_push(ql, key, val);
+  queue_low_push(ql, key, val); //the low-level push is NOT sorted by key (priority)
   return 1;
 }
 
@@ -68,13 +68,16 @@ sval_t
 pqueue_optik_delete(pqueue_t* qu)
 {
   queue_low_t* qls[PQUEUE_K];
-  qls[0] = pqueue_get_low_local(qu);
+  qls[0] = pqueue_get_low_local(qu); //always query the local queue first
   skey_t key_min = queue_low_get_min(qls[0]);
   int key_min_i = 0;
 
+  /* the following loop is not atomic + there is no check if the queue is
+   empty in a way or another */
   int k;
   for (k = 1; k < PQUEUE_K && k < qu->size; k++)
     {
+      /* no check if the queue selected has be used again for lower ks */
       int qi = mrand(seeds) % qu->size;
       qls[k] = qu->queues + qi;
       skey_t key = queue_low_get_min(qls[k]);
@@ -85,8 +88,8 @@ pqueue_optik_delete(pqueue_t* qu)
   	}
     }
 
+  /* there is not check on whether the key that was seen in the for loop is
+   the one removed below. Even an empty key could be erroneously returned. */
   sval_t ret = queue_low_pop(qls[key_min_i]);
-  /* queue_low_t* ql = pqueue_get_low_n(qu, 0); //pqueue_get_low_local(qu); */
-  /* sval_t ret = queue_low_pop(ql); */
   return ret;
 }
