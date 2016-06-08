@@ -43,7 +43,7 @@ __thread uint32_t my_node, my_id;
 htlock_t* 
 create_htlock()
 {
-  htlock_t* htl;
+  htlock_t* htl = NULL;
 #ifdef __sparc__
   htl = memalign(CACHE_LINE_SIZE, sizeof(htlock_t));
   if (htl==NULL) 
@@ -245,7 +245,7 @@ create_htlock_no_alloc(htlock_t* htl, htlock_local_t* locals[NUMBER_OF_SOCKETS],
 htlock_t*
 init_htlocks(uint32_t num_locks)
 {
-  htlock_t* htls;
+  htlock_t* htls = NULL;
 #ifdef __sparc__
     htls = memalign(CACHE_LINE_SIZE, num_locks * sizeof(htlock_t));
     if (htls==NULL) {
