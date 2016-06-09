@@ -275,13 +275,12 @@ else
 
 		ifeq ($(GC),0)
 			CFLAGS += -DGC=0
-		else ifeq ($(GC),1)
-			CFLAGS += -DGC=1
-		else	
+		else ifeq ($(GC),2)
 			CFLAGS += -DGC=2
+		else	
+			CFLAGS += -DGC=1
 		endif
 	endif
-
 endif
 
 ifeq ($(LATENCY),1)
