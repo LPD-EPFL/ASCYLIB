@@ -24,19 +24,19 @@
 #include "linkedlist-optik.h"
 #include "utils.h"
 
-inline sval_t
+sval_t
 set_contains_l(intset_l_t* set, skey_t key)
 {
   return optik_find(set, key);
 }
 
-inline int
+int
 set_add_l(intset_l_t* set, skey_t key, sval_t val)
 {  
   return optik_insert(set, key, val);
 }
 
-inline sval_t
+sval_t
 set_remove_l(intset_l_t* set, skey_t key)
 {
   return optik_delete(set, key);
