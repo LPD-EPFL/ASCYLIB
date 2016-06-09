@@ -15,7 +15,7 @@ default: lockfree tas seq
 
 all:	lockfree tas seq external
 
-ppopp: mapppopp llppopp htppopp slppopp quppopp stppopp
+ppopp: mapppopp llppopp htppopp slppopp quppopp stppopp bstppopp
 
 mutex:
 	$(MAKE) "LOCK=MUTEX" $(LBENCHS)
@@ -37,6 +37,8 @@ clh:
 
 bst:	seqbstint seqbstext
 	$(MAKE) $(BSTS)
+
+bstppopp: bst_aravind bst_bronson bst_tk 
 
 bst_tk:
 	$(MAKE) src/bst-tk/
