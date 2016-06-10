@@ -2,7 +2,7 @@
 
 ds=bst;
 
-. ./scripts/ppopp/run.config.fast
+. ./scripts/ppopp/run.config
 
 skip=$#;
 
