@@ -100,13 +100,10 @@ typedef struct mcs_lock_local
 #endif
 } mcs_lock_local_t;
 
-#define MCS_LOCK_INITIALIZER { .waiting = 0, .next = NULL, .local = { 0 } }
-
-
 extern __thread mcs_lock_local_t __mcs_local;
 
 static inline mcs_lock_t*
-mcs_get_local(lock)
+mcs_get_local()
 {
   return (mcs_lock_t*) &__mcs_local;
 }
@@ -128,7 +125,7 @@ mcs_lock_trylock(mcs_lock_t* lock)
 static inline int
 mcs_lock_lock(mcs_lock_t* lock) 
 {
-  volatile mcs_lock_t* local = mcs_get_local(lock);
+  volatile mcs_lock_t* local = mcs_get_local();
   local->next = NULL;
   
   mcs_lock_t* pred = swap_ptr((void*) &lock->next, (void*) local);

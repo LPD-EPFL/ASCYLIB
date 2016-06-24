@@ -70,6 +70,8 @@ queue_new()
   node->next = NULL;
   set->head = node;
   set->tail = node;
+  INIT_LOCK(&(set->head_lock));
+  INIT_LOCK(&(set->tail_lock));
 
   return set;
 }
