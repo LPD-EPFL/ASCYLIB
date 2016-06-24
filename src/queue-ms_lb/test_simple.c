@@ -374,7 +374,7 @@ main(int argc, char **argv)
     }
 
   printf("## Initial: %zu / Range: %zu / ", initial, range);
-  printf("OPTIK algorithm\n");
+  printf("MS lock-based algorithm\n");
 
   double kb = initial * sizeof(DS_NODE) / 1024.0;
   double mb = kb / 1024.0;
