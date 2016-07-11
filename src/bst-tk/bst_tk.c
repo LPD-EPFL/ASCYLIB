@@ -34,6 +34,10 @@ RETRY_STATS_VARS;
 bst_tk_delete(intset_t* set, skey_t key)
 {
 
+#if RETRY_STATS == 1
+    size_t num = 0;
+#endif
+
 #ifdef USE_TSX
     int num_retries = TSX_NUM_RETRIES;
 #if TSX_STATS == 1
@@ -58,6 +62,9 @@ retry:
     }
 #endif
 
+#if RETRY_STATS == 1
+    num++;
+#endif
     curr = set->head;
 
     do
@@ -87,6 +94,14 @@ retry:
 
     if (curr->key != key)
     {
+
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
         return 0;
     }
 
@@ -218,6 +233,13 @@ retry:
     ssmem_free(alloc, pred);
 #endif
 
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
     return curr->val;
 }
 
@@ -251,6 +273,10 @@ bst_tk_find(intset_t* set, skey_t key)
     int
 bst_tk_insert(intset_t* set, skey_t key, sval_t val) 
 {
+
+#if RETRY_STATS == 1
+    size_t num = 0;
+#endif 
 #ifdef USE_TSX
     int num_retries = TSX_NUM_RETRIES;
 #if TSX_STATS == 1
@@ -266,6 +292,9 @@ bst_tk_insert(intset_t* set, skey_t key, sval_t val)
     int done = 0;
 #endif
 retry:
+#if RETRY_STATS == 1
+    num++;
+#endif 
 #if RETRY_STATS == 1
     if (done < 2) { 
         PARSE_TRY();
@@ -300,6 +329,14 @@ retry:
     if (curr->key == key)
     {
         return 0;
+
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
     }
 
     node_t* nn = new_node(key, val, NULL, NULL, 0);
@@ -418,5 +455,12 @@ retry:
 
     tl_unlock(&pred->lock, right);
 
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
     return 1;
 }

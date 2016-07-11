@@ -175,6 +175,10 @@ unlock_levels(sl_intset_t* set, sl_node_t **nodes, int highestlevel)
 int
 optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 {
+
+#if RETRY_STATS == 1
+    size_t num = 0;
+#endif 
   sl_node_t *succs[HERLIHY_MAX_MAX_LEVEL], *preds[HERLIHY_MAX_MAX_LEVEL];
   sl_node_t  *node_found, *prev_pred, *new_node;
   sl_node_t *pred, *succ;
@@ -187,6 +191,10 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
   PARSE_START_TS(1);
   while (1) 
     {
+
+#if RETRY_STATS == 1
+    num++;
+#endif 
       UPDATE_TRY();
       found = optimistic_search(set, key, preds, succs, 1);
       PARSE_END_TS(1, lat_parsing_put);
@@ -201,6 +209,13 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 		  PAUSE;
 		}
 	      PARSE_END_INC(lat_parsing_put);
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
 	      return 0;
 	    }
 	  continue;
@@ -257,6 +272,14 @@ optimistic_insert(sl_intset_t *set, skey_t key, sval_t val)
 
       unlock_levels(set, preds, highest_locked);
       PARSE_END_INC(lat_parsing_put);
+
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
       return 1;
     }
 }
@@ -276,6 +299,9 @@ optimistic_delete(sl_intset_t *set, skey_t key)
   int is_marked, toplevel, highest_locked, i, valid, found;	
   unsigned int backoff;
 
+#if RETRY_STATS == 1
+    size_t num = 0;
+#endif
   node_todel = NULL;
   is_marked = 0;
   toplevel = -1;
@@ -284,6 +310,10 @@ optimistic_delete(sl_intset_t *set, skey_t key)
   PARSE_START_TS(2);
   while(1)
     {
+
+#if RETRY_STATS == 1
+    num++;
+#endif
       UPDATE_TRY();
       found = optimistic_search(set, key, preds, succs, 1);
       PARSE_END_TS(2, lat_parsing_rem);
@@ -305,6 +335,13 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 		  GL_UNLOCK(set->lock);
 		  UNLOCK(ND_GET_LOCK(node_todel));
 		  PARSE_END_INC(lat_parsing_rem);
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
 		  return 0;
 		}
 
@@ -356,11 +393,28 @@ optimistic_delete(sl_intset_t *set, skey_t key)
 	  unlock_levels(set, preds, highest_locked);
 
 	  PARSE_END_INC(lat_parsing_rem);
+
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
+
 	  return val;
 	}
       else
 	{
 	  PARSE_END_INC(lat_parsing_rem);
+
+#if RETRY_STATS == 1
+     num--;
+     if (num>=HIST_SIZE) {
+        num=HIST_SIZE-1;
+     }
+     rest[num]++;
+#endif
 	  return 0;
 	}
     }
