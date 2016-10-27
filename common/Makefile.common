@@ -147,6 +147,12 @@ ifeq ($(PC_NAME), lpdxeon2680)
     PLATFORM_NUMA = 1
 endif
 
+ifeq ($(PC_NAME), lpdquad)
+    PLATFORM_KNOWN = 1
+    CFLAGS += -DLPDQUAD -DPLATFORM_MCORE
+    PLATFORM_NUMA = 1
+endif
+
 ifeq ($(PC_NAME), lpdpc34)
     PLATFORM_KNOWN = 1
     CFLAGS += -DHASWELL 
