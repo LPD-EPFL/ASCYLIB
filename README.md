@@ -8,7 +8,7 @@ ASCYLIB works on x86, SPARC, and Tilera architectures and contains tests to eval
 OPTIK is a new design pattern for easily implementing fast and scalable concurrent data structures. We have merged several concurrent data structures developed with OPTIK in ASCYLIB. More details can be found here: http://lpd.epfl.ch/site/optik.
 
 * Website             : http://lpd.epfl.ch/site/ascylib - http://lpd.epfl.ch/site/optik
-* Authors             : Vasileios Trigonakis <vasileios.trigonakis@epfl.ch>,
+* Authors             : Vasileios Trigonakis <github@trigonakis.com>,
                         Tudor David <tudor.david@epfl.ch> 
 * Related Publications:
   * [*Optimistic Concurrency with OPTIK*](https://dl.acm.org/citation.cfm?id=2851146),  
