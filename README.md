@@ -9,7 +9,7 @@ OPTIK is a new design pattern for easily implementing fast and scalable concurre
 
 * Website             : http://lpd.epfl.ch/site/ascylib - http://lpd.epfl.ch/site/optik
 * Authors             : Vasileios Trigonakis <github@trigonakis.com>,
-                        Tudor David <tudor.david@epfl.ch> 
+                        Tudor David <repos@tudordavid.com> 
 * Related Publications:
   * [*Optimistic Concurrency with OPTIK*](https://dl.acm.org/citation.cfm?id=2851146),  
     Rachid Guerraoui, Vasileios Trigonakis (alphabetical order),  
