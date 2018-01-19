@@ -138,8 +138,7 @@ S. Heller, M. Herlihy, V. Luchangco, M. Moir, W. N. Scherer, and N. Shavit.
 OPODIS '05.
 * <a name="HS+12">**[HS+12]**</a>
 M. Herlihy and N. Shavit.
-*The Art of Multiprocessor Programming, Revised First Edition*.
-2012.
+*The Art of Multiprocessor Programming, Revised First Edition*. 2012.
 * <a name="HLL+07">**[HLL+07]**</a>
 M. Herlihy, Y. Lev, V. Luchangco, and N. Shavit.
 *A Simple Optimistic Skiplist Algorithm*.
@@ -159,8 +158,7 @@ https://www.threadingbuildingblocks.org.
 * <a name="L+03">**[L+03]**</a>
 D. Lea.
 *Overview of Package util.concurrent Release 1.3.4*.
-http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html,
-2003.
+http://gee.cs.oswego.edu/dl/classes/EDU/oswego/cs/dl/util/concurrent/intro.html, 2003.
 * <a name="LS+00">**[LS+00]**</a>
 I. Lotan and N. Shavit. 
 *Skiplist-based concurrent priority queues*.
